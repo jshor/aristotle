@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "start": "npm run serve --prefix ./packages/aristotle"
+  },
+  "devDependencies": {
+    "lerna": "^2.11.0",
+    "vuepress": "^0.10.1",
+    "vuepress-theme-vue": "^1.0.3"
+  },
+  "engines": {
+    "node": ">= 8"
+  }
+}
