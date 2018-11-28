@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="111" version="1.1">
+   <rect width="200" height="105" stroke="black" stroke-width="3" fill="white"/>
+    <text x="10" y="25" class="small" font-family="monospace" font-size="12">CL...</text>
+    <text x="10" y="45" class="small" font-family="monospace" font-size="12">CLR'</text>
+    <text x="10" y="65" class="small" font-family="monospace" font-size="12">A</text>
+    <text x="10" y="85" class="small" font-family="monospace" font-size="12">B</text>
+    <text x="150" y="65" class="small" font-family="monospace" font-size="12">A</text>
+    <text x="150" y="85" class="small" font-family="monospace" font-size="12">B</text>
+</svg>
