@@ -1,0 +1,19 @@
+{
+  "name": "@aristotle/logic-gates",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc -b ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^8.0.28"
+  },
+  "devDependencies": {
+    "typescript": "~3.0.0"
+  }
+}
