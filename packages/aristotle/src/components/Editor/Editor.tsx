@@ -1,38 +1,39 @@
-<script lang="tsx">
-import Canvas from '../designer/Canvas'
-import Gate from '../designer/Gate'
+import Canvas from '@/designer/Canvas'
+// @ts-ignore
+import Gate from '@/designer/Gate.js'
+import ic from '@aristotle/logic-gates'
 import { Component, Vue } from 'vue-property-decorator'
 
 @Component
 export default class extends Vue {
-  panning: boolean = false
-  canvas: Canvas
-  canvasWidth: number = 1600
-  canvasHeight: number = 1600
+  public panning: boolean = false
+  public canvas: any
+  public canvasWidth: number = 1600
+  public canvasHeight: number = 1600
 
-  pan () {
+  public pan () {
     this.canvas.setMouseMode('PANNING')
   }
 
-  select () {
+  public select () {
     this.canvas.setMouseMode('SELECTION')
   }
 
-  mounted () {
+  public mounted () {
     this.canvas = new Canvas('canvas')
-   
+
     this.canvas.add(new Gate('AND'), 50, 450)
     this.canvas.add(new Gate('NAND'), 50, 350)
   }
 
-  render () {
+  public render () {
     return (
-      <div id="app">
+      <div id='app'>
         <button onClick={this.pan}>Panning Mode</button>
         <button onClick={this.select}>Select Mode</button>
-        <div id="canvasWrapper">
+        <div id='canvasWrapper'>
           <div
-            id="canvas"
+            id='canvas'
             style={{
               width: this.canvasWidth + 'px',
               height: this.canvasHeight + 'px'
@@ -43,17 +44,3 @@ export default class extends Vue {
     )
   }
 }
-</script>
-
-<style>
-#canvasWrapper {
-  border: 1px dotted red;
-  overflow: hidden;
-  width: 800px;
-  height: 800px;
-}
-
-#canvas svg {
-  position: relative !important;
-}
-</style>
