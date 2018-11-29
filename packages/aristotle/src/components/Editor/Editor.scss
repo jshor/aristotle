@@ -1,0 +1,10 @@
+#canvasWrapper {
+  border: 1px dotted red;
+  overflow: hidden;
+  width: 800px;
+  height: 800px;
+}
+
+#canvas svg {
+  position: relative !important;
+}
