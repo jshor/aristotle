@@ -5,13 +5,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import Editor from './components/Editor.vue';
+import { Component, Vue } from 'vue-property-decorator'
+import Editor from '@/components/Editor/index.vue'
 
 @Component({
   components: {
-    Editor,
-  },
+    Editor
+  }
 })
 export default class App extends Vue {}
 </script>
