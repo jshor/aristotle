@@ -1,3 +1,4 @@
-export function awesomeFn() {
-  console.log("Hello");
-}
+import ic from './ic'
+
+console.log('herse')
+export default ic

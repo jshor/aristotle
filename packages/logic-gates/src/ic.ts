@@ -178,6 +178,8 @@ function render (wires) {
   return btoa(svg)
 }
 
+const y = 0
+
 export default render({
   top: [
     { label: 'ABC' },

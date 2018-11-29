@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "start": "npm run serve --prefix ./packages/aristotle"
+    "start": "npm run serve --prefix ./packages/aristotle",
+    "do": "lerna run start --parallel"
   },
   "devDependencies": {
     "lerna": "^2.11.0",
