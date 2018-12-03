@@ -2,10 +2,10 @@
   "name": "@aristotle/logic-gates",
   "version": "1.0.0",
   "description": "",
-  "main": "lib/index.ts",
+  "main": "src/index.ts",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "start": "webpack --watch",
+    "dev": "webpack --watch",
     "build": "webpack"
   },
   "keywords": [],
