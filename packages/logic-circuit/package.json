@@ -1,0 +1,26 @@
+{
+  "name": "@aristotle/logic-circuit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "dev": "webpack --watch",
+    "build": "webpack",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^8.0.28"
+  },
+  "devDependencies": {
+    "@types/jest": "^23.3.10",
+    "ts-jest": "^23.10.5",
+    "ts-loader": "^5.3.1",
+    "typescript": "~3.0.0",
+    "webpack": "^4.26.1",
+    "webpack-cli": "^3.1.2"
+  }
+}

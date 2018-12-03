@@ -7,7 +7,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "start": "npm run serve --prefix ./packages/aristotle",
-    "do": "lerna run start --parallel"
+    "dev": "lerna run dev --parallel --stream --concurrency"
   },
   "devDependencies": {
     "lerna": "^2.11.0",
