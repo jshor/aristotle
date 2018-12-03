@@ -15,3 +15,15 @@ import Editor from '@/components/Editor/index.vue'
 })
 export default class App extends Vue {}
 </script>
+
+<style lang="scss">
+rect.draw2d {
+  &_ResizeHandle {
+    display: none;
+  }
+
+  &_shape_basic_Rectangle:not(:last-of-type) {
+    stroke: none;
+  }
+}
+</style>

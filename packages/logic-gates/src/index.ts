@@ -1,4 +1,4 @@
-import ic from './ic'
+import renderIc from './ic'
+import renderGate from './gate'
 
-console.log('herse')
-export default ic
+export { renderIc, renderGate }

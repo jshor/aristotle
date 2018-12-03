@@ -3,13 +3,14 @@
   "version": "0.1.9",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
     "@aristotle/logic-gates": "1.0.0",
+    "@aristotle/logic-circuit": "1.0.0",
     "draw2d": "^1.0.18",
     "jquery": "^3.3.1",
     "vue": "^2.5.17",
