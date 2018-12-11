@@ -14,6 +14,14 @@ export default class LogicGate extends Element {
     this.node.on('change', this.updateWireColor)
   }
 
+  public updateWireColor = (value: string) => {
+    this.setOutputConnectionColor(this.getWireColor(value))
+  }
+
+  protected getSvg = (color: string) => {
+    return renderGate('NOR', 2, color)
+  }
+
   private getCircuitNode = (): CircuitNode => {
     switch (this.gateType) {
       case 'NOR':
@@ -22,14 +30,5 @@ export default class LogicGate extends Element {
       default:
         return new Or(this.name)
     }
-  }
-
-  protected getSvg = (color: string) => {
-    console.log('renderGate: ', renderGate)
-    return renderGate('NOR', 2, color)
-  }
-
-  public updateWireColor = (value: string) => {
-    this.setOutputConnectionColor(this.getWireColor(value))
   }
 }

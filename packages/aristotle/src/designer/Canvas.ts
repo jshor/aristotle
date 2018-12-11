@@ -29,12 +29,35 @@ export default class Canvas extends draw2d.Canvas {
   }
 
   /**
+   * Returns the absolute X position in the document of the parent wrapper.
+   *
+   * @ts-ignore
+   * @override getAbsoluteX
+   * @returns {Number}
+   */
+  // @ts-ignore
+  public getAbsoluteX = (): number => $(this.parent).offset().left
+
+  /**
+   * Returns the absolute Y position in the document of the parent wrapper.
+   *
+   * @override getAbsoluteX
+   * @returns {Number}
+   */
+  // @ts-ignore
+  public getAbsoluteY = (): number => $(this.parent).offset().top
+
+  public installEditPolicy = (policy: draw2d.policy) => super.installEditPolicy(policy)
+
+  public add = (shape: draw2d.shape, x: number = 0, y: number = 0) => super.add(shape, x, y)
+
+  /**
    * Fires mousedrag events if the mouse is down for any document movement.
    * This fixes the draw2d issue of being unable to change the boundary when the mouse leaves the canvas.
    *
    * @param {MouseEvent} event
    */
-  public onBoundlessMouseMove = (event: MouseEvent) => {
+  private onBoundlessMouseMove = (event: MouseEvent) => {
     if (this.mouseDown) {
       const { clientX, clientY, shiftKey, ctrlKey } = event
       const { x, y } = super.fromDocumentToCanvasCoordinate(clientX, clientY)
@@ -77,27 +100,4 @@ export default class Canvas extends draw2d.Canvas {
     this.mouseDragDiffX = 0
     this.mouseDragDiffY = 0
   }
-
-  /**
-   * Returns the absolute X position in the document of the parent wrapper.
-   *
-   * @ts-ignore
-   * @override getAbsoluteX
-   * @returns {Number}
-   */
-  // @ts-ignore
-  public getAbsoluteX = (): number => $(this.parent).offset().left
-
-  /**
-   * Returns the absolute Y position in the document of the parent wrapper.
-   *
-   * @override getAbsoluteX
-   * @returns {Number}
-   */
-  // @ts-ignore
-  public getAbsoluteY = (): number => $(this.parent).offset().top
-
-  public installEditPolicy = (policy: draw2d.policy) => super.installEditPolicy(policy)
-
-  public add = (shape: draw2d.shape, x: number = 0, y: number = 0) => super.add(shape, x, y)
 }

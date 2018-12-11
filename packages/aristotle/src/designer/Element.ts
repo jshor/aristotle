@@ -14,25 +14,8 @@ export default class Element extends draw2d.shape.basic.Image {
     super.on('added', this.addEventListeners) // TODO: add removed event
   }
 
-  private addEventListeners = () => {
-    this.canvas.on('select', this.updateSelectionColor)
-    this.canvas.on('reset', this.updateSelectionColor)
-    this.canvas.html[0].addEventListener('click', this.updateSelectionColor)
-  }
-
-  private updateSelectionColor = () => {
-    if (this.canvas) {
-      const isSelected = !!~this.canvas.selection.all.data.indexOf(this)
-      const color = isSelected ? '#ff0000' : '#000'
-
-      super.setPath(this.getSvg(color).path)
-    }
-  }
-
-  private setPorts = (ports: Array<{ x: number, y: number, type: string }>) => {
-    ports.forEach(({ x, y, type }) => {
-      super.createPort(type, new draw2d.layout.locator.XYAbsPortLocator(x, y))
-    })
+  public setValue = (value: any) => {
+    this.node.setValue(value)
   }
 
   protected render = (renderPorts: boolean = false) => {
@@ -68,9 +51,26 @@ export default class Element extends draw2d.shape.basic.Image {
 
   protected getSvg = (color: string): any => ({})
 
-  protected on = (eventName: string, fn: Function) => super.on(eventName, fn)
+  protected on = (eventName: string, fn: () => void) => super.on(eventName, fn)
 
-  public setValue = (value: any) => {
-    this.node.setValue(value)
+  private addEventListeners = () => {
+    this.canvas.on('select', this.updateSelectionColor)
+    this.canvas.on('reset', this.updateSelectionColor)
+    this.canvas.html[0].addEventListener('click', this.updateSelectionColor)
+  }
+
+  private updateSelectionColor = () => {
+    if (this.canvas) {
+      const isSelected = !!~this.canvas.selection.all.data.indexOf(this)
+      const color = isSelected ? '#ff0000' : '#000'
+
+      super.setPath(this.getSvg(color).path)
+    }
+  }
+
+  private setPorts = (ports: Array<{ x: number, y: number, type: string }>) => {
+    ports.forEach(({ x, y, type }) => {
+      super.createPort(type, new draw2d.layout.locator.XYAbsPortLocator(x, y))
+    })
   }
 }

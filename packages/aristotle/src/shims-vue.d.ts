@@ -19,7 +19,8 @@ declare module '@aristotle/logic-gates' {
   export { renderIc, renderGate } from '@aristotle/logic-circuit'
 }
 
-declare module 'simulant' {
-  import simulant from 'simulant'
-  export default simulant
-}
+// declare module 'simulant' {
+//   // @ts-ignore
+//   import simulant from 'simulant'
+//   export default simulant
+// }
