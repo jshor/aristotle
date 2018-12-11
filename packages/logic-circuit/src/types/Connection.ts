@@ -4,7 +4,7 @@ class Connection {
   node: CircuitNode
   index: number
 
-  constructor (node, index) {
+  constructor (node: CircuitNode, index: number) {
     this.node = node
     this.index = index
   }

@@ -185,7 +185,10 @@ function getWireGroups (wires, { width, height }) {
   }
 }
 
-function getBoundary (width, height, color, bgColor = '#fff') {
+function getBoundary (wires, width, height, color, bgColor = '#fff') {
+  // const wireHorzCount = wires.left.length ? (wires.right.length ? 2 : 1) : 0
+  // const wireVertCount = wires.top.length ? (wires.bottom.length ? 2 : 1) : 0
+
   return toSvg('rect', {
     x: WIRE_LENGTH,
     y: WIRE_LENGTH,
@@ -217,7 +220,7 @@ function toDataUrl (svg) {
 function render (data, color, bgColor) {
   const { width, height } = getSvgDimensions(data)
   const { wires, labels, ports } = getWireGroups(data, { width, height })
-  const boundary = getBoundary(width, height, color, bgColor)
+  const boundary = getBoundary(data, width, height, color, bgColor)
   const svg = toSvg('svg', {
     width,
     height,
@@ -227,7 +230,7 @@ function render (data, color, bgColor) {
     ...wires,
     ...labels
   ])
-  const path = toDataUrl(svg)
+  const path = svg // toDataUrl(svg)
 
   return {
     path,
@@ -236,7 +239,5 @@ function render (data, color, bgColor) {
     height
   }
 }
-
-const y = 0
 
 export default render
