@@ -13,6 +13,12 @@ export default class Lightbulb extends Element {
     this.render(true)
   }
 
+  public updateWireColor = (value: string) => {
+    this.bgColor = this.getWireColor(value)
+    this.setOutputConnectionColor(this.bgColor)
+    this.render()
+  }
+
   protected getSvg = (color: string) => {
     console.log('renderGate: ', renderIc)
     const svg = {
@@ -22,11 +28,5 @@ export default class Lightbulb extends Element {
     }
 
     return renderIc(svg, color, this.bgColor)
-  }
-
-  public updateWireColor = (value: string) => {
-    this.bgColor = this.getWireColor(value)
-    this.setOutputConnectionColor(this.bgColor)
-    this.render()
   }
 }

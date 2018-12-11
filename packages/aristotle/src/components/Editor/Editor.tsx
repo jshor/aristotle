@@ -1,11 +1,10 @@
 import Editor from '@/designer/Editor'
 // @ts-ignore
-import Gate from '@/designer/Gate'
 import { Component, Vue } from 'vue-property-decorator'
 import { LogicValue } from '@aristotle/logic-circuit'
-import LogicGate from '@/designer/elements/gates/LogicGate'
-import Switch from '@/designer/elements/inputs/Switch'
-import Lightbulb from '@/designer/elements/outputs/Lightbulb'
+import LogicGate from '@/designer/elements/LogicGate'
+import Switch from '@/designer/elements/Switch'
+import Lightbulb from '@/designer/elements/Lightbulb'
 
 @Component
 export default class extends Vue {
