@@ -23,6 +23,7 @@ export default class Canvas extends draw2d.Canvas {
 
     this.parent = this.html[0].parentNode
     super.setScrollArea(this.parent)
+    this.parent = document.createElement('div')
     document.addEventListener('mousemove', this.onBoundlessMouseMove)
     document.addEventListener('mouseup', this.onBoundlessMouseUp)
   }
@@ -33,7 +34,7 @@ export default class Canvas extends draw2d.Canvas {
    *
    * @param {MouseEvent} event
    */
-  private onBoundlessMouseMove = (event: MouseEvent) => {
+  public onBoundlessMouseMove = (event: MouseEvent) => {
     if (this.mouseDown) {
       const { clientX, clientY, shiftKey, ctrlKey } = event
       const { x, y } = super.fromDocumentToCanvasCoordinate(clientX, clientY)
@@ -80,9 +81,11 @@ export default class Canvas extends draw2d.Canvas {
   /**
    * Returns the absolute X position in the document of the parent wrapper.
    *
+   * @ts-ignore
    * @override getAbsoluteX
    * @returns {Number}
    */
+  // @ts-ignore
   public getAbsoluteX = (): number => $(this.parent).offset().left
 
   /**
@@ -91,5 +94,10 @@ export default class Canvas extends draw2d.Canvas {
    * @override getAbsoluteX
    * @returns {Number}
    */
+  // @ts-ignore
   public getAbsoluteY = (): number => $(this.parent).offset().top
+
+  public installEditPolicy = (policy: draw2d.policy) => super.installEditPolicy(policy)
+
+  public add = (shape: draw2d.shape, x: number = 0, y: number = 0) => super.add(shape, x, y)
 }

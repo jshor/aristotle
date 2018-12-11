@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/ic.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">All files</a> / <a href="index.html">src</a> ic.ts
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">84.62% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>66/78</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">66.67% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>4/6</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">69.23% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>18/26</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">84% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>63/75</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const WIRE_LENGTH = 30
+const PORT_WIDTH = 30
+const MIN_DIMENSION = 100
+const STROKE_WIDTH = 2
+const LABEL_HEIGHT = 8
+const LABEL_PADDING = 6
+const TEXT_SIZE = 12
+const MIN_WIDTH = 150
+const MIN_HEIGHT = 120
+const STROKE_COLOR = '#000'
+&nbsp;
+function toSvg (tag, attrs, children = []) {
+  const attributes = [tag]
+&nbsp;
+  for (const key in attrs) {
+    attributes.push(`${key}="${attrs[key]}"`)
+  }
+&nbsp;
+  if (children.length) {
+    return `&lt;${attributes.join(' ')}&gt;${children.join('')}&lt;/${tag}&gt;`
+  }
+  return `&lt;${ attributes.join(' ')} /&gt;`
+}
+&nbsp;
+function getHorizontalWire (x, y) {
+  return toSvg('line', {
+    x1: x,
+    x2: x + WIRE_LENGTH,
+    y1: y,
+    y2: y,
+    'stroke-width': STROKE_WIDTH,
+    stroke: STROKE_COLOR
+  })
+}
+&nbsp;
+function <span class="fstat-no" title="function not covered" >getVerticalWire </span>(x, y) {
+<span class="cstat-no" title="statement not covered" >  return toSvg('line', {</span>
+    x1: x,
+    x2: x,
+    y1: y,
+    y2: y + WIRE_LENGTH,
+    'stroke-width': STROKE_WIDTH,
+    stroke: STROKE_COLOR
+  })
+}
+&nbsp;
+function getLabelData (label) {
+  let text = label.toUpperCase()
+&nbsp;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (text.length &gt; 3) {
+<span class="cstat-no" title="statement not covered" >    text = `${text.substring(0, 2)}…`</span>
+  }
+&nbsp;
+  const width = text.length * 7.25
+&nbsp;
+  return { text, width }
+}
+&nbsp;
+function getLabel (x, y, text) {
+  const attrs = {
+    'font-family': 'Lucida Console, Monaco, monospace',
+    'font-size': TEXT_SIZE
+  }
+  return toSvg('text', { x, y, ...attrs }, [text])
+}
+&nbsp;
+function <span class="fstat-no" title="function not covered" >getTopLabel </span>(label, x, y) {
+  const { text, width } = <span class="cstat-no" title="statement not covered" >getLabelData(label)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return getLabel(x - width / 2, y + LABEL_PADDING, text)</span>
+}
+&nbsp;
+function <span class="fstat-no" title="function not covered" >getLeftLabel </span>(label, x, y) {
+  const { text, width } = <span class="cstat-no" title="statement not covered" >getLabelData(label)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return getLabel(x + LABEL_PADDING, y, text)</span>
+}
+&nbsp;
+function getRightLabel (label, x, y) {
+  const { text, width } = getLabelData(label)
+&nbsp;
+  return getLabel(x - width - LABEL_PADDING, y, text)
+}
+&nbsp;
+function <span class="fstat-no" title="function not covered" >getBottomLabel </span>(label, x, y) {
+  const { text, width } = <span class="cstat-no" title="statement not covered" >getLabelData(label)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return getLabel(x - width / 2, y - WIRE_LENGTH - LABEL_HEIGHT - LABEL_PADDING, text)</span>
+}
+&nbsp;
+function getPortOffset (dimension, wireLength) {
+  return dimension / 2 - (wireLength * PORT_WIDTH) / 2 + PORT_WIDTH / 2
+}
+&nbsp;
+function getLeftWires (wires, svgHeight, x) {
+  const children = []
+  const y = getPortOffset(svgHeight, wires.length)
+&nbsp;
+  return wires
+    .map(<span class="fstat-no" title="function not covered" >({</span> label, type }, i) =&gt; (<span class="cstat-no" title="statement not covered" >{</span>
+      wire: getHorizontalWire(x, y + i * PORT_WIDTH),
+      label: getLeftLabel(label, x + PORT_WIDTH, y + i * PORT_WIDTH + LABEL_HEIGHT / 2),
+      port: {
+        x,
+        y: y + i * PORT_WIDTH,
+        type
+      }
+    }))
+}
+&nbsp;
+function getRightWires (wires, svgHeight, x) {
+  const children = []
+  const y = getPortOffset(svgHeight, wires.length)
+&nbsp;
+  return wires
+    .map(({ label, type }, i) =&gt; ({
+      wire: getHorizontalWire(x, y + i * PORT_WIDTH),
+      label: getRightLabel(label, x,  y + i * PORT_WIDTH + LABEL_HEIGHT / 2),
+      port: {
+        x: x + WIRE_LENGTH,
+        y: y + i * PORT_WIDTH,
+        type
+      }
+    }))
+}
+&nbsp;
+function getTopWires (wires, svgWidth, y) {
+  const children = []
+  const x = getPortOffset(svgWidth, wires.length)
+&nbsp;
+  return wires
+    .map(<span class="fstat-no" title="function not covered" >({</span> label, type }, i) =&gt; (<span class="cstat-no" title="statement not covered" >{</span>
+      wire: getVerticalWire(x + i * PORT_WIDTH, y),
+      label: getTopLabel(label, x + i * PORT_WIDTH,  y + PORT_WIDTH + LABEL_HEIGHT),
+      port: {
+        x: x + i * PORT_WIDTH,
+        y,
+        type
+      }
+    }))
+}
+&nbsp;
+function getBottomWires (wires, svgWidth, y) {
+  const children = []
+  const x = getPortOffset(svgWidth, wires.length)
+&nbsp;
+  return wires
+    .map(<span class="fstat-no" title="function not covered" >({</span> label, type }, i) =&gt; (<span class="cstat-no" title="statement not covered" >{</span>
+      wire: getVerticalWire(x + i * PORT_WIDTH, y),
+      label: getBottomLabel(label, x + i * PORT_WIDTH, y + PORT_WIDTH + LABEL_HEIGHT),
+      port: {
+        x: x + i * PORT_WIDTH,
+        y: y + WIRE_LENGTH,
+        type
+      }
+    }))
+}
+&nbsp;
+function getWireGroups (wires, { width, height }) {
+  const left = getLeftWires(wires.left, height, 0)
+  const right = getRightWires(wires.right, height, width - WIRE_LENGTH)
+  const top = getTopWires(wires.top, width, 0)
+  const bottom = getBottomWires(wires.bottom, width, height - WIRE_LENGTH)
+  const get = (group, key) =&gt; group.map(e =&gt; e[key])
+&nbsp;
+  return {
+    wires: [
+      ...get(left, 'wire'),
+      ...get(right, 'wire'),
+      ...get(top, 'wire'),
+      ...get(bottom, 'wire')
+    ],
+    labels: [
+      ...get(left, 'label'),
+      ...get(right, 'label'),
+      ...get(top, 'label'),
+      ...get(bottom, 'label')
+    ],
+    ports: [
+      ...get(left, 'port'),
+      ...get(right, 'port'),
+      ...get(top, 'port'),
+      ...get(bottom, 'port')
+    ]
+  }
+}
+&nbsp;
+function getBoundary (wires, width, height, color, bgColor = <span class="branch-0 cbranch-no" title="branch not covered" >'#fff')</span> {
+  // const wireHorzCount = wires.left.length ? (wires.right.length ? 2 : 1) : 0
+  // const wireVertCount = wires.top.length ? (wires.bottom.length ? 2 : 1) : 0
+&nbsp;
+  return toSvg('rect', {
+    x: WIRE_LENGTH,
+    y: WIRE_LENGTH,
+    width: width - WIRE_LENGTH * 2,
+    height: height - WIRE_LENGTH * 2,
+    stroke: color,
+    'stroke-width': STROKE_WIDTH,
+    fill: bgColor
+  })
+}
+&nbsp;
+function getSvgDimensions (wires) {
+  const baseDim = PORT_WIDTH / 2 + PORT_WIDTH
+  const getMaxDim = (a, b) =&gt; Math.max(wires[a].length, wires[b].length)
+  const horzCount = getMaxDim('top', 'bottom') + 2
+  const vertCount = getMaxDim('left', 'right')
+  const baseWidth = horzCount * PORT_WIDTH + horzCount * STROKE_WIDTH + baseDim
+  const baseHeight = vertCount * PORT_WIDTH + vertCount * STROKE_WIDTH + baseDim
+  const width = Math.max(baseWidth, MIN_WIDTH)
+  const height = Math.max(baseHeight, MIN_HEIGHT)
+&nbsp;
+  return { width, height }
+}
+&nbsp;
+function <span class="fstat-no" title="function not covered" >toDataUrl </span>(svg) {
+<span class="cstat-no" title="statement not covered" >  return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)))</span>
+}
+&nbsp;
+function render (data, color, bgColor) {
+  const { width, height } = getSvgDimensions(data)
+  const { wires, labels, ports } = getWireGroups(data, { width, height })
+  const boundary = getBoundary(data, width, height, color, bgColor)
+  const svg = toSvg('svg', {
+    width,
+    height,
+    xmlns: 'http://www.w3.org/2000/svg'
+  }, [
+    boundary,
+    ...wires,
+    ...labels
+  ])
+  const path = svg // toDataUrl(svg)
+&nbsp;
+  return {
+    path,
+    ports,
+    width,
+    height
+  }
+}
+&nbsp;
+const y = 0
+&nbsp;
+export default render
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Mon Dec 10 2018 15:38:33 GMT-0500 (EST)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

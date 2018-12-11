@@ -30,7 +30,7 @@ class Circuit {
    *
    * @param {CircuitNode} node - node to add
    */
-  public addNode (node: CircuitNode) {
+  public addNode (node: CircuitNode): void {
     if (node instanceof InputNode) {
       this.inputs.push(node)
       this.enqueue(node)
@@ -43,7 +43,7 @@ class Circuit {
    *
    * @param {CircuitNode} node - node to remove
    */
-  public removeNode (node: CircuitNode) {
+  public removeNode (node: CircuitNode): void {
     if (node instanceof InputNode) {
       this.inputs.splice(this.inputs.indexOf(node), 1)
       this.reset()
@@ -60,7 +60,7 @@ class Circuit {
    * @param {CircuitNode} target - target node
    * @param {Number} targetIndex - entry index on the target node for the connection
    */
-  public addConnection (source: CircuitNode, target: CircuitNode, targetIndex: number) {
+  public addConnection (source: CircuitNode, target: CircuitNode, targetIndex: number): void {
     source.outputs.push(new Connection(target, targetIndex))
     source.value = LogicValue.UNKNOWN
     this.enqueue(source)
@@ -70,11 +70,11 @@ class Circuit {
   /**
    * Removes the connection on the source node at the source index and the connection at its target node.
    * The input value at the target index will be reset to Hi-Z.
-   * 
+   *
    * @param {CircuitNode} sourceNode - source node to disconnect
    * @param {CircuitNode} targetNode - target node to disconnect
    */
-  public removeConnection (sourceNode: CircuitNode, targetNode: CircuitNode) {
+  public removeConnection (sourceNode: CircuitNode, targetNode: CircuitNode): void {
     sourceNode
       .outputs
       .concat()
@@ -95,10 +95,10 @@ class Circuit {
 
   /**
    * Removes all connections from the given source node.
-   * 
-   * @param {CircuitNode} source 
+   *
+   * @param {CircuitNode} source
    */
-  removeNodeOutputs (source: CircuitNode) {
+  removeNodeOutputs (source: CircuitNode): void {
     for (let i: number = 0; i < source.outputs.length; i++) {
       this.removeConnection(source, source.outputs[i].node)
     }
@@ -106,10 +106,10 @@ class Circuit {
 
   /**
    * Appends the given node(s) to the processing queue.
-   * 
+   *
    * @param {...CircuitNode} added - node(s) to add to the queue
    */
-  public enqueue (...added: CircuitNode[]) {
+  public enqueue (...added: CircuitNode[]): void {
     added.forEach((node) => {
       if (!~this.queue.indexOf(node)) {
         this.queue.push(node)
@@ -119,10 +119,10 @@ class Circuit {
 
   /**
    * Removes the given node from the processing queue.
-   * 
+   *
    * @param {CircuitNode} removed - node to remove from the queue
    */
-  public dequeue (removed: CircuitNode) {
+  public dequeue (removed: CircuitNode): void {
     const removedIndex = this.queue.indexOf(removed)
 
     if (~removedIndex) {
@@ -133,7 +133,7 @@ class Circuit {
   /**
    * Resets the circuit.
    */
-  public reset () {
+  public reset (): void {
     this.nodes.forEach((node) => node.reset())
   }
 
@@ -141,7 +141,7 @@ class Circuit {
    * Advances the circuit simulation one step. If none of the node values have changed,
    * it continues stepping through until either a value changes or the queue is empty.
    */
-  public next () {
+  public next (): void {
     let isValueChanged = false
 
     this.queue.forEach((node) => {
@@ -162,14 +162,14 @@ class Circuit {
 
   /**
    * Returns true when the queue is finished processing.
-   * 
+   *
    * @returns {Boolean}
    */
   public isComplete (): boolean {
     return this.queue.length === 0
   }
 
-  debug () { // TODO: delete this
+  debug (): void { // TODO: delete this
     this.nodes.forEach(({ name, value, newValue }) => {
       console.log(`${name}:`, value, newValue)
     })
