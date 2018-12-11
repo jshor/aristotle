@@ -6,21 +6,21 @@ class InputNode extends CircuitNode {
 
   /**
    * Updates the node's value to be static having the given value.
-   * 
+   *
    * @override CircuitNode.setValue
    * @param {LogicValue} value
    */
-  setValue (value) {
+  public setValue (value: number): void {
     this.newValue = value
     this.eval = () => value
   }
 
   /**
    * Resets the node.
-   * 
+   *
    * @override CircuitNode.reset
    */
-  reset () {
+  public reset (): void {
     // do nothing
   }
 }

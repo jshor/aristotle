@@ -25,11 +25,11 @@ const baseLineAttrs = {
 
 function toSvg (tag: string, attrs: Object, children: string[] = []) {
   const attributes: string[] = [tag]
-  
-  for (const key: string in attrs) {
+
+  for (const key in attrs) {
     attributes.push(`${key}="${attrs[key]}"`)
   }
-  
+
   if (children.length) {
     return `<${attributes.join(' ')}>${children.join('')}</${tag}>`
   }
@@ -41,7 +41,7 @@ function getWires (wireCount, x, svgHeight) {
   const inputHeight = (wireCount - 1) * PORT_WIDTH
   const yOffset = svgHeight / 2 - inputHeight / 2
   const wires = []
-  
+
   for (let i = 0; i < wireCount; i++) {
     wires.push(toSvg('line', {
       x1: x,
@@ -51,7 +51,7 @@ function getWires (wireCount, x, svgHeight) {
       ...baseLineAttrs
     }))
   }
-  
+
   return wires
 }
 
@@ -61,7 +61,7 @@ function getFigureSvg (x, pathData, fill = '#fff') {
     fill,
     ...baseLineAttrs
   })
-  
+
   return toSvg('svg', {
     height: '100%',
     viewBox: '0 0 16 7.25',
@@ -88,13 +88,13 @@ function getPathData (gateType) {
 }
 
 function isNegated (gateType) {
-  return ['XNOR', 'NOR', 'NAND'].indexOf(gateType) !== -1  
+  return ['XNOR', 'NOR', 'NAND'].indexOf(gateType) !== -1
 }
 
 function getNegation (gateType, height) {
   const x = NEGATION_X[gateType]
   const r = 4
-  
+
   if (x) {
     return toSvg('circle', {
       cx: x,
@@ -122,13 +122,13 @@ function render (gateType, inputCount, color, bgColor) {
     ...getWires(1, width - WIRE_LENGTH, height),
     getFigureSvg(20, pathData)
   ]
-  
+
   if (gateType === 'XOR' || gateType === 'XNOR') {
     children.push(getFigureSvg(10, PATH.XOR_BASE, 'none'))
   }
-  
+
   children.push(getNegation(gateType, height))
-  
+
   const svg = toSvg('svg', {
     width,
     height,

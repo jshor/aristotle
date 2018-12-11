@@ -9,6 +9,7 @@ module.exports = {
   ],
   transform: {
     '^.+\\.vue$': 'vue-jest',
+    '^.+\\.js$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$': 'jest-transform-stub',
     '^.+\\.tsx?$': 'ts-jest'
   },
@@ -18,8 +19,13 @@ module.exports = {
   snapshotSerializers: [
     'jest-serializer-vue'
   ],
-  testMatch: [
-    '**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'
+  setupFiles: [
+    'jest-canvas-mock',
+    '<rootDir>/test/setup.js'
   ],
+  testMatch: [
+    '**/src/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'
+  ],
+  collectCoverage: true,
   testURL: 'http://localhost/'
 }

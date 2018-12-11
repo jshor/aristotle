@@ -1,9 +1,9 @@
 import draw2d from 'draw2d'
 import Canvas from './Canvas'
-import Gate from './Gate'
 import { Circuit, CircuitNode } from '@aristotle/logic-circuit'
+import Connection from './Connection'
 
-const getPortIndex = (port, type): number => {
+const getPortIndex = (port: draw2d.Port, type: string): number => {
   const ports = port.parent[`${type}Ports`].data
 
   for (let i = 0; i < ports.length; i++) {
@@ -25,29 +25,14 @@ export default class Editor extends Canvas {
     this.installEditPolicies()
   }
 
-  public createConnection = (): draw2d.Connection => {
-    const connection = new draw2d.Connection()
-
-    connection.setOutlineColor('#000000')
-
-    connection.setOutlineStroke(1)
-    connection.setColor('#808080')
-    connection.setGlow(false)
-    connection.setRouter(new draw2d.layout.connection.CircuitConnectionRouter())
-    connection.on('added', () => this.addConnection(connection))
-    connection.on('removed', this.removeConnection)
-
-    return connection
-  }
-
-  public addNode (node: any, x: number, y: number) {
+  public addNode (node: any, x: number, y: number): void {
     super.add(node, x, y)
     this.circuit.addNode(node.node)
     this.step(true)
   }
 
-  public newConnection = (source: any, target: any, index: number) => {
-    const connection = this.createConnection()
+  public newConnection = (source: any, target: any, index: number): void => {
+    const connection = new Connection(this.circuit)
 
     connection.setSource(source.getOutputPort(0))
     connection.setTarget(target.getInputPort(index))
@@ -56,23 +41,7 @@ export default class Editor extends Canvas {
     this.step(true)
   }
 
-  public addConnection = (connection: draw2d.Connection) => {
-    const source = connection.sourcePort.parent
-    const target = connection.targetPort.parent
-
-    this.circuit.addConnection(source.node, target.node, getPortIndex(connection.targetPort, 'input'))
-    this.step(true)
-  }
-
-  public removeConnection = (connection: draw2d.Connection) => {
-    const sourceNode: CircuitNode = connection.sourcePort.parent.node
-    const targetNode: CircuitNode = connection.targetPort.parent.node
-
-    this.circuit.removeConnection(sourceNode, targetNode)
-    this.step(true)
-  }
-
-  public step = (force: boolean = false) => {
+  public step = (force: boolean = false): void => {
     if (!this.circuit.isComplete() || force) {
       this.circuit.next()
       this.circuit.debug()
@@ -83,7 +52,7 @@ export default class Editor extends Canvas {
     }
   }
 
-  public setMouseMode (mode: string) {
+  public setMouseMode (mode: string): void {
     switch (mode) {
       case 'PANNING':
         super.installEditPolicy(new draw2d.policy.canvas.PanningSelectionPolicy())
@@ -95,7 +64,7 @@ export default class Editor extends Canvas {
     }
   }
 
-  private installEditPolicies = () => {
+  private installEditPolicies = (): void => {
     // this.installEditPolicy(new draw2d.policy.canvas.FadeoutDecorationPolicy())
     super.installEditPolicy(new draw2d.policy.canvas.ShowGridEditPolicy())
     super.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({
