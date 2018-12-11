@@ -9,7 +9,7 @@ const PATHS = {
 module.exports = {
   mode: 'development',
   entry: {
-    'logic-gates': PATHS.src + '/ic.ts'
+    'logic-gates': PATHS.src + '/index.ts'
   },
   output: {
     path: PATHS.build,
@@ -26,29 +26,3 @@ module.exports = {
     ]
   }
 }
-
-// module.exports = {
-//   entry: path.resolve(__dirname, 'src/index.ts'),
-//   module: {
-//     rules: [
-//       {
-//         test: /\.tsx?$/,
-//         use: 'ts-loader',
-//         exclude: /node_modules/
-//       }
-//     ]
-//   },
-//   resolve: {
-//     extensions: [ '.tsx', '.ts', '.js' ]
-//   },
-//   output: {
-//     filename: 'bundle.js',
-//     path: path.resolve(__dirname, 'dist'),
-//     libraryTarget: 'umd',
-//     library: 'lib',
-//     umdNamedDefine: true,
-//   },
-//   watchOptions: {
-//     poll: true
-//   }
-// }

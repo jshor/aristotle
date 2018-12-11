@@ -230,7 +230,7 @@ function render (data, color, bgColor) {
     ...wires,
     ...labels
   ])
-  const path = svg // toDataUrl(svg)
+  const path = toDataUrl(svg)
 
   return {
     path,

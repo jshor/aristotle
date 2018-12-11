@@ -1,10 +1,16 @@
 import draw2d from 'draw2d'
 import { Circuit, CircuitNode } from '@aristotle/logic-circuit'
+import getPortIndex from '../utils/getPortIndex'
+import Editor from './Editor'
 
 class Connection extends draw2d.Connection {
   public circuit: Circuit
+  public sourcePort: draw2d.Port
+  public targetPort: draw2d.Port
+  // @ts-ignore
+  public canvas: Editor
 
-  constructor(circuit: Circuit) {
+  constructor (circuit: Circuit) {
     super({
       outlineColor: '#000000',
       outlineStroke: 1,
@@ -14,25 +20,29 @@ class Connection extends draw2d.Connection {
     })
 
     this.circuit = circuit
-    this.on('added', () => this.onAdd)
-    this.on('removed', this.onRemove)
+
+    super.on('added', this.onAdd)
+    super.on('removed', this.onRemove)
   }
 
-  public onAdd = (connection: draw2d.Connection): void => {
-    const source = connection.sourcePort.parent
-    const target = connection.targetPort.parent
+  public onAdd = (): void => {
+    const source = this.sourcePort.parent
+    const target = this.targetPort.parent
 
-    this.circuit.addConnection(source.node, target.node, getPortIndex(connection.targetPort, 'input'))
-    this.step(true)
+    this.circuit.addConnection(source.node, target.node, getPortIndex(this.targetPort, 'input'))
+    this.canvas.step(true)
   }
 
-  public onRemove = (connection: draw2d.Connection): void => {
-    const sourceNode: CircuitNode = connection.sourcePort.parent.node
-    const targetNode: CircuitNode = connection.targetPort.parent.node
+  public onRemove = (): void => {
+    const sourceNode: CircuitNode = this.sourcePort.parent.node
+    const targetNode: CircuitNode = this.targetPort.parent.node
 
     this.circuit.removeConnection(sourceNode, targetNode)
-    this.step(true)
   }
+
+  public setTarget = (port: draw2d.Port) => super.setTarget(port)
+
+  public setSource = (port: draw2d.Port) => super.setSource(port)
 }
 
 export default Connection

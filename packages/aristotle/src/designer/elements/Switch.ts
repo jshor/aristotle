@@ -14,11 +14,10 @@ export default class Switch extends Element {
     super.on('click', this.toggle)
   }
 
-  private toggle = () => {
-    const newValue = this.node.value === LogicValue.TRUE ? LogicValue.FALSE : LogicValue.TRUE
-    this.node.setValue(newValue)
-    this.canvas.step(true)
-    this.canvas.circuit.queue.push(this.node)
+  public updateWireColor = (value: string) => {
+    this.bgColor = this.getWireColor(value)
+    this.setOutputConnectionColor(this.bgColor)
+    this.render()
   }
 
   protected getSvg = (color: string) => {
@@ -31,9 +30,10 @@ export default class Switch extends Element {
     return renderIc(svg, color, this.bgColor)
   }
 
-  public updateWireColor = (value: string) => {
-    this.bgColor = this.getWireColor(value)
-    this.setOutputConnectionColor(this.bgColor)
-    this.render()
+  private toggle = () => {
+    const newValue = this.node.value === LogicValue.TRUE ? LogicValue.FALSE : LogicValue.TRUE
+    this.node.setValue(newValue)
+    this.canvas.step(true)
+    this.canvas.circuit.queue.push(this.node)
   }
 }

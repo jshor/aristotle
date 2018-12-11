@@ -2,17 +2,7 @@ import draw2d from 'draw2d'
 import Canvas from './Canvas'
 import { Circuit, CircuitNode } from '@aristotle/logic-circuit'
 import Connection from './Connection'
-
-const getPortIndex = (port: draw2d.Port, type: string): number => {
-  const ports = port.parent[`${type}Ports`].data
-
-  for (let i = 0; i < ports.length; i++) {
-    if (ports[i] === port) {
-      return i
-    }
-  }
-  return -1
-}
+import getPortIndex from '../utils/getPortIndex'
 
 export default class Editor extends Canvas {
   public circuit: Circuit = new Circuit()
@@ -68,7 +58,7 @@ export default class Editor extends Canvas {
     // this.installEditPolicy(new draw2d.policy.canvas.FadeoutDecorationPolicy())
     super.installEditPolicy(new draw2d.policy.canvas.ShowGridEditPolicy())
     super.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({
-      createConnection: this.createConnection
+      createConnection: () => new Connection(this.circuit)
     }))
   }
 }
