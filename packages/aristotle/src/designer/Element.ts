@@ -3,8 +3,8 @@ import draw2d from 'draw2d'
 import { CircuitNode, LogicValue } from '@aristotle/logic-circuit'
 
 export default class Element extends draw2d.shape.basic.Image {
-  protected name: string
-  protected node: CircuitNode
+  public node: CircuitNode
+  public name: string
   protected canvas: draw2d.Canvas
 
   constructor (name: string) {
@@ -14,11 +14,15 @@ export default class Element extends draw2d.shape.basic.Image {
     super.on('added', this.addEventListeners) // TODO: add removed event
   }
 
-  public setValue = (value: any) => {
+  public getInputPort = (index: number): draw2d.Port => super.getInputPort(index)
+
+  public getOutputPort = (index: number): draw2d.Port => super.getOutputPort(index)
+
+  public setValue = (value: number): void => {
     this.node.setValue(value)
   }
 
-  protected render = (renderPorts: boolean = false) => {
+  public render = (renderPorts: boolean = false): void => {
     const { path, width, height, ports } = this.getSvg('#000')
 
     super.setPath(path)
@@ -30,7 +34,7 @@ export default class Element extends draw2d.shape.basic.Image {
     }
   }
 
-  protected getWireColor = (value: string) => {
+  public getWireColor = (value: number): string => {
     switch (value) {
       case LogicValue.TRUE:
         return '#0000ff'
@@ -41,7 +45,7 @@ export default class Element extends draw2d.shape.basic.Image {
     }
   }
 
-  protected setOutputConnectionColor = (color: string) => {
+  public setOutputConnectionColor = (color: string): void => {
     super
       .getConnections()
       .data
@@ -49,17 +53,11 @@ export default class Element extends draw2d.shape.basic.Image {
       .forEach((connection: draw2d.Connection) => connection.setColor(color))
   }
 
-  protected getSvg = (color: string): any => ({})
+  public getSvg = (color: string): any => ({})
 
-  protected on = (eventName: string, fn: () => void) => super.on(eventName, fn)
+  public on = (eventName: string, fn: () => void): void => super.on(eventName, fn)
 
-  private addEventListeners = () => {
-    this.canvas.on('select', this.updateSelectionColor)
-    this.canvas.on('reset', this.updateSelectionColor)
-    this.canvas.html[0].addEventListener('click', this.updateSelectionColor)
-  }
-
-  private updateSelectionColor = () => {
+  public updateSelectionColor = (): void => {
     if (this.canvas) {
       const isSelected = !!~this.canvas.selection.all.data.indexOf(this)
       const color = isSelected ? '#ff0000' : '#000'
@@ -68,9 +66,15 @@ export default class Element extends draw2d.shape.basic.Image {
     }
   }
 
-  private setPorts = (ports: Array<{ x: number, y: number, type: string }>) => {
+  public setPorts = (ports: Array<{ x: number, y: number, type: string }>): void => {
     ports.forEach(({ x, y, type }) => {
       super.createPort(type, new draw2d.layout.locator.XYAbsPortLocator(x, y))
     })
+  }
+
+  private addEventListeners = (): void => {
+    this.canvas.on('select', this.updateSelectionColor)
+    this.canvas.on('reset', this.updateSelectionColor)
+    this.canvas.html[0].addEventListener('click', this.updateSelectionColor)
   }
 }
