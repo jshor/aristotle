@@ -46,12 +46,12 @@ export default class extends Vue {
     this.canvas.addNode(OUT_1, 400, 350)
     this.canvas.addNode(OUT_2, 400, 450)
 
-    this.canvas.newConnection(NOR_1, NOR_2, 1)
-    this.canvas.newConnection(S, NOR_2, 0)
-    this.canvas.newConnection(NOR_2, NOR_1, 1)
-    this.canvas.newConnection(R, NOR_1, 0)
-    this.canvas.newConnection(NOR_1, OUT_1, 0)
-    this.canvas.newConnection(NOR_2, OUT_2, 0)
+    this.canvas.addConnection(NOR_1, NOR_2, 1)
+    this.canvas.addConnection(S, NOR_2, 0)
+    this.canvas.addConnection(NOR_2, NOR_1, 1)
+    this.canvas.addConnection(R, NOR_1, 0)
+    this.canvas.addConnection(NOR_1, OUT_1, 0)
+    this.canvas.addConnection(NOR_2, OUT_2, 0)
 
     R.setValue(LogicValue.TRUE)
     S.setValue(LogicValue.FALSE)

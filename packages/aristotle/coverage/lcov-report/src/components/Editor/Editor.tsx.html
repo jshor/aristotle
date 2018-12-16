@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/components/Editor/Editor.tsx</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../prettify.css" />
+    <link rel="stylesheet" href="../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../index.html">All files</a> / <a href="index.html">src/components/Editor</a> Editor.tsx
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/37</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/0</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/6</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/37</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79</td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import Editor from '@/designer/Editor'</span>
+// @ts-ignore
+<span class="cstat-no" title="statement not covered" >import { Component, Vue } from 'vue-property-decorator'</span>
+<span class="cstat-no" title="statement not covered" >import { LogicValue } from '@aristotle/logic-circuit'</span>
+<span class="cstat-no" title="statement not covered" >import LogicGate from '@/designer/elements/LogicGate'</span>
+<span class="cstat-no" title="statement not covered" >import Switch from '@/designer/elements/Switch'</span>
+<span class="cstat-no" title="statement not covered" >import Lightbulb from '@/designer/elements/Lightbulb'</span>
+&nbsp;
+<span class="fstat-no" title="function not covered" >@Component</span>
+<span class="cstat-no" title="statement not covered" >export default class extends Vue {</span>
+  public <span class="cstat-no" title="statement not covered" >panning: boolean = false</span>
+  public canvas: any
+  public <span class="cstat-no" title="statement not covered" >canvasWidth: number = 1600</span>
+  public <span class="cstat-no" title="statement not covered" >canvasHeight: number = 1600</span>
+&nbsp;
+  public <span class="fstat-no" title="function not covered" >pan</span> () {
+<span class="cstat-no" title="statement not covered" >    this.canvas.setMouseMode('PANNING')</span>
+  }
+&nbsp;
+  public <span class="fstat-no" title="function not covered" >select</span> () {
+<span class="cstat-no" title="statement not covered" >    this.canvas.setMouseMode('SELECTION')</span>
+  }
+&nbsp;
+  public <span class="fstat-no" title="function not covered" >step</span> () {
+<span class="cstat-no" title="statement not covered" >    this.canvas.step()</span>
+  }
+&nbsp;
+  public <span class="fstat-no" title="function not covered" >mounted</span> () {
+<span class="cstat-no" title="statement not covered" >    this.canvas = new Editor('canvas')</span>
+&nbsp;
+    const R = <span class="cstat-no" title="statement not covered" >new Switch('R')</span>
+    const S = <span class="cstat-no" title="statement not covered" >new Switch('S')</span>
+&nbsp;
+    const NOR_1 = <span class="cstat-no" title="statement not covered" >new LogicGate('NOR_1', 'NOR')</span>
+    const NOR_2 = <span class="cstat-no" title="statement not covered" >new LogicGate('NOR_2', 'NOR')</span>
+    const NOR_3 = <span class="cstat-no" title="statement not covered" >new LogicGate('NOR_3', 'NOR')</span>
+&nbsp;
+    const OUT_1 = <span class="cstat-no" title="statement not covered" >new Lightbulb('OUT_1')</span>
+    const OUT_2 = <span class="cstat-no" title="statement not covered" >new Lightbulb('OUT_2')</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.canvas.addNode(NOR_3, 0, 100)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addNode(R, 0, 350)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addNode(S, 0, 450)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addNode(NOR_1, 200, 350)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addNode(NOR_2, 200, 450)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addNode(OUT_1, 400, 350)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addNode(OUT_2, 400, 450)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.canvas.addConnection(NOR_1, NOR_2, 1)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addConnection(S, NOR_2, 0)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addConnection(NOR_2, NOR_1, 1)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addConnection(R, NOR_1, 0)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addConnection(NOR_1, OUT_1, 0)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.addConnection(NOR_2, OUT_2, 0)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    R.setValue(LogicValue.TRUE)</span>
+<span class="cstat-no" title="statement not covered" >    S.setValue(LogicValue.FALSE)</span>
+  }
+&nbsp;
+  public <span class="fstat-no" title="function not covered" >render</span> () {
+<span class="cstat-no" title="statement not covered" >    return (</span>
+      &lt;div id='app'&gt;
+        &lt;button onClick={this.pan}&gt;Panning Mode&lt;/button&gt;
+        &lt;button onClick={this.select}&gt;Select Mode&lt;/button&gt;
+        &lt;button onClick={this.step}&gt;Step&lt;/button&gt;
+        &lt;div id='canvasWrapper'&gt;
+          &lt;div
+            id='canvas'
+            style={{
+              width: '4998px', // this.canvasWidth + 'px',
+              height: '4998px' // this.canvasHeight + 'px'
+            }}
+          /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    )
+  }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Fri Dec 14 2018 15:53:20 GMT-0500 (EST)
+</div>
+</div>
+<script src="../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../sorter.js"></script>
+</body>
+</html>
