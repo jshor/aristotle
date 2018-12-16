@@ -1,5 +1,7 @@
 .DS_Store
 node_modules
+.coverage
+*.sh
 
 # local env files
 .env.local
