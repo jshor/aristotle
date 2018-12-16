@@ -20,12 +20,15 @@ module.exports = {
     'jest-serializer-vue'
   ],
   setupFiles: [
-    'jest-canvas-mock',
     '<rootDir>/test/setup.js'
   ],
   testMatch: [
     '**/src/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'
   ],
   collectCoverage: true,
+  collectCoverageFrom: [
+    '<rootDir>/src/**/*.(js|jsx|ts|tsx)',
+    '!<rootDir>/src/designer/Canvas.ts'
+  ],
   testURL: 'http://localhost/'
 }

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/designer/Connection.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">All files</a> / <a href="index.html">src/designer</a> Connection.ts
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">15% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>3/20</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/0</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/5</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">16.67% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>3/18</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import draw2d from 'draw2d'
+import { Circuit, CircuitNode } from '@aristotle/logic-circuit'
+import getPortIndex from '../utils/getPortIndex'
+import Editor from './Editor'
+&nbsp;
+class Connection extends draw2d.Connection {
+  public circuit: Circuit
+  public sourcePort: draw2d.Port
+  public targetPort: draw2d.Port
+  // @ts-ignore
+  public canvas: Editor
+&nbsp;
+<span class="fstat-no" title="function not covered" >  constructor (</span>circuit: Circuit) {
+<span class="cstat-no" title="statement not covered" >    super({</span>
+      outlineColor: '#000000',
+      outlineStroke: 1,
+      color: '#808080',
+      glow: false,
+      router: new draw2d.layout.connection.CircuitConnectionRouter()
+    })
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.circuit = circuit</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    super.on('added', this.onAdd)</span>
+<span class="cstat-no" title="statement not covered" >    super.on('removed', this.onRemove)</span>
+  }
+&nbsp;
+  public <span class="cstat-no" title="statement not covered" >onAdd = <span class="fstat-no" title="function not covered" >(): void </span>=&gt; {</span>
+    const source = <span class="cstat-no" title="statement not covered" >this.sourcePort.parent</span>
+    const target = <span class="cstat-no" title="statement not covered" >this.targetPort.parent</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.circuit.addConnection(source.node, target.node, getPortIndex(this.targetPort, 'input'))</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.step(true)</span>
+  }
+&nbsp;
+  public <span class="cstat-no" title="statement not covered" >onRemove = <span class="fstat-no" title="function not covered" >(): void </span>=&gt; {</span>
+    const sourceNode: CircuitNode = <span class="cstat-no" title="statement not covered" >this.sourcePort.parent.node</span>
+    const targetNode: CircuitNode = <span class="cstat-no" title="statement not covered" >this.targetPort.parent.node</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.circuit.removeConnection(sourceNode, targetNode)</span>
+  }
+&nbsp;
+  public <span class="cstat-no" title="statement not covered" >setTarget = <span class="fstat-no" title="function not covered" >(p</span>ort: draw2d.Port) =&gt; <span class="cstat-no" title="statement not covered" >super.setTarget(port)</span></span>
+&nbsp;
+  public <span class="cstat-no" title="statement not covered" >setSource = <span class="fstat-no" title="function not covered" >(p</span>ort: draw2d.Port) =&gt; <span class="cstat-no" title="statement not covered" >super.setSource(port)</span></span>
+}
+&nbsp;
+export default Connection
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Fri Dec 14 2018 15:53:20 GMT-0500 (EST)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

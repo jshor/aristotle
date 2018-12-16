@@ -2,6 +2,7 @@ import draw2d from 'draw2d'
 
 /**
  * Extends the draw2d Canvas to add user-friendly enhancements and support parent wrapper elements.
+ * This class is practically untestable due to the complexity of lack of jsdom SVG support and inability to stub Raphaeljs.
  *
  * @class Canvas
  * @extends draw2d.Canvas
