@@ -26,6 +26,7 @@ module.exports = {
     '**/src/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'
   ],
   collectCoverage: true,
+  coverageDirectory: '<rootDir>/.coverage',
   collectCoverageFrom: [
     '<rootDir>/src/**/*.(js|jsx|ts|tsx)',
     '!<rootDir>/src/designer/Canvas.ts'

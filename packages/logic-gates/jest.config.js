@@ -19,6 +19,7 @@ module.exports = {
     'json',
     'node'
   ],
+  coverageDirectory: '<rootDir>/.coverage',
   collectCoverageFrom: [
     'src/**/*.ts',
     '!<rootDir>/test/setup.ts'
