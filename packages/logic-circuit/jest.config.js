@@ -14,5 +14,6 @@ module.exports = {
     'json',
     'node'
   ],
+  coverageDirectory: '<rootDir>/.coverage',
   collectCoverage: true
 }
