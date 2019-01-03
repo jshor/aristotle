@@ -5,30 +5,30 @@ import { renderGate } from '@aristotle/logic-gates'
 export default class LogicGate extends Element {
   private gateType: string
 
-  constructor (name: string, gateType: string) {
-    super(name)
+  constructor (id: string, name: string, gateType: string) {
+    super(id, name)
 
     this.gateType = gateType
     this.render(true)
-    this.node = this.getCircuitNode()
+    this.node = this.getCircuitNode(id)
     this.node.on('change', this.updateWireColor)
   }
 
-  public updateWireColor = (value: string) => {
+  public updateWireColor = (value: number) => {
     this.setOutputConnectionColor(this.getWireColor(value))
   }
 
-  protected getSvg = (color: string) => {
+  public getSvg = (color: string) => {
     return renderGate('NOR', 2, color)
   }
 
-  private getCircuitNode = (): CircuitNode => {
+  private getCircuitNode = (id: string): CircuitNode => {
     switch (this.gateType) {
       case 'NOR':
-        return new Nor(this.name)
+        return new Nor(id)
       case 'OR':
       default:
-        return new Or(this.name)
+        return new Or(id)
     }
   }
 }
