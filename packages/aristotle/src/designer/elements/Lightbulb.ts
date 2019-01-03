@@ -5,22 +5,21 @@ import { renderIc } from '@aristotle/logic-gates'
 export default class Lightbulb extends Element {
   private bgColor: string = '#808080'
 
-  constructor (name: string) {
-    super(name)
+  constructor (id: string, name: string) {
+    super(id, name)
 
-    this.node = new OutputNode(name)
+    this.node = new OutputNode(id)
     this.node.on('change', this.updateWireColor)
     this.render(true)
   }
 
-  public updateWireColor = (value: string) => {
+  public updateWireColor = (value: number) => {
     this.bgColor = this.getWireColor(value)
     this.setOutputConnectionColor(this.bgColor)
     this.render()
   }
 
-  protected getSvg = (color: string) => {
-    console.log('renderGate: ', renderIc)
+  public getSvg = (color: string) => {
     const svg = {
       right: [], left: [
         { label: '*', type: 'input' }

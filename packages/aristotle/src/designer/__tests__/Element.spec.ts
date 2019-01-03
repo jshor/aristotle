@@ -7,7 +7,7 @@ describe('Element base class', () => {
   let element: Element
 
   beforeEach(() => {
-    element = new Element('testElement')
+    element = new Element('12345', 'testElement')
   })
 
   describe('render()', () => {

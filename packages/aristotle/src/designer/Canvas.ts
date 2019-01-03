@@ -17,6 +17,7 @@ export default class Canvas extends draw2d.Canvas {
   public currentHoverFigure: any = null
   public editPolicy: draw2d.util.ArrayList
   public html: draw2d.util.ArrayList
+  public commandStack: draw2d.CommandStack
   private parent: HTMLElement
 
   constructor (elementId: string) {
@@ -24,9 +25,11 @@ export default class Canvas extends draw2d.Canvas {
 
     this.parent = this.html[0].parentNode
     super.setScrollArea(this.parent)
-    this.parent = document.createElement('div')
+    // this.parent = document.createElement('div')
     document.addEventListener('mousemove', this.onBoundlessMouseMove)
     document.addEventListener('mouseup', this.onBoundlessMouseUp)
+    this.commandStack.addEventListener(() => super.fireEvent('commandStackChanged'))
+    this.html[0].addEventListener('click', () => super.fireEvent('deselect'))
   }
 
   /**
@@ -49,6 +52,8 @@ export default class Canvas extends draw2d.Canvas {
   public getAbsoluteY = (): number => $(this.parent).offset().top
 
   public installEditPolicy = (policy: draw2d.policy) => super.installEditPolicy(policy)
+
+  public getSelection = (): any => super.getSelection()
 
   public add = (shape: draw2d.shape, x: number = 0, y: number = 0) => super.add(shape, x, y)
 

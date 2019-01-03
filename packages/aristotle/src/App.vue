@@ -1,19 +1,38 @@
 <template>
   <div id="app">
-    <Editor />
+    <button @click="openDocument">Open Document</button>
+
+    <DocumentContainer v-for="document in documents" :key="document.id" />
   </div>
 </template>
 
 <script lang="ts">
+import { mapState } from 'vuex'
 import { Component, Vue } from 'vue-property-decorator'
-import Editor from '@/components/Editor/index.vue'
+import DocumentContainer from './containers/DocumentContainer'
+import DocumentModel from './models/DocumentModel'
+import { State } from './store'
+import data from './services/data.json'
 
 @Component({
   components: {
-    Editor
+    DocumentContainer
+  },
+  computed: {
+    ...mapState({
+      documents: (state: State) => state.documents.documents
+    })
   }
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  openDocument () {
+    const document = new DocumentModel()
+
+    document.data = JSON.stringify(data)
+
+    this.$store.commit('OPEN_DOCUMENT', document)
+  }
+}
 </script>
 
 <style lang="scss">

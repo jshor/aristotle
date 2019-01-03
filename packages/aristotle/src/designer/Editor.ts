@@ -3,11 +3,16 @@ import Canvas from './Canvas'
 import { Circuit } from '@aristotle/logic-circuit'
 import Connection from './Connection'
 import Element from './Element'
-import getPortIndex from '../utils/getPortIndex'
+import CommandModel from '@/models/CommandModel'
+import Command from '@/types/Command'
+import EditorModel from '@/models/EditorModel'
+import MouseMode from '@/types/MouseMode'
 
 export default class Editor extends Canvas {
   public circuit: Circuit = new Circuit()
   public debug: boolean = false
+  public commandStack: draw2d.CommandStack
+  public mouseMode: MouseMode = MouseMode.PANNING
 
   constructor (elementId: string) {
     super(elementId)
@@ -66,18 +71,19 @@ export default class Editor extends Canvas {
   /**
    * Sets the mouse mode of the editor.
    *
-   * @param {String} mode - valid values are: PANNING or SELECTION
+   * @param {MouseMode} mode - valid values are: PANNING or SELECTION
    */
-  public setMouseMode (mode: string): void {
+  public setMouseMode (mode: MouseMode): void {
     switch (mode) {
-      case 'PANNING':
+      case MouseMode.PANNING:
         super.installEditPolicy(new draw2d.policy.canvas.PanningSelectionPolicy())
         break
-      case 'SELECTION':
+      case MouseMode.SELECTION:
       default:
         super.installEditPolicy(new draw2d.policy.canvas.BoundingboxSelectionPolicy())
         break
     }
+    this.mouseMode = mode
   }
 
   /**
@@ -99,5 +105,27 @@ export default class Editor extends Canvas {
     super.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({
       createConnection: this.createConnection
     }))
+  }
+
+  public getEditorModel = (): EditorModel => {
+    return new EditorModel({
+      canUndo: this.commandStack.canUndo(),
+      canRedo: this.commandStack.canRedo(),
+      selectionCount: super.getSelection().getSize(),
+      mouseMode: this.mouseMode,
+      debug: this.debug
+    })
+  }
+
+  public applyCommand = (command: CommandModel) => {
+    switch (command.command) {
+      case Command.UNDO:
+        console.log('will undo')
+        this.commandStack.undo()
+        break
+      case Command.REDO:
+        this.commandStack.redo()
+        break
+    }
   }
 }
