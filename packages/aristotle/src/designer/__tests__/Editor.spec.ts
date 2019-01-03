@@ -3,6 +3,7 @@ import Canvas from '../Canvas'
 import Editor from '../Editor'
 import Connection from '../Connection'
 import Element from '../Element'
+import MouseMode from '@/types/MouseMode'
 
 jest.mock('../Canvas')
 jest.mock('../Connection')
@@ -17,7 +18,7 @@ describe('Editor', () => {
   afterEach(() => jest.resetAllMocks())
 
   describe('addNode()', () => {
-    const node = new Element('testElement')
+    const node = new Element('12345', 'testElement')
     const x = 40
     const y = 60
 
@@ -47,8 +48,8 @@ describe('Editor', () => {
   })
 
   describe('addConnection()', () => {
-    const source = new Element('sourceElement')
-    const target = new Element('targetElement')
+    const source = new Element('12345', 'sourceElement')
+    const target = new Element('12346', 'targetElement')
     const outputPort = new draw2d.Port()
     const inputPort = new draw2d.Port()
     const index = 1
@@ -171,15 +172,19 @@ describe('Editor', () => {
     })
 
     it('should install the panning selection policy when in `PANNING` mode', () => {
-      editor.setMouseMode('PANNING')
+      editor.setMouseMode(MouseMode.PANNING)
 
-      expect(Canvas.prototype.installEditPolicy).toHaveBeenCalledWith(expect.any(draw2d.policy.canvas.PanningSelectionPolicy))
+      expect(Canvas.prototype.installEditPolicy).toHaveBeenCalledWith(
+        expect.any(draw2d.policy.canvas.PanningSelectionPolicy)
+      )
     })
 
     it('should install the bounding box selection policy when in `SELECTION` mode', () => {
-      editor.setMouseMode('SELECTION')
+      editor.setMouseMode(MouseMode.SELECTION)
 
-      expect(Canvas.prototype.installEditPolicy).toHaveBeenCalledWith(expect.any(draw2d.policy.canvas.BoundingboxSelectionPolicy))
+      expect(Canvas.prototype.installEditPolicy).toHaveBeenCalledWith(
+        expect.any(draw2d.policy.canvas.BoundingboxSelectionPolicy)
+      )
     })
   })
 
@@ -195,7 +200,9 @@ describe('Editor', () => {
     })
 
     it('should install the drag-connection-edit policy', () => {
-      expect(Canvas.prototype.installEditPolicy).toHaveBeenCalledWith(expect.any(draw2d.policy.connection.DragConnectionCreatePolicy))
+      expect(Canvas.prototype.installEditPolicy).toHaveBeenCalledWith(
+        expect.any(draw2d.policy.connection.DragConnectionCreatePolicy)
+      )
     })
   })
 })

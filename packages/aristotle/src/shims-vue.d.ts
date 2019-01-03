@@ -5,7 +5,7 @@ declare module '*.vue' {
 
 declare module 'draw2d' {
   // @ts-ignore
-  export { policy, util, Connection, Port, Canvas, layout, geo, shape } from 'draw2d'
+  export { policy, util, Connection, Port, Canvas, CommandStack, layout, geo, shape } from 'draw2d'
 }
 
 declare module '@aristotle/logic-circuit' {

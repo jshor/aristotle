@@ -7,9 +7,10 @@ export default class Element extends draw2d.shape.basic.Image {
   public name: string
   protected canvas: draw2d.Canvas
 
-  constructor (name: string) {
+  constructor (id: string, name: string) {
     super({ resizeable: false })
 
+    super.setId(id)
     this.name = name
     super.on('added', this.addEventListeners) // TODO: add removed event
   }
@@ -73,8 +74,8 @@ export default class Element extends draw2d.shape.basic.Image {
   }
 
   private addEventListeners = (): void => {
+    this.canvas.on('deselect', this.updateSelectionColor)
     this.canvas.on('select', this.updateSelectionColor)
     this.canvas.on('reset', this.updateSelectionColor)
-    this.canvas.html[0].addEventListener('click', this.updateSelectionColor)
   }
 }
