@@ -1,8 +1,9 @@
 {
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": ["packages/*"],
+    "nohoist": ["**/logic-circuit"]
+  },
   "license": "MIT",
   "scripts": {
     "bootstrap": "lerna bootstrap",

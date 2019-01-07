@@ -13,11 +13,11 @@ class Nor extends Or {
   //   }
   // }
   protected eval (): number {
-    if (this.valueCount(LogicValue.TRUE)) {
+    if (super.valueCount(LogicValue.TRUE)) {
       return LogicValue.FALSE
     }
 
-    if (this.valueCount(LogicValue.UNKNOWN)) {
+    if (super.valueCount(LogicValue.UNKNOWN)) {
       return LogicValue.UNKNOWN
     }
 

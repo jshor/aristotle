@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "target": "ES2015",
+    "outDir": "dist",
+    "rootDir": "src",
     "declaration": true,
-    "moduleResolution": "node",
-    "declarationDir": "./dist"
-
+    "moduleResolution": "node"
   },
   "exclude": [
+    "**/*.spec.ts",
+    "__tests__",
+    "test",
     "node_modules",
-    "demo",
-    "dist"
+    "dist",
+    "esm"
   ]
 }

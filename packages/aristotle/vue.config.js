@@ -1,4 +1,5 @@
 const webpack = require('webpack')
+const path = require('path')
 
 module.exports = {
   chainWebpack: config => {
@@ -10,7 +11,7 @@ module.exports = {
       })
     ]
     config.alias = {
-        'jquery-ui': 'jquery-ui-dist/jquery-ui.js'
+       // 'jquery-ui': 'jquery-ui-dist/jquery-ui.js'
     }
   }
 }

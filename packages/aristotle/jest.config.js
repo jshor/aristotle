@@ -3,15 +3,12 @@ module.exports = {
     'js',
     'jsx',
     'json',
-    'vue',
-    'ts',
-    'tsx'
+    'vue'
   ],
   transform: {
     '^.+\\.vue$': 'vue-jest',
-    '^.+\\.js$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$': 'jest-transform-stub',
-    '^.+\\.tsx?$': 'ts-jest'
+    '^.+\\.jsx?$': 'babel-jest'
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
@@ -19,17 +16,8 @@ module.exports = {
   snapshotSerializers: [
     'jest-serializer-vue'
   ],
-  setupFiles: [
-    '<rootDir>/test/setup.js'
-  ],
   testMatch: [
-    '**/src/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'
-  ],
-  collectCoverage: true,
-  coverageDirectory: '<rootDir>/.coverage',
-  collectCoverageFrom: [
-    '<rootDir>/src/**/*.(js|jsx|ts|tsx)',
-    '!<rootDir>/src/designer/Canvas.ts'
+    '**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'
   ],
   testURL: 'http://localhost/'
 }
