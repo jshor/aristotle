@@ -1,14 +1,43 @@
-<script lang="tsx">
-import Editor from '../designer/Editor'
-import { Component, Vue } from 'vue-property-decorator'
-import MouseMode from '../types/MouseMode'
-import CommandModel from '../models/CommandModel'
-import SerializationService from '../services/SerializationService'
+<template>
+  <div id="app">
+    <button @click="pan">Panning Mode</button>
+    <button @click="select">Select Mode</button>
+    <button @click="step">Step</button>
+    <div id="canvasWrapper">
+      <div
+        id="canvas"
+        :style="{
+          width: '4998px',
+          height: '4998px'
+        }"
+      />
+    </div>
+  </div>
+</template>
 
-@Component<EditorComponent>({
+<script>
+import Editor from '@/designer/Editor'
+import CommandModel from '@/models/CommandModel'
+import SerializationService from '@/services/SerializationService'
+
+export default {
+  name: 'Editor',
   props: {
-    data: String,
-    relayedCommand: CommandModel
+    data: {
+      type: String,
+      default: ''
+    },
+    relayedCommand: {
+      type: CommandModel,
+      default: null
+    }
+  },
+  data () {
+    return {
+      canvas: null,
+      canvasWidth: 1600,
+      canvasHeight: 1600
+    }
   },
   watch: {
     data (value) {
@@ -16,34 +45,29 @@ import SerializationService from '../services/SerializationService'
     },
     relayedCommand: {
       deep: true,
-      handler (command: CommandModel) {
+      handler (command) {
           this.canvas.applyCommand(command)
       }
     }
-  }
-})
-export default class EditorComponent extends Vue {
-  public data: String
-  public relayedCommand: CommandModel
-  public panning: boolean = false
-  public canvas: any
-  public canvasWidth: number = 1600
-  public canvasHeight: number = 1600
-  public id = 'test'
+  },
+  methods: {
+    pan () {
+      this.canvas.setMouseMode('PANNING')
+    },
+    select () {
+      this.canvas.setMouseMode('SELECTION')
+    },
+    step () {
+      this.canvas.step()
+    },
+    onCanvasUpdate (canvas) {
+      const model = canvas.getEditorModel()
 
-  public pan () {
-    this.canvas.setMouseMode(MouseMode.PANNING)
-  }
-
-  public select () {
-    this.canvas.setMouseMode(MouseMode.SELECTION)
-  }
-
-  public step () {
-    this.canvas.step()
-  }
-
-  public mounted () {
+      this.$store.commit('SET_EDITOR_MODEL', model)
+      // console.log('model: ', model)
+    }
+  },
+  mounted () {
     this.canvas = new Editor('canvas')
 
     this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
@@ -51,33 +75,6 @@ export default class EditorComponent extends Vue {
 
     SerializationService.deserialize(this.canvas)
 
-  }
-
-  onCanvasUpdate = (canvas: Editor) => {
-    const model = canvas.getEditorModel()
-
-    this.$store.commit('SET_EDITOR_MODEL', model)
-    // console.log('model: ', model)
-  }
-
-  public render () {
-    return (
-      <div id='app'>
-        COMD: { this.relayedCommand ? 'yes' : 'no' }
-        <button onClick={this.pan}>Panning Mode</button>
-        <button onClick={this.select}>Select Mode</button>
-        <button onClick={this.step}>Step</button>
-        <div id='canvasWrapper'>
-          <div
-            id='canvas'
-            style={{
-              width: '4998px', // this.canvasWidth + 'px',
-              height: '4998px' // this.canvasHeight + 'px'
-            }}
-          />
-        </div>
-      </div>
-    )
   }
 }
 </script>
