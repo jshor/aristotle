@@ -6,31 +6,33 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { mapState } from 'vuex'
-import { Component, Vue } from 'vue-property-decorator'
-import DocumentContainer from './containers/DocumentContainer'
-import DocumentModel from './models/DocumentModel'
-import { State } from './store'
-import data from './services/data.json'
+import DocumentContainer from '@/containers/DocumentContainer'
+import DocumentModel from '@/models/DocumentModel'
+import data from '@/services/data.json'
 
-@Component({
+export default {
+  name: 'App',
   components: {
     DocumentContainer
   },
   computed: {
     ...mapState({
-      documents: (state: State) => state.documents.documents
+      documents: (state) => state.documents.documents
     })
-  }
-})
-export default class App extends Vue {
-  openDocument () {
-    const document = new DocumentModel()
+  },
+  mounted () {
+    // console.log('stugf: ', CircuitNode)
+  },
+  methods: {
+    openDocument () {
+      const document = new DocumentModel()
 
-    document.data = JSON.stringify(data)
+      document.data = JSON.stringify(data)
 
-    this.$store.commit('OPEN_DOCUMENT', document)
+      this.$store.commit('OPEN_DOCUMENT', document)
+    }
   }
 }
 </script>

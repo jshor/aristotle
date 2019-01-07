@@ -4,6 +4,10 @@ import LogicValue from '../types/LogicValue'
 class InputNode extends CircuitNode {
   inputValues = [LogicValue.UNKNOWN]
 
+  constructor (name: string) {
+    super(name)
+  }
+
   /**
    * Updates the node's value to be static having the given value.
    *

@@ -3,7 +3,6 @@ import Canvas from '../Canvas'
 import Editor from '../Editor'
 import Connection from '../Connection'
 import Element from '../Element'
-import MouseMode from '@/types/MouseMode'
 
 jest.mock('../Canvas')
 jest.mock('../Connection')
@@ -172,7 +171,7 @@ describe('Editor', () => {
     })
 
     it('should install the panning selection policy when in `PANNING` mode', () => {
-      editor.setMouseMode(MouseMode.PANNING)
+      editor.setMouseMode('PANNING')
 
       expect(Canvas.prototype.installEditPolicy).toHaveBeenCalledWith(
         expect.any(draw2d.policy.canvas.PanningSelectionPolicy)
@@ -180,7 +179,7 @@ describe('Editor', () => {
     })
 
     it('should install the bounding box selection policy when in `SELECTION` mode', () => {
-      editor.setMouseMode(MouseMode.SELECTION)
+      editor.setMouseMode('SELECTION')
 
       expect(Canvas.prototype.installEditPolicy).toHaveBeenCalledWith(
         expect.any(draw2d.policy.canvas.BoundingboxSelectionPolicy)

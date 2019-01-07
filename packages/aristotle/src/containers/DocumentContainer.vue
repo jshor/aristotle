@@ -1,53 +1,45 @@
-<script lang="tsx">
-import { Component, Vue } from 'vue-property-decorator'
+<template>
+  <div>
+    <Toolbar
+      :document="activeDocument"
+      @relayCommand="onRelayCommand"
+    />
+    <Editor
+      :document="activeDocument"
+      :relayedCommand="relayedCommand"
+      @updateEditor="onUpdateEditor"
+    />
+  </div>
+</template>
+
+<script>
 import { mapGetters, mapState } from 'vuex'
-import Command from '../types/Command'
-import Editor from '@/components/Editor.vue'
-import Toolbar from '@/components/Toolbar.vue'
-import DocumentModel from '../models/DocumentModel'
-import EditorModel from '../models/EditorModel'
-import CommandModel from '../models/CommandModel'
+import Editor from '@/components/Editor'
+import Toolbar from '@/components/Toolbar'
+import DocumentModel from '@/models/DocumentModel'
+import EditorModel from '@/models/EditorModel'
+import CommandModel from '@/models/CommandModel'
 import { State } from '../store'
 
-@Component<DocumentContainer>({
-  computed: {
-    ...mapGetters(['activeDocument']),
-    ...mapState({
-      relayedCommand: (state: State) => state.documents.relayedCommand
-    })
-  },
+export default {
+  name: 'DocumentContainer',
   components: {
     Editor,
     Toolbar
-  }
-})
-export default class DocumentContainer extends Vue {
-  public activeDocument: DocumentModel
-  public relayedCommand: CommandModel
-
-  public onRelayCommand = ({ command, payload }: { command: Command, payload: any }) => {
-    this.$store.commit('RELAY_COMMAND', new CommandModel(command, payload))
-  }
-
-  public onUpdateEditor = (editorModel: EditorModel) => {
-    this.$store.commit('SET_EDITOR_MODEL', editorModel)
-  }
-
-  public render () {
-    return (
-      <div>
-        Cmd: { this.relayedCommand }
-        <Toolbar
-          document={this.activeDocument}
-          onRelayCommand={this.onRelayCommand}
-        />
-        <Editor
-          document={this.activeDocument}
-          relayedCommand={this.relayedCommand}
-          onUpdateEditor={this.onUpdateEditor}
-        />
-      </div>
-    )
+  },
+  computed: {
+    ...mapGetters(['activeDocument']),
+    ...mapState({
+      relayedCommand: (state) => state.documents.relayedCommand
+    })
+  },
+  methods: {
+    onRelayCommand ({ command, payload }) {
+      this.$store.commit('RELAY_COMMAND', new CommandModel(command, payload))
+    },
+    onUpdateEditor (editorModel) {
+      this.$store.commit('SET_EDITOR_MODEL', editorModel)
+    }
   }
 }
 </script>
