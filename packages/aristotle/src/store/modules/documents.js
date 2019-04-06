@@ -3,7 +3,9 @@ import Vue from 'vue'
 const state = {
   documents: {},
   activeDocumentId: '',
-  relayedCommand: null
+  relayedCommand: null,
+  toolboxVisible: false,
+  toolboxSettings: {}
 }
 
 const getters = {
@@ -25,6 +27,15 @@ const mutations = {
   },
   RELAY_COMMAND (state, relayedCommand) {
     state.relayedCommand = relayedCommand
+  },
+  SET_TOOLBOX_VISIBILITY (state, visibility) {
+    state.toolboxVisible = visibility
+  },
+  SET_TOOLBOX_SETTINGS (state, settings) {
+    state.toolboxSettings = settings
+  },
+  UPDATE_ELEMENT_SETTINGS (state, settings) {
+    state.elementSettings = settings
   }
 }
 

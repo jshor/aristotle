@@ -2,16 +2,14 @@ const webpack = require('webpack')
 const path = require('path')
 
 module.exports = {
-  chainWebpack: config => {
-    config.module.plugins = [
+  configureWebpack: {
+    plugins: [
       new webpack.ProvidePlugin({
-        "$":"jquery",
-        "jQuery":"jquery",
-        "window.jQuery":"jquery"
+        '$': 'jquery',
+        'jquery': 'jquery',
+        'window.jQuery': 'jquery',
+        'jQuery': 'jquery'
       })
     ]
-    config.alias = {
-       // 'jquery-ui': 'jquery-ui-dist/jquery-ui.js'
-    }
   }
 }

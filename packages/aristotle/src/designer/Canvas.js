@@ -21,7 +21,11 @@ export default class Canvas extends draw2d.Canvas {
     document.addEventListener('mousemove', this.onBoundlessMouseMove)
     document.addEventListener('mouseup', this.onBoundlessMouseUp)
     this.commandStack.addEventListener(() => this.fireEvent('commandStackChanged'))
-    this.html[0].addEventListener('click', () => this.fireEvent('deselect'))
+    this.html[0].addEventListener('click', () => {
+      if (this.getSelection().getSize() === 0) {
+        this.fireEvent('deselect')
+      }
+    })
   }
 
   /**
@@ -88,5 +92,30 @@ export default class Canvas extends draw2d.Canvas {
 
     this.mouseDragDiffX = 0
     this.mouseDragDiffY = 0
+  }
+
+  /**
+   * Sets the actively-dragged toolbox element dimensions to match the current zoom level.
+   * 
+   * @param {HTMLElememt} elememt
+   */
+  onDragEnter = (element) => {
+    const scale = 1 / this.zoomFactor
+    const width = $(element).width() * scale
+    const height = $(element).height() * scale
+
+    $('.ui-draggable-dragging').width(width)
+    $('.ui-draggable-dragging').height(height)
+  }
+
+  /**
+   * Returns the document coordinates of the active-dragged toolbox element.
+   * 
+   * @returns {Object} x, y coordinates
+   */
+  getDraggedCoordinates = () => {
+    const { left, top } = $('.ui-draggable-dragging').offset()
+
+    return this.fromDocumentToCanvasCoordinate(left, top)
   }
 }

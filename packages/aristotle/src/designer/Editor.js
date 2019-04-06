@@ -3,12 +3,18 @@ import Canvas from './Canvas'
 import { Circuit } from '@aristotle/logic-circuit'
 import Connection from './Connection'
 import EditorModel from '@/models/EditorModel'
+import ClipboardService from '@/services/ClipboardService'
+import SerializationService from '@/services/SerializationService'
+import CommandCut from './commands/CommandCut'
+import uuid from '@/utils/uuid'
+import Element from './Element'
 
 export default class Editor extends Canvas {
   constructor (elementId) {
     super(elementId)
 
     this.circuit = new Circuit()
+    this.clipboard = new ClipboardService(this)
     this.installEditPolicies()
   }
 
@@ -40,6 +46,18 @@ export default class Editor extends Canvas {
 
     this.add(connection)
     this.step(true)
+  }
+
+  /**
+   * Handles a toolbox drop event.
+   * 
+   * @param {HTMLElement} element
+   */
+  onDrop = (element) => {
+    const { x, y } = this.getDraggedCoordinates()
+    const node = SerializationService.getNode('LogicGate', uuid(), '')
+    
+    this.addNode(node, x, y)
   }
 
   /**
@@ -116,6 +134,19 @@ export default class Editor extends Canvas {
         break
       case 'REDO':
         this.commandStack.redo()
+        break
+      case 'CUT':
+        // this
+        //   .getFigures()
+        //   .each((i, figure) => {
+        //     const cmd = new draw2d.command.CommandDelete(figure)
+        //     this.commandStack.execute(cmd)
+        //   })
+        const cmd = new CommandCut(this)
+        this.commandStack.execute(cmd)
+        break
+      case 'PASTE':
+        this.clipboard.paste()
         break
     }
   }
