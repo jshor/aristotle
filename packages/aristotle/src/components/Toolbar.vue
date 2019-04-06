@@ -10,6 +10,14 @@
       @click="relayCommand('REDO')">
       Redo
     </button>
+    <button
+      @click="relayCommand('CUT')">
+      Cut
+    </button>
+    <button
+      @click="relayCommand('PASTE')">
+      Paste
+    </button>
   </div>
 </template>
 
@@ -26,7 +34,6 @@ export default {
   },
   computed: {
     editor () {
-      console.log('this.document: ', this.document.editorModel)
       return this.document.editorModel
     }
   },

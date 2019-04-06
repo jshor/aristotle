@@ -2,13 +2,13 @@ import Switch from '@/designer/elements/Switch'
 import LogicGate from '@/designer/elements/LogicGate'
 import Lightbulb from '@/designer/elements/Lightbulb'
 import uuid from '@/utils/uuid'
-import data from './data.json'
+import getPortIndex from '@/utils/getPortIndex'
 
 class SerializationService {
-  static getIdMapping (nodes) {
+  static getIdMapping (nodes, remapIds) {
     return nodes.reduce((map, { id }) => ({
       ...map,
-      [id]: uuid()
+      [id]: remapIds ? uuid() : id
     }), {})
   }
 
@@ -25,9 +25,72 @@ class SerializationService {
     }
   }
 
-  static deserialize (editor) {
+  static filterBySelection (figures, connections, selection) {
+    const selectionIds = selection.map(({ id }) => id)
+
+    // filter figures 
+    const filteredFigures = figures
+      .filter(({ id }) => {
+        return ~selectionIds.indexOf(id)
+      })
+      
+    // filter connections
+    const filteredConnections = connections
+      .filter(({ inputId, outputId }) => {
+        return ~selectionIds.indexOf(inputId) && ~selectionIds.indexOf(outputId)
+      })
+
+    return {
+      nodes: filteredFigures,
+      connections: filteredConnections
+    }
+  }
+
+  static serialize (editor, selection) {
+    const figures = []
+    const connections = []
+
+    // serialize figures
+    editor
+      .getFigures()
+      .each((i, figure) => {
+        figures.push({ // TODO: this should be handled by the figure itself
+          id: figure.id,
+          x: figure.x,
+          y: figure.y,
+          type: figure.constructor.name, // 'LogicGate',
+          name: uuid()
+        })
+      })
+    
+    // serialize connections
+    editor
+      .getLines()
+      .each((i, connection) => {
+        const source = connection.getSource()
+        const target = connection.getTarget()
+        const index = getPortIndex(target, 'input')
+
+        connections.push({
+          inputId: source.getParent().id,
+          outputId: target.getParent().id,
+          outputPortIndex: index
+        })
+      })
+    
+    if (selection) {
+      return SerializationService.filterBySelection(figures, connections, selection)
+    }
+
+    return {
+      nodes: figures,
+      connections
+    }
+  }
+
+  static deserialize (editor, data, remapIds = false) {
     // map the old ids to new ones to avoid conflicts
-    const idMap = SerializationService.getIdMapping(data.nodes)
+    const idMap = SerializationService.getIdMapping(data.nodes, remapIds)
     const nodes = []
 
     // deserialize nodes
@@ -46,7 +109,12 @@ class SerializationService {
 
     // connect the nodes
     data.connections.forEach(({ inputId, outputId, outputPortIndex }) => {
-      editor.addConnection(getNodeById(idMap[inputId]), getNodeById(idMap[outputId]), outputPortIndex)
+      const source = getNodeById(idMap[inputId])
+      const target = getNodeById(idMap[outputId])
+
+      if (source && target) {
+        editor.addConnection(source, target, outputPortIndex)
+      }
     })
   }
 }

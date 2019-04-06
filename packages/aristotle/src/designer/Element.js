@@ -9,6 +9,7 @@ export default class Element extends draw2d.shape.basic.Image {
     this.setId(id)
     this.name = name
     this.on('added', this.addEventListeners) // TODO: add removed event
+    this.hasToolbox = false
   }
 
   setValue = (value) => {
@@ -21,6 +22,7 @@ export default class Element extends draw2d.shape.basic.Image {
     this.setPath(path)
     this.setWidth(width)
     this.setHeight(height)
+    this.setToolboxButton()
 
     if (renderPorts) {
       this.setPorts(ports)
@@ -46,10 +48,13 @@ export default class Element extends draw2d.shape.basic.Image {
       .forEach((connection) => connection.setColor(color))
   }
 
+  isSelected = () => {
+    return this.canvas.selection.all.data.includes(this)
+  }
+
   updateSelectionColor = () => {
     if (this.canvas) {
-      const isSelected = !!~this.canvas.selection.all.data.indexOf(this)
-      const color = isSelected ? '#ff0000' : '#000'
+      const color = this.isSelected() ? '#ff0000' : '#000'
 
       this.setPath(this.getSvg(color).path)
     }
@@ -61,9 +66,38 @@ export default class Element extends draw2d.shape.basic.Image {
     })
   }
 
+  toggleToolboxVisibility = () => {
+    this.toolboxButton.setVisible(this.isSelected() && this.hasToolbox)
+  }
+
+  setToolboxButton = () => {
+    const locator = new draw2d.layout.locator.XYAbsPortLocator(this.width + 10, 0)
+    const settings = { width: 16, height: 16, visible: false }
+    
+    this.toolboxButton = new draw2d.shape.icon.Wrench(settings)
+    this.toolboxButton.on('click', this.fireToolboxEvent)
+    this.add(this.toolboxButton, locator)
+  }
+
+  fireToolboxEvent = (button) => {
+    const x = button.x + this.x
+    const y = button.y + this.y
+    const position = this.canvas.fromCanvasToDocumentCoordinate(x, y)
+
+    this.canvas.fireEvent('toolbox', {
+      settings: this.settings,
+      position
+    })
+  }
+
+  onSelectChanged = () => {
+    this.updateSelectionColor()
+    this.toggleToolboxVisibility()
+  }
+
   addEventListeners = () => {
-    this.canvas.on('deselect', this.updateSelectionColor)
-    this.canvas.on('select', this.updateSelectionColor)
+    this.canvas.on('deselect', this.onSelectChanged)
+    this.canvas.on('select', this.onSelectChanged)
     this.canvas.on('reset', this.updateSelectionColor)
   }
 }

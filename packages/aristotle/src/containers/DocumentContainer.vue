@@ -9,6 +9,12 @@
       :relayedCommand="relayedCommand"
       @updateEditor="onUpdateEditor"
     />
+    <Toolbox
+      v-if="toolboxVisible"
+      :settings="toolboxSettings"
+      @change="settingsChanged"
+      @close="closeToolbox"
+    />
   </div>
 </template>
 
@@ -16,8 +22,7 @@
 import { mapGetters, mapState } from 'vuex'
 import Editor from '@/components/Editor'
 import Toolbar from '@/components/Toolbar'
-import DocumentModel from '@/models/DocumentModel'
-import EditorModel from '@/models/EditorModel'
+import Toolbox from '@/components/Toolbox'
 import CommandModel from '@/models/CommandModel'
 import { State } from '../store'
 
@@ -25,12 +30,15 @@ export default {
   name: 'DocumentContainer',
   components: {
     Editor,
-    Toolbar
+    Toolbar,
+    Toolbox
   },
   computed: {
     ...mapGetters(['activeDocument']),
     ...mapState({
-      relayedCommand: (state) => state.documents.relayedCommand
+      relayedCommand: (state) => state.documents.relayedCommand,
+      toolboxVisible: state => state.documents.toolboxVisible,
+      toolboxSettings: state => state.documents.toolboxSettings
     })
   },
   methods: {
@@ -39,6 +47,12 @@ export default {
     },
     onUpdateEditor (editorModel) {
       this.$store.commit('SET_EDITOR_MODEL', editorModel)
+    },
+    settingsChanged (setting) {
+      console.log('setting: ', setting)
+    },
+    closeToolbox () {
+      this.$store.commit('SET_TOOLBOX_VISIBILITY', false)
     }
   }
 }
