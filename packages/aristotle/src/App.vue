@@ -22,9 +22,6 @@ export default {
       documents: (state) => state.documents.documents
     })
   },
-  mounted () {
-    // console.log('stugf: ', CircuitNode)
-  },
   methods: {
     openDocument () {
       const document = new DocumentModel()
@@ -38,13 +35,19 @@ export default {
 </script>
 
 <style lang="scss">
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
 rect.draw2d {
   &_ResizeHandle {
-    display: none;
+    // display: none;
   }
 
   &_shape_basic_Rectangle:not(:last-of-type) {
-    stroke: none;
+    // stroke: none;
   }
 }
 </style>
