@@ -68,7 +68,7 @@ export default {
       this.canvas.step()
     },
     onCanvasUpdate (canvas) {
-      const model = canvas.getEditorModel()
+      const model = canvas.getEditorModel() // should be v-model (emit `value`)
 
       this.$store.commit('SET_EDITOR_MODEL', model)
       this.$store.commit('SET_TOOLBOX_VISIBILITY', false)
@@ -82,9 +82,7 @@ export default {
   },
   mounted () {
     this.canvas = new Editor('canvas')
-    // this.draggable = new DraggableService(this.canvas)
-    // this.draggable.addElement(this.$refs.svg)
-
+    
     this.canvas.on('toolbox', this.onToolbox)
     this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
     this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))

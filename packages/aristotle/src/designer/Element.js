@@ -3,30 +3,61 @@ import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
 
 export default class Element extends draw2d.shape.basic.Image {
-  constructor (id, name) {
+  constructor (id) {
     super({ resizeable: false })
 
     this.setId(id)
-    this.name = name
-    this.on('added', this.addEventListeners) // TODO: add removed event
-    this.hasToolbox = false
+    this.on('added', this.addEventListeners) // TODO: add 'removed' event
+  }
+
+  getSetting = (key) => {
+    return this.settings[key].value
   }
 
   setValue = (value) => {
     this.node.setValue(value)
   }
 
-  render = (renderPorts = false) => {
-    const { path, width, height, ports } = this.getSvg('#000')
-
-    this.setPath(path)
-    this.setWidth(width)
-    this.setHeight(height)
-    this.setToolboxButton()
+  render = (renderPorts = true) => {
+    const { path, width, height, ports = [] } = this.getSvg('#000')
 
     if (renderPorts) {
       this.setPorts(ports)
     }
+    this.setPath(path)
+    this.setWidth(width)
+    this.setHeight(height)
+    this.repaint()
+    this.setToolboxButton()
+    this.updateSelectionColor()
+  }
+
+  setPorts = (ports) => {
+    const outputs = []
+    const inputs = []
+
+    super
+      .getConnections()
+      .data
+      .filter((connection) => connection.getSource().parent === this)
+      .forEach((connection) => {
+        const a = connection.getSource().parent
+        const b = connection.getTarget().parent
+
+        // cache the connections, since we're resetting the ports
+        if (a === this) {
+          outputs.push(b)
+        } else {
+          inputs.push(b)
+        }
+      })
+      
+    this.resetPorts()
+    this.addPorts(ports)
+
+    // re-connect the cached connections
+    outputs.forEach((output, index) => this.canvas.addConnection(this, output, index))
+    inputs.forEach((input, index) => this.canvas.addConnection(input, this, index))
   }
 
   getWireColor = (value) => {
@@ -60,21 +91,36 @@ export default class Element extends draw2d.shape.basic.Image {
     }
   }
 
-  setPorts = (ports) => {
+  updateSettings = (settings) => {
+    for (let key in settings) {
+      this.settings[key].value = settings[key]
+    }
+    
+    this.render()
+  }
+
+  addPorts = (ports) => {
     ports.forEach(({ x, y, type }) => {
       this.createPort(type, new draw2d.layout.locator.XYAbsPortLocator(x, y))
     })
   }
 
   toggleToolboxVisibility = () => {
-    this.toolboxButton.setVisible(this.isSelected() && this.hasToolbox)
+    this.toolboxButton.setVisible(this.isSelected() && Object.keys(this.settings).length)
   }
 
   setToolboxButton = () => {
+    const children = this.children.data
     const locator = new draw2d.layout.locator.XYAbsPortLocator(this.width + 10, 0)
     const settings = { width: 16, height: 16, visible: false }
-    
+
+    if (children) {
+      children.forEach((child) => this.remove(child))
+      // console.log('child: ', child.length)
+      // this.toolboxButton = child
+    }
     this.toolboxButton = new draw2d.shape.icon.Wrench(settings)
+    
     this.toolboxButton.on('click', this.fireToolboxEvent)
     this.add(this.toolboxButton, locator)
   }
