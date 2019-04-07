@@ -8,14 +8,21 @@ export default class Switch extends Element {
 
     this.node = new InputNode(id)
     this.node.on('change', this.updateWireColor)
-    this.render(true)
+    this.render()
     this.on('click', this.toggle)
+  }
+  
+  settings = {
+    name: {
+      type: 'text',
+      value: ''
+    }
   }
 
   updateWireColor = (value) => {
     this.bgColor = this.getWireColor(value)
     this.setOutputConnectionColor(this.bgColor)
-    this.render()
+    this.render(false)
   }
 
   getSvg = (color) => {

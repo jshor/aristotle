@@ -8,13 +8,20 @@ export default class Lightbulb extends Element {
 
     this.node = new OutputNode(id)
     this.node.on('change', this.updateWireColor)
-    this.render(true)
+    this.render()
+  }
+  
+  settings = {
+    name: {
+      type: 'text',
+      value: ''
+    }
   }
 
   updateWireColor = (value) => {
     this.bgColor = this.getWireColor(value)
     this.setOutputConnectionColor(this.bgColor)
-    this.render()
+    this.render(false)
   }
 
   getSvg = (color) => {

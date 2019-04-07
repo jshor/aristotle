@@ -7,14 +7,13 @@ export default class LogicGate extends Element {
     super(id, name)
 
     this.gateType = gateType
-    this.render(true)
+    this.render()
     this.node = this.getCircuitNode(id)
     this.node.on('change', this.updateWireColor)
-    this.hasToolbox = true
   }
 
   settings = {
-    ports: {
+    inputs: {
       type: 'number',
       value: 2
     }
@@ -25,7 +24,7 @@ export default class LogicGate extends Element {
   }
 
   getSvg = (color) => {
-    return renderGate('NOR', this.settings.ports.value, color)
+    return renderGate('NOR', this.settings.inputs.value, color)
   }
 
   getCircuitNode = (id) => {
