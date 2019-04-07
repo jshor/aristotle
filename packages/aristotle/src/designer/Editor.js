@@ -126,6 +126,12 @@ export default class Editor extends Canvas {
     })
   }
 
+  updateElement = (payload) => {
+    this
+      .getPrimarySelection()
+      .updateSettings(payload)
+  }
+
   applyCommand = (command) => {
     switch (command.command) {
       case 'UNDO':
@@ -147,6 +153,9 @@ export default class Editor extends Canvas {
         break
       case 'PASTE':
         this.clipboard.paste()
+        break
+      case 'UPDATE_ELEMENT':
+        this.updateElement(command.payload)
         break
     }
   }

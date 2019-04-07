@@ -55,6 +55,22 @@ function getWires (wireCount, x, svgHeight) {
   return wires
 }
 
+
+function getInputPorts (wireCount, svgHeight) {
+  const inputHeight = (wireCount - 1) * PORT_WIDTH
+  const yOffset = svgHeight / 2 - inputHeight / 2
+  const ports = []
+
+  for (let i = 0; i < wireCount; i++) {
+    const x = 0
+    const y = yOffset + i * PORT_WIDTH
+
+    ports.push({ x, y, type: 'input' })
+  }
+
+  return ports
+}
+
 function getFigureSvg (x, pathData, fill = '#fff') {
   const path = toSvg('path', {
     d: pathData,
@@ -138,8 +154,7 @@ function render (gateType, inputCount, color, bgColor) {
   const path = toDataUrl(svg)
 
   const ports = [
-    { x: 0, y: 10, type: 'input' },
-    { x: 0, y: 40, type: 'input' },
+    ...getInputPorts(inputCount, height),
     { x: width, y: height / 2, type: 'output' }
   ]
 

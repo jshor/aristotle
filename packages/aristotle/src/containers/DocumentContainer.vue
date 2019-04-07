@@ -12,7 +12,7 @@
     <Toolbox
       v-if="toolboxVisible"
       :settings="toolboxSettings"
-      @change="settingsChanged"
+      @change="toolboxChanged"
       @close="closeToolbox"
     />
   </div>
@@ -48,8 +48,8 @@ export default {
     onUpdateEditor (editorModel) {
       this.$store.commit('SET_EDITOR_MODEL', editorModel)
     },
-    settingsChanged (setting) {
-      console.log('setting: ', setting)
+    toolboxChanged (payload) {
+      this.onRelayCommand({ command: 'UPDATE_ELEMENT', payload })
     },
     closeToolbox () {
       this.$store.commit('SET_TOOLBOX_VISIBILITY', false)
