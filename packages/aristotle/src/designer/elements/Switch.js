@@ -3,8 +3,8 @@ import { InputNode, LogicValue } from '@aristotle/logic-circuit'
 import { renderIc } from '@aristotle/logic-gates'
 
 export default class Switch extends Element {
-  constructor (id, name) {
-    super(id, name)
+  constructor (id) {
+    super(id)
 
     this.node = new InputNode(id)
     this.node.on('change', this.updateWireColor)
