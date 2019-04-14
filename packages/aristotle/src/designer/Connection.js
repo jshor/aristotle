@@ -20,14 +20,19 @@ class Connection extends draw2d.Connection {
   onAdd = () => {
     const source = this.sourcePort.parent
     const target = this.targetPort.parent
+    const sourceNode = source.getCircuitNode(this)
+    const targetNode = target.getCircuitNode(this)
+    const targetIndex = getPortIndex(this.targetPort, 'input')
 
-    this.circuit.addConnection(source.node, target.node, getPortIndex(this.targetPort, 'input'))
+    this.circuit.addConnection(sourceNode, targetNode, targetIndex)
     this.canvas.step(true)
   }
 
   onRemove = () => {
-    const sourceNode = this.sourcePort.parent.node
-    const targetNode = this.targetPort.parent.node
+    const source = this.sourcePort.parent
+    const target = this.targetPort.parent
+    const sourceNode = source.getCircuitNode(this)
+    const targetNode = target.getCircuitNode(this)
 
     this.circuit.removeConnection(sourceNode, targetNode)
   }

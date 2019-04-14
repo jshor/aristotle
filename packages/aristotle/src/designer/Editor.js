@@ -41,8 +41,6 @@ export default class Editor extends Canvas {
   addConnection = (source, target, index) => {
     const connection = new Connection(this.circuit)
 
-    console.log('source, targ', source.getOutputPort(0), target.getInputPort(index))
-
     connection.setSource(source.getOutputPort(0))
     connection.setTarget(target.getInputPort(index))
 
@@ -57,7 +55,7 @@ export default class Editor extends Canvas {
    */
   onDrop = (element) => {
     const { x, y } = this.getDraggedCoordinates()
-    const node = SerializationService.getNode('LogicGate', uuid(), '')
+    const node = SerializationService.getNode(uuid(), { type: 'LogicGate', subtype: 'NOR' })
     
     this.addNode(node, x, y)
   }

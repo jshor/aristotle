@@ -1,6 +1,7 @@
 import Switch from '@/designer/elements/Switch'
 import LogicGate from '@/designer/elements/LogicGate'
 import Lightbulb from '@/designer/elements/Lightbulb'
+import IntegratedCircuit from '@/designer/elements/IntegratedCircuit'
 import uuid from '@/utils/uuid'
 import getPortIndex from '@/utils/getPortIndex'
 import draw2d from 'draw2d'
@@ -13,16 +14,18 @@ class SerializationService {
     }), {})
   }
 
-  static getNode (type, id, name) {
-    switch (type) {
+  static getNode (id, params) {
+    switch (params.type) {
+      case 'IntegratedCircuit':
+        return new IntegratedCircuit(id, params)
       case 'Switch':
-        return new Switch(id, name)
+        return new Switch(id, params)
       case 'LogicGate':
-        return new LogicGate(id, name, 'NOR') // TODO
+        return new LogicGate(id, params)
       case 'Lightbulb':
-        return new Lightbulb(id, name)
+        return new Lightbulb(id, params)
       default:
-        return new Element()
+        return new Element(id, params)
     }
   }
 
@@ -45,7 +48,6 @@ class SerializationService {
 
   static filterBySelection (figures, connections, selection) {
     const selectionIds = selection.map(({ id }) => id)
-    console.log('fig: ', figures, connections, selectionIds)
 
     // filter figures 
     const filteredFigures = figures
@@ -88,12 +90,13 @@ class SerializationService {
       .each((i, connection) => {
         const source = connection.getSource()
         const target = connection.getTarget()
-        const index = getPortIndex(target, 'input')
+        const targetIndex = getPortIndex(target, 'input')
 
         connections.push({
           inputId: source.getParent().id,
           outputId: target.getParent().id,
-          outputPortIndex: index
+          sourceIndex: 0, // TODO
+          targetIndex
         })
       })
     
@@ -120,8 +123,9 @@ class SerializationService {
     const nodes = []
 
     // deserialize nodes
-    data.nodes.forEach(({ id, name, type, x, y }) => {
-      const node = SerializationService.getNode(type, idMap[id], name)
+    data.nodes.forEach((params) => {
+      const { x, y, id } = params
+      const node = SerializationService.getNode(idMap[id], params)
 
       nodes.push(node)
       command.add(new CommandAdd(editor, node, x, y))
@@ -134,9 +138,9 @@ class SerializationService {
     }
 
     // connect the nodes
-    data.connections.forEach(({ inputId, outputId, outputPortIndex }) => {
-      const source = getNodeById(idMap[inputId]).getOutputPort(0)
-      const target = getNodeById(idMap[outputId]).getInputPort(outputPortIndex)
+    data.connections.forEach(({ inputId, outputId, sourceIndex, targetIndex }) => {
+      const source = getNodeById(idMap[inputId]).getOutputPort(sourceIndex)
+      const target = getNodeById(idMap[outputId]).getInputPort(targetIndex)
  
       // port is not yet added to the canvas, so this would ordinarily return null
       // force getCanvas() to return the editor, as it is called by CommandConnect

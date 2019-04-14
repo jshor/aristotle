@@ -4,6 +4,7 @@ import InputNode from './base/InputNode'
 import OutputNode from './base/OutputNode'
 import Nor from './gates/Nor'
 import Or from './gates/Or'
+import Buffer from './gates/Buffer'
 import LogicValue from './types/LogicValue'
 
 export {
@@ -13,5 +14,6 @@ export {
   OutputNode,
   Nor,
   Or,
+  Buffer,
   LogicValue
 }

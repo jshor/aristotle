@@ -3,12 +3,12 @@ import { Nor, Or } from '@aristotle/logic-circuit'
 import { renderGate } from '@aristotle/logic-gates'
 
 export default class LogicGate extends Element {
-  constructor (id, name, gateType) {
+  constructor (id, { subtype }) {
     super(id, name)
 
-    this.gateType = gateType
+    this.gateType = subtype
     this.render()
-    this.node = this.getCircuitNode(id)
+    this.node = this.getLogicGate(id)
     this.node.on('change', this.updateWireColor)
   }
 
@@ -27,7 +27,7 @@ export default class LogicGate extends Element {
     return renderGate('NOR', this.settings.inputs.value, color)
   }
 
-  getCircuitNode = (id) => {
+  getLogicGate = (id) => {
     switch (this.gateType) {
       case 'NOR':
         return new Nor(id)
