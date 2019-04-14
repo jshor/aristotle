@@ -3,6 +3,7 @@ import LogicGate from '@/designer/elements/LogicGate'
 import Lightbulb from '@/designer/elements/Lightbulb'
 import uuid from '@/utils/uuid'
 import getPortIndex from '@/utils/getPortIndex'
+import draw2d from 'draw2d'
 
 class SerializationService {
   static getIdMapping (nodes, remapIds) {
@@ -25,8 +26,26 @@ class SerializationService {
     }
   }
 
+  /**
+   * Connects two elements together in the Editor and its circuit instance.
+   *
+   * @param {Editor} editor
+   * @param {draw2d.Port} source - source port
+   * @param {draw2d.Port} target - target port
+   * @returns {draw2d.Connection}
+   */
+  static getConnection (editor, source, target) {
+    const connection = editor.createConnection()
+
+    connection.setSource(source)
+    connection.setTarget(target)
+
+    return connection
+  }
+
   static filterBySelection (figures, connections, selection) {
     const selectionIds = selection.map(({ id }) => id)
+    console.log('fig: ', figures, connections, selectionIds)
 
     // filter figures 
     const filteredFigures = figures
@@ -89,6 +108,13 @@ class SerializationService {
   }
 
   static deserialize (editor, data, remapIds = false) {
+    const {
+      CommandAdd,
+      CommandConnect,
+      CommandCollection
+    } = draw2d.command
+    const command = new CommandCollection()
+
     // map the old ids to new ones to avoid conflicts
     const idMap = SerializationService.getIdMapping(data.nodes, remapIds)
     const nodes = []
@@ -98,7 +124,7 @@ class SerializationService {
       const node = SerializationService.getNode(type, idMap[id], name)
 
       nodes.push(node)
-      editor.addNode(node, x, y)
+      command.add(new CommandAdd(editor, node, x, y))
     })
 
     const getNodeById = (id) => {
@@ -109,13 +135,23 @@ class SerializationService {
 
     // connect the nodes
     data.connections.forEach(({ inputId, outputId, outputPortIndex }) => {
-      const source = getNodeById(idMap[inputId])
-      const target = getNodeById(idMap[outputId])
+      const source = getNodeById(idMap[inputId]).getOutputPort(0)
+      const target = getNodeById(idMap[outputId]).getInputPort(outputPortIndex)
+ 
+      // port is not yet added to the canvas, so this would ordinarily return null
+      // force getCanvas() to return the editor, as it is called by CommandConnect
+      target.getCanvas = () => editor
 
       if (source && target) {
-        editor.addConnection(source, target, outputPortIndex)
+        const cmd = new CommandConnect(source, target)
+
+        cmd.setConnection(SerializationService.getConnection(editor, source, target))
+        command.add(cmd)
       }
     })
+
+    // execute the command to add nodes and connect them
+    editor.commandStack.execute(command)
   }
 }
 
