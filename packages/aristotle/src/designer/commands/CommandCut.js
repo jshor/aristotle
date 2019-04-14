@@ -5,7 +5,7 @@ class CommandCut extends draw2d.command.Command {
   constructor (canvas) {
     super()
     this.clipboard = canvas.clipboard
-    this.data = null
+    this.state = null
   }
 
   canExecute = () => {
@@ -13,16 +13,18 @@ class CommandCut extends draw2d.command.Command {
   }
 
   execute = () => {
-    this.data = this.clipboard.getSerializedSelection()
+    this.state = this.clipboard.getCurrentState()
     this.clipboard.deleteSelection()
   }
 
   undo = () => {
-    this.clipboard.setDeserializedSelection(this.data)
+    this.clipboard.setCurrentState(this.state)
+    this.state = this.clipboard.getCurrentState()
   }
 
   redo = () => {
-    this.execute()
+    this.clipboard.setCurrentState(this.state)
+    this.state = this.clipboard.getCurrentState()
   }
 }
 

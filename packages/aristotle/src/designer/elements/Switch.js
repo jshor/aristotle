@@ -13,10 +13,10 @@ export default class Switch extends Element {
   }
   
   settings = {
-    name: {
-      type: 'text',
-      value: ''
-    }
+    // name: {
+    //   type: 'text',
+    //   value: ''
+    // }
   }
 
   updateWireColor = (value) => {

@@ -41,6 +41,8 @@ export default class Editor extends Canvas {
   addConnection = (source, target, index) => {
     const connection = new Connection(this.circuit)
 
+    console.log('source, targ', source.getOutputPort(0), target.getInputPort(index))
+
     connection.setSource(source.getOutputPort(0))
     connection.setTarget(target.getInputPort(index))
 
