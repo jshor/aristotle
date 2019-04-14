@@ -4,56 +4,15 @@ import { LogicValue } from '@aristotle/logic-circuit'
 import getPortIndex from '@/utils/getPortIndex'
 import SerializationService from '../services/SerializationService';
 
-class CommandUpdateSettings extends draw2d.command.Command {
-  constructor (element, settings) {
-    super()
-
-    this.element = element
-    this.oldSettings = this.getSettings()
-    this.newSettings = settings
-  }
-
-  canExecute = () => {
-    return true
-  }
-
-  execute = () => {
-    this.redo()
-  }
-
-  undo = () => {
-    this.setSettings(this.oldSettings)
-  }
-
-  redo = () => {
-    this.setSettings(this.newSettings)
-  }
-
-  getSettings = () => {
-    const settings = {}
-
-    for (let key in this.element.settings) {
-      settings[key] = this.element.settings[key].value
-    }
-
-    return settings
-  }
-
-  setSettings = (settings) => {
-    for (let key in settings) {
-      this.element.settings[key].value = settings[key]
-    }
-    this.element.render()
-  }
-}
-
 export default class Element extends draw2d.shape.basic.Image {
   constructor (id) {
     super({ resizeable: false })
 
-    this.setId(id)
+    if (id) this.setId(id)
     this.on('added', this.addEventListeners) // TODO: add 'removed' event
   }
+
+  settings = {}
 
   getSetting = (key) => {
     return this.settings[key].value
@@ -61,6 +20,10 @@ export default class Element extends draw2d.shape.basic.Image {
 
   setValue = (value) => {
     this.node.setValue(value)
+  }
+
+  getCircuitNode = () => {
+    return this.node
   }
 
   render = (renderPorts = true) => {
@@ -163,8 +126,9 @@ export default class Element extends draw2d.shape.basic.Image {
   }
 
   addPorts = (ports) => {
-    ports.forEach(({ x, y, type }) => {
-      this.createPort(type, new draw2d.layout.locator.XYAbsPortLocator(x, y))
+    ports.forEach(({ x, y, type, id }) => {
+      const port = this.createPort(type, new draw2d.layout.locator.XYAbsPortLocator(x, y))
+      port.setId(id)
     })
   }
 

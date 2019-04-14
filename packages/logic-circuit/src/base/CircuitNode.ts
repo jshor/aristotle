@@ -18,11 +18,18 @@ class CircuitNode {
   public outputs: Array<Connection> = []
 
   /**
-   * Flag for if the value of the node has changed since last circuit evaluation.
+   * Set to true if the value of the node has changed since last circuit evaluation.
    *
    * @type {Boolean}
    */
   public isValueChanged: boolean = false
+
+  /**
+   * Set to true to have the debugger continue regardless of whether this node changed or not.
+   *
+   * @type {Boolean}
+   */
+  public forceContinue: boolean = false
 
   /**
    * Name of the node.
@@ -59,9 +66,11 @@ class CircuitNode {
    * Constructor.
    *
    * @param {String} name - name of the node
+   * @param {Number} [inputCount = 2] - number of inputs the node has
    */
-  constructor (name: string) {
+  constructor (name: string, inputCount: number = 2) {
     this.name = name
+    this.inputValues = new Array(inputCount).fill(LogicValue.UNKNOWN)
   }
 
   /**

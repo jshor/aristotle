@@ -143,6 +143,7 @@ export default class Circuit {
    */
   public next (): void {
     let isValueChanged = false
+    let forceContinue = false
 
     this.queue.forEach((node) => {
       this.enqueue(...node.propagate())
@@ -152,10 +153,14 @@ export default class Circuit {
         isValueChanged = true
         node.isValueChanged = false
       }
+
+      if (node.forceContinue) {
+        forceContinue = true
+      }
     })
 
-    if (!this.isComplete() && !isValueChanged) {
-      // if the queue is not finished but no value in the circuit has changed, step again
+    if (!this.isComplete() && (!isValueChanged || forceContinue)) {
+      // queue is not finished but the node determined we should step again
       return this.next()
     }
   }

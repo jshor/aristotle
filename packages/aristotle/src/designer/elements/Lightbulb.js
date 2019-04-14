@@ -3,8 +3,8 @@ import { OutputNode } from '@aristotle/logic-circuit'
 import { renderIc } from '@aristotle/logic-gates'
 
 export default class Lightbulb extends Element {
-  constructor (id, name) {
-    super(id, name)
+  constructor (id) {
+    super(id)
 
     this.node = new OutputNode(id)
     this.node.on('change', this.updateWireColor)
