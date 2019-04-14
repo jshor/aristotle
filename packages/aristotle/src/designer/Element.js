@@ -1,6 +1,51 @@
 
 import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
+import getPortIndex from '@/utils/getPortIndex'
+import SerializationService from '../services/SerializationService';
+
+class CommandUpdateSettings extends draw2d.command.Command {
+  constructor (element, settings) {
+    super()
+
+    this.element = element
+    this.oldSettings = this.getSettings()
+    this.newSettings = settings
+  }
+
+  canExecute = () => {
+    return true
+  }
+
+  execute = () => {
+    this.redo()
+  }
+
+  undo = () => {
+    this.setSettings(this.oldSettings)
+  }
+
+  redo = () => {
+    this.setSettings(this.newSettings)
+  }
+
+  getSettings = () => {
+    const settings = {}
+
+    for (let key in this.element.settings) {
+      settings[key] = this.element.settings[key].value
+    }
+
+    return settings
+  }
+
+  setSettings = (settings) => {
+    for (let key in settings) {
+      this.element.settings[key].value = settings[key]
+    }
+    this.element.render()
+  }
+}
 
 export default class Element extends draw2d.shape.basic.Image {
   constructor (id) {
@@ -28,36 +73,49 @@ export default class Element extends draw2d.shape.basic.Image {
     this.setWidth(width)
     this.setHeight(height)
     this.repaint()
-    this.setToolboxButton()
+    this.createToolboxButton()
     this.updateSelectionColor()
   }
 
-  setPorts = (ports) => {
-    const outputs = []
+  setPorts = (ports) => { // this should be an override method ONLY in LogicGate
     const inputs = []
+    const outputs = []
 
-    super
+    const connections = super
       .getConnections()
       .data
-      .filter((connection) => connection.getSource().parent === this)
-      .forEach((connection) => {
+      .filter((connection) => {
         const a = connection.getSource().parent
         const b = connection.getTarget().parent
 
-        // cache the connections, since we're resetting the ports
         if (a === this) {
-          outputs.push(b)
-        } else {
-          inputs.push(b)
+          outputs.push({
+            node: b,
+            index: getPortIndex(connection.getTarget(), 'input')
+          })
+        } else if (b === this) {
+          inputs.push({
+            node: a,
+            index: getPortIndex(connection.getSource(), 'output')
+          })
         }
+        
+        return a === this || b === this
       })
+
+    connections.forEach((c) => this.canvas.remove(c))
       
     this.resetPorts()
     this.addPorts(ports)
 
+    inputs.forEach(({ node }, index) => this.canvas.addConnection(node, this, index))
+    outputs.forEach(({ node, index }) => this.canvas.addConnection(this, node, index))
+
     // re-connect the cached connections
-    outputs.forEach((output, index) => this.canvas.addConnection(this, output, index))
-    inputs.forEach((input, index) => this.canvas.addConnection(input, this, index))
+    // setTimeout(() => {
+    //   outputs.forEach(({ node, index }) => this.canvas.addConnection(this, node, index))
+    // }, 2000)
+    // inputs.forEach((input, index) => this.canvas.addConnection(input, this, 0))
   }
 
   getWireColor = (value) => {
@@ -80,7 +138,13 @@ export default class Element extends draw2d.shape.basic.Image {
   }
 
   isSelected = () => {
-    return this.canvas.selection.all.data.includes(this)
+    if (!this.canvas) return false
+    const { selection } = this.canvas
+
+    if (selection) {
+      return selection.all.data.includes(this)
+    }
+    return false
   }
 
   updateSelectionColor = () => {
@@ -92,11 +156,10 @@ export default class Element extends draw2d.shape.basic.Image {
   }
 
   updateSettings = (settings) => {
-    for (let key in settings) {
-      this.settings[key].value = settings[key]
-    }
-    
-    this.render()
+    const cmd = new CommandUpdateSettings(this, settings)
+
+    this.canvas.commandStack.execute(cmd)
+    this.fireToolboxEvent(this.toolboxButton) // keep toolbox open
   }
 
   addPorts = (ports) => {
@@ -105,22 +168,23 @@ export default class Element extends draw2d.shape.basic.Image {
     })
   }
 
-  toggleToolboxVisibility = () => {
-    this.toolboxButton.setVisible(this.isSelected() && Object.keys(this.settings).length)
+  hasSettings = () => {
+    return Object.keys(this.settings).length
   }
 
-  setToolboxButton = () => {
-    const children = this.children.data
+  toggleToolboxVisibility = () => {
+    if (this.toolboxButton) {
+      this.toolboxButton.setVisible(this.isSelected())
+    }
+  }
+
+  createToolboxButton = () => {
+    if (this.toolboxButton || !this.hasSettings()) return
+
     const locator = new draw2d.layout.locator.XYAbsPortLocator(this.width + 10, 0)
     const settings = { width: 16, height: 16, visible: false }
 
-    if (children) {
-      children.forEach((child) => this.remove(child))
-      // console.log('child: ', child.length)
-      // this.toolboxButton = child
-    }
     this.toolboxButton = new draw2d.shape.icon.Wrench(settings)
-    
     this.toolboxButton.on('click', this.fireToolboxEvent)
     this.add(this.toolboxButton, locator)
   }
