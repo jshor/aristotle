@@ -1,4 +1,5 @@
 import draw2d from 'draw2d'
+import BezierConnectionRouter from './layout/BezierConnectionRouter'
 import getPortIndex from '../utils/getPortIndex'
 
 class Connection extends draw2d.Connection {
@@ -9,7 +10,7 @@ class Connection extends draw2d.Connection {
       color: '#808080',
       glow: true,
       stroke: 1,
-      router: new draw2d.layout.connection.CircuitConnectionRouter()
+      router: new BezierConnectionRouter()
     })
 
     this.circuit = circuit
