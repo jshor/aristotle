@@ -5,9 +5,7 @@ import Connection from './Connection'
 import EditorModel from '@/models/EditorModel'
 import ClipboardService from '@/services/ClipboardService'
 import SerializationService from '@/services/SerializationService'
-import CommandCut from './commands/CommandCut'
 import uuid from '@/utils/uuid'
-import Element from './Element'
 
 export default class Editor extends Canvas {
   constructor (elementId) {
@@ -50,13 +48,13 @@ export default class Editor extends Canvas {
 
   /**
    * Handles a toolbox drop event.
-   * 
+   *
    * @param {HTMLElement} element
    */
   onDrop = (element) => {
     const { x, y } = this.getDraggedCoordinates()
     const node = SerializationService.getNode(uuid(), { type: 'LogicGate', subtype: 'NOR' })
-    
+
     this.addNode(node, x, y)
   }
 
@@ -135,11 +133,9 @@ export default class Editor extends Canvas {
   applyCommand = (command) => {
     switch (command.command) {
       case 'UNDO':
-        console.log('will undo')
         try {
           this.commandStack.undo()
         } catch (e) {
-          console.log('e1: ', e)
           this.commandStack.redo()
           this.commandStack.undostack = []
           this.fireEvent('commandStackChanged')
@@ -149,21 +145,13 @@ export default class Editor extends Canvas {
         try {
           this.commandStack.redo()
         } catch (e) {
-          console.log('e: ', e)
           this.commandStack.undo()
           this.commandStack.redostack = []
           this.fireEvent('commandStackChanged')
         }
         break
       case 'CUT':
-        // this
-        //   .getFigures()
-        //   .each((i, figure) => {
-        //     const cmd = new draw2d.command.CommandDelete(figure)
-        //     this.commandStack.execute(cmd)
-        //   })
-        const cmd = new CommandCut(this)
-        this.commandStack.execute(cmd)
+        console.log('not implemented')
         break
       case 'PASTE':
         this.clipboard.paste()

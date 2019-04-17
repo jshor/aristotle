@@ -1,8 +1,6 @@
 
 import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
-import getPortIndex from '@/utils/getPortIndex'
-import SerializationService from '../services/SerializationService'
 import CommandSetInputCount from './commands/CommandSetInputCount'
 
 export default class Element extends draw2d.shape.basic.Image {
@@ -40,7 +38,7 @@ export default class Element extends draw2d.shape.basic.Image {
     this.createToolboxButton()
     this.updateSelectionColor()
   }
-  
+
   getWireColor = (value) => {
     switch (value) {
       case LogicValue.TRUE:

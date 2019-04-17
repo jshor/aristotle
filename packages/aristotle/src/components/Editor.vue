@@ -48,12 +48,11 @@ export default {
   },
   watch: {
     data (value) {
-      console.log('this: ', value)
     },
     relayedCommand: {
       deep: true,
       handler (command) {
-          this.canvas.applyCommand(command)
+        this.canvas.applyCommand(command)
       }
     }
   },
@@ -82,14 +81,13 @@ export default {
   },
   mounted () {
     this.canvas = new Editor('canvas')
-    
+
     this.canvas.on('toolbox', this.onToolbox)
     this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
     this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
     this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))
 
     SerializationService.deserialize(this.canvas, data)
-
   }
 }
 </script>
