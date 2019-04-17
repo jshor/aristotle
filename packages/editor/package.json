@@ -1,0 +1,17 @@
+{
+  "name": "@aristotle/editor",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "rollup -w",
+    "build": "rollup --config"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@aristotle/logic-circuit": "1.0.0",
+    "@aristotle/logic-gates": "1.0.0"
+  },
+  "devDependencies": {
+    "rollup": "^1.1.0"
+  }
+}

@@ -1,6 +1,6 @@
-import Element from '@/designer/Element'
 import { Nor, Or } from '@aristotle/logic-circuit'
 import { renderGate } from '@aristotle/logic-gates'
+import Element from '../Element'
 
 export default class LogicGate extends Element {
   constructor (id, { subtype }) {
