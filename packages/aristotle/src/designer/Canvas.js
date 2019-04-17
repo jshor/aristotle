@@ -96,7 +96,7 @@ export default class Canvas extends draw2d.Canvas {
 
   /**
    * Sets the actively-dragged toolbox element dimensions to match the current zoom level.
-   * 
+   *
    * @param {HTMLElememt} elememt
    */
   onDragEnter = (element) => {
@@ -110,7 +110,7 @@ export default class Canvas extends draw2d.Canvas {
 
   /**
    * Returns the document coordinates of the active-dragged toolbox element.
-   * 
+   *
    * @returns {Object} x, y coordinates
    */
   getDraggedCoordinates = () => {

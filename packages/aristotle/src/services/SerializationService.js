@@ -49,12 +49,12 @@ class SerializationService {
   static filterBySelection (figures, connections, selection) {
     const selectionIds = selection.map(({ id }) => id)
 
-    // filter figures 
+    // filter figures
     const filteredFigures = figures
       .filter(({ id }) => {
         return ~selectionIds.indexOf(id)
       })
-      
+
     // filter connections
     const filteredConnections = connections
       .filter(({ inputId, outputId }) => {
@@ -83,7 +83,7 @@ class SerializationService {
           name: uuid()
         })
       })
-    
+
     // serialize connections
     editor
       .getLines()
@@ -99,7 +99,7 @@ class SerializationService {
           targetIndex
         })
       })
-    
+
     if (selection) {
       return SerializationService.filterBySelection(figures, connections, selection)
     }
@@ -141,7 +141,7 @@ class SerializationService {
     data.connections.forEach(({ inputId, outputId, sourceIndex, targetIndex }) => {
       const source = getNodeById(idMap[inputId]).getOutputPort(sourceIndex)
       const target = getNodeById(idMap[outputId]).getInputPort(targetIndex)
- 
+
       // port is not yet added to the canvas, so this would ordinarily return null
       // force getCanvas() to return the editor, as it is called by CommandConnect
       target.getCanvas = () => editor

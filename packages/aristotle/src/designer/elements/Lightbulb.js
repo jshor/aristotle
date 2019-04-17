@@ -10,7 +10,7 @@ export default class Lightbulb extends Element {
     this.node.on('change', this.updateWireColor)
     this.render()
   }
-  
+
   settings = {
     name: {
       type: 'text',
@@ -26,9 +26,12 @@ export default class Lightbulb extends Element {
 
   getSvg = (color) => {
     const svg = {
-      right: [], left: [
+      right: [],
+      left: [
         { label: '*', type: 'input' }
-      ], top: [], bottom: []
+      ],
+      top: [],
+      bottom: []
     }
 
     return renderIc(svg, color, this.bgColor)

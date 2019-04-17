@@ -5,14 +5,14 @@ import getPortIndex from '@/utils/getPortIndex'
 
 class IntegratedCircuit extends Element {
   constructor (id, { ports, nodes, connections }) {
-    super (id)
-    
+    super(id)
+
     this.portDefinitions = ports
     this.connections = connections
     this.nodes = nodes.map(this.getInitializedNode)
     this.inputIds = this.getNodeListByType(nodes, 'input')
     this.outputIds = this.getNodeListByType(nodes, 'output')
-    
+
     this.on('added', this.buildCircuit)
     this.render()
   }
@@ -33,7 +33,7 @@ class IntegratedCircuit extends Element {
       .filter((node) => node.name === nodeId)
       .pop()
   }
-  
+
   getCircuitNode = (connection) => {
     const nodeId = this.getCircuitNodeId(connection)
 

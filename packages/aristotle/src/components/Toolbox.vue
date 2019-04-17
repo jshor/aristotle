@@ -59,7 +59,6 @@ export default {
   },
   methods: {
     change (key) {
-      // console.log('values: ', this)
       this.$emit('change', { [key]: this.values[key] })
     },
     close () {

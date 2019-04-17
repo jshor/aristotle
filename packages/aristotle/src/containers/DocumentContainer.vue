@@ -24,7 +24,6 @@ import Editor from '@/components/Editor'
 import Toolbar from '@/components/Toolbar'
 import Toolbox from '@/components/Toolbox'
 import CommandModel from '@/models/CommandModel'
-import { State } from '../store'
 
 export default {
   name: 'DocumentContainer',

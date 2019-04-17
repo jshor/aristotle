@@ -7,14 +7,11 @@ class ClipboardService {
     this.clipboardData = null
   }
 
-  
   getCurrentState = () => {
     return JSON.stringify(SerializationService.serialize(this.canvas))
   }
 
   setCurrentState = (data) => {
-    console.log('data: ', data)
-    // this.canvas.clear()
     this.deleteAll()
     SerializationService.deserialize(this.canvas, JSON.parse(data))
   }
@@ -30,35 +27,35 @@ class ClipboardService {
           selection.push(figure)
         }
       })
-    
+
     return selection
   }
 
   deleteAll = () => {
-    this.canvas.lines.clone().each((i,e) => {
-      this.canvas.remove(e);
-    });
-    
-     this.canvas.figures.clone().each((i,e) => {
-        this.canvas.remove(e);
-    });
-    
-    this.canvas.selection.clear();
-    this.canvas.currentDropTarget = null;
+    this.canvas.lines.clone().each((i, e) => {
+      this.canvas.remove(e)
+    })
+
+    this.canvas.figures.clone().each((i, e) => {
+      this.canvas.remove(e)
+    })
+
+    this.canvas.selection.clear()
+    this.canvas.currentDropTarget = null
 
     // internal document with all figures, ports, ....
     //
-    this.canvas.figures = new draw2d.util.ArrayList();
-    this.canvas.lines = new draw2d.util.ArrayList();
-    this.canvas.commonPorts = new draw2d.util.ArrayList();
-    this.canvas.dropTargets = new draw2d.util.ArrayList();
-   
+    this.canvas.figures = new draw2d.util.ArrayList()
+    this.canvas.lines = new draw2d.util.ArrayList()
+    this.canvas.commonPorts = new draw2d.util.ArrayList()
+    this.canvas.dropTargets = new draw2d.util.ArrayList()
+
     // this.commandStack.markSaveLocation();
-    
+
     // INTERSECTION/CROSSING handling for connections and lines
     //
-    this.canvas.linesToRepaintAfterDragDrop =  new draw2d.util.ArrayList();
-    this.canvas.lineIntersections = new draw2d.util.ArrayList();
+    this.canvas.linesToRepaintAfterDragDrop = new draw2d.util.ArrayList()
+    this.canvas.lineIntersections = new draw2d.util.ArrayList()
   }
 
   deleteOne = (figure) => {
