@@ -10,7 +10,7 @@
 import { mapState } from 'vuex'
 import DocumentContainer from '@/containers/DocumentContainer'
 import DocumentModel from '@/models/DocumentModel'
-import data from '@/services/data2.json'
+import data from '@/mocks/document.json'
 
 export default {
   name: 'App',

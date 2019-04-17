@@ -23,7 +23,7 @@ import { mapGetters, mapState } from 'vuex'
 import Editor from '@/components/Editor'
 import Toolbar from '@/components/Toolbar'
 import Toolbox from '@/components/Toolbox'
-import CommandModel from '@/models/CommandModel'
+import { CommandModel } from '@aristotle/editor'
 
 export default {
   name: 'DocumentContainer',

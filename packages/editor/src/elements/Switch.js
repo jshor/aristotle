@@ -1,6 +1,6 @@
-import Element from '@/designer/Element'
 import { InputNode, LogicValue } from '@aristotle/logic-circuit'
 import { renderIc } from '@aristotle/logic-gates'
+import Element from '../Element'
 
 export default class Switch extends Element {
   constructor (id) {

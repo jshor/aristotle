@@ -2,10 +2,10 @@ import draw2d from 'draw2d'
 import Canvas from './Canvas'
 import { Circuit } from '@aristotle/logic-circuit'
 import Connection from './Connection'
-import EditorModel from '@/models/EditorModel'
-import ClipboardService from '@/services/ClipboardService'
-import SerializationService from '@/services/SerializationService'
-import uuid from '@/utils/uuid'
+import EditorModel from './models/EditorModel'
+import ClipboardService from './services/ClipboardService'
+import SerializationService from './services/SerializationService'
+import uuid from './utils/uuid'
 
 export default class Editor extends Canvas {
   constructor (elementId) {
@@ -128,6 +128,10 @@ export default class Editor extends Canvas {
     this
       .getPrimarySelection()
       .updateSettings(payload)
+  }
+
+  load = (data) => {
+    SerializationService.deserialize(this, data)
   }
 
   applyCommand = (command) => {
