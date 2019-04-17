@@ -2,7 +2,8 @@
 import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
 import getPortIndex from '@/utils/getPortIndex'
-import SerializationService from '../services/SerializationService';
+import SerializationService from '../services/SerializationService'
+import CommandSetInputCount from './commands/CommandSetInputCount'
 
 export default class Element extends draw2d.shape.basic.Image {
   constructor (id) {
@@ -30,7 +31,7 @@ export default class Element extends draw2d.shape.basic.Image {
     const { path, width, height, ports = [] } = this.getSvg('#000')
 
     if (renderPorts) {
-      this.setPorts(ports)
+      this.addPorts(ports)
     }
     this.setPath(path)
     this.setWidth(width)
@@ -39,48 +40,7 @@ export default class Element extends draw2d.shape.basic.Image {
     this.createToolboxButton()
     this.updateSelectionColor()
   }
-
-  setPorts = (ports) => { // this should be an override method ONLY in LogicGate
-    const inputs = []
-    const outputs = []
-
-    const connections = super
-      .getConnections()
-      .data
-      .filter((connection) => {
-        const a = connection.getSource().parent
-        const b = connection.getTarget().parent
-
-        if (a === this) {
-          outputs.push({
-            node: b,
-            index: getPortIndex(connection.getTarget(), 'input')
-          })
-        } else if (b === this) {
-          inputs.push({
-            node: a,
-            index: getPortIndex(connection.getSource(), 'output')
-          })
-        }
-        
-        return a === this || b === this
-      })
-
-    connections.forEach((c) => this.canvas.remove(c))
-      
-    this.resetPorts()
-    this.addPorts(ports)
-
-    inputs.forEach(({ node }, index) => this.canvas.addConnection(node, this, index))
-    outputs.forEach(({ node, index }) => this.canvas.addConnection(this, node, index))
-
-    // re-connect the cached connections
-    // setTimeout(() => {
-    //   outputs.forEach(({ node, index }) => this.canvas.addConnection(this, node, index))
-    // }, 2000)
-    // inputs.forEach((input, index) => this.canvas.addConnection(input, this, 0))
-  }
-
+  
   getWireColor = (value) => {
     switch (value) {
       case LogicValue.TRUE:
@@ -119,9 +79,10 @@ export default class Element extends draw2d.shape.basic.Image {
   }
 
   updateSettings = (settings) => {
-    const cmd = new CommandUpdateSettings(this, settings)
+    this.canvas.commandStack.execute(new CommandSetInputCount(this, settings.inputs))
+    // const cmd = new CommandUpdateSettings(this, settings)
 
-    this.canvas.commandStack.execute(cmd)
+    // this.canvas.commandStack.execute(cmd)
     this.fireToolboxEvent(this.toolboxButton) // keep toolbox open
   }
 
