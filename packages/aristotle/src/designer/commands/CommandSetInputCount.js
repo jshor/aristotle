@@ -3,7 +3,7 @@ import draw2d from 'draw2d'
 class CommandSetInputCount extends draw2d.command.CommandCollection {
   constructor (figure, newPortCount) {
     super()
-    
+
     this.oldPortCount = figure.settings.inputs.value
     this.newPortCount = newPortCount
     this.figure = figure
@@ -12,7 +12,7 @@ class CommandSetInputCount extends draw2d.command.CommandCollection {
     this.ports = figure.getPorts()
   }
 
-  canExecute = () => { 
+  canExecute = () => {
     return true
   }
 
@@ -72,13 +72,9 @@ class CommandSetInputCount extends draw2d.command.CommandCollection {
   }
 
   reconnect = (count) => {
-    try {
-      this.reconnectInputs()
-      this.reconnectOutputs()
-      this.figure.repaint()
-    } catch (e) {
-      console.log('bad thing happened ', e)
-    }
+    this.reconnectInputs()
+    this.reconnectOutputs()
+    this.figure.repaint()
   }
 
   reconnectInputs = () => {

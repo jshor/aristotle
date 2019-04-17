@@ -11,7 +11,7 @@ export default class Switch extends Element {
     this.render()
     this.on('click', this.toggle)
   }
-  
+
   settings = {
     // name: {
     //   type: 'text',
@@ -27,9 +27,12 @@ export default class Switch extends Element {
 
   getSvg = (color) => {
     const svg = {
-      left: [], right: [
+      left: [],
+      right: [
         { label: '*', type: 'output' }
-      ], top: [], bottom: []
+      ],
+      top: [],
+      bottom: []
     }
 
     return renderIc(svg, color, this.bgColor)
