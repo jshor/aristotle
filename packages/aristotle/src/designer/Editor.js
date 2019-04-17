@@ -136,10 +136,24 @@ export default class Editor extends Canvas {
     switch (command.command) {
       case 'UNDO':
         console.log('will undo')
-        this.commandStack.undo()
+        try {
+          this.commandStack.undo()
+        } catch (e) {
+          console.log('e1: ', e)
+          this.commandStack.redo()
+          this.commandStack.undostack = []
+          this.fireEvent('commandStackChanged')
+        }
         break
       case 'REDO':
-        this.commandStack.redo()
+        try {
+          this.commandStack.redo()
+        } catch (e) {
+          console.log('e: ', e)
+          this.commandStack.undo()
+          this.commandStack.redostack = []
+          this.fireEvent('commandStackChanged')
+        }
         break
       case 'CUT':
         // this

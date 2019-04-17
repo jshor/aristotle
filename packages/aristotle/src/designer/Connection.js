@@ -7,12 +7,12 @@ class Connection extends draw2d.Connection {
       outlineColor: '#000000',
       outlineStroke: 1,
       color: '#808080',
-      glow: false,
+      glow: true,
+      stroke: 1,
       router: new draw2d.layout.connection.CircuitConnectionRouter()
     })
 
     this.circuit = circuit
-
     this.on('added', this.onAdd)
     this.on('removed', this.onRemove)
   }
