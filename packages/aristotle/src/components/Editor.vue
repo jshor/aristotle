@@ -24,7 +24,7 @@ import Editor from '@/designer/Editor'
 import CommandModel from '@/models/CommandModel'
 import SerializationService from '@/services/SerializationService'
 import { renderGate } from '@aristotle/logic-gates'
-import data from '@/services/data2.json'
+import data from '@/services/data.json'
 
 export default {
   name: 'Editor',
