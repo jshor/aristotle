@@ -1,9 +1,9 @@
-import uuid from '@/utils/uuid'
-import EditorModel from './EditorModel'
+// import uuid from '@/utils/uuid'
+import { EditorModel } from '@aristotle/editor'
 
 class DocumentModel {
   constructor () {
-    this.id = uuid()
+    this.id = 'random-id' // uuid()
     this.editorModel = new EditorModel({})
   }
 }

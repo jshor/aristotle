@@ -1,6 +1,6 @@
-import Element from '@/designer/Element'
 import { OutputNode } from '@aristotle/logic-circuit'
 import { renderIc } from '@aristotle/logic-gates'
+import Element from '../Element'
 
 export default class Lightbulb extends Element {
   constructor (id) {

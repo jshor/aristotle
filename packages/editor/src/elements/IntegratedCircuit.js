@@ -1,7 +1,7 @@
 import Element from '../Element'
 import { Buffer, Nor } from '@aristotle/logic-circuit'
 import { renderIc } from '@aristotle/logic-gates'
-import getPortIndex from '@/utils/getPortIndex'
+import getPortIndex from '../utils/getPortIndex'
 
 class IntegratedCircuit extends Element {
   constructor (id, { ports, nodes, connections }) {

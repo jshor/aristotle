@@ -1,6 +1,6 @@
 import draw2d from 'draw2d'
 import BezierConnectionRouter from './layout/BezierConnectionRouter'
-import getPortIndex from '../utils/getPortIndex'
+import getPortIndex from './utils/getPortIndex'
 
 class Connection extends draw2d.Connection {
   constructor (circuit) {

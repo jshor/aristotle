@@ -1,10 +1,10 @@
-import Switch from '@/designer/elements/Switch'
-import LogicGate from '@/designer/elements/LogicGate'
-import Lightbulb from '@/designer/elements/Lightbulb'
-import IntegratedCircuit from '@/designer/elements/IntegratedCircuit'
-import uuid from '@/utils/uuid'
-import getPortIndex from '@/utils/getPortIndex'
 import draw2d from 'draw2d'
+import Switch from '../elements/Switch'
+import LogicGate from '../elements/LogicGate'
+import Lightbulb from '../elements/Lightbulb'
+import IntegratedCircuit from '../elements/IntegratedCircuit'
+import uuid from '../utils/uuid'
+import getPortIndex from '../utils/getPortIndex'
 
 class SerializationService {
   static getIdMapping (nodes, remapIds) {

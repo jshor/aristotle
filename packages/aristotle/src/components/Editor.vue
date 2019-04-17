@@ -20,11 +20,9 @@
 </template>
 
 <script>
-import Editor from '@/designer/Editor'
-import CommandModel from '@/models/CommandModel'
-import SerializationService from '@/services/SerializationService'
+import { Editor, CommandModel } from '@aristotle/editor'
 import { renderGate } from '@aristotle/logic-gates'
-import data from '@/services/data.json'
+import document from '@/mocks/document.json'
 
 export default {
   name: 'Editor',
@@ -86,8 +84,7 @@ export default {
     this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
     this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
     this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))
-
-    SerializationService.deserialize(this.canvas, data)
+    this.canvas.load(document)
   }
 }
 </script>
