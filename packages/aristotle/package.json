@@ -12,6 +12,7 @@
     "@aristotle/editor": "1.0.0",
     "@aristotle/logic-circuit": "1.0.0",
     "@aristotle/logic-gates": "1.0.0",
+    "@fortawesome/fontawesome-free": "^5.8.1",
     "clipboard": "^2.0.4",
     "draw2d": "^1.0.18",
     "jquery": "^3.3.1",
