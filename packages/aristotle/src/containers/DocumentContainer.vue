@@ -101,6 +101,7 @@ export default {
 }
 
 #canvasWrapper svg {
+  background-color: #1D1E25;
   position: relative !important;
 }
 </style>
