@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/services/ClipboardService.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="..\..\prettify.css" />
+    <link rel="stylesheet" href="..\..\base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(..\..\sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="..\..\index.html">All files</a> / <a href="index.html">src/services</a> ClipboardService.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">6.06% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>2/33</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/2</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">7.69% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>1/13</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">6.06% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>2/33</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import SerializationService from './SerializationService'
+import draw2d from 'draw2d'
+&nbsp;
+class ClipboardService {
+  constructor (canvas) {
+    this.canvas = canvas
+    this.clipboardData = null
+  }
+&nbsp;
+  getCurrentState = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    return JSON.stringify(SerializationService.serialize(this.canvas))</span>
+  }
+&nbsp;
+  setCurrentState = <span class="fstat-no" title="function not covered" >(d</span>ata) =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.deleteAll()</span>
+<span class="cstat-no" title="statement not covered" >    SerializationService.deserialize(this.canvas, JSON.parse(data))</span>
+  }
+&nbsp;
+  getSelectedFigures = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+    const selection = <span class="cstat-no" title="statement not covered" >[]</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this</span>
+      .canvas
+      .getFigures()
+      .each(<span class="fstat-no" title="function not covered" >(i</span>, figure) =&gt; {
+<span class="cstat-no" title="statement not covered" >        if (figure.isSelected()) {</span>
+<span class="cstat-no" title="statement not covered" >          selection.push(figure)</span>
+        }
+      })
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return selection</span>
+  }
+&nbsp;
+  deleteAll = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.canvas.lines.clone().each(<span class="fstat-no" title="function not covered" >(i</span>, e) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >      this.canvas.remove(e)</span>
+    })
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.canvas.figures.clone().each(<span class="fstat-no" title="function not covered" >(i</span>, e) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >      this.canvas.remove(e)</span>
+    })
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.canvas.selection.clear()</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.currentDropTarget = null</span>
+&nbsp;
+    // internal document with all figures, ports, ....
+    //
+<span class="cstat-no" title="statement not covered" >    this.canvas.figures = new draw2d.util.ArrayList()</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.lines = new draw2d.util.ArrayList()</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.commonPorts = new draw2d.util.ArrayList()</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.dropTargets = new draw2d.util.ArrayList()</span>
+&nbsp;
+    // this.commandStack.markSaveLocation();
+&nbsp;
+    // INTERSECTION/CROSSING handling for connections and lines
+    //
+<span class="cstat-no" title="statement not covered" >    this.canvas.linesToRepaintAfterDragDrop = new draw2d.util.ArrayList()</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.lineIntersections = new draw2d.util.ArrayList()</span>
+  }
+&nbsp;
+  deleteOne = <span class="fstat-no" title="function not covered" >(f</span>igure) =&gt; {
+<span class="cstat-no" title="statement not covered" >    figure</span>
+      .getConnections()
+      .each(<span class="fstat-no" title="function not covered" >(i</span>, connection) =&gt; <span class="cstat-no" title="statement not covered" >this.canvas.remove(connection))</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.remove(figure)</span>
+  }
+&nbsp;
+  deleteSelection = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    this</span>
+      .getSelectedFigures()
+      .forEach(this.deleteOne)
+  }
+&nbsp;
+  getSerializedSelection = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+    const selected = <span class="cstat-no" title="statement not covered" >this.getSelectedFigures()</span>
+    const elements = <span class="cstat-no" title="statement not covered" >SerializationService.serialize(this.canvas, selected)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return btoa(JSON.stringify(elements))</span>
+  }
+&nbsp;
+  setDeserializedSelection = <span class="fstat-no" title="function not covered" >(d</span>ata) =&gt; {
+<span class="cstat-no" title="statement not covered" >    try {</span>
+      const parsedData = <span class="cstat-no" title="statement not covered" >JSON.parse(atob(data))</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      SerializationService.deserialize(this.canvas, parsedData)</span>
+    } catch (error) {
+<span class="cstat-no" title="statement not covered" >      console.log('Failed to deserialize', error)</span>
+    }
+  }
+}
+&nbsp;
+export default ClipboardService
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu Apr 18 2019 08:35:04 GMT-0400 (Eastern Daylight Time)
+</div>
+</div>
+<script src="..\..\prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="..\..\sorter.js"></script>
+</body>
+</html>

@@ -14,6 +14,7 @@ export default class Editor extends Canvas {
     this.circuit = new Circuit()
     this.clipboard = new ClipboardService(this)
     this.installEditPolicies()
+    this.setMouseMode('PANNING') // TODO: remove
   }
 
   /**

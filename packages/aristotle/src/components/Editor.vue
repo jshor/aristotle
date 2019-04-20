@@ -1,28 +1,18 @@
 <template>
-  <div id="app">
-    <div>
-      <img :src="buffer" class="draw2d_droppable ui-draggable" ref="svg" />
-      Nor
-    </div>
-    <button @click="pan">Panning Mode</button>
-    <button @click="select">Select Mode</button>
-    <button @click="step">Step</button>
-    <div id="canvasWrapper">
-      <div
-        id="canvas"
-        :style="{
-          width: '4998px',
-          height: '4998px'
-        }"
-      />
-    </div>
+  <div id="canvasWrapper">
+    <div
+      :id="document.id"
+      :style="{
+        width: '4998px',
+        height: '4998px'
+      }"
+    />
   </div>
 </template>
 
 <script>
 import { Editor, CommandModel } from '@aristotle/editor'
-import { renderGate } from '@aristotle/logic-gates'
-import document from '@/mocks/document.json'
+import DocumentModel from '@/models/DocumentModel'
 
 export default {
   name: 'Editor',
@@ -31,17 +21,20 @@ export default {
       type: String,
       default: ''
     },
-    relayedCommand: {
-      type: CommandModel,
-      default: null
+    // relayedCommand: {
+    //   type: CommandModel,
+    //   default: null
+    // },
+    document: {
+      type: DocumentModel,
+      require: true
     }
   },
   data () {
     return {
       canvas: null,
       canvasWidth: 1600,
-      canvasHeight: 1600,
-      buffer: renderGate('NOR', 2, '#000').path
+      canvasHeight: 1600
     }
   },
   watch: {
@@ -78,13 +71,14 @@ export default {
     }
   },
   mounted () {
-    this.canvas = new Editor('canvas')
+    console.log('doc: ', document.getElementById(this.document.id), this.document.id)
+    this.canvas = new Editor(this.document.id.toString())
 
     this.canvas.on('toolbox', this.onToolbox)
     this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
     this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
     this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))
-    this.canvas.load(document)
+    this.canvas.load(this.document.data)
   }
 }
 </script>
