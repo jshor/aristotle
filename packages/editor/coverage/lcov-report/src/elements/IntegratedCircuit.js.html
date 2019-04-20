@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/elements/IntegratedCircuit.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="..\..\prettify.css" />
+    <link rel="stylesheet" href="..\..\base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(..\..\sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="..\..\index.html">All files</a> / <a href="index.html">src/elements</a> IntegratedCircuit.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/39</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/8</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/18</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/39</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import Element from '../Element'
+import { Buffer, Nor } from '@aristotle/logic-circuit'
+import { renderIc } from '@aristotle/logic-gates'
+import getPortIndex from '../utils/getPortIndex'
+&nbsp;
+class IntegratedCircuit extends Element {
+<span class="fstat-no" title="function not covered" >  co</span>nstructor (id, { ports, nodes, connections }) {
+<span class="cstat-no" title="statement not covered" >    super(id)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.portDefinitions = ports</span>
+<span class="cstat-no" title="statement not covered" >    this.connections = connections</span>
+<span class="cstat-no" title="statement not covered" >    this.nodes = nodes.map(this.getInitializedNode)</span>
+<span class="cstat-no" title="statement not covered" >    this.inputIds = this.getNodeListByType(nodes, 'input')</span>
+<span class="cstat-no" title="statement not covered" >    this.outputIds = this.getNodeListByType(nodes, 'output')</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.on('added', this.buildCircuit)</span>
+<span class="cstat-no" title="statement not covered" >    this.render()</span>
+  }
+&nbsp;
+  getCircuitNodeId = <span class="fstat-no" title="function not covered" >(c</span>onnection) =&gt; {
+    const source = <span class="cstat-no" title="statement not covered" >connection.getSource()</span>
+    const target = <span class="cstat-no" title="statement not covered" >connection.getTarget()</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (source.parent === this) {</span>
+<span class="cstat-no" title="statement not covered" >      return this.outputIds[getPortIndex(source, 'output')]</span>
+    }
+<span class="cstat-no" title="statement not covered" >    return this.inputIds[getPortIndex(target, 'input')]</span>
+  }
+&nbsp;
+  getCircuitNodeById = <span class="fstat-no" title="function not covered" >(n</span>odeId) =&gt; {
+<span class="cstat-no" title="statement not covered" >    return this</span>
+      .nodes
+      .filter(<span class="fstat-no" title="function not covered" >(n</span>ode) =&gt; <span class="cstat-no" title="statement not covered" >node.name === nodeId)</span>
+      .pop()
+  }
+&nbsp;
+  getCircuitNode = <span class="fstat-no" title="function not covered" >(c</span>onnection) =&gt; {
+    const nodeId = <span class="cstat-no" title="statement not covered" >this.getCircuitNodeId(connection)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return this.getCircuitNodeById(nodeId)</span>
+  }
+&nbsp;
+  getNodeListByType = <span class="fstat-no" title="function not covered" >(n</span>odes, type) =&gt; {
+<span class="cstat-no" title="statement not covered" >    return nodes</span>
+      .filter(<span class="fstat-no" title="function not covered" >({</span> nodeType }) =&gt; <span class="cstat-no" title="statement not covered" >nodeType === type)</span>
+      .sort(<span class="fstat-no" title="function not covered" >(a</span>, b) =&gt; <span class="cstat-no" title="statement not covered" >a.portIndex - b.portIndex)</span>
+      .map(<span class="fstat-no" title="function not covered" >({</span> id }) =&gt; <span class="cstat-no" title="statement not covered" >id)</span>
+  }
+&nbsp;
+  getInitializedNode = <span class="fstat-no" title="function not covered" >({</span> id, nodeType, portIndex }) =&gt; { // TODO: need to remap ids here too
+<span class="cstat-no" title="statement not covered" >    if (nodeType === 'input' || nodeType === 'output') {</span>
+      // replace inputs and outputs with buffers
+      const node = <span class="cstat-no" title="statement not covered" >new Buffer(id)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      if (nodeType === 'output') {</span>
+        // if the node is an output, propagate the color change
+<span class="cstat-no" title="statement not covered" >        node.on('change', this.updateWireColor.bind(this, id, portIndex))</span>
+      }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      node.forceContinue = true</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      return node</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return new Nor(id) </span>// TODO
+  }
+&nbsp;
+  buildCircuit = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.nodes.forEach(this.canvas.circuit.addNode.bind(this))</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.connections.forEach(<span class="fstat-no" title="function not covered" >({</span> inputId, outputId, targetIndex }) =&gt; {</span>
+      const input = <span class="cstat-no" title="statement not covered" >this.getCircuitNodeById(inputId)</span>
+      const output = <span class="cstat-no" title="statement not covered" >this.getCircuitNodeById(outputId)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      this.canvas.circuit.addConnection(input, output, targetIndex)</span>
+    })
+  }
+&nbsp;
+  setOutputConnectionColor = <span class="fstat-no" title="function not covered" >(c</span>olor, portIndex) =&gt; {
+<span class="cstat-no" title="statement not covered" >    super</span>
+      .getConnections()
+      .data
+      .filter(<span class="fstat-no" title="function not covered" >(c</span>onnection) =&gt; <span class="cstat-no" title="statement not covered" >connection.getSource().parent === this)</span>
+      .filter(<span class="fstat-no" title="function not covered" >(c</span>onnection) =&gt; <span class="cstat-no" title="statement not covered" >getPortIndex(connection.getSource(), 'output') === portIndex)</span>
+      .forEach(<span class="fstat-no" title="function not covered" >(c</span>onnection) =&gt; <span class="cstat-no" title="statement not covered" >connection.setColor(color))</span>
+  }
+&nbsp;
+  updateWireColor = <span class="fstat-no" title="function not covered" >(n</span>odeId, portIndex, value) =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.setOutputConnectionColor(this.getWireColor(value), portIndex)</span>
+  }
+&nbsp;
+  getSvg = <span class="fstat-no" title="function not covered" >(c</span>olor) =&gt; {
+<span class="cstat-no" title="statement not covered" >    return renderIc(this.portDefinitions, color, this.bgColor)</span>
+  }
+}
+&nbsp;
+export default IntegratedCircuit
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu Apr 18 2019 08:35:04 GMT-0400 (Eastern Daylight Time)
+</div>
+</div>
+<script src="..\..\prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="..\..\sorter.js"></script>
+</body>
+</html>

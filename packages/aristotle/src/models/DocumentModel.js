@@ -3,7 +3,7 @@ import { EditorModel } from '@aristotle/editor'
 
 class DocumentModel {
   constructor () {
-    this.id = 'random-id' // uuid()
+    this.id = 'X' + (Math.random() * 1000).toString().replace('.', '').substring(0, 5)
     this.editorModel = new EditorModel({})
   }
 }

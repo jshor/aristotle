@@ -26,11 +26,9 @@ export default class Element extends draw2d.shape.basic.Image {
   }
 
   render = (renderPorts = true) => {
-    const { path, width, height, ports = [] } = this.getSvg('#000')
+    const { path, width, height, ports } = this.getSvg('#000')
 
-    if (renderPorts) {
-      this.addPorts(ports)
-    }
+    this.addPorts(ports)
     this.setPath(path)
     this.setWidth(width)
     this.setHeight(height)

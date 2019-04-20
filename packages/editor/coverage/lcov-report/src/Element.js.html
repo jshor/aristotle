@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/Element.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="..\prettify.css" />
+    <link rel="stylesheet" href="..\base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(..\sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="..\index.html">All files</a> / <a href="index.html">src</a> Element.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">9.09% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>5/55</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">10% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>2/20</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">10% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>2/20</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">7.69% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>4/52</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
+import draw2d from 'draw2d'
+import { LogicValue } from '@aristotle/logic-circuit'
+import CommandSetInputCount from './commands/CommandSetInputCount'
+&nbsp;
+export default class Element extends draw2d.shape.basic.Image {
+  constructor (id) {
+    super({ resizeable: false })
+&nbsp;
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (id) this.setId(id)
+    this.on('added', this.addEventListeners) // TODO: add 'removed' event
+  }
+&nbsp;
+  settings = {}
+&nbsp;
+  getSetting = <span class="fstat-no" title="function not covered" >(k</span>ey) =&gt; {
+<span class="cstat-no" title="statement not covered" >    return this.settings[key].value</span>
+  }
+&nbsp;
+  setValue = <span class="fstat-no" title="function not covered" >(v</span>alue) =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.node.setValue(value)</span>
+  }
+&nbsp;
+  getCircuitNode = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    return this.node</span>
+  }
+&nbsp;
+  render = (renderPorts = true) =&gt; {
+    const { path, width, height } = this.getSvg('#000')
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.addPorts(ports)</span>
+<span class="cstat-no" title="statement not covered" >    this.setPath(path)</span>
+<span class="cstat-no" title="statement not covered" >    this.setWidth(width)</span>
+<span class="cstat-no" title="statement not covered" >    this.setHeight(height)</span>
+<span class="cstat-no" title="statement not covered" >    this.repaint()</span>
+<span class="cstat-no" title="statement not covered" >    this.createToolboxButton()</span>
+<span class="cstat-no" title="statement not covered" >    this.updateSelectionColor()</span>
+  }
+&nbsp;
+  getWireColor = <span class="fstat-no" title="function not covered" >(v</span>alue) =&gt; {
+<span class="cstat-no" title="statement not covered" >    switch (value) {</span>
+      case LogicValue.TRUE:
+<span class="cstat-no" title="statement not covered" >        return '#0000ff'</span>
+      case LogicValue.FALSE:
+<span class="cstat-no" title="statement not covered" >        return '#ff0000'</span>
+      default:
+<span class="cstat-no" title="statement not covered" >        return '#808080'</span>
+    }
+  }
+&nbsp;
+  setOutputConnectionColor = <span class="fstat-no" title="function not covered" >(c</span>olor) =&gt; {
+<span class="cstat-no" title="statement not covered" >    super</span>
+      .getConnections()
+      .data
+      .filter(<span class="fstat-no" title="function not covered" >(c</span>onnection) =&gt; <span class="cstat-no" title="statement not covered" >connection.getSource().parent === this)</span>
+      .forEach(<span class="fstat-no" title="function not covered" >(c</span>onnection) =&gt; <span class="cstat-no" title="statement not covered" >connection.setColor(color))</span>
+  }
+&nbsp;
+  isSelected = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    if (!this.canvas) <span class="cstat-no" title="statement not covered" >return false</span></span>
+    const { selection } = <span class="cstat-no" title="statement not covered" >this.canvas</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (selection) {</span>
+<span class="cstat-no" title="statement not covered" >      return selection.all.data.includes(this)</span>
+    }
+<span class="cstat-no" title="statement not covered" >    return false</span>
+  }
+&nbsp;
+  updateSelectionColor = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    if (this.canvas) {</span>
+      const color = <span class="cstat-no" title="statement not covered" >this.isSelected() ? '#ff0000' : '#000'</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      this.setPath(this.getSvg(color).path)</span>
+    }
+  }
+&nbsp;
+  updateSettings = <span class="fstat-no" title="function not covered" >(s</span>ettings) =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.canvas.commandStack.execute(new CommandSetInputCount(this, settings.inputs))</span>
+    // const cmd = new CommandUpdateSettings(this, settings)
+&nbsp;
+    // this.canvas.commandStack.execute(cmd)
+<span class="cstat-no" title="statement not covered" >    this.fireToolboxEvent(this.toolboxButton) </span>// keep toolbox open
+  }
+&nbsp;
+  addPorts = <span class="fstat-no" title="function not covered" >(p</span>orts) =&gt; {
+<span class="cstat-no" title="statement not covered" >    ports.forEach(<span class="fstat-no" title="function not covered" >({</span> x, y, type, id }) =&gt; {</span>
+      const port = <span class="cstat-no" title="statement not covered" >this.createPort(type, new draw2d.layout.locator.XYAbsPortLocator(x, y))</span>
+<span class="cstat-no" title="statement not covered" >      port.setId(id)</span>
+    })
+  }
+&nbsp;
+  hasSettings = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    return Object.keys(this.settings).length</span>
+  }
+&nbsp;
+  toggleToolboxVisibility = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    if (this.toolboxButton) {</span>
+<span class="cstat-no" title="statement not covered" >      this.toolboxButton.setVisible(this.isSelected())</span>
+    }
+  }
+&nbsp;
+  createToolboxButton = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    if (this.toolboxButton || !this.hasSettings()) <span class="cstat-no" title="statement not covered" >return</span></span>
+&nbsp;
+    const locator = <span class="cstat-no" title="statement not covered" >new draw2d.layout.locator.XYAbsPortLocator(this.width + 10, 0)</span>
+    const settings = <span class="cstat-no" title="statement not covered" >{ width: 16, height: 16, visible: false }</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.toolboxButton = new draw2d.shape.icon.Wrench(settings)</span>
+<span class="cstat-no" title="statement not covered" >    this.toolboxButton.on('click', this.fireToolboxEvent)</span>
+<span class="cstat-no" title="statement not covered" >    this.add(this.toolboxButton, locator)</span>
+  }
+&nbsp;
+  fireToolboxEvent = <span class="fstat-no" title="function not covered" >(b</span>utton) =&gt; {
+    const x = <span class="cstat-no" title="statement not covered" >button.x + this.x</span>
+    const y = <span class="cstat-no" title="statement not covered" >button.y + this.y</span>
+    const position = <span class="cstat-no" title="statement not covered" >this.canvas.fromCanvasToDocumentCoordinate(x, y)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.canvas.fireEvent('toolbox', {</span>
+      settings: this.settings,
+      position
+    })
+  }
+&nbsp;
+  onSelectChanged = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.updateSelectionColor()</span>
+<span class="cstat-no" title="statement not covered" >    this.toggleToolboxVisibility()</span>
+  }
+&nbsp;
+  addEventListeners = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.canvas.on('deselect', this.onSelectChanged)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.on('select', this.onSelectChanged)</span>
+<span class="cstat-no" title="statement not covered" >    this.canvas.on('reset', this.updateSelectionColor)</span>
+  }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu Apr 18 2019 08:35:04 GMT-0400 (Eastern Daylight Time)
+</div>
+</div>
+<script src="..\prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="..\sorter.js"></script>
+</body>
+</html>

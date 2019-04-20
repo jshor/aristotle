@@ -1,4 +1,5 @@
 module.exports = {
+  collectCoverage: true,
   moduleFileExtensions: ['js'],
   transform: {
     '^.+\\.js$': 'babel-jest'

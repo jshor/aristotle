@@ -1,29 +1,22 @@
 <template>
-  <div>
-    <Toolbar
-      :document="activeDocument"
-      @relayCommand="onRelayCommand"
-    />
-    <Editor
-      :document="activeDocument"
-      :relayedCommand="relayedCommand"
-      @updateEditor="onUpdateEditor"
-    />
-    <Toolbox
-      v-if="toolboxVisible"
-      :settings="toolboxSettings"
-      @change="toolboxChanged"
-      @close="closeToolbox"
+  <div id="canvasWrapper">
+    <div
+      :id="document.id"
+      :style="{
+        width: '4998px',
+        height: '4998px'
+      }"
     />
   </div>
 </template>
 
 <script>
+// :relayedCommand="relayedCommand"
 import { mapGetters, mapState } from 'vuex'
-import Editor from '@/components/Editor'
 import Toolbar from '@/components/Toolbar'
 import Toolbox from '@/components/Toolbox'
-import { CommandModel } from '@aristotle/editor'
+import { Editor, CommandModel } from '@aristotle/editor'
+import DocumentModel from '@/models/DocumentModel'
 
 export default {
   name: 'DocumentContainer',
@@ -32,13 +25,29 @@ export default {
     Toolbar,
     Toolbox
   },
+  data () {
+    return {
+      canvas: null,
+      canvasWidth: 1600,
+      canvasHeight: 1600
+    }
+  },
+  props: {
+    document: {
+      type: DocumentModel,
+      required: true
+    }
+  },
   computed: {
-    ...mapGetters(['activeDocument']),
-    ...mapState({
-      relayedCommand: (state) => state.documents.relayedCommand,
-      toolboxVisible: state => state.documents.toolboxVisible,
-      toolboxSettings: state => state.documents.toolboxSettings
-    })
+    ...mapState(['relayedCommand'])
+  },
+  watch: {
+    relayedCommand: {
+      deep: true,
+      handler (command) {
+        this.canvas.applyCommand(command)
+      }
+    }
   },
   methods: {
     onRelayCommand ({ command, payload }) {
@@ -52,7 +61,46 @@ export default {
     },
     closeToolbox () {
       this.$store.commit('SET_TOOLBOX_VISIBILITY', false)
+    },
+    pan () {
+      this.canvas.setMouseMode('PANNING')
+    },
+    select () {
+      this.canvas.setMouseMode('SELECTION')
+    },
+    step () {
+      this.canvas.step()
+    },
+    onCanvasUpdate (canvas) {
+      const model = canvas.getEditorModel() // should be v-model (emit `value`)
+
+      this.$store.commit('SET_EDITOR_MODEL', model)
+      this.$store.commit('SET_TOOLBOX_VISIBILITY', false)
+    },
+    onToolbox (editor, settings) {
+      this.$store.commit('SET_TOOLBOX_SETTINGS', settings)
+      this.$store.commit('SET_TOOLBOX_VISIBILITY', true)
+    },
+    hideToolbox () {
     }
+  },
+  mounted () {
+    this.canvas = new Editor(this.document.id.toString())
+
+    this.canvas.on('toolbox', this.onToolbox)
+    this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
+    this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
+    this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))
+    this.canvas.load(this.document.data)
   }
 }
 </script>
+
+<style>
+#canvasWrapper {
+}
+
+#canvasWrapper svg {
+  position: relative !important;
+}
+</style>
