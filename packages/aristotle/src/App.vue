@@ -1,14 +1,12 @@
 <template>
   <div id="app" class="main">
-    <div class="toolbar">
-      <button @click="changeDocument">changeDocument</button>
-      <button @click="openDocument">Open Document</button>
-      <toolbar 
-        v-if="activeDocument"
-        :document="activeDocument"
-        @relayCommand="onRelayCommand"
-      />
-    </div>
+    <button @click="openDocument" v-if="!activeDocument">Open document</button>
+    <toolbar 
+      v-if="activeDocument"
+      :document="activeDocument"
+      @relayCommand="onRelayCommand"
+      @openDocument="openDocument"
+    />
     
     <div class="panel">
       <toolbox-container class="dropbox" />
@@ -72,6 +70,10 @@ export default {
 </script>
 
 <style lang="scss">
+$fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '"~@fortawesome/fontawesome-free/scss/solid';
+
 $color-shadow: #000;
 
 $border-width: 1px;
@@ -105,10 +107,6 @@ rect.draw2d {
   flex-direction: column;
 }
 
-.toolbar {
-  background-color: beige;
-}
-
 .panel {
   display: flex;
   height: 100vh;
@@ -119,7 +117,6 @@ rect.draw2d {
 }
 
 .dropbox {
-  background: lightblue;
   width: 200px;
 }
 
@@ -131,7 +128,6 @@ rect.draw2d {
   flex-direction: column; /* NEW */
   padding: 0.5rem;
   box-sizing: border-box;
-  box-shadow: 0 0 $border-width $color-shadow;
 }
 
 .editor {
@@ -141,5 +137,6 @@ rect.draw2d {
   box-sizing: border-box;
   border: 3px solid #3D404B;
   border-top: 0;
+  box-shadow: 0 0 $border-width $color-shadow;
 }
 </style>

@@ -1,22 +1,22 @@
 <template>
   <div
-    class="toolbox"
+    class="properties"
     :style="style">
-    <div class="toolbox__heading">
-      <div class="toolbox__heading__text toolbox__heading__text--expand">Settings</div>
+    <div class="properties__heading">
+      <div class="properties__heading__text properties__heading__text--expand">Settings</div>
       <div
         @click="close"
-        class="toolbox__heading__text">
+        class="properties__heading__text">
         &times;
       </div>
     </div>
     <div
       v-for="(data, key, index) in settings.settings"
       :key="index"
-      class="toolbox__field">
+      class="properties__field">
       <label
         :for="index"
-        class="toolbox__field__label">
+        class="properties__field__label">
         {{ key }}
       </label>
       <input
@@ -24,7 +24,7 @@
         :type="data.type"
         :value="data.value"
         @input="change(key)"
-        class="toolbox__field__input"
+        class="properties__field__input"
       >
     </div>
   </div>
@@ -32,7 +32,7 @@
 
 <script>
 export default {
-  name: 'Toolbox',
+  name: 'properties',
   computed: {
     style () {
       return {
@@ -69,7 +69,7 @@ export default {
 </script>
 
 <style>
-.toolbox {
+.properties {
   position: absolute;
   background-color: #fff;
   border: 1px solid #000;
@@ -77,30 +77,30 @@ export default {
   padding: 0.5em;
 }
 
-.toolbox__field {
+.properties__field {
   display: flex;
   width: 100%;
 }
 
-.toolbox__field__label,
-.toolbox__field__input {
+.properties__field__label,
+.properties__field__input {
   flex: 1;
   max-width: 50%;
 }
 
-.toolbox__heading {
+.properties__heading {
   display: flex;
   width: 100%;
   border-bottom: 1px solid #000;
   margin-bottom: 0.5rem;
 }
 
-.toolbox__heading__text {
+.properties__heading__text {
   font-size: 1.25em;
   font-weight: bold;
 }
 
-.toolbox__heading__text--expand {
+.properties__heading__text--expand {
   flex: 1;
 }
 </style>
