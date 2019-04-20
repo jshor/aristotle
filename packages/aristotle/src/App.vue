@@ -13,14 +13,7 @@
     <div class="panel">
       <toolbox-container class="dropbox" />
       <div class="document-host">
-        <div class="tab-host">
-          <span
-            v-for="document in documents"
-            :key="document.id"
-            @click="activateDocument(document.id)">
-            {{ document.id }} &mdash;
-          </span>
-        </div>
+        <tabs-container />
 
         <DocumentContainer
           v-show="document.id === activeDocumentId"
@@ -38,6 +31,7 @@
 import { mapState, mapGetters } from 'vuex'
 import Toolbar from '@/components/Toolbar'
 import DocumentContainer from '@/containers/DocumentContainer'
+import TabsContainer from '@/containers/TabsContainer'
 import ToolboxContainer from '@/containers/ToolboxContainer'
 import DocumentModel from '@/models/DocumentModel'
 import { CommandModel } from '@aristotle/editor'
@@ -47,6 +41,7 @@ export default {
   name: 'App',
   components: {
     DocumentContainer,
+    TabsContainer,
     ToolboxContainer,
     Toolbar
   },
@@ -60,9 +55,6 @@ export default {
   methods: {
     onRelayCommand ({ command, payload }) {
       this.$store.commit('RELAY_COMMAND', new CommandModel(command, payload))
-    },
-    activateDocument (documentId) {
-      this.$store.commit('ACTIVATE_DOCUMENT', documentId)
     },
     openDocument () {
       console.log('opening doc')
@@ -80,11 +72,18 @@ export default {
 </script>
 
 <style lang="scss">
+$color-shadow: #000;
+
+$border-width: 1px;
+$scrollbar-width: 3px;
 body {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
   margin: 0;
+  background: #1D1E25;
+  font-family: Segoe UI;
+  font-size: 0.8rem;
 }
 
 rect.draw2d {
@@ -130,9 +129,17 @@ rect.draw2d {
   max-width: calc(100vw - 200px);
   display: flex;          /* NEW */
   flex-direction: column; /* NEW */
+  padding: 0.5rem;
+  box-sizing: border-box;
+  box-shadow: 0 0 $border-width $color-shadow;
 }
 
 .editor {
   overflow: hidden;
+  
+  background-color: #333641;
+  box-sizing: border-box;
+  border: 3px solid #3D404B;
+  border-top: 0;
 }
 </style>

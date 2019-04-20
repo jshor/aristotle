@@ -109,7 +109,11 @@ export default class Editor extends Canvas {
    * @private
    */
   installEditPolicies = () => {
-    this.installEditPolicy(new draw2d.policy.canvas.ShowGridEditPolicy())
+    const grid = new draw2d.policy.canvas.ShowGridEditPolicy()
+
+    grid.setGridColor('#333641')
+
+    this.installEditPolicy(grid)
     this.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({
       createConnection: this.createConnection
     }))
