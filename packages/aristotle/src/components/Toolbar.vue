@@ -1,24 +1,26 @@
 <template>
   <div class="toolbar">
     <div class="toolbar__group toolbar__group--left">
-      <!-- only temporary -->
+
+      <!-- only temporary, this button will be removed -->
       <button
         @click="$emit('openDocument')"
         class="toolbar-button">
         <i class="fas fa-folder-open" />
       </button>
+
       <div class="toolbar__separator" />
       <button
         :disabled="!editor.canUndo"
         @click="relayCommand('UNDO')"
         class="toolbar-button">
-        <i class="fas fa-undo" />
+        <i class="fas fa-reply" />
       </button>
       <button
         :disabled="!editor.canRedo"
         @click="relayCommand('REDO')"
         class="toolbar-button">
-        <i class="fas fa-redo" />
+        <i class="fas fa-share" />
       </button>
       <div class="toolbar__separator" />
       <button
@@ -63,6 +65,19 @@
         :disabled="!editor.canRedo"
         @click="relayCommand('REDO')"
         class="toolbar-button">
+        <i class="fas fa-undo-alt" />
+      </button>
+      <button
+        :disabled="!editor.canRedo"
+        @click="relayCommand('REDO')"
+        class="toolbar-button">
+        <i class="fas fa-redo-alt" />
+      </button>
+      <div class="toolbar__separator" />
+      <button
+        :disabled="!editor.canRedo"
+        @click="relayCommand('REDO')"
+        class="toolbar-button">
         <i class="fas fa-object-group" />
       </button>
       <button
@@ -98,7 +113,7 @@
         :disabled="!editor.canRedo"
         @click="relayCommand('RESET')"
         class="toolbar-button toolbar-button--pull-right">
-        <i class="fas fa-fast-backward" />
+        <i class="fas fa-sync-alt" />
       </button>
       <button
         :disabled="!editor.canRedo"
@@ -161,6 +176,7 @@ $scrollbar-width: 3px;
     background-color: $color-secondary;
     height: 90%;
     margin: 0.25rem;
+    box-shadow: 0 0 $border-width $color-shadow;
     width: 1px;
   }
 
@@ -181,6 +197,7 @@ $scrollbar-width: 3px;
   padding: 0.25rem 0;
   width: 1.85rem;
   font-size: 1.25rem;
+  text-shadow: drop-shadow(0 0 1px $color-shadow);
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
