@@ -3,20 +3,43 @@ import { Buffer, Nor } from '@aristotle/logic-circuit'
 import { renderIc } from '@aristotle/logic-gates'
 import getPortIndex from '../utils/getPortIndex'
 
+/**
+ * @description Embedded/integrated circuit element class. This takes an ordinary circuit definition
+ * and assembles a subcircuit, where the inputs and outputs are buffers. When these buffers change,
+ * the signal is propagated and the circuit is evaluated. This extends Element and renders an IC SVG.
+ * @class IntegratedCircuit
+ * @extends Element
+ */
 class IntegratedCircuit extends Element {
-  constructor (id, { ports, nodes, connections }) {
+  /**
+   * Constructor.
+   * 
+   * @param {String} id
+   * @param {Object} circuit
+   * @param {Object} circuit.ports - list of port definitions
+   * @param {Object} circuit.elements - list of node definitions
+   * @param {Object} circuit.connections - list of connection entries
+   */
+  constructor (id, { ports, elements, connections }) {
     super(id)
 
     this.portDefinitions = ports
     this.connections = connections
-    this.nodes = nodes.map(this.getInitializedNode)
-    this.inputIds = this.getNodeListByType(nodes, 'input')
-    this.outputIds = this.getNodeListByType(nodes, 'output')
+    this.elements = elements.map(this.getInitializedNode)
+    this.inputIds = this.getNodeListByType(elements, 'input')
+    this.outputIds = this.getNodeListByType(elements, 'output')
 
     this.on('added', this.buildCircuit)
     this.render()
   }
 
+  /**
+   * Returns the id of the node that the given connection is connected to.
+   * The connection can be either to an input port or an output one.
+   * 
+   * @param {Connection} connection
+   * @returns {String} id of connected node
+   */
   getCircuitNodeId = (connection) => {
     const source = connection.getSource()
     const target = connection.getTarget()
@@ -27,9 +50,15 @@ class IntegratedCircuit extends Element {
     return this.inputIds[getPortIndex(target, 'input')]
   }
 
+  /**
+   * Returns a circuit node with the matching id.
+   * 
+   * @param {String} nodeId
+   * @returns {LogicNode}
+   */
   getCircuitNodeById = (nodeId) => {
     return this
-      .nodes
+      .elements
       .filter((node) => node.name === nodeId)
       .pop()
   }
@@ -40,8 +69,15 @@ class IntegratedCircuit extends Element {
     return this.getCircuitNodeById(nodeId)
   }
 
-  getNodeListByType = (nodes, type) => {
-    return nodes
+  /**
+   * Maps the ids of all nodes having the given type into an array.
+   * 
+   * @param {Object[]} elements - list of elements to map ids from
+   * @param {String} type - `input` or `output`
+   * @returns {String[]} list of ids
+   */
+  getNodeListByType = (elements, type) => {
+    return elements
       .filter(({ nodeType }) => nodeType === type)
       .sort((a, b) => a.portIndex - b.portIndex)
       .map(({ id }) => id)
@@ -65,8 +101,11 @@ class IntegratedCircuit extends Element {
     return new Nor(id) // TODO
   }
 
+  /**
+   * Assembles the embedded circuit for the given nodes and connections.
+   */
   buildCircuit = () => {
-    this.nodes.forEach(this.canvas.circuit.addNode.bind(this))
+    this.elements.forEach((el) => this.canvas.circuit.addNode(el)) //.bind(this))
 
     this.connections.forEach(({ inputId, outputId, targetIndex }) => {
       const input = this.getCircuitNodeById(inputId)

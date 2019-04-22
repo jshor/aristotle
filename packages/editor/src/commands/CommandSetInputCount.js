@@ -40,7 +40,7 @@ class CommandSetInputCount extends draw2d.command.CommandCollection {
     this.repaint()
   }
 
-  repaint = () => {
+  repaint = () => { // TODO: isn't this IDENTICAL to this.figure.render()??
     const { path, width, height } = this.figure.getSvg('#000')
 
     this.figure.setPath(path)
