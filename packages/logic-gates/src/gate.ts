@@ -16,8 +16,10 @@ const NEGATION_X = {
   NAND: 78
 }
 
+const fillColor = '#1C1D24'
+
 const baseLineAttrs = {
-  'stroke': '#000',
+  'stroke': '#fff',
   'stroke-linecap': 'square',
   'stroke-width': 2,
   'vector-effect': 'non-scaling-stroke'
@@ -71,7 +73,7 @@ function getInputPorts (wireCount, svgHeight) {
   return ports
 }
 
-function getFigureSvg (x, pathData, fill = '#fff') {
+function getFigureSvg (x, pathData, fill = fillColor) {
   const path = toSvg('path', {
     d: pathData,
     fill,
@@ -116,7 +118,7 @@ function getNegation (gateType, height) {
       cx: x,
       cy: height / 2,
       r,
-      fill: '#fff',
+      fill: fillColor,
       ...baseLineAttrs
     })
   }

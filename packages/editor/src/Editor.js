@@ -3,8 +3,8 @@ import Canvas from './Canvas'
 import { Circuit } from '@aristotle/logic-circuit'
 import Connection from './Connection'
 import EditorModel from './models/EditorModel'
-import ClipboardService from './services/ClipboardService'
 import SerializationService from './services/SerializationService'
+import DeserializerService from './services/DeserializerService'
 import uuid from './utils/uuid'
 
 export default class Editor extends Canvas {
@@ -12,7 +12,7 @@ export default class Editor extends Canvas {
     super(elementId)
 
     this.circuit = new Circuit()
-    this.clipboard = new ClipboardService(this)
+    this.deserializer = new DeserializerService(this)
     this.installEditPolicies()
     this.setMouseMode('PANNING') // TODO: remove
   }
@@ -136,7 +136,7 @@ export default class Editor extends Canvas {
   }
 
   load = (data) => {
-    SerializationService.deserialize(this, data)
+    this.deserializer.deserialize(data)
   }
 
   applyCommand = (command) => {
@@ -161,9 +161,6 @@ export default class Editor extends Canvas {
         break
       case 'CUT':
         console.log('not implemented')
-        break
-      case 'PASTE':
-        this.clipboard.paste()
         break
       case 'UPDATE_ELEMENT':
         this.updateElement(command.payload)

@@ -1,5 +1,5 @@
 {
-	"nodes": [
+	"elements": [
 		{
 			"id": "aqLvQGuk27",
 			"type": "Switch",
@@ -55,7 +55,7 @@
 					}
 				]
 			},
-			"nodes": [{
+			"elements": [{
 				"id": "aqLvQGuk27",
 				"type": "Switch",
 				"nodeType": "input",

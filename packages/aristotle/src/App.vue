@@ -33,7 +33,7 @@ import TabsContainer from '@/containers/TabsContainer'
 import ToolboxContainer from '@/containers/ToolboxContainer'
 import DocumentModel from '@/models/DocumentModel'
 import { CommandModel } from '@aristotle/editor'
-import data from '@/mocks/document2.json'
+import data from '@/mocks/document.json'
 
 export default {
   name: 'App',
