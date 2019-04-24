@@ -3,8 +3,8 @@ import Canvas from './Canvas'
 import { Circuit } from '@aristotle/logic-circuit'
 import Connection from './Connection'
 import EditorModel from './models/EditorModel'
-import SerializationService from './services/SerializationService'
 import DeserializerService from './services/DeserializerService'
+import SerializerService from './services/SerializerService'
 import uuid from './utils/uuid'
 
 export default class Editor extends Canvas {
@@ -13,8 +13,23 @@ export default class Editor extends Canvas {
 
     this.circuit = new Circuit()
     this.deserializer = new DeserializerService(this)
+    this.serializer = new SerializerService(this)
     this.installEditPolicies()
-    this.setMouseMode('PANNING') // TODO: remove
+
+    this.drawn = false
+    // this.setMouseMode('PANNING') // TODO: remove
+
+    // this.on('select', (...args) => {
+    //   if (!this.drawn) {
+    //     const serialized = JSON.stringify(this.serializer.serializeAll())
+    //     // this.clear()
+
+    //     setTimeout(() => {
+    //       this.deserializer.deserialize(JSON.parse(serialized))
+    //     }, 1000)
+    //     this.drawn = true
+    //   }
+    // })
   }
 
   /**

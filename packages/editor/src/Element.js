@@ -2,6 +2,7 @@
 import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
 import CommandSetInputCount from './commands/CommandSetInputCount'
+import uuid from './utils/uuid'
 
 export default class Element extends draw2d.shape.basic.Image {
   constructor (id) {
@@ -193,5 +194,15 @@ export default class Element extends draw2d.shape.basic.Image {
     this.toolboxButton = new draw2d.shape.icon.Wrench(settings)
     this.toolboxButton.on('click', this.fireToolboxEvent)
     this.add(this.toolboxButton, locator)
+  }
+
+  serialize = () => {
+    return {
+      id: this.id,
+      x: this.x,
+      y: this.y,
+      type: this.constructor.name,
+      name: uuid()
+    }
   }
 }
