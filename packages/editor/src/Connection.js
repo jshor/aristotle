@@ -37,6 +37,20 @@ class Connection extends draw2d.Connection {
 
     this.circuit.removeConnection(sourceNode, targetNode)
   }
+
+  serialize = () => {
+    const source = this.getSource()
+    const target = this.getTarget()
+    const sourceIndex = getPortIndex(source, 'output')
+    const targetIndex = getPortIndex(target, 'input')
+
+    return {
+      inputId: source.getParent().id,
+      outputId: target.getParent().id,
+      sourceIndex,
+      targetIndex
+    }
+  }
 }
 
 export default Connection
