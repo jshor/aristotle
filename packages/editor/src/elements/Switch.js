@@ -26,16 +26,39 @@ export default class Switch extends Element {
   }
 
   getSvg = (color) => {
-    const svg = {
-      left: [],
-      right: [
-        { label: '*', type: 'output' }
-      ],
-      top: [],
-      bottom: []
+    const bg = this.node.value === LogicValue.TRUE ? '66AD7C' : '808080'
+    const posY = this.node.value === LogicValue.TRUE ? 15 : 48
+
+    const svg = `
+      <svg  xmlns="http://www.w3.org/2000/svg">
+      <rect width="60" height="75" fill="#000000" stroke="#ffffff"
+            stroke-width="2" vector-effect="non-scaling-stroke" />
+      
+      
+      <rect width="15" height="40" x="22" y="15" fill="#${bg}"
+            rx="2" ry="2"
+            />
+      
+      <rect width="24" height="12" x="18" y="${posY}" 
+            stroke="#000000"
+            stroke-width="1" vector-effect="non-scaling-stroke"
+            rx="2" ry="2"
+            fill="#ffffff"  />
+      
+      <line x1="60" x2="96" y1="36" y2="36" stroke="#ffffff" stroke-width="2" />
+    </svg>
+    `.replace(/>\s+</g, '><').replace(/\s+/g, ' ')
+
+    return {
+      path: 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))),
+      width: 96,
+      height: 75,
+      ports: [
+        { x: 96, y: 36, type: 'output', id: 'ssfsdsdfdsdfs' }
+      ]
     }
 
-    return renderIc(svg, color, this.bgColor)
+    // return renderIc(svg, color, this.bgColor)
   }
 
   toggle = () => {
@@ -43,5 +66,6 @@ export default class Switch extends Element {
     this.node.setValue(newValue)
     this.canvas.step(true)
     this.canvas.circuit.queue.push(this.node)
+    this.updateSelectionColor()
   }
 }
