@@ -33,7 +33,7 @@ import TabsContainer from '@/containers/TabsContainer'
 import ToolboxContainer from '@/containers/ToolboxContainer'
 import DocumentModel from '@/models/DocumentModel'
 import { CommandModel } from '@aristotle/editor'
-import data from '@/mocks/document.json'
+import data from '@/mocks/document3.json'
 
 export default {
   name: 'App',
@@ -59,7 +59,7 @@ export default {
       const document = new DocumentModel()
 
       document.data = data
-
+console.log('document: ', document)
       this.$store.commit('OPEN_DOCUMENT', document)
     },
     changeDocument () {
@@ -86,11 +86,23 @@ body {
   background: #1D1E25;
   font-family: Segoe UI;
   font-size: 0.8rem;
+  
+  --main-bg-color: brown;
+}
+
+image.draw2d_shape_basic_Image {
+  opacity: 1 !important; // SHAME.
+  cursor: move !important;
+}
+
+ellipse.draw2d_OutputPort, ellipse.draw2d_InputPort {
+    fill: rgb(255,255,255) !important; // SHAME.
+    stroke-width: 2;
 }
 
 rect.draw2d {
   &_ResizeHandle {
-    // display: none;
+    display: none;
   }
 
   &_shape_basic_Rectangle:not(:last-of-type) {
