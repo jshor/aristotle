@@ -23,10 +23,13 @@ git clone https://github.com/jshor/aristotle.git
 # 2. Enter your newly-cloned folder
 cd my-new-project
 
-# 3. Bootstrap
+# 3. Install dependencies
+yarn
+
+# 4. Bootstrap
 yarn bootstrap
 
-# 4. Start the dev server
-yarn start
+# 5. Start the dev server
+yarn dev
 
 ```

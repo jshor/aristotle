@@ -32,8 +32,6 @@ export default class BezierConnectionRouter extends draw2d.layout.connection.Man
       'C', x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)
     ].join(',')
 
-    connection.addPoint(start)
-    connection.addPoint(end)
     connection.svgPathString = path
   }
 }

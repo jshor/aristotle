@@ -63,18 +63,6 @@ export default class Editor extends Canvas {
   }
 
   /**
-   * Handles a toolbox drop event.
-   *
-   * @param {HTMLElement} element
-   */
-  onDrop = (element) => {
-    const { x, y } = this.getDraggedCoordinates()
-    const node = SerializationService.getNode(uuid(), { type: 'LogicGate', subtype: 'NOR' })
-
-    this.addNode(node, x, y)
-  }
-
-  /**
    * Runs the circuit evaluation.
    * It will debug in a step-through manner if the `debug` property is set to `true`.
    * It will evaluate automatically until the circuit has no more updates.

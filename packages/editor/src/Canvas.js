@@ -1,5 +1,7 @@
 import draw2d from 'draw2d'
 import $ from 'jquery'
+import ElementInitializerService from './services/ElementInitializerService'
+import uuid from './utils/uuid'
 
 /**
  * Extends the draw2d Canvas to add user-friendly enhancements and support parent wrapper elements.
@@ -15,6 +17,11 @@ export default class Canvas extends draw2d.Canvas {
     this.parent = this.html[0].parentNode
     this.setScrollArea(this.parent)
     this.registerEventListeners()
+    // $("body").append(`
+    // <svg style="position: absolute; width: 1px; height: 1px">
+    // <filter id="filter-0" width="1" height="1"><feOffset in="SourceAlpha" dx="1" dy="1" result="1"></feOffset><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0 " in="1" result="2"></feColorMatrix><feGaussianBlur stdDeviation="2" in="2" result="3"></feGaussianBlur><feMerge in="3" result="4"><feMergeNode in="3"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge></filter>
+    // </svg>
+    // `)
   }
 
   registerEventListeners = () => {
@@ -106,6 +113,31 @@ export default class Canvas extends draw2d.Canvas {
 
     $('.ui-draggable-dragging').width(width)
     $('.ui-draggable-dragging').height(height)
+  }
+
+  /**
+   * Handles a toolbox drop event.
+   *
+   * @override {draw2d.Canvas.onDrop}
+   * @param {HTMLElement} element
+   */
+  onDrop = (element, x, y, ...args) => {
+    const rect = this.parent.getBoundingClientRect()
+    const { clientX, clientY } = event
+
+    const isInViewport = (
+      clientX >= rect.left &&
+      clientY >= rect.top &&
+      clientX <= rect.right &&
+      clientY <= rect.bottom
+    )
+
+    if (isInViewport) {
+      const { x, y } = this.getDraggedCoordinates()
+      const element = ElementInitializerService.getInitializedElement(uuid(), { type: 'LogicGate', subtype: 'NOR' })
+
+      this.addNode(element, x, y)// TODO: should be command
+    }
   }
 
   /**

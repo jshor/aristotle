@@ -1,10 +1,7 @@
 import { command } from 'draw2d'
 import DeserializerService from '../DeserializerService'
-import Switch from '../../elements/Switch'
-import LogicGate from '../../elements/LogicGate'
-import Lightbulb from '../../elements/Lightbulb'
-import IntegratedCircuit from '../../elements/IntegratedCircuit'
 import data from './__fixtures__/circuit.json'
+import ElementInitializerService from '../ElementInitializerService';
 
 describe('Deserializer Service', () => {
   let editor
@@ -15,7 +12,7 @@ describe('Deserializer Service', () => {
       commandStack: {
         execute: jest.fn()
       },
-      
+
       createConnection () {
         return {
           setSource: jest.fn(),
@@ -32,7 +29,7 @@ describe('Deserializer Service', () => {
       jest.spyOn(service, 'createConnection')
       jest.spyOn(editor.commandStack, 'execute')
 
-      service.deserialize(data)  
+      service.deserialize(data)
     })
 
     it('should instantiate a new command collection', () => {
@@ -64,7 +61,7 @@ describe('Deserializer Service', () => {
 
     beforeEach(() => {
       jest
-        .spyOn(service, 'getInitializedElement')
+        .spyOn(ElementInitializerService, 'getInitializedElement')
         .mockReturnValue(element)
 
       service.idMap = {}
@@ -85,36 +82,6 @@ describe('Deserializer Service', () => {
 
       expect(service.commandCollection.add).toHaveBeenCalledTimes(1)
       expect(service.commandCollection.add).toHaveBeenCalledWith(expect.any(command.CommandAdd))
-    })
-  })
-
-  describe('getInitializedElement()', () => {
-    const id = '123456'
-
-    it('should return an IntegratedCircuit', () => {
-      expect(service.getInitializedElement(id, {
-        type: 'IntegratedCircuit',
-        elements: [],
-        connections: [],
-        ports: {
-          top: [],
-          bottom: [],
-          left: [],
-          right: []
-        }
-      })).toBeInstanceOf(IntegratedCircuit)
-    })
-
-    it('should return a Switch', () => {
-      expect(service.getInitializedElement(id, {
-        type: 'Switch'
-      })).toBeInstanceOf(Switch)
-    })
-
-    it('should default to a generic Element', () => {
-      expect(service.getInitializedElement(id, {
-        type: 'Unknown'
-      }).constructor.name).toEqual('Element')
     })
   })
 })

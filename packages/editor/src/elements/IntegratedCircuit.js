@@ -1,7 +1,7 @@
 import Element from '../Element'
 import { Buffer, Nor } from '@aristotle/logic-circuit'
-import { renderIc } from '@aristotle/logic-gates'
 import getPortIndex from '../utils/getPortIndex'
+import { IntegratedCircuitSVG } from '../svg'
 
 /**
  * @description Embedded/integrated circuit element class. This takes an ordinary circuit definition
@@ -10,10 +10,10 @@ import getPortIndex from '../utils/getPortIndex'
  * @class IntegratedCircuit
  * @extends Element
  */
-class IntegratedCircuit extends Element {
+export default class IntegratedCircuit extends Element {
   /**
    * Constructor.
-   * 
+   *
    * @param {String} id
    * @param {Object} circuit
    * @param {Object} circuit.ports - list of port definitions
@@ -23,11 +23,16 @@ class IntegratedCircuit extends Element {
   constructor (id, { ports, elements, connections }) {
     super(id)
 
-    this.portDefinitions = ports
     this.connections = connections
     this.elements = elements.map(this.getInitializedNode)
     this.inputIds = this.getNodeListByType(elements, 'input')
     this.outputIds = this.getNodeListByType(elements, 'output')
+    this.svgRenderer = new IntegratedCircuitSVG({
+      primaryColor: '#ffffff',
+      secondaryColor: '#1C1D24',
+      wires: ports,
+      title: 'test' // TODO
+    })
 
     this.on('added', this.buildCircuit)
     this.render()
@@ -36,7 +41,7 @@ class IntegratedCircuit extends Element {
   /**
    * Returns the id of the node that the given connection is connected to.
    * The connection can be either to an input port or an output one.
-   * 
+   *
    * @param {Connection} connection
    * @returns {String} id of connected node
    */
@@ -52,7 +57,7 @@ class IntegratedCircuit extends Element {
 
   /**
    * Returns a circuit node with the matching id.
-   * 
+   *
    * @param {String} nodeId
    * @returns {LogicNode}
    */
@@ -71,7 +76,7 @@ class IntegratedCircuit extends Element {
 
   /**
    * Maps the ids of all nodes having the given type into an array.
-   * 
+   *
    * @param {Object[]} elements - list of elements to map ids from
    * @param {String} type - `input` or `output`
    * @returns {String[]} list of ids
@@ -129,8 +134,6 @@ class IntegratedCircuit extends Element {
   }
 
   getSvg = (color) => {
-    return renderIc(this.portDefinitions, color, this.bgColor)
+    return this.svgRenderer.getSvgData()
   }
 }
-
-export default IntegratedCircuit
