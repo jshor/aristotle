@@ -1,15 +1,23 @@
 import { Nor, Or } from '@aristotle/logic-circuit'
 import { renderGate } from '@aristotle/logic-gates'
 import Element from '../Element'
+import LogicGateSVG from '../svg/lib/LogicGateSVG';
 
 export default class LogicGate extends Element {
   constructor (id, { subtype }) {
     super(id, name)
 
     this.gateType = subtype
-    this.render()
     this.node = this.getLogicGate(id)
     this.node.on('change', this.updateWireColor)
+    this.svgRenderer = new LogicGateSVG({
+      primaryColor: '#ffffff',
+      secondaryColor: '#1C1D24',
+      gateType: this.gateType,
+      inputCount: this.settings.inputs.value
+    })
+    
+    this.render()
   }
 
   settings = {
@@ -24,7 +32,7 @@ export default class LogicGate extends Element {
   }
 
   getSvg = (color) => {
-    return renderGate('NOR', this.settings.inputs.value, color)
+    return this.svgRenderer.getSvgData() // renderGate('NOR', this.settings.inputs.value, color)
   }
 
   getLogicGate = (id) => {

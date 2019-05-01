@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Integrated Circuit SVG renderer render() should render the integrated circuit 1`] = `
+Object {
+  "height": 60,
+  "path": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY0IiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAsIC0zMCkiPjxzdmcgeD0iMzAiIHk9IjMwIiB3aWR0aD0iMjA0IiBoZWlnaHQ9IjYwIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzMCwgMzApIj48cmVjdCB3aWR0aD0iMjA0IiBoZWlnaHQ9IjYwIiBzdHJva2U9InVuZGVmaW5lZCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJ1bmRlZmluZWQiIC8+PHN2ZyB3aWR0aD0iMjA0IiBoZWlnaHQ9IjYwIj48dGV4dCB4PSIxMDIiIHk9IjMwIiBmb250LWZhbWlseT0iTHVjaWRhIENvbnNvbGUsIE1vbmFjbywgbW9ub3NwYWNlIiBmb250LXNpemU9IjEyIiBmaWxsPSJ1bmRlZmluZWQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGFsaWdubWVudC1iYXNlbGluZT0iY2VudHJhbCI+VGVzdCBjaXJjdWl0PC90ZXh0Pjwvc3ZnPjwvc3ZnPjxsaW5lIHgxPSIwIiB4Mj0iMzAiIHkxPSI0NSIgeTI9IjQ1IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0idW5kZWZpbmVkIiAvPjxsaW5lIHgxPSIwIiB4Mj0iMzAiIHkxPSI3NSIgeTI9Ijc1IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0idW5kZWZpbmVkIiAvPjxsaW5lIHgxPSIyMzQiIHgyPSIyNjQiIHkxPSI0NSIgeTI9IjQ1IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0idW5kZWZpbmVkIiAvPjxsaW5lIHgxPSIyMzQiIHgyPSIyNjQiIHkxPSI3NSIgeTI9Ijc1IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0idW5kZWZpbmVkIiAvPjx0ZXh0IHg9IjM2IiB5PSI0OSIgZm9udC1mYW1pbHk9Ikx1Y2lkYSBDb25zb2xlLCBNb25hY28sIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMiIgZmlsbD0idW5kZWZpbmVkIj5SPC90ZXh0Pjx0ZXh0IHg9IjM2IiB5PSI3OSIgZm9udC1mYW1pbHk9Ikx1Y2lkYSBDb25zb2xlLCBNb25hY28sIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMiIgZmlsbD0idW5kZWZpbmVkIj5TPC90ZXh0Pjx0ZXh0IHg9IjIwNi4yNSIgeT0iNDkiIGZvbnQtZmFtaWx5PSJMdWNpZGEgQ29uc29sZSwgTW9uYWNvLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9InVuZGVmaW5lZCI+T1XigKY8L3RleHQ+PHRleHQgeD0iMjA2LjI1IiB5PSI3OSIgZm9udC1mYW1pbHk9Ikx1Y2lkYSBDb25zb2xlLCBNb25hY28sIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMiIgZmlsbD0idW5kZWZpbmVkIj5PVeKApjwvdGV4dD48L2c+PC9zdmc+",
+  "ports": Array [
+    Object {
+      "type": "input",
+      "x": 0,
+      "y": 15,
+    },
+    Object {
+      "type": "input",
+      "x": 0,
+      "y": 45,
+    },
+    Object {
+      "type": "output",
+      "x": 264,
+      "y": 15,
+    },
+    Object {
+      "type": "output",
+      "x": 264,
+      "y": 45,
+    },
+  ],
+  "width": 264,
+}
+`;

@@ -106,7 +106,7 @@ export default class Element extends draw2d.shape.basic.Image {
   /**
    * Updates the color of the SVG according to the element's selection state.
    */
-  updateSelectionColor = () => {
+  updateSelectionColor = () => { // TODO: MAJOR: DO NOT RE-RENDER IF NOT NECESSARY
     if (this.canvas) {
       const color = this.isSelected() ? '#ff0000' : '#000'
 
@@ -189,10 +189,11 @@ export default class Element extends draw2d.shape.basic.Image {
       return
     }
     const locator = new draw2d.layout.locator.XYAbsPortLocator(this.width + 10, 0)
-    const settings = { width: 16, height: 16, visible: false }
+    const settings = { width: 16, height: 16, visible: false, cursor: 'pointer' }
 
-    this.toolboxButton = new draw2d.shape.icon.Wrench(settings)
+    this.toolboxButton = new draw2d.shape.icon.Wrench2(settings)
     this.toolboxButton.on('click', this.fireToolboxEvent)
+    this.toolboxButton.setColor('#ffffff')
     this.add(this.toolboxButton, locator)
   }
 

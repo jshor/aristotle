@@ -1,9 +1,5 @@
 import { command } from 'draw2d'
-import Element from '../Element'
-import Switch from '../elements/Switch'
-import LogicGate from '../elements/LogicGate'
-import Lightbulb from '../elements/Lightbulb'
-import IntegratedCircuit from '../elements/IntegratedCircuit'
+import ElementInitializerService from './ElementInitializerService'
 import getIdMapping from '../utils/getIdMapping'
 
 /**
@@ -52,32 +48,10 @@ export default class DeserializerService {
    */
   createElement = (params) => {
     const { x, y, id } = params
-    const node = this.getInitializedElement(this.idMap[id], params)
+    const node = ElementInitializerService.getInitializedElement(this.idMap[id], params)
 
     this.elements.push(node)
     this.commandCollection.add(new command.CommandAdd(this.editor, node, x, y))
-  }
-  
-  /**
-   * Initializes the element based on its type.
-   * 
-   * @param {Object} params - any configurable params
-   * @param {String} params.type - element class name
-   * @returns {Element}
-   */
-  getInitializedElement = (id, params) => {
-    switch (params.type) {
-      case 'IntegratedCircuit':
-        return new IntegratedCircuit(id, params)
-      case 'Switch':
-        return new Switch(id, params)
-      case 'LogicGate':
-        return new LogicGate(id, params)
-      case 'Lightbulb':
-        return new Lightbulb(id, params)
-      default:
-        return new Element(id, params)
-    }
   }
 
   /**

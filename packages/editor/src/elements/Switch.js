@@ -1,15 +1,41 @@
 import { InputNode, LogicValue } from '@aristotle/logic-circuit'
 import { renderIc } from '@aristotle/logic-gates'
 import Element from '../Element'
+import { IntegratedCircuitSVG } from '../svg'
 
 export default class Switch extends Element {
   constructor (id) {
     super(id)
 
     this.node = new InputNode(id)
+
+    const wires = {
+      "top": [],
+      "bottom": [
+        {
+          "label": "OUT_1",
+          "type": "output"
+        }],
+      "left": [
+        {
+          "label": "OUT_1",
+          "type": "output"
+        }
+      ],
+      "right": [
+      ]
+    }
+    
     this.node.on('change', this.updateWireColor)
-    this.render()
     this.on('click', this.toggle)
+
+    this.svgRenderer = new IntegratedCircuitSVG({
+      title: 'sdfsdffsd',
+      wires,
+      primaryColor: '#ffffff',
+      secondaryColor: '#1C1D24'
+    })
+    this.render()
   }
 
   settings = {
@@ -49,6 +75,9 @@ export default class Switch extends Element {
     </svg>
     `.replace(/>\s+</g, '><').replace(/\s+/g, ' ')
 
+
+    return this.svgRenderer.getSvgData()
+
     return {
       path: 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))),
       width: 96,
@@ -58,7 +87,8 @@ export default class Switch extends Element {
       ]
     }
 
-    // return renderIc(svg, color, this.bgColor)
+
+    return renderIc(svg, color, this.bgColor)
   }
 
   toggle = () => {
