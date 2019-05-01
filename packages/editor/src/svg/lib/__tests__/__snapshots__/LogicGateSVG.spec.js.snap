@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Logic Gate SVG library render() should render the integrated circuit 1`] = `
+Object {
+  "height": 50,
+  "path": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxsaW5lIHgxPSIwIiB4Mj0iNDAiIHkxPSIxMCIgeTI9IjEwIiBzdHJva2U9InVuZGVmaW5lZCIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgc3Ryb2tlLXdpZHRoPSIyIiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIC8+PGxpbmUgeDE9IjAiIHgyPSI0MCIgeTE9IjQwIiB5Mj0iNDAiIHN0cm9rZT0idW5kZWZpbmVkIiBzdHJva2UtbGluZWNhcD0ic3F1YXJlIiBzdHJva2Utd2lkdGg9IjIiIHZlY3Rvci1lZmZlY3Q9Im5vbi1zY2FsaW5nLXN0cm9rZSIgLz48bGluZSB4MT0iNjAiIHgyPSIxMDAiIHkxPSIyNSIgeTI9IjI1IiBzdHJva2U9InVuZGVmaW5lZCIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgc3Ryb2tlLXdpZHRoPSIyIiB2ZWN0b3ItZWZmZWN0PSJub24tc2NhbGluZy1zdHJva2UiIC8+PHN2ZyBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAxNiA3LjI1IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiB4PSIyMCI+PHBhdGggZD0ibSAwLjEzMjI5MDAxLDAuMTMyNDYwNTMgdiAwLjAxNjUgQyAwLjcxNDA0MDAxLDEuMTU4MzYwNSAxLjA1MDA2LDIuMzI0MDYwNSAxLjA1MDA2LDMuNTcxOTYwNSBjIDAsMS4yNDggLTAuMzM2MDE5OTksMi40MTM2IC0wLjkxNzc2OTk5LDMuNDIzIHYgMC4wMTY1IEggMy42OTU4OSBjIDIuNTQyOCwwIDQuNzYyNSwtMS4zODYyIDUuOTUzMSwtMy40Mzk2IC0xLjE5MDYsLTIuMDUzNCAtMy40MTAzLC0zLjQzOTU5OTk3IC01Ljk1MzEsLTMuNDM5NTk5OTcgaCAtMi42NDU4IHoiIGZpbGw9InVuZGVmaW5lZCIgc3Ryb2tlPSJ1bmRlZmluZWQiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS13aWR0aD0iMiIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiAvPjwvc3ZnPjxjaXJjbGUgY3g9Ijg0IiBjeT0iMjUiIHI9IjQiIGZpbGw9InVuZGVmaW5lZCIgc3Ryb2tlPSJ1bmRlZmluZWQiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS13aWR0aD0iMiIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIiAvPjwvc3ZnPg==",
+  "ports": Array [
+    Object {
+      "type": "input",
+      "x": 0,
+      "y": 10,
+    },
+    Object {
+      "type": "input",
+      "x": 0,
+      "y": 40,
+    },
+    Object {
+      "type": "output",
+      "x": 100,
+      "y": 25,
+    },
+  ],
+  "width": 100,
+}
+`;
