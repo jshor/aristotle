@@ -20,9 +20,9 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">17.86% </span>
+        <span class="strong">19.05% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>5/28</span>
+        <span class='fraction'>4/21</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -30,14 +30,14 @@
         <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">20% </span>
+        <span class="strong">25% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>1/5</span>
+        <span class='fraction'>1/4</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">17.86% </span>
+        <span class="strong">19.05% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>5/28</span>
+        <span class='fraction'>4/21</span>
       </div>
     </div>
   </div>
@@ -100,31 +100,14 @@
 55
 56
 57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+58</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -133,26 +116,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -210,26 +176,9 @@ class Connection extends draw2d.Connection {
     this.circuit = circuit
     this.on('added', this.onAdd)
     this.on('removed', this.onRemove)
-    console.log('created line')
   }
 &nbsp;
   onAdd = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
-<span class="cstat-no" title="statement not covered" >    this.shape.node.addEventListener('click', <span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      this.canvas.setCurrentSelection(this)</span>
-<span class="cstat-no" title="statement not covered" >      console.log('click')</span>
-    })
-<span class="cstat-no" title="statement not covered" >    console.log('draw2d.Connection.DROP_FILTER:', draw2d.Connection.DROP_FILTER)</span>
-    const settings = <span class="cstat-no" title="statement not covered" >{</span>
-      outlineColor: '#000000',
-      outlineStroke: 1,
-      stroke: 1
-    }
-<span class="cstat-no" title="statement not covered" >    persistFilter()</span>
-&nbsp;
-    // this.shape.items[0].attr(settings);
-    // this.shape.items[1].attr(settings);
-&nbsp;
-&nbsp;
     const source = <span class="cstat-no" title="statement not covered" >this.sourcePort.parent</span>
     const target = <span class="cstat-no" title="statement not covered" >this.targetPort.parent</span>
     const sourceNode = <span class="cstat-no" title="statement not covered" >source.getCircuitNode(this)</span>
@@ -271,7 +220,7 @@ export default Connection
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu May 02 2019 15:41:12 GMT-0400 (EDT)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu May 02 2019 17:48:28 GMT-0400 (EDT)
 </div>
 </div>
 <script src="../prettify.js"></script>
