@@ -11,6 +11,7 @@
 </template>
 
 <script>
+// TODO: THIS COMPONENT IS DEAD
 import { Editor, CommandModel } from '@aristotle/editor'
 import DocumentModel from '@/models/DocumentModel'
 
@@ -71,7 +72,6 @@ export default {
     }
   },
   mounted () {
-    console.log('doc: ', document.getElementById(this.document.id), this.document.id)
     this.canvas = new Editor(this.document.id.toString())
 
     this.canvas.on('toolbox', this.onToolbox)
