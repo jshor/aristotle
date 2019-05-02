@@ -1,15 +1,31 @@
 <template>
   <div class="toolbox">
     <div class="toolbox__border">
-      <div class="toolbox__pane">
-        <img :src="buffer" class="draw2d_droppable ui-draggable" ref="svg" />
-        Nor
+      <div
+        class="toolbox__pane">
+        <div class="toolbox__item">
+          <div
+            class="toolbox__draggable draw2d_droppable ui-draggable"
+            :data-type="`LogicGate`"
+            :data-subtype="`NOR`">
+            <img
+              :src="buffer"
+              :style="{
+                width: `${100 * (1 / activeDocument.zoomFactor)}px`
+              }"
+            />
+          </div>
+          <div class="toolbox__visible">
+            <img :src="buffer" class="toolbox__thumbnail" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { renderGate } from '@aristotle/logic-gates'
 
 export default {
@@ -18,6 +34,9 @@ export default {
     return {
       buffer: renderGate('NOR', 2, '#000').path
     }
+  },
+  computed: {
+    ...mapGetters(['activeDocument'])
   }
 }
 </script>
@@ -53,6 +72,26 @@ $scrollbar-width: 3px;
   &__pane {
     height: 100%;
     background-color: $color-primary;
+  }
+
+  &__item {
+    width: 50%;
+    position: relative;
+    
+    .toolbox__draggable {
+      overflow: hidden;
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+  }
+
+  &__visible {
+    pointer-events: none;
+    background-color: red;
   }
 }
 </style>

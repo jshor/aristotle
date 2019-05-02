@@ -1,13 +1,13 @@
 <template>
   <div id="app" class="main">
     <button @click="openDocument" v-if="!activeDocument">Open document</button>
-    <toolbar 
+    <toolbar
       v-if="activeDocument"
       :document="activeDocument"
       @relayCommand="onRelayCommand"
       @openDocument="openDocument"
     />
-    
+
     <div class="panel">
       <toolbox-container class="dropbox" />
       <div class="document-host">
@@ -22,6 +22,9 @@
         />
       </div>
     </div>
+
+    {{ filters }}
+    <img :src="filters" />
   </div>
 </template>
 
@@ -33,7 +36,8 @@ import TabsContainer from '@/containers/TabsContainer'
 import ToolboxContainer from '@/containers/ToolboxContainer'
 import DocumentModel from '@/models/DocumentModel'
 import { CommandModel } from '@aristotle/editor'
-import data from '@/mocks/document3.json'
+import data from '@/mocks/document.json'
+import filters from '@/assets/filters.svg'
 
 export default {
   name: 'App',
@@ -42,6 +46,9 @@ export default {
     TabsContainer,
     ToolboxContainer,
     Toolbar
+  },
+  data () {
+    return { filters }
   },
   computed: {
     ...mapState({
@@ -55,11 +62,9 @@ export default {
       this.$store.commit('RELAY_COMMAND', new CommandModel(command, payload))
     },
     openDocument () {
-      console.log('opening doc')
       const document = new DocumentModel()
 
       document.data = data
-console.log('document: ', document)
       this.$store.commit('OPEN_DOCUMENT', document)
     },
     changeDocument () {
@@ -86,8 +91,19 @@ body {
   background: #1D1E25;
   font-family: Segoe UI;
   font-size: 0.8rem;
-  
+ position: fixed;
   --main-bg-color: brown;
+  overflow: hidden;
+}
+
+rect.draw2d_shape_icon_Wrench2 {
+  cursor: pointer;
+}
+
+path.draw2d_shape_icon_Wrench2 {
+  fill: #ffffff;
+  stroke: #333641;
+  stroke-width: 1px;
 }
 
 image.draw2d_shape_basic_Image {
@@ -107,9 +123,26 @@ rect.draw2d {
 
   &_shape_basic_Rectangle:not(:last-of-type) {
     // stroke: none;
+    stroke-dasharray: 6;
+    animation: animate1 30s infinite linear; // THIS IS COOL!
+    opacity: 0.5;
+    stroke: #5c6175;
   }
 }
 
+.draw2d_Connection {
+  // stroke-dasharray: 6;
+  // animation: animate1 30s infinite linear; // THIS IS COOL!
+  stroke-linejoin: bevel;
+  stroke-linecap: square !important;
+  cursor: pointer;
+}
+
+@keyframes animate1 {
+ to {
+       stroke-dashoffset: -1000;
+ }
+}
 .main {
   display: flex;
   height: 100vh;
@@ -144,7 +177,7 @@ rect.draw2d {
 
 .editor {
   overflow: hidden;
-  
+
   background-color: #333641;
   box-sizing: border-box;
   border: 3px solid #3D404B;
