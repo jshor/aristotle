@@ -24,6 +24,11 @@ export default class Lightbulb extends Element {
     }
   }
 
+  /**
+   * Creates a new output node for one bit representation.
+   *
+   * @returns {OutputNode}
+   */
   createInput = () => {
     const node = new OutputNode()
 
@@ -32,6 +37,11 @@ export default class Lightbulb extends Element {
     return node
   }
 
+  /**
+   * Returns the binary representation for the output nodes, in reverse order.
+   *
+   * @returns {String}
+   */
   getBinaryValue = () => {
     return this
       .nodes
@@ -40,10 +50,18 @@ export default class Lightbulb extends Element {
       .join('')
   }
 
+  /**
+   * Returns the binary representation for the output nodes.
+   *
+   * @returns {String}
+   */
   getHexadecimalValue = () => {
     return parseInt(this.getBinaryValue(), 2).toString(16)
   }
 
+  /**
+   * Repaints the SVG after an input change.
+   */
   change = () => {
     const value = this.getHexadecimalValue()
     const { path } = this.getSvg(value)
@@ -51,6 +69,12 @@ export default class Lightbulb extends Element {
     this.setPath(path)
   }
 
+  /**
+   * Returns the CircuitNode of the n-th port used by the given connection.
+   *
+   * @param {Connection} connection
+   * @returns {CircuitNode}
+   */
   getCircuitNode = (connection) => {
     const target = connection.getTarget()
     const index = getPortIndex(target, 'input')
