@@ -85,13 +85,21 @@ export default {
     }
   },
   mounted () {
-    this.canvas = new Editor(this.document.id.toString())
+    setTimeout(() => {
+      // TODO: Editor needs to be created AFTER the toolboxContainer is ready
+      // because it looks for all .ui-droppable elements to apply d-n-d ops to.
+      // maybe create an action for this that is called in mounted() of ToolboxContainer?
+      this.canvas = new Editor(this.document.id.toString())
 
-    this.canvas.on('toolbox', this.onToolbox)
-    this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
-    this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
-    this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))
-    this.canvas.load(this.document.data)
+      this.canvas.on('toolbox', this.onToolbox)
+      this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
+      this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
+      this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))
+      this.canvas.on('zoomed', (editor, { value }) => {
+        this.$store.commit('SET_ZOOM_FACTOR', value)
+      })
+      this.canvas.load(this.document.data)
+    })
   }
 }
 </script>

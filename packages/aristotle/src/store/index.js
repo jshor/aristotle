@@ -23,9 +23,7 @@ const getters = {
 const mutations = {
   OPEN_DOCUMENT (state, document) {
     state.activeDocumentId = document.id
-    // state.documents.push(document)
     state.documents.push(document)
-    // console.log(state.documents)
   },
   ACTIVATE_DOCUMENT (state, documentId) {
     state.activeDocumentId = documentId
@@ -37,6 +35,14 @@ const mutations = {
       .filter(({ id }) => state.activeDocumentId === id)
       .forEach((doc) => {
         doc.editorModel = editorModel
+      })
+  },
+  SET_ZOOM_FACTOR (state, zoomFactor) {
+    state
+      .documents
+      .filter(({ id }) => state.activeDocumentId === id)
+      .forEach((doc) => {
+        Vue.set(doc, 'zoomFactor', zoomFactor)
       })
   },
   RELAY_COMMAND (state, relayedCommand) {
