@@ -1,20 +1,26 @@
 <template>
-  <div id="canvasWrapper">
-    <div
-      :id="document.id"
-      :style="{
-        width: '4998px',
-        height: '4998px'
-      }"
-    />
-  </div>
+  <document>
+    <template v-slot:editor>
+      <div
+        :id="document.id"
+        :style="{
+          width: '4998px',
+          height: '4998px'
+        }"
+      />
+    </template>
+    
+    <template v-slot:oscilloscope>
+      <div class="oscilloscope-inner">OSCILLOSCOPE YAY</div>
+    </template>
+  </document>
 </template>
 
 <script>
-// :relayedCommand="relayedCommand"
 import { mapGetters, mapState } from 'vuex'
 import Toolbar from '@/components/Toolbar'
 import Toolbox from '@/components/Toolbox'
+import Document from '@/components/Document'
 import { Editor, CommandModel } from '@aristotle/editor'
 import DocumentModel from '@/models/DocumentModel'
 
@@ -23,13 +29,12 @@ export default {
   components: {
     Editor,
     Toolbar,
-    Toolbox
+    Toolbox,
+    Document
   },
   data () {
     return {
-      canvas: null,
-      canvasWidth: 1600,
-      canvasHeight: 1600
+      canvas: null
     }
   },
   props: {
@@ -105,11 +110,9 @@ export default {
 </script>
 
 <style>
-#canvasWrapper {
-}
-
-#canvasWrapper svg {
-  background-color: #1D1E25;
-  position: relative !important;
+.oscilloscope-inner {
+  background-color: #1C1D24;
+  height: 100%;
+  box-sizing: border-box;
 }
 </style>
