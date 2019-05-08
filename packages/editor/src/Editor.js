@@ -17,7 +17,7 @@ export default class Editor extends Canvas {
     this.installEditPolicies()
 
     this.drawn = false
-    // this.setMouseMode('PANNING') // TODO: remove
+    this.setMouseMode('PANNING') // TODO: remove
 
     // this.on('select', (...args) => {
     //   if (!this.drawn) {

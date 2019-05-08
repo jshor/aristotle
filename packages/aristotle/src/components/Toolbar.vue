@@ -103,7 +103,6 @@
     </div>
     <div class="toolbar__group toolbar__group--right">
       <button
-        :disabled="true"
         @click="relayCommand('TOGGLE_DEBUG')"
         class="toolbar-button">
         <i class="fas fa-bug" />
@@ -120,6 +119,12 @@
         @click="relayCommand('STEP')"
         class="toolbar-button toolbar-button--pull-right">
         <i class="fas fa-step-forward" />
+      </button>
+      <div class="toolbar__separator" />
+      <button
+        @click="relayCommand('STEP')"
+        class="toolbar-button toolbar-button--pull-right">
+        <i class="fas fa-wave-square" />
       </button>
     </div>
   </div>
@@ -173,7 +178,8 @@ $scrollbar-width: 3px;
 
   &__separator {
     display: block;
-    background-color: $color-secondary;
+    border-left: 1px solid $color-secondary;
+    box-sizing: border-box;
     height: 90%;
     margin: 0.25rem;
     box-shadow: 0 0 $border-width $color-shadow;
