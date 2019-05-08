@@ -8,23 +8,25 @@
       @openDocument="openDocument"
     />
 
-    <div class="panel">
-      <toolbox-container class="dropbox" />
-      <div class="document-host">
-        <tabs-container />
+    <split-pane :default-percent="20" split="vertical">
+      <template v-slot:paneL>
+        <toolbox-container class="dropbox" />
+      </template>
+      <template v-slot:paneR>
+        <div class="miracle">
+          <tabs-container />
 
-        <DocumentContainer
-          v-show="document.id === activeDocumentId"
-          v-for="document in documents"
-          :document="document"
-          :key="document.id"
-          class="editor"
-        />
-      </div>
-    </div>
+          <DocumentContainer
+            v-show="document.id === activeDocumentId"
+            v-for="document in documents"
+            :document="document"
+            :key="document.id"
+            class="document"
+          />
 
-    {{ filters }}
-    <img :src="filters" />
+        </div>
+      </template>
+    </split-pane>
   </div>
 </template>
 
@@ -94,6 +96,7 @@ body {
  position: fixed;
   --main-bg-color: brown;
   overflow: hidden;
+  // color: #fff;
 }
 
 rect.draw2d_shape_icon_Wrench2 {
@@ -140,7 +143,7 @@ rect.draw2d {
 
 @keyframes animate1 {
  to {
-       stroke-dashoffset: -1000;
+    stroke-dashoffset: -1000;
  }
 }
 .main {
@@ -150,38 +153,32 @@ rect.draw2d {
   max-width: 100vw;
   max-height: 100vh;
   flex-direction: column;
-}
-
-.panel {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-  max-width: 100vw;
-  max-height: 100vh;
-  flex-direction: row;
-}
-
-.dropbox {
-  width: 200px;
-}
-
-.document-host {
-  flex: 1;
-  height: 100%;
-  max-width: calc(100vw - 200px);
-  display: flex;          /* NEW */
-  flex-direction: column; /* NEW */
-  padding: 0.5rem;
-  box-sizing: border-box;
-}
-
-.editor {
   overflow: hidden;
+  // opacity: 0.5;
+  // filter: blur(10px); // thanks CSS, very cool!
+}
 
+.miracle {
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px 5px 5px;
+}
+
+.document {
+  overflow: hidden;
+  height: 100%;
+  padding-bottom: 5px;
+}
+
+.box {
   background-color: #333641;
   box-sizing: border-box;
   border: 3px solid #3D404B;
-  border-top: 0;
-  box-shadow: 0 0 $border-width $color-shadow;
+}
+
+.dropbox {
+  padding: 10px 5px 10px 10px;
 }
 </style>
