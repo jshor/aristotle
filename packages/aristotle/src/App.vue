@@ -77,9 +77,6 @@ export default {
 </script>
 
 <style lang="scss">
-$fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
-@import '~@fortawesome/fontawesome-free/scss/fontawesome';
-@import '"~@fortawesome/fontawesome-free/scss/solid';
 
 $color-shadow: #000;
 
@@ -97,48 +94,6 @@ body {
   --main-bg-color: brown;
   overflow: hidden;
   // color: #fff;
-}
-
-rect.draw2d_shape_icon_Wrench2 {
-  cursor: pointer;
-}
-
-path.draw2d_shape_icon_Wrench2 {
-  fill: #ffffff;
-  stroke: #333641;
-  stroke-width: 1px;
-}
-
-image.draw2d_shape_basic_Image {
-  opacity: 1 !important; // SHAME.
-  cursor: move !important;
-}
-
-ellipse.draw2d_OutputPort, ellipse.draw2d_InputPort {
-    fill: rgb(255,255,255) !important; // SHAME.
-    stroke-width: 2;
-}
-
-rect.draw2d {
-  &_ResizeHandle {
-    display: none;
-  }
-
-  &_shape_basic_Rectangle:not(:last-of-type) {
-    // stroke: none;
-    stroke-dasharray: 6;
-    animation: animate1 30s infinite linear; // THIS IS COOL!
-    opacity: 0.5;
-    stroke: #5c6175;
-  }
-}
-
-.draw2d_Connection {
-  // stroke-dasharray: 6;
-  // animation: animate1 30s infinite linear; // THIS IS COOL!
-  stroke-linejoin: bevel;
-  stroke-linecap: square !important;
-  cursor: pointer;
 }
 
 @keyframes animate1 {
