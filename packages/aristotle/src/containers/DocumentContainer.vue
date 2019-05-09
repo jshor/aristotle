@@ -9,7 +9,7 @@
         }"
       />
     </template>
-    
+
     <template v-slot:oscilloscope>
       <div class="oscilloscope-inner">OSCILLOSCOPE YAY</div>
     </template>
@@ -17,9 +17,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex'
-import Toolbar from '@/components/Toolbar'
-import Toolbox from '@/components/Toolbox'
+import { mapState } from 'vuex'
 import Document from '@/components/Document'
 import { Editor, CommandModel } from '@aristotle/editor'
 import DocumentModel from '@/models/DocumentModel'
@@ -27,9 +25,6 @@ import DocumentModel from '@/models/DocumentModel'
 export default {
   name: 'DocumentContainer',
   components: {
-    Editor,
-    Toolbar,
-    Toolbox,
     Document
   },
   data () {

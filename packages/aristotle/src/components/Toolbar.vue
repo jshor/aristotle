@@ -155,20 +155,6 @@ export default {
 </script>
 
 <style lang="scss">
-
-$color-bg-primary: #1D1E25;
-$color-bg-secondary: #333641;
-$color-bg-tertiary: #3D404B;
-$color-bg-quaternary: #454857;
-
-$color-primary: #fff;
-$color-secondary: #9ca0b1;
-
-$color-shadow: #000;
-
-$border-width: 1px;
-$scrollbar-width: 3px;
-
 .toolbar {
   background-color: $color-bg-secondary;
   border: $border-width solid $color-bg-secondary;
