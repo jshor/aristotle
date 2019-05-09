@@ -5,6 +5,7 @@ import Connection from './Connection'
 import EditorModel from './models/EditorModel'
 import DeserializerService from './services/DeserializerService'
 import SerializerService from './services/SerializerService'
+import OscillationService from './services/OscillationService'
 import uuid from './utils/uuid'
 
 export default class Editor extends Canvas {
@@ -14,11 +15,13 @@ export default class Editor extends Canvas {
     this.circuit = new Circuit()
     this.deserializer = new DeserializerService(this)
     this.serializer = new SerializerService(this)
+    this.oscillation = new OscillationService(this)
     this.installEditPolicies()
 
     this.drawn = false
     this.setMouseMode('PANNING') // TODO: remove
 
+    // this.oscillation.start()
     // this.on('select', (...args) => {
     //   if (!this.drawn) {
     //     const serialized = JSON.stringify(this.serializer.serializeAll())
@@ -30,6 +33,11 @@ export default class Editor extends Canvas {
     //     this.drawn = true
     //   }
     // })
+  }
+
+  oscillate = (waves) => {
+    this.fireEvent('oscillate', waves)
+    // console.log('oscillating', waves)
   }
 
   /**

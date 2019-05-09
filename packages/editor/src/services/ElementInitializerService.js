@@ -1,5 +1,6 @@
 import Element from '../Element'
 import Switch from '../elements/Switch'
+import Clock from '../elements/Clock'
 import LogicGate from '../elements/LogicGate'
 import Lightbulb from '../elements/Lightbulb'
 import IntegratedCircuit from '../elements/IntegratedCircuit'
@@ -16,6 +17,8 @@ export default class ElementInitializerService {
     switch (params.type) {
       case 'IntegratedCircuit':
         return new IntegratedCircuit(id, params)
+      case 'Clock':
+        return new Clock(id, params)
       case 'Switch':
         return new Switch(id, params)
       case 'LogicGate':

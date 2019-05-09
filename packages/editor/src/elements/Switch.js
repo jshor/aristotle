@@ -27,7 +27,7 @@ export default class Switch extends Element {
     }
     
     this.node.on('change', this.updateWireColor)
-    this.on('click', this.toggle)
+    this.on('click', this.doToggle)
 
     this.svgRenderer = new IntegratedCircuitSVG({
       title: 'sdfsdffsd',
@@ -76,7 +76,7 @@ export default class Switch extends Element {
     `.replace(/>\s+</g, '><').replace(/\s+/g, ' ')
 
 
-    return this.svgRenderer.getSvgData()
+    // return this.svgRenderer.getSvgData()
 
     return {
       path: 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))),
@@ -91,8 +91,13 @@ export default class Switch extends Element {
     return renderIc(svg, color, this.bgColor)
   }
 
-  toggle = () => {
+  doToggle = () => {
     const newValue = this.node.value === LogicValue.TRUE ? LogicValue.FALSE : LogicValue.TRUE
+
+    this.toggle(newValue)
+  }
+
+  toggle = (newValue) => {
     this.node.setValue(newValue)
     this.canvas.step(true)
     this.canvas.circuit.queue.push(this.node)
