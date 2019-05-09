@@ -38,7 +38,7 @@ import TabsContainer from '@/containers/TabsContainer'
 import ToolboxContainer from '@/containers/ToolboxContainer'
 import DocumentModel from '@/models/DocumentModel'
 import { CommandModel } from '@aristotle/editor'
-import data from '@/mocks/document.json'
+import data from '@/mocks/document2.json'
 import filters from '@/assets/filters.svg'
 
 export default {
@@ -77,23 +77,14 @@ export default {
 </script>
 
 <style lang="scss">
-
-$color-shadow: #000;
-
-$border-width: 1px;
-$scrollbar-width: 3px;
 body {
-  -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
   margin: 0;
   background: #1D1E25;
   font-family: Segoe UI;
   font-size: 0.8rem;
- position: fixed;
-  --main-bg-color: brown;
+  position: fixed;
   overflow: hidden;
-  // color: #fff;
 }
 
 @keyframes animate1 {
@@ -127,13 +118,7 @@ body {
   padding-bottom: 5px;
 }
 
-.box {
-  background-color: #333641;
-  box-sizing: border-box;
-  border: 3px solid #3D404B;
-}
-
 .dropbox {
-  padding: 10px 5px 10px 10px;
+  padding: 10px 5px 10px 7px;
 }
 </style>
