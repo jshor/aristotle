@@ -1,5 +1,3 @@
-import Vue from 'vue'
-
 const state = [
   // relayedCommand: null,
   // toolboxVisible: false,

@@ -18,7 +18,6 @@
   </div>
 </template>
 
-
 <style lang="scss">
 .document {
   &__pane {
