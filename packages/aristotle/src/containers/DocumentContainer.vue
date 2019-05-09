@@ -11,6 +11,7 @@
     </template>
 
     <template v-slot:oscilloscope>
+      <oscilloscope-container :waves="waves" />
       <div class="oscilloscope-inner">OSCILLOSCOPE YAY</div>
     </template>
   </document>
@@ -19,17 +20,20 @@
 <script>
 import { mapState } from 'vuex'
 import Document from '@/components/Document'
+import OscilloscopeContainer from './OscilloscopeContainer'
 import { Editor, CommandModel } from '@aristotle/editor'
 import DocumentModel from '@/models/DocumentModel'
 
 export default {
   name: 'DocumentContainer',
   components: {
-    Document
+    Document,
+    OscilloscopeContainer
   },
   data () {
     return {
-      canvas: null
+      canvas: null,
+      waves: {}
     }
   },
   props: {
@@ -97,6 +101,9 @@ export default {
       this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))
       this.canvas.on('zoomed', (editor, { value }) => {
         this.$store.commit('SET_ZOOM_FACTOR', value)
+      })
+      this.canvas.on('oscillate', (editor, waves) => {
+        this.waves = waves
       })
       this.canvas.load(this.document.data)
     })
