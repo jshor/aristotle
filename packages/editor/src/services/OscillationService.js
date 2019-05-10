@@ -1,9 +1,12 @@
+import IntervalWorkerService from './IntervalWorkerService'
+
 const BASE_INTERVAL = 1000
 const SIGNAL_HEIGHT = 40
 const SEGMENT_WIDTH = 2 // px per refresh rate
 
 export default class OscillationService {
   constructor (editor) {
+    this.interval = new IntervalWorkerService()
     this.waves = {}
     // refreshRate (ms) -- must be a number that all pulses are divisible by
     // TODO: calculate this dynamically...?
@@ -12,14 +15,19 @@ export default class OscillationService {
     this.ticks = 0
     this.lastSignal = 0
     this.lastUpdate = Date.now()
+    this.interval.onTick(this.tick.bind(this))
+
+    setTimeout(() => {
+      this.interval.stop()
+    }, 20000)
   }
   
   start = () => {
-    this.interval = setInterval(this.tick)
+    this.interval.start()
   }
   
   stop = () => {
-    clearInterval(this.interval)
+    this.interval.stop()
   }
   
   tick = () => {

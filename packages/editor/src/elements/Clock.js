@@ -6,7 +6,7 @@ export default class Clock extends Switch {
   constructor (id) {
     super(id)
 
-    const val = parseInt(Math.random() * 40) * 100
+    const val = 1000 // parseInt(Math.random() * 40) * 100
     console.log('val: ', val)
     this.wave = new WaveService(id, val)
     this.wave.onUpdate(this.pulse)
