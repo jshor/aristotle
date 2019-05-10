@@ -12,7 +12,6 @@
 
     <template v-slot:oscilloscope>
       <oscilloscope-container :waves="waves" />
-      <div class="oscilloscope-inner">OSCILLOSCOPE YAY</div>
     </template>
   </document>
 </template>
