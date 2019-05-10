@@ -21,7 +21,7 @@ export default class Editor extends Canvas {
     this.drawn = false
     this.setMouseMode('PANNING') // TODO: remove
 
-    // this.oscillation.start()
+    this.oscillation.start()
     // this.on('select', (...args) => {
     //   if (!this.drawn) {
     //     const serialized = JSON.stringify(this.serializer.serializeAll())
