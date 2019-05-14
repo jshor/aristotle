@@ -6,6 +6,7 @@ import EditorModel from './models/EditorModel'
 import DeserializerService from './services/DeserializerService'
 import SerializerService from './services/SerializerService'
 import OscillationService from './services/OscillationService'
+import ElementInitializerService from './services/ElementInitializerService'
 import uuid from './utils/uuid'
 
 export default class Editor extends Canvas {
@@ -47,10 +48,18 @@ export default class Editor extends Canvas {
    * @param {Number} x - x-axis screen coordinates to add the element at
    * @param {Number} y - y-axis screen coordinates to add the element at
    */
-  addNode (node, x, y) {
+  addNode = (node, x, y) => {
     this.add(node, x, y)
     this.circuit.addNode(node.node)
     this.step(true)
+  }
+
+
+  addElement = (params, x, y) => {
+    const element = ElementInitializerService
+      .getInitializedElement(uuid(), params)
+
+    this.addNode(element, x, y)// TODO: should be command
   }
 
   /**

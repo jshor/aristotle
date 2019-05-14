@@ -1,5 +1,4 @@
 import { Port, policy } from 'draw2d'
-import Canvas from '../Canvas'
 import Editor from '../Editor'
 import Connection from '../Connection'
 import Element from '../Element'

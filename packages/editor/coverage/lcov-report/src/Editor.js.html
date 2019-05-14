@@ -20,9 +20,9 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">58% </span>
+        <span class="strong">57.14% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>29/50</span>
+        <span class='fraction'>32/56</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">71.43% </span>
@@ -30,14 +30,14 @@
         <span class='fraction'>10/14</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">58.33% </span>
+        <span class="strong">50% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>7/12</span>
+        <span class='fraction'>7/14</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">59.18% </span>
+        <span class="strong">58.18% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>29/49</span>
+        <span class='fraction'>32/55</span>
       </div>
     </div>
   </div>
@@ -216,7 +216,26 @@
 171
 172
 173
-174</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -233,6 +252,10 @@
 <span class="cline-any cline-yes">17x</span>
 <span class="cline-any cline-yes">17x</span>
 <span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-yes">17x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">17x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -247,6 +270,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -261,6 +287,14 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -303,16 +337,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">19x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">19x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -396,6 +430,8 @@ import Connection from './Connection'
 import EditorModel from './models/EditorModel'
 import DeserializerService from './services/DeserializerService'
 import SerializerService from './services/SerializerService'
+import OscillationService from './services/OscillationService'
+import ElementInitializerService from './services/ElementInitializerService'
 import uuid from './utils/uuid'
 &nbsp;
 export default class Editor extends Canvas {
@@ -405,11 +441,13 @@ export default class Editor extends Canvas {
     this.circuit = new Circuit()
     this.deserializer = new DeserializerService(this)
     this.serializer = new SerializerService(this)
+    this.oscillation = new OscillationService(this)
     this.installEditPolicies()
 &nbsp;
     this.drawn = false
-    // this.setMouseMode('PANNING') // TODO: remove
+    this.setMouseMode('PANNING') // TODO: remove
 &nbsp;
+    this.oscillation.start()
     // this.on('select', (...args) =&gt; {
     //   if (!this.drawn) {
     //     const serialized = JSON.stringify(this.serializer.serializeAll())
@@ -423,6 +461,11 @@ export default class Editor extends Canvas {
     // })
   }
 &nbsp;
+  oscillate = <span class="fstat-no" title="function not covered" >(w</span>aves) =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.fireEvent('oscillate', waves)</span>
+    // console.log('oscillating', waves)
+  }
+&nbsp;
   /**
    * Adds a node to the Editor and its circuit instance.
    *
@@ -430,10 +473,18 @@ export default class Editor extends Canvas {
    * @param {Number} x - x-axis screen coordinates to add the element at
    * @param {Number} y - y-axis screen coordinates to add the element at
    */
-  addNode (node, x, y) {
+  addNode = (node, x, y) =&gt; {
     this.add(node, x, y)
     this.circuit.addNode(node.node)
     this.step(true)
+  }
+&nbsp;
+&nbsp;
+  addElement = <span class="fstat-no" title="function not covered" >(p</span>arams, x, y) =&gt; {
+    const element = <span class="cstat-no" title="statement not covered" >ElementInitializerService</span>
+      .getInitializedElement(uuid(), params)
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.addNode(element, x, y)/</span>/ TODO: should be command
   }
 &nbsp;
   /**
@@ -568,7 +619,7 @@ export default class Editor extends Canvas {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu May 02 2019 17:48:28 GMT-0400 (EDT)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Tue May 14 2019 14:55:28 GMT-0400 (EDT)
 </div>
 </div>
 <script src="../prettify.js"></script>

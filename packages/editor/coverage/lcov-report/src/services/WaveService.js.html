@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/services/WaveService.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">All files</a> / <a href="index.html">src/services</a> WaveService.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">11.11% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>3/27</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/4</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/8</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">11.11% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>3/27</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63</td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const BASE_INTERVAL = 1000
+const SIGNAL_HEIGHT = 40
+const SEGMENT_WIDTH = 2 // px per refresh rate
+&nbsp;
+// TODO: rename to ClockService
+export default class WaveService {
+<span class="fstat-no" title="function not covered" >  co</span>nstructor (id, interval) {
+<span class="cstat-no" title="statement not covered" >    this.id = id</span>
+<span class="cstat-no" title="statement not covered" >    this.interval = interval</span>
+<span class="cstat-no" title="statement not covered" >    this.lastUpdate = Date.now()</span>
+<span class="cstat-no" title="statement not covered" >    this.signal = false</span>
+<span class="cstat-no" title="statement not covered" >    this.segments = [{ x: 0, y: SIGNAL_HEIGHT }]</span>
+<span class="cstat-no" title="statement not covered" >    this.segmentWidth = SEGMENT_WIDTH </span>// TODO
+<span class="cstat-no" title="statement not covered" >    this.updateCallbacks = []</span>
+  }
+&nbsp;
+  onUpdate = <span class="fstat-no" title="function not covered" >(e</span>vent) =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.updateCallbacks.push(event)</span>
+  }
+  
+  update = <span class="fstat-no" title="function not covered" >(t</span>icks) =&gt; {
+<span class="cstat-no" title="statement not covered" >    if (ticks % this.interval === 0) {</span>
+<span class="cstat-no" title="statement not covered" >      this.drawPulseChange()</span>
+<span class="cstat-no" title="statement not covered" >      this.signal = !this.signal</span>
+<span class="cstat-no" title="statement not covered" >      this.lastUpdate = Date.now()</span>
+<span class="cstat-no" title="statement not covered" >      this.updateCallbacks.forEach(<span class="fstat-no" title="function not covered" >(c</span>allback) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        callback(this.signal)</span>
+      })
+    } else {
+<span class="cstat-no" title="statement not covered" >      this.drawPulseConstant()</span>
+    }
+  }
+  
+  getLastSegment = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    return this.segments[this.segments.length - 1]</span>
+  }
+  
+  addSegments = <span class="fstat-no" title="function not covered" >(s</span>egments) =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.segments = this.segments.concat(segments)</span>
+  }
+  
+  /**
+   * Draws a line like: |_ (for down), or _| (for up)
+   *
+   */
+  drawPulseChange = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+    const { x, y } = <span class="cstat-no" title="statement not covered" >this.getLastSegment()</span>
+    const deltaX = <span class="cstat-no" title="statement not covered" >this.segmentWidth / 2</span>
+    const deltaY = <span class="cstat-no" title="statement not covered" >this.signal ? SIGNAL_HEIGHT : 0</span>
+    
+<span class="cstat-no" title="statement not covered" >    this.addSegments([</span>
+      { x, y: deltaY }, // |
+      { x: x + deltaX + deltaX, y: deltaY } // _
+    ])
+  }
+  
+  drawPulseConstant = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+    const pos = <span class="cstat-no" title="statement not covered" >this.segments[this.segments.length - 1] </span>// .pop()
+    const x = <span class="cstat-no" title="statement not covered" >pos.x + this.segmentWidth</span>
+    
+<span class="cstat-no" title="statement not covered" >    this.addSegments({ x, y: pos.y })</span>
+  }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Tue May 14 2019 14:55:28 GMT-0400 (EDT)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

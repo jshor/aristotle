@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Code coverage report for src/elements/Lightbulb.js</title>
+    <title>Code coverage report for src/elements/Clock.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -16,32 +16,32 @@
 <div class='wrapper'>
   <div class='pad1'>
     <h1>
-      <a href="../../index.html">All files</a> / <a href="index.html">src/elements</a> Lightbulb.js
+      <a href="../../index.html">All files</a> / <a href="index.html">src/elements</a> Clock.js
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">66.67% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>6/9</span>
+        <span class='fraction'>0/9</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>0/0</span>
+        <span class='fraction'>0/2</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">66.67% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>2/3</span>
+        <span class='fraction'>0/4</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">66.67% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>6/9</span>
+        <span class='fraction'>0/9</span>
       </div>
     </div>
   </div>
-  <div class='status-line medium'></div>
+  <div class='status-line low'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -72,30 +72,24 @@
 27
 28
 29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+30</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -104,63 +98,39 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { OutputNode } from '@aristotle/logic-circuit'
-import { renderIc } from '@aristotle/logic-gates'
-import Element from '../Element'
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { LogicValue } from '@aristotle/logic-circuit'
+import Switch from './Switch'
+import WaveService from '../services/WaveService'
 &nbsp;
-export default class Lightbulb extends Element {
-  constructor (id) {
-    super(id)
+export default class Clock extends Switch {
+<span class="fstat-no" title="function not covered" >  co</span>nstructor (id) {
+<span class="cstat-no" title="statement not covered" >    super(id)</span>
 &nbsp;
-    this.node = new OutputNode(id)
-    this.node.on('change', this.updateWireColor)
-    this.render()
+    const val = <span class="cstat-no" title="statement not covered" >1000 </span>// parseInt(Math.random() * 40) * 100
+<span class="cstat-no" title="statement not covered" >    console.log('val: ', val)</span>
+<span class="cstat-no" title="statement not covered" >    this.wave = new WaveService(id, val)</span>
+<span class="cstat-no" title="statement not covered" >    this.wave.onUpdate(this.pulse)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.on('added', this.registerWave)</span>
   }
 &nbsp;
-  settings = {
-    name: {
-      type: 'text',
-      value: ''
-    }
+  registerWave = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >    this.canvas.oscillation.add(this.wave)</span>
   }
 &nbsp;
-  updateWireColor = <span class="fstat-no" title="function not covered" >(v</span>alue) =&gt; {
-<span class="cstat-no" title="statement not covered" >    this.bgColor = this.getWireColor(value)</span>
-<span class="cstat-no" title="statement not covered" >    this.setOutputConnectionColor(this.bgColor)</span>
-<span class="cstat-no" title="statement not covered" >    this.render(false)</span>
+  doToggle = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+    // 
   }
 &nbsp;
-  getSvg = (color) =&gt; {
-    const svg = {
-      right: [],
-      left: [
-        { label: '*', type: 'input' }
-      ],
-      top: [],
-      bottom: []
-    }
+  pulse = <span class="fstat-no" title="function not covered" >(v</span>alue) =&gt; {
+    const newValue = <span class="cstat-no" title="statement not covered" >this.node.value === LogicValue.TRUE ? LogicValue.FALSE : LogicValue.TRUE</span>
 &nbsp;
-    return renderIc(svg, color, this.bgColor)
+<span class="cstat-no" title="statement not covered" >    this.toggle(newValue)</span>
   }
-}
-&nbsp;</pre></td></tr>
+}</pre></td></tr>
 </table></pre>
 <div class='push'></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
