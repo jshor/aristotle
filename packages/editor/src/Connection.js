@@ -1,7 +1,6 @@
 import draw2d from 'draw2d'
 import BezierConnectionRouter from './layout/BezierConnectionRouter'
 import getPortIndex from './utils/getPortIndex'
-import persistFilter from './utils/persistFilter'
 
 class Connection extends draw2d.Connection {
   constructor (circuit) {
@@ -15,11 +14,14 @@ class Connection extends draw2d.Connection {
     })
 
     this.circuit = circuit
-    this.on('added', this.onAdd)
-    this.on('removed', this.onRemove)
+    this.on('added', this.addCircuitConnection)
+    this.on('removed', this.removeCircuitConnection)
   }
 
-  onAdd = () => {
+  /**
+   * Connects the circuit nodes of the source and target in the circuit instance.
+   */
+  addCircuitConnection = () => {
     const source = this.sourcePort.parent
     const target = this.targetPort.parent
     const sourceNode = source.getCircuitNode(this)
@@ -30,7 +32,10 @@ class Connection extends draw2d.Connection {
     this.canvas.step(true)
   }
 
-  onRemove = () => {
+  /**
+   * Removes the connection between the circuit nodes of the source and target in the circuit instance.
+   */
+  removeCircuitConnection = () => {
     const source = this.sourcePort.parent
     const target = this.targetPort.parent
     const sourceNode = source.getCircuitNode(this)

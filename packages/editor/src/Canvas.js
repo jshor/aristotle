@@ -1,22 +1,21 @@
-import draw2d from 'draw2d'
+// import draw2d from 'draw2d'
+import Draw2DCanvas from './Draw2DCanvas'
 import $ from 'jquery'
-import ElementInitializerService from './services/ElementInitializerService'
-import uuid from './utils/uuid'
 
 /**
  * Extends the draw2d Canvas to add user-friendly enhancements and support parent wrapper elements.
- * This class is practically untestable due to the complexity of lack of jsdom SVG support and inability to stub Raphaeljs.
  *
  * @class Canvas
  * @extends draw2d.Canvas
  */
-export default class Canvas extends draw2d.Canvas {
+export default class Canvas extends Draw2DCanvas {
   constructor (elementId) {
     super(elementId)
 
-    this.parent = this.html[0].parentNode
+    this.wrapper = this.html[0]
+    this.parent = this.wrapper.parentNode
     this.setScrollArea(this.parent)
-    this.registerEventListeners()
+    // this.registerEventListeners()
     // $("body").append(`
     // <svg style="position: absolute; width: 1px; height: 1px">
     // <filter id="filter-0" width="1" height="1"><feOffset in="SourceAlpha" dx="1" dy="1" result="1"></feOffset><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0 " in="1" result="2"></feColorMatrix><feGaussianBlur stdDeviation="2" in="2" result="3"></feGaussianBlur><feMerge in="3" result="4"><feMergeNode in="3"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge></filter>
@@ -24,21 +23,31 @@ export default class Canvas extends draw2d.Canvas {
     // `)
   }
 
+  /**
+   * Registers the user interaction event listeners.
+   */
   registerEventListeners = () => {
     document.addEventListener('mousemove', this.onBoundlessMouseMove)
     document.addEventListener('mouseup', this.onBoundlessMouseUp)
+    this.wrapper.addEventListener('click', this.onDeselect)
     this.commandStack.addEventListener(() => this.fireEvent('commandStackChanged'))
-    this.html[0].addEventListener('click', () => {
-      if (this.getSelection().getSize() === 0) {
-        this.fireEvent('deselect')
-      }
-    })
+  }
+
+  /**
+   * Fires `deselect` when the canvas is clicked and no elements are actively selected.
+   *
+   * @emits `deselect`
+   */
+  onDeselect = () => {
+    if (this.getSelection().getSize() === 0) {
+      this.fireEvent('deselect')
+    }
   }
 
   /**
    * Returns the absolute X position in the document of the parent wrapper.
    *
-   * @override getAbsoluteX
+   * @override {draw2d.Canvas.getAbsoluteX}
    * @returns {Number}
    */
   getAbsoluteX = () => $(this.parent).offset().left
@@ -46,7 +55,7 @@ export default class Canvas extends draw2d.Canvas {
   /**
    * Returns the absolute Y position in the document of the parent wrapper.
    *
-   * @override getAbsoluteX
+   * @override {draw2d.Canvas.getAbsoluteY}
    * @returns {Number}
    */
   getAbsoluteY = () => $(this.parent).offset().top
@@ -55,6 +64,7 @@ export default class Canvas extends draw2d.Canvas {
    * Fires mousedrag events if the mouse is down for any document movement.
    * This fixes the draw2d issue of being unable to change the boundary when the mouse leaves the canvas.
    *
+   * @emits `mousemove`
    * @param {MouseEvent} event
    */
   onBoundlessMouseMove = (event) => {
@@ -83,47 +93,30 @@ export default class Canvas extends draw2d.Canvas {
    * @param {MouseEvent} event
    */
   onBoundlessMouseUp = (event) => {
-    if (this.mouseDown === false) {
-      return
+    if (this.mouseDown) {
+      this.calculateConnectionIntersection()
+
+      this.mouseDown = false
+      const { x, y } = this.fromDocumentToCanvasCoordinate(event.clientX, event.clientY)
+
+      this.editPolicy.each((i, policy) => {
+        policy.onMouseUp(this, x, y, event.shiftKey, event.ctrlKey)
+      })
+
+      this.mouseDragDiffX = 0
+      this.mouseDragDiffY = 0
     }
-
-    // event = this._getEvent(event)
-    this.calculateConnectionIntersection()
-
-    this.mouseDown = false
-    const { x, y } = this.fromDocumentToCanvasCoordinate(event.clientX, event.clientY)
-
-    this.editPolicy.each((i, policy) => {
-      policy.onMouseUp(this, x, y, event.shiftKey, event.ctrlKey)
-    })
-
-    this.mouseDragDiffX = 0
-    this.mouseDragDiffY = 0
-  }
-
-  /**
-   * Sets the actively-dragged toolbox element dimensions to match the current zoom level.
-   *
-   * @param {HTMLElememt} elememt
-   */
-  onDragEnter = (element) => {
-    const scale = 1 / this.zoomFactor
-    const width = $(element).width() * scale
-    const height = $(element).height() * scale
-
-    $('.ui-draggable-dragging').width(width)
-    $('.ui-draggable-dragging').height(height)
   }
 
   /**
    * Handles a toolbox drop event.
    *
    * @override {draw2d.Canvas.onDrop}
-   * @param {HTMLElement} element
+   * @param {HTMLElement} el
    */
-  onDrop = (element, x, y, ...args) => {
+  onDrop = () => {
     const rect = this.parent.getBoundingClientRect()
-    const { clientX, clientY } = event
+    const { clientX, clientY } = this.getDomEvent()
 
     const isInViewport = (
       clientX >= rect.left &&
@@ -134,9 +127,9 @@ export default class Canvas extends draw2d.Canvas {
 
     if (isInViewport) {
       const { x, y } = this.getDraggedCoordinates()
-      const element = ElementInitializerService.getInitializedElement(uuid(), { type: 'LogicGate', subtype: 'NOR' })
 
-      this.addNode(element, x, y)// TODO: should be command
+      // TODO: must get params from `data-` attrs on `el`
+      this.addElement({ type: 'LogicGate', subtype: 'NOR' }, x, y)
     }
   }
 
@@ -150,4 +143,11 @@ export default class Canvas extends draw2d.Canvas {
 
     return this.fromDocumentToCanvasCoordinate(left, top)
   }
+
+  /**
+   * Returns the most recent Canvas DOM event.
+   *
+   * @returns {Event}
+   */
+  getDomEvent = () => event
 }
