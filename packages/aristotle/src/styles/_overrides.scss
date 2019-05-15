@@ -13,6 +13,10 @@ image.draw2d_shape_basic_Image {
   cursor: move !important;
 }
 
+.clickable {
+  cursor: pointer;
+}
+
 ellipse.draw2d_OutputPort, ellipse.draw2d_InputPort {
     fill: rgb(255,255,255) !important; // SHAME.
     stroke-width: 2;

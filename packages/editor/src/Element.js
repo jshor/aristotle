@@ -3,6 +3,7 @@ import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
 import CommandSetInputCount from './commands/CommandSetInputCount'
 import uuid from './utils/uuid'
+import getPortLocator from './utils/getPortLocator'
 
 export default class Element extends draw2d.shape.basic.Image {
   constructor (id) {
@@ -128,9 +129,9 @@ export default class Element extends draw2d.shape.basic.Image {
    * @param {Object[]} <{ x: Number, y: Number, type: String, id: String }>
    */
   setPorts = (ports) => {
-    ports.forEach(({ x, y, type, id }) => {
-      const port = this.createPort(type, new draw2d.layout.locator.XYAbsPortLocator(x, y))
-      port.setId(id)
+    ports.forEach((params) => {
+      const port = this.createPort(params.type, getPortLocator(params))
+      port.setId(params.id)
     })
   }
 
