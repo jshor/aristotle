@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1557860128386" clover="3.2.0">
-  <project timestamp="1557860128386" name="All files">
+<coverage generated="1557875302050" clover="3.2.0">
+  <project timestamp="1557875302050" name="All files">
     <metrics statements="652" coveredstatements="460" conditionals="118" coveredconditionals="89" methods="210" coveredmethods="139" elements="980" coveredelements="688" complexity="0" loc="652" ncloc="652" packages="10" files="29" classes="29">
       <package name="src">
         <metrics statements="173" coveredstatements="139" conditionals="45" coveredconditionals="41" methods="52" coveredmethods="38"/>
-        <file name="Canvas.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/Canvas.js">
+        <file name="Canvas.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\Canvas.js">
           <metrics statements="42" coveredstatements="41" conditionals="12" coveredconditionals="12" methods="13" coveredmethods="12"/>
           <line num="13" count="23" type="stmt"/>
           <line num="15" count="23" type="stmt"/>
@@ -49,7 +49,7 @@
           <line num="144" count="1" type="stmt"/>
           <line num="152" count="0" type="stmt"/>
         </file>
-        <file name="Connection.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/Connection.js">
+        <file name="Connection.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\Connection.js">
           <metrics statements="21" coveredstatements="21" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
           <line num="7" count="10" type="stmt"/>
           <line num="16" count="10" type="stmt"/>
@@ -73,10 +73,10 @@
           <line num="51" count="1" type="stmt"/>
           <line num="53" count="1" type="stmt"/>
         </file>
-        <file name="Draw2DCanvas.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/Draw2DCanvas.js">
+        <file name="Draw2DCanvas.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\Draw2DCanvas.js">
           <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         </file>
-        <file name="Editor.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/Editor.js">
+        <file name="Editor.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\Editor.js">
           <metrics statements="55" coveredstatements="32" conditionals="14" coveredconditionals="10" methods="14" coveredmethods="7"/>
           <line num="14" count="17" type="stmt"/>
           <line num="16" count="17" type="stmt"/>
@@ -134,7 +134,7 @@
           <line num="186" count="0" type="stmt"/>
           <line num="187" count="0" type="stmt"/>
         </file>
-        <file name="Element.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/Element.js">
+        <file name="Element.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\Element.js">
           <metrics statements="55" coveredstatements="45" conditionals="19" coveredconditionals="19" methods="21" coveredmethods="15"/>
           <line num="9" count="105" type="stmt"/>
           <line num="11" count="105" type="cond" truecount="2" falsecount="0"/>
@@ -195,7 +195,7 @@
       </package>
       <package name="src.commands">
         <metrics statements="51" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="17" coveredmethods="0"/>
-        <file name="CommandSetInputCount.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/commands/CommandSetInputCount.js">
+        <file name="CommandSetInputCount.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\commands\CommandSetInputCount.js">
           <metrics statements="51" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="17" coveredmethods="0"/>
           <line num="5" count="0" type="stmt"/>
           <line num="7" count="0" type="stmt"/>
@@ -252,7 +252,7 @@
       </package>
       <package name="src.elements">
         <metrics statements="113" coveredstatements="80" conditionals="21" coveredconditionals="15" methods="44" coveredmethods="28"/>
-        <file name="Clock.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/elements/Clock.js">
+        <file name="Clock.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\Clock.js">
           <metrics statements="9" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="4" coveredmethods="0"/>
           <line num="7" count="0" type="stmt"/>
           <line num="9" count="0" type="stmt"/>
@@ -264,7 +264,7 @@
           <line num="26" count="0" type="cond" truecount="0" falsecount="2"/>
           <line num="28" count="0" type="stmt"/>
         </file>
-        <file name="Digit.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/elements/Digit.js">
+        <file name="Digit.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\Digit.js">
           <metrics statements="24" coveredstatements="21" conditionals="2" coveredconditionals="2" methods="9" coveredmethods="8"/>
           <line num="8" count="12" type="stmt"/>
           <line num="10" count="12" type="stmt"/>
@@ -291,7 +291,7 @@
           <line num="94" count="14" type="stmt"/>
           <line num="96" count="14" type="stmt"/>
         </file>
-        <file name="IntegratedCircuit.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/elements/IntegratedCircuit.js">
+        <file name="IntegratedCircuit.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\IntegratedCircuit.js">
           <metrics statements="39" coveredstatements="32" conditionals="8" coveredconditionals="8" methods="19" coveredmethods="13"/>
           <line num="24" count="12" type="stmt"/>
           <line num="26" count="12" type="stmt"/>
@@ -333,7 +333,7 @@
           <line num="133" count="0" type="stmt"/>
           <line num="137" count="12" type="stmt"/>
         </file>
-        <file name="Lightbulb.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/elements/Lightbulb.js">
+        <file name="Lightbulb.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\Lightbulb.js">
           <metrics statements="9" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="2"/>
           <line num="7" count="14" type="stmt"/>
           <line num="9" count="14" type="stmt"/>
@@ -345,7 +345,7 @@
           <line num="28" count="14" type="stmt"/>
           <line num="37" count="14" type="stmt"/>
         </file>
-        <file name="LogicGate.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/elements/LogicGate.js">
+        <file name="LogicGate.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\LogicGate.js">
           <metrics statements="11" coveredstatements="10" conditionals="3" coveredconditionals="3" methods="4" coveredmethods="3"/>
           <line num="8" count="17" type="stmt"/>
           <line num="10" count="17" type="stmt"/>
@@ -359,7 +359,7 @@
           <line num="41" count="15" type="stmt"/>
           <line num="44" count="2" type="stmt"/>
         </file>
-        <file name="Switch.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/elements/Switch.js">
+        <file name="Switch.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\Switch.js">
           <metrics statements="21" coveredstatements="11" conditionals="6" coveredconditionals="2" methods="5" coveredmethods="2"/>
           <line num="8" count="19" type="stmt"/>
           <line num="10" count="19" type="stmt"/>
@@ -386,7 +386,7 @@
       </package>
       <package name="src.layout">
         <metrics statements="16" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <file name="BezierConnectionRouter.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/layout/BezierConnectionRouter.js">
+        <file name="BezierConnectionRouter.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\layout\BezierConnectionRouter.js">
           <metrics statements="16" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
           <line num="5" count="0" type="stmt"/>
           <line num="6" count="0" type="stmt"/>
@@ -408,7 +408,7 @@
       </package>
       <package name="src.models">
         <metrics statements="5" coveredstatements="0" conditionals="5" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <file name="EditorModel.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/models/EditorModel.js">
+        <file name="EditorModel.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\models\EditorModel.js">
           <metrics statements="5" coveredstatements="0" conditionals="5" coveredconditionals="0" methods="1" coveredmethods="0"/>
           <line num="9" count="0" type="stmt"/>
           <line num="10" count="0" type="stmt"/>
@@ -419,7 +419,7 @@
       </package>
       <package name="src.services">
         <metrics statements="103" coveredstatements="60" conditionals="16" coveredconditionals="9" methods="38" coveredmethods="21"/>
-        <file name="DeserializerService.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/services/DeserializerService.js">
+        <file name="DeserializerService.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\services\DeserializerService.js">
           <metrics statements="23" coveredstatements="23" conditionals="0" coveredconditionals="0" methods="8" coveredmethods="8"/>
           <line num="22" count="24" type="stmt"/>
           <line num="31" count="5" type="stmt"/>
@@ -445,7 +445,7 @@
           <line num="108" count="60" type="stmt"/>
           <line num="110" count="420" type="stmt"/>
         </file>
-        <file name="ElementInitializerService.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/services/ElementInitializerService.js">
+        <file name="ElementInitializerService.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\services\ElementInitializerService.js">
           <metrics statements="7" coveredstatements="6" conditionals="6" coveredconditionals="5" methods="1" coveredmethods="1"/>
           <line num="17" count="38" type="cond" truecount="5" falsecount="1"/>
           <line num="19" count="1" type="stmt"/>
@@ -455,7 +455,7 @@
           <line num="27" count="10" type="stmt"/>
           <line num="29" count="1" type="stmt"/>
         </file>
-        <file name="IntervalWorkerService.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/services/IntervalWorkerService.js">
+        <file name="IntervalWorkerService.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\services\IntervalWorkerService.js">
           <metrics statements="7" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="7" coveredmethods="3"/>
           <line num="4" count="17" type="stmt"/>
           <line num="9" count="0" type="stmt"/>
@@ -465,7 +465,7 @@
           <line num="48" count="0" type="stmt"/>
           <line num="52" count="17" type="stmt"/>
         </file>
-        <file name="OscillationService.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/services/OscillationService.js">
+        <file name="OscillationService.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\services\OscillationService.js">
           <metrics statements="25" coveredstatements="25" conditionals="4" coveredconditionals="4" methods="8" coveredmethods="8"/>
           <line num="3" count="2" type="stmt"/>
           <line num="7" count="28" type="stmt"/>
@@ -493,7 +493,7 @@
           <line num="70" count="2" type="stmt"/>
           <line num="79" count="1" type="stmt"/>
         </file>
-        <file name="SerializerService.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/services/SerializerService.js">
+        <file name="SerializerService.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\services\SerializerService.js">
           <metrics statements="14" coveredstatements="1" conditionals="2" coveredconditionals="0" methods="6" coveredmethods="1"/>
           <line num="5" count="17" type="stmt"/>
           <line num="9" count="0" type="stmt"/>
@@ -510,7 +510,7 @@
           <line num="38" count="0" type="stmt"/>
           <line num="42" count="0" type="stmt"/>
         </file>
-        <file name="WaveService.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/services/WaveService.js">
+        <file name="WaveService.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\services\WaveService.js">
           <metrics statements="27" coveredstatements="3" conditionals="4" coveredconditionals="0" methods="8" coveredmethods="0"/>
           <line num="1" count="3" type="stmt"/>
           <line num="2" count="3" type="stmt"/>
@@ -543,13 +543,13 @@
       </package>
       <package name="src.svg">
         <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <file name="index.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/svg/index.js">
+        <file name="index.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\index.js">
           <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         </file>
       </package>
       <package name="src.svg.lib">
         <metrics statements="178" coveredstatements="169" conditionals="27" coveredconditionals="22" methods="53" coveredmethods="48"/>
-        <file name="DigitSVG.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/svg/lib/DigitSVG.js">
+        <file name="DigitSVG.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\lib\DigitSVG.js">
           <metrics statements="32" coveredstatements="32" conditionals="2" coveredconditionals="2" methods="12" coveredmethods="12"/>
           <line num="18" count="7" type="stmt"/>
           <line num="38" count="7" type="stmt"/>
@@ -584,7 +584,7 @@
           <line num="192" count="16" type="stmt"/>
           <line num="194" count="16" type="stmt"/>
         </file>
-        <file name="IntegratedCircuitSVG.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/svg/lib/IntegratedCircuitSVG.js">
+        <file name="IntegratedCircuitSVG.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\lib\IntegratedCircuitSVG.js">
           <metrics statements="91" coveredstatements="85" conditionals="8" coveredconditionals="7" methods="30" coveredmethods="26"/>
           <line num="3" count="7" type="stmt"/>
           <line num="4" count="7" type="stmt"/>
@@ -678,7 +678,7 @@
           <line num="424" count="14" type="stmt"/>
           <line num="426" count="14" type="stmt"/>
         </file>
-        <file name="LogicGateSVG.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/svg/lib/LogicGateSVG.js">
+        <file name="LogicGateSVG.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\lib\LogicGateSVG.js">
           <metrics statements="46" coveredstatements="43" conditionals="14" coveredconditionals="10" methods="8" coveredmethods="7"/>
           <line num="3" count="5" type="stmt"/>
           <line num="4" count="5" type="stmt"/>
@@ -727,7 +727,7 @@
           <line num="186" count="19" type="stmt"/>
           <line num="193" count="19" type="stmt"/>
         </file>
-        <file name="SVGBase.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/svg/lib/SVGBase.js">
+        <file name="SVGBase.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\lib\SVGBase.js">
           <metrics statements="9" coveredstatements="9" conditionals="3" coveredconditionals="3" methods="3" coveredmethods="3"/>
           <line num="3" count="84" type="stmt"/>
           <line num="4" count="84" type="stmt"/>
@@ -742,11 +742,11 @@
       </package>
       <package name="src.utils">
         <metrics statements="12" coveredstatements="11" conditionals="2" coveredconditionals="2" methods="4" coveredmethods="4"/>
-        <file name="getIdMapping.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/utils/getIdMapping.js">
+        <file name="getIdMapping.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\utils\getIdMapping.js">
           <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
           <line num="4" count="35" type="stmt"/>
         </file>
-        <file name="getPortIndex.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/utils/getPortIndex.js">
+        <file name="getPortIndex.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\utils\getPortIndex.js">
           <metrics statements="6" coveredstatements="5" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
           <line num="1" count="7" type="stmt"/>
           <line num="2" count="10" type="stmt"/>
@@ -755,7 +755,7 @@
           <line num="6" count="10" type="stmt"/>
           <line num="9" count="0" type="stmt"/>
         </file>
-        <file name="uuid.js" path="/Users/e070910/Documents/aristotle/packages/editor/src/utils/uuid.js">
+        <file name="uuid.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\src\utils\uuid.js">
           <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
           <line num="2" count="35" type="stmt"/>
           <line num="3" count="35" type="stmt"/>
@@ -766,7 +766,7 @@
       </package>
       <package name="test">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <file name="setup.js" path="/Users/e070910/Documents/aristotle/packages/editor/test/setup.js">
+        <file name="setup.js" path="C:\Users\Josh\Documents\aristotle\packages\editor\test\setup.js">
           <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
           <line num="3" count="12" type="stmt"/>
         </file>

@@ -12,7 +12,9 @@
       />
     </div>
     <div class="toolbox-item__visible">
-      <img :src="src" class="toolbox-item__thumbnail" />
+      <div class="toolbox-item__thumbnail" :style="{ backgroundImage: `url(${src})` }">
+        t
+      </div>
       <div class="toolbox-item__caption">{{ caption }}</div>
     </div>
   </div>
@@ -53,8 +55,12 @@ export default {
 <style lang="scss">
 .toolbox-item {
   width: 50%;
+  overflow: hidden;
   position: relative;
   cursor: move;
+    box-sizing: border-box;
+    padding: 1rem;
+    display: inline-block;
 
   & > &__draggable {
     overflow: hidden;
@@ -64,6 +70,10 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
+
+    img {
+      // display: none;
+    }
   }
 
   &__visible {
@@ -72,9 +82,12 @@ export default {
   }
 
   &__thumbnail {
-    padding: 1rem;
     box-sizing: border-box;
     width: 100%;
+    padding-bottom: 75%;
+    background-position: center center;
+    background-size: contain;
+    background-repeat: no-repeat;
   }
 
   &__caption {
