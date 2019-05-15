@@ -1,0 +1,9 @@
+<svg width="100" height="50" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" x2="40" y1="10" y2="10" stroke="#fff" stroke-linecap="square" stroke-width="2" vector-effect="non-scaling-stroke" />
+  <line x1="0" x2="40" y1="40" y2="40" stroke="#fff" stroke-linecap="square" stroke-width="2" vector-effect="non-scaling-stroke" />
+  <line x1="60" x2="100" y1="25" y2="25" stroke="#fff" stroke-linecap="square" stroke-width="2" vector-effect="non-scaling-stroke" />
+  <svg height="100%" viewBox="0 0 16 7.25" preserveAspectRatio="none" x="20">
+    <path d="m 0.13229001,0.13246053 v 0.0165 C 0.71404001,1.1583605 1.05006,2.3240605 1.05006,3.5719605 c 0,1.248 -0.33601999,2.4136 -0.91776999,3.423 v 0.0165 H 3.69589 c 2.5428,0 4.7625,-1.3862 5.9531,-3.4396 -1.1906,-2.0534 -3.4103,-3.43959997 -5.9531,-3.43959997 h -2.6458 z" fill="#1C1D24" stroke="#fff" stroke-linecap="square" stroke-width="2" vector-effect="non-scaling-stroke" />
+  </svg>
+  <circle cx="84" cy="25" r="4" fill="#ff0000" stroke="#fff" stroke-linecap="square" stroke-width="2" vector-effect="non-scaling-stroke" />
+</svg>

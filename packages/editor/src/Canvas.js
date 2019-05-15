@@ -15,7 +15,7 @@ export default class Canvas extends Draw2DCanvas {
     this.wrapper = this.html[0]
     this.parent = this.wrapper.parentNode
     this.setScrollArea(this.parent)
-    // this.registerEventListeners()
+    this.registerEventListeners()
     // $("body").append(`
     // <svg style="position: absolute; width: 1px; height: 1px">
     // <filter id="filter-0" width="1" height="1"><feOffset in="SourceAlpha" dx="1" dy="1" result="1"></feOffset><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0 " in="1" result="2"></feColorMatrix><feGaussianBlur stdDeviation="2" in="2" result="3"></feGaussianBlur><feMerge in="3" result="4"><feMergeNode in="3"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge></filter>
@@ -114,7 +114,7 @@ export default class Canvas extends Draw2DCanvas {
    * @override {draw2d.Canvas.onDrop}
    * @param {HTMLElement} el
    */
-  onDrop = () => {
+  onDrop = (el) => {
     const rect = this.parent.getBoundingClientRect()
     const { clientX, clientY } = this.getDomEvent()
 
@@ -128,8 +128,10 @@ export default class Canvas extends Draw2DCanvas {
     if (isInViewport) {
       const { x, y } = this.getDraggedCoordinates()
 
+      console.log('el: ', el.data())
+
       // TODO: must get params from `data-` attrs on `el`
-      this.addElement({ type: 'LogicGate', subtype: 'NOR' }, x, y)
+      this.addElement(el.data(), x, y)
     }
   }
 

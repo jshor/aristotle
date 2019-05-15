@@ -1,5 +1,5 @@
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/Canvas.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\Canvas.js
 FN:12,(anonymous_0)
 FN:29,(anonymous_1)
 FN:33,(anonymous_2)
@@ -88,7 +88,7 @@ BRF:12
 BRH:12
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/Connection.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\Connection.js
 FN:6,(anonymous_0)
 FN:24,(anonymous_1)
 FN:38,(anonymous_2)
@@ -126,7 +126,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/Draw2DCanvas.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\Draw2DCanvas.js
 FNF:0
 FNH:0
 LF:0
@@ -135,7 +135,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/Editor.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\Editor.js
 FN:13,(anonymous_0)
 FN:39,(anonymous_1)
 FN:51,(anonymous_2)
@@ -241,7 +241,7 @@ BRF:14
 BRH:10
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/Element.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\Element.js
 FN:8,(anonymous_0)
 FN:23,(anonymous_1)
 FN:32,(anonymous_2)
@@ -366,7 +366,7 @@ BRF:19
 BRH:19
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/commands/CommandSetInputCount.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\commands\CommandSetInputCount.js
 FN:4,(anonymous_0)
 FN:15,(anonymous_1)
 FN:19,(anonymous_2)
@@ -462,7 +462,7 @@ BRF:2
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/elements/Clock.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\Clock.js
 FN:6,(anonymous_0)
 FN:17,(anonymous_1)
 FN:21,(anonymous_2)
@@ -490,7 +490,7 @@ BRF:2
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/elements/Digit.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\Digit.js
 FN:7,(anonymous_0)
 FN:32,(anonymous_1)
 FN:45,(anonymous_2)
@@ -543,7 +543,7 @@ BRF:2
 BRH:2
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/elements/IntegratedCircuit.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\IntegratedCircuit.js
 FN:23,(anonymous_0)
 FN:48,(anonymous_1)
 FN:64,(anonymous_2)
@@ -637,7 +637,7 @@ BRF:8
 BRH:8
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/elements/Lightbulb.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\Lightbulb.js
 FN:6,(anonymous_0)
 FN:21,(anonymous_1)
 FN:27,(anonymous_2)
@@ -661,7 +661,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/elements/LogicGate.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\LogicGate.js
 FN:7,(anonymous_0)
 FN:30,(anonymous_1)
 FN:34,(anonymous_2)
@@ -692,7 +692,7 @@ BRF:3
 BRH:3
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/elements/Switch.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\elements\Switch.js
 FN:7,(anonymous_0)
 FN:48,(anonymous_1)
 FN:54,(anonymous_2)
@@ -738,7 +738,7 @@ BRF:6
 BRH:2
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/layout/BezierConnectionRouter.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\layout\BezierConnectionRouter.js
 FN:4,(anonymous_0)
 FNF:1
 FNH:0
@@ -765,7 +765,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/models/EditorModel.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\models\EditorModel.js
 FN:2,(anonymous_0)
 FNF:1
 FNH:0
@@ -786,7 +786,7 @@ BRF:5
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/services/DeserializerService.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\services\DeserializerService.js
 FN:21,(anonymous_0)
 FN:30,(anonymous_1)
 FN:49,(anonymous_2)
@@ -834,7 +834,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/services/ElementInitializerService.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\services\ElementInitializerService.js
 FN:16,(anonymous_0)
 FNF:1
 FNH:1
@@ -858,7 +858,7 @@ BRF:6
 BRH:5
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/services/IntervalWorkerService.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\services\IntervalWorkerService.js
 FN:3,(anonymous_0)
 FN:8,(anonymous_1)
 FN:39,(anonymous_2)
@@ -888,7 +888,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/services/OscillationService.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\services\OscillationService.js
 FN:6,(anonymous_0)
 FN:22,(anonymous_1)
 FN:29,(anonymous_2)
@@ -942,7 +942,7 @@ BRF:4
 BRH:4
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/services/SerializerService.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\services\SerializerService.js
 FN:4,(anonymous_0)
 FN:8,(anonymous_1)
 FN:15,(anonymous_2)
@@ -979,7 +979,7 @@ BRF:2
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/services/WaveService.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\services\WaveService.js
 FN:7,(anonymous_0)
 FN:17,(anonymous_1)
 FN:21,(anonymous_2)
@@ -1035,7 +1035,7 @@ BRF:4
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/svg/index.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\index.js
 FNF:0
 FNH:0
 LF:0
@@ -1044,7 +1044,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/svg/lib/DigitSVG.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\lib\DigitSVG.js
 FN:63,(anonymous_0)
 FN:77,(anonymous_1)
 FN:81,(anonymous_2)
@@ -1111,7 +1111,7 @@ BRF:2
 BRH:2
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/svg/lib/IntegratedCircuitSVG.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\lib\IntegratedCircuitSVG.js
 FN:15,(anonymous_0)
 FN:31,(anonymous_1)
 FN:49,(anonymous_2)
@@ -1279,7 +1279,7 @@ BRF:8
 BRH:7
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/svg/lib/LogicGateSVG.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\lib\LogicGateSVG.js
 FN:22,(anonymous_0)
 FN:43,(anonymous_1)
 FN:67,(anonymous_2)
@@ -1364,7 +1364,7 @@ BRF:14
 BRH:10
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/svg/lib/SVGBase.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\svg\lib\SVGBase.js
 FN:2,(anonymous_0)
 FN:7,(anonymous_1)
 FN:20,(anonymous_2)
@@ -1391,7 +1391,7 @@ BRF:3
 BRH:3
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/utils/getIdMapping.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\utils\getIdMapping.js
 FN:3,getIdMapping
 FN:4,(anonymous_1)
 FNF:2
@@ -1405,7 +1405,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/utils/getPortIndex.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\utils\getPortIndex.js
 FN:1,(anonymous_0)
 FNF:1
 FNH:1
@@ -1424,7 +1424,7 @@ BRF:2
 BRH:2
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/src/utils/uuid.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\src\utils\uuid.js
 FN:1,uuid
 FNF:1
 FNH:1
@@ -1440,7 +1440,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/e070910/Documents/aristotle/packages/editor/test/setup.js
+SF:C:\Users\Josh\Documents\aristotle\packages\editor\test\setup.js
 FNF:0
 FNH:0
 DA:3,12
