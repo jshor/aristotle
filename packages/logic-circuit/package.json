@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "rimraf dist && tsc --watch",
-    "build": "rimraf dist && tsc --outDir esm && rollup --config && rimraf esm",
+    "dev": "webpack -w",
+    "build": "webpack",
     "test": "jest"
   },
   "keywords": [],
@@ -15,11 +15,16 @@
     "@types/node": "^8.0.28"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/preset-typescript": "^7.4.3",
     "@types/jest": "^23.3.10",
-    "rimraf": "^2.6.3",
-    "rollup": "^1.1.0",
-    "rollup-plugin-commonjs": "^9.2.0",
+    "babel-loader": "^8.0.6",
+    "jest": "^24.8.0",
     "ts-jest": "^23.10.5",
-    "typescript": "~3.0.0"
+    "typescript": "~3.0.0",
+    "webpack": "^4.31.0",
+    "webpack-cli": "^3.3.2"
   }
 }
