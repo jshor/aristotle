@@ -141,7 +141,7 @@ export default class Circuit {
    * Advances the circuit simulation one step. If none of the node values have changed,
    * it continues stepping through until either a value changes or the queue is empty.
    */
-  public next (): void {
+  public next = (): void => {
     let isValueChanged = false
     let forceContinue = false
 

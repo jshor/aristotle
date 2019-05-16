@@ -7,24 +7,14 @@ export default class Clock extends Switch {
     super(id)
 
     const val = 1000 // parseInt(Math.random() * 40) * 100
-    console.log('val: ', val)
     this.wave = new WaveService(id, val)
-    this.wave.onUpdate(this.pulse)
+    this.wave.onUpdate(this.toggle)
+    this.remove(this.clickableArea)
 
     this.on('added', this.registerWave)
   }
 
   registerWave = () => {
     this.canvas.oscillation.add(this.wave)
-  }
-
-  doToggle = () => {
-    // 
-  }
-
-  pulse = (value) => {
-    const newValue = this.node.value === LogicValue.TRUE ? LogicValue.FALSE : LogicValue.TRUE
-
-    this.toggle(newValue)
   }
 }

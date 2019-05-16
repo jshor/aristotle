@@ -190,11 +190,12 @@ export default class Element extends draw2d.shape.basic.Image {
       return
     }
     const locator = new draw2d.layout.locator.XYAbsPortLocator(this.width + 10, 0)
-    const settings = { width: 16, height: 16, visible: false, cursor: 'pointer' }
+    const settings = { width: 16, height: 16, visible: false }
 
     this.toolboxButton = new draw2d.shape.icon.Wrench2(settings)
     this.toolboxButton.on('click', this.fireToolboxEvent)
     this.toolboxButton.setColor('#ffffff')
+    this.toolboxButton.addCssClass('clickable')
     this.add(this.toolboxButton, locator)
   }
 

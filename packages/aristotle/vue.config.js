@@ -2,37 +2,32 @@ const webpack = require('webpack')
 
 module.exports = {
   configureWebpack: {
-    plugins: [
-      new webpack.ProvidePlugin({
-        '$': 'jquery',
-        'jquery': 'jquery',
-        'window.jQuery': 'jquery',
-        'jQuery': 'jquery'
-      })
-    ],
-    module: {
-      rules: [
-        {
-          test: /\.(svg)(\?.*)?$/,
-          use: [
-            {
-              loader: 'svg-inline-loader',
-              options: {
-                limit: 10000,
-                name: 'assets/img/[name].[hash:7].[ext]'
-              }
-            }
-          ]
-        }
-      ]
-    }
+    // module: {
+    //   rules: [
+    //     {
+    //       test: /\.(svg)(\?.*)?$/,
+    //       use: [
+    //         {
+    //           loader: 'svg-inline-loader',
+    //           options: {
+    //             limit: 10000,
+    //             name: 'assets/img/[name].[hash:7].[ext]'
+    //           }
+    //         }
+    //       ]
+    //     }
+    //   ]
+    // }
   },
-  chainWebpack: config => {
-    config.module
-      .rule('svg')
-      .test(() => false)
-      .use('file-loader')
+  chainWebpack: (config) => {
+    config.resolve.symlinks(false)
   },
+  // chainWebpack: config => {
+  //   config.module
+  //     .rule('svg')
+  //     .test(() => false)
+  //     .use('file-loader')
+  // },
   css: {
     loaderOptions: {
       sass: {
