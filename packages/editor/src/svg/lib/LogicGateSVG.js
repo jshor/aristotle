@@ -3,6 +3,8 @@ import SVGBase from './SVGBase'
 const PORT_WIDTH = 30
 const STROKE_WIDTH = 2
 const WIRE_LENGTH = 40
+const LOGIC_GATE_WIDTH = 100
+const LOGIC_GATE_HEIGHT = 50
 
 const PATH = {
   OR: 'm 0.13229001,0.13246053 v 0.0165 C 0.71404001,1.1583605 1.05006,2.3240605 1.05006,3.5719605 c 0,1.248 -0.33601999,2.4136 -0.91776999,3.423 v 0.0165 H 3.69589 c 2.5428,0 4.7625,-1.3862 5.9531,-3.4396 -1.1906,-2.0534 -3.4103,-3.43959997 -5.9531,-3.43959997 h -2.6458 z',
@@ -156,11 +158,11 @@ export default class LogicGateSVG extends SVGBase {
    * 
    * @returns {Object<{ ports: Object[], path: Buffer, width: Number, height: Number }>}
    */
-  getSvgData () {
+  getSvgData = () => {
     const height = this.inputCount > 2
       ? this.inputCount * PORT_WIDTH + this.inputCount * STROKE_WIDTH
-      : 50
-    const width = 100
+      : LOGIC_GATE_HEIGHT
+    const width = LOGIC_GATE_WIDTH
     const pathData = this.getPathData()
     const children = [
       ...this.getWires(this.inputCount, 0, height),

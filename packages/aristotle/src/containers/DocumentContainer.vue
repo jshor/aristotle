@@ -13,12 +13,20 @@
     <template v-slot:oscilloscope>
       <oscilloscope-container :waves="waves" />
     </template>
+
+    <properties
+      v-if="elementSettings && toolboxOpen"
+      :settings="elementSettings"
+      @change="toolboxChanged"
+      @close="propertiesClosed"
+    />
   </document>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import Document from '@/components/Document'
+import Properties from '@/components/Properties'
 import OscilloscopeContainer from './OscilloscopeContainer'
 import { Editor, CommandModel } from '@aristotle/editor'
 import DocumentModel from '@/models/DocumentModel'
@@ -27,12 +35,15 @@ export default {
   name: 'DocumentContainer',
   components: {
     Document,
+    Properties,
     OscilloscopeContainer
   },
   data () {
     return {
       canvas: null,
-      waves: {}
+      waves: {},
+      toolboxOpen: false,
+      elementSettings: {}
     }
   },
   props: {
@@ -62,29 +73,19 @@ export default {
     toolboxChanged (payload) {
       this.onRelayCommand({ command: 'UPDATE_ELEMENT', payload })
     },
-    closeToolbox () {
-      this.$store.commit('SET_TOOLBOX_VISIBILITY', false)
+    openSettingsDialog (editor, settings) {
+      console.log('OPENdddd', settings)
+      this.elementSettings = settings
+      this.toolboxOpen = true
     },
-    pan () {
-      this.canvas.setMouseMode('PANNING')
-    },
-    select () {
-      this.canvas.setMouseMode('SELECTION')
-    },
-    step () {
-      this.canvas.step()
+    propertiesClosed () {
+      this.toolboxOpen = false
     },
     onCanvasUpdate (canvas) {
       const model = canvas.getEditorModel() // should be v-model (emit `value`)
 
       this.$store.commit('SET_EDITOR_MODEL', model)
       this.$store.commit('SET_TOOLBOX_VISIBILITY', false)
-    },
-    onToolbox (editor, settings) {
-      this.$store.commit('SET_TOOLBOX_SETTINGS', settings)
-      this.$store.commit('SET_TOOLBOX_VISIBILITY', true)
-    },
-    hideToolbox () {
     }
   },
   mounted () {
@@ -94,7 +95,7 @@ export default {
       // maybe create an action for this that is called in mounted() of ToolboxContainer?
       this.canvas = new Editor(this.document.id.toString())
 
-      this.canvas.on('toolbox', this.onToolbox)
+      this.canvas.on('toolbox', this.openSettingsDialog)
       this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
       this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
       this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))

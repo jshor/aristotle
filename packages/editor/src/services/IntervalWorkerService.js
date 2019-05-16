@@ -2,7 +2,7 @@
 export default class IntervalWorkerService {
   constructor () {
     this.callbacks = []
-    // this.registerServiceWorker()
+    this.registerServiceWorker()
   }
 
   registerServiceWorker = () => {
@@ -37,11 +37,11 @@ export default class IntervalWorkerService {
   }
 
   start = () => {
-    // this.worker.postMessage('START')
+    this.worker.postMessage('START')
   }
 
   stop = () => {
-    // this.worker.postMessage('STOP')
+    this.worker.postMessage('STOP')
   }
 
   onMessage = () => {

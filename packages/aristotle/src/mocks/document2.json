@@ -2,7 +2,7 @@
 	"elements": [
 		{
 			"id": "aqLvQGuk27",
-			"type": "Clock",
+			"type": "Switch",
 			"name": "R",
 			"x": 0,
 			"y": 350

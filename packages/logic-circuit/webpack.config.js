@@ -1,39 +1,31 @@
-var path = require('path')
-var webpack = require('webpack')
-// var WebpackBuildNotifierPlugin = require('webpack-build-notifier')
-
-const PATHS = {
-  src: path.join(__dirname, './src'),
-  build: path.join(__dirname, './build')
-}
+const path = require('path')
 
 module.exports = {
-  mode: 'development',
-  entry: {
-    'logic-circuit': PATHS.src + '/index.ts'
-  },
+  entry: './src/index.ts',
   output: {
-    path: PATHS.build,
-    filename: '[name].js',
-    libraryTarget: 'umd'
+    filename: 'logic-circuit.js',
+    path: path.resolve(__dirname, 'dist'),
+    libraryTarget: 'umd',
+    // library: 'editor',
+    // umdNamedDefine: true,
+    // // https://stackoverflow.com/a/49119917
+    // globalObject: `(typeof self !== 'undefined' ? self : this)`
   },
-  devtool: 'source-map',
+  resolve: {
+    // modulesDirectories: ['node_modules'],
+    extensions: ['.ts'],
+  },
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        loader: 'awesome-typescript-loader'
+        test: /\.(js|jsx|tsx|ts)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader'
+        }
       }
     ]
   },
-  resolve: {
-    // you can now require('file') instead of require('file.js')
-    extensions: ['.ts', '.js']
-  },
-  plugins: [
-    // new WebpackBuildNotifierPlugin({
-    //   title: 'My Project Webpack Build'
-    // }),
-    new webpack.IgnorePlugin(/test\.ts$/)
-  ]
+  mode: 'development',
+  devtool: 'source-map'
 }

@@ -17,6 +17,7 @@ export default class LogicGate extends Element {
       inputCount: this.settings.inputs.value
     })
     
+    console.log('svgRenderersvgRenderersvgRenderersvgRenderersvgRenderersvgRenderersvgRenderersvgRenderersvgRenderersvgRenderer: ', this.svgRenderer)
     this.render()
   }
 
