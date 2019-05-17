@@ -4,6 +4,7 @@ import { LogicValue } from '@aristotle/logic-circuit'
 import CommandSetInputCount from './commands/CommandSetInputCount'
 import uuid from './utils/uuid'
 import getPortLocator from './utils/getPortLocator'
+import inputPortPolicy from './policies/inputPortPolicy'
 
 export default class Element extends draw2d.shape.basic.Image {
   constructor (id) {
@@ -131,6 +132,11 @@ export default class Element extends draw2d.shape.basic.Image {
   setPorts = (ports) => {
     ports.forEach((params) => {
       const port = this.createPort(params.type, getPortLocator(params))
+      if (params.type === "input") {
+        port.installEditPolicy(inputPortPolicy)
+      }// else {
+      //   port.installEditPolicy()
+      // }
       port.setId(params.id)
     })
   }
