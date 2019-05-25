@@ -1,18 +1,24 @@
 {
   "private": true,
   "workspaces": {
-    "packages": ["packages/*"],
-    "nohoist": ["**/logic-circuit"]
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/logic-circuit"
+    ]
   },
   "license": "MIT",
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "start": "npm run serve --prefix ./packages/aristotle",
-    "dev": "lerna run dev --parallel --stream --concurrency"
+    "dev": "lerna run dev --parallel --stream --concurrency",
+    "docs:dev": "vuepress dev docs --host localhost",
+    "docs:build": "vuepress build docs"
   },
   "devDependencies": {
     "lerna": "^2.11.0",
-    "vuepress": "^0.10.1",
+    "vuepress": "^1.0.0-alpha.48",
     "vuepress-theme-vue": "^1.0.3"
   },
   "engines": {
