@@ -120,13 +120,13 @@ describe('Integrated Circuit', () => {
     it('should add the element for each element entry in the set', () => {
       ic.buildCircuit()
 
-      expect(ic.canvas.circuit.addNode).toHaveBeenCalledTimes(ic.elements.length)
+      expect(ic.canvas.circuit.addNode).toHaveBeenCalledTimes(ic.elementEntries.length)
     })
 
     it('should add the connection for each connection entry in the set', () => {
       ic.buildCircuit()
 
-      expect(ic.canvas.circuit.addConnection).toHaveBeenCalledTimes(ic.connections.length)
+      expect(ic.canvas.circuit.addConnection).toHaveBeenCalledTimes(ic.connectionEntries.length)
     })
   })
 })

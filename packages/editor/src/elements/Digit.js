@@ -7,13 +7,8 @@ export default class Lightbulb extends Element {
   constructor (id) {
     super(id)
 
-    this.node = new OutputNode(id)
-    this.node.on('change', this.updateWireColor)
-    this.svgRenderer = new DigitSVG({
-      primaryColor: '#ffffff',
-      secondaryColor: '#1C1D24'
-    })
-    this.nodes = Array(4).fill(this.createInput)
+    this.registerSvgRenderer()
+    this.registerCircuitNode()
     this.render()
   }
 
@@ -22,6 +17,17 @@ export default class Lightbulb extends Element {
       type: 'text',
       value: ''
     }
+  }
+
+  registerSvgRenderer = () => {
+    this.svgRenderer = new DigitSVG({
+      primaryColor: '#ffffff',
+      secondaryColor: '#1C1D24'
+    })
+  }
+
+  registerCircuitNode = () => {
+    this.nodes = Array(4).fill(this.createInput)
   }
 
   /**
@@ -63,8 +69,7 @@ export default class Lightbulb extends Element {
    * Repaints the SVG after an input change.
    */
   change = () => {
-    const value = this.getHexadecimalValue()
-    const { path } = this.getSvg(value)
+    const { path } = this.getSvg()
 
     this.setPath(path)
   }
@@ -80,12 +85,6 @@ export default class Lightbulb extends Element {
     const index = getPortIndex(target, 'input')
 
     return this.nodes[index]
-  }
-
-  updateWireColor = (value) => {
-    this.bgColor = this.getWireColor(value)
-    this.setOutputConnectionColor(this.bgColor)
-    this.render(false)
   }
 
   getSvg = () => {
