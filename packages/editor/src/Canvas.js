@@ -21,6 +21,16 @@ export default class Canvas extends Draw2DCanvas {
     // <filter id="filter-0" width="1" height="1"><feOffset in="SourceAlpha" dx="1" dy="1" result="1"></feOffset><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0 " in="1" result="2"></feColorMatrix><feGaussianBlur stdDeviation="2" in="2" result="3"></feGaussianBlur><feMerge in="3" result="4"><feMergeNode in="3"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge></filter>
     // </svg>
     // `)
+    
+    // this.html.on("touchend", (event) => {
+    //   event = this._getEvent(event)
+
+    //   if(this.mouseDownX === event.clientX || this.mouseDownY === event.clientY){
+    //     console.log('ROUTING CLICK')
+    //     var pos = this.fromDocumentToCanvasCoordinate(event.clientX, event.clientY);
+    //     this.onClick(pos.x, pos.y, event.shiftKey, event.ctrlKey);
+    //   }
+    // })
   }
 
   /**
@@ -29,18 +39,19 @@ export default class Canvas extends Draw2DCanvas {
   registerEventListeners = () => {
     document.addEventListener('mousemove', this.onBoundlessMouseMove)
     document.addEventListener('mouseup', this.onBoundlessMouseUp)
-    this.wrapper.addEventListener('click', this.onDeselect)
     this.commandStack.addEventListener(() => this.fireEvent('commandStackChanged'))
+    this.on('unselect', this.onDeselect)
   }
 
   /**
-   * Fires `deselect` when the canvas is clicked and no elements are actively selected.
+   * Fires `toolbox.close` when the canvas is clicked and no elements are actively selected.
    *
    * @emits `deselect`
+   * @emits `toolbox.close`
    */
   onDeselect = () => {
     if (this.getSelection().getSize() === 0) {
-      this.fireEvent('deselect')
+      this.fireEvent('toolbox.close')
     }
   }
 
@@ -128,8 +139,6 @@ export default class Canvas extends Draw2DCanvas {
     if (isInViewport) {
       const { x, y } = this.getDraggedCoordinates()
 
-      console.log('el: ', el.data())
-
       // TODO: must get params from `data-` attrs on `el`
       this.addElement(el.data(), x, y)
     }
@@ -144,6 +153,15 @@ export default class Canvas extends Draw2DCanvas {
     const { left, top } = $('.ui-draggable-dragging').offset()
 
     return this.fromDocumentToCanvasCoordinate(left, top)
+  }
+
+  fromCanvasToDocumentCoordinate = (x, y) => {
+    const coords = super.fromCanvasToDocumentCoordinate(x, y)
+
+    coords.x -= this.getAbsoluteX()
+    coords.y -= this.getAbsoluteY()
+
+    return coords
   }
 
   /**

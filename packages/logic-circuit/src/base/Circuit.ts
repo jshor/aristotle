@@ -30,7 +30,7 @@ export default class Circuit {
    *
    * @param {CircuitNode} node - node to add
    */
-  public addNode (node: CircuitNode): void {
+  public addNode = (node: CircuitNode): void => {
     if (node instanceof InputNode) {
       this.inputs.push(node)
       this.enqueue(node)
@@ -43,7 +43,7 @@ export default class Circuit {
    *
    * @param {CircuitNode} node - node to remove
    */
-  public removeNode (node: CircuitNode): void {
+  public removeNode = (node: CircuitNode): void => {
     if (node instanceof InputNode) {
       this.inputs.splice(this.inputs.indexOf(node), 1)
       this.reset()
@@ -60,7 +60,7 @@ export default class Circuit {
    * @param {CircuitNode} target - target node
    * @param {Number} targetIndex - entry index on the target node for the connection
    */
-  public addConnection (source: CircuitNode, target: CircuitNode, targetIndex: number): void {
+  public addConnection = (source: CircuitNode, target: CircuitNode, targetIndex: number): void => {
     source.outputs.push(new Connection(target, targetIndex))
     source.value = LogicValue.UNKNOWN
     this.enqueue(source)
@@ -74,7 +74,7 @@ export default class Circuit {
    * @param {CircuitNode} sourceNode - source node to disconnect
    * @param {CircuitNode} targetNode - target node to disconnect
    */
-  public removeConnection (sourceNode: CircuitNode, targetNode: CircuitNode): void {
+  public removeConnection = (sourceNode: CircuitNode, targetNode: CircuitNode): void => {
     sourceNode
       .outputs
       .concat()
@@ -98,7 +98,7 @@ export default class Circuit {
    *
    * @param {CircuitNode} source
    */
-  removeNodeOutputs (source: CircuitNode): void {
+  removeNodeOutputs = (source: CircuitNode): void => {
     for (let i: number = 0; i < source.outputs.length; i++) {
       this.removeConnection(source, source.outputs[i].node)
     }
@@ -109,7 +109,7 @@ export default class Circuit {
    *
    * @param {...CircuitNode} added - node(s) to add to the queue
    */
-  public enqueue (...added: CircuitNode[]): void {
+  public enqueue = (...added: CircuitNode[]): void => {
     added.forEach((node) => {
       if (!~this.queue.indexOf(node)) {
         this.queue.push(node)
@@ -122,7 +122,7 @@ export default class Circuit {
    *
    * @param {CircuitNode} removed - node to remove from the queue
    */
-  public dequeue (removed: CircuitNode): void {
+  public dequeue = (removed: CircuitNode): void => {
     const removedIndex = this.queue.indexOf(removed)
 
     if (~removedIndex) {
@@ -133,7 +133,7 @@ export default class Circuit {
   /**
    * Resets the circuit.
    */
-  public reset (): void {
+  public reset = (): void => {
     this.nodes.forEach((node) => node.reset())
   }
 
@@ -170,7 +170,7 @@ export default class Circuit {
    *
    * @returns {Boolean}
    */
-  public isComplete (): boolean {
+  public isComplete = (): boolean => {
     return this.queue.length === 0
   }
 

@@ -3,6 +3,7 @@ import Switch from '../elements/Switch'
 import Clock from '../elements/Clock'
 import LogicGate from '../elements/LogicGate'
 import Lightbulb from '../elements/Lightbulb'
+import Digit from '../elements/Digit'
 import IntegratedCircuit from '../elements/IntegratedCircuit'
 
 export default class ElementInitializerService {
@@ -25,6 +26,8 @@ export default class ElementInitializerService {
         return new LogicGate(id, params)
       case 'Lightbulb':
         return new Lightbulb(id, params)
+      case 'Digit':
+        return new Digit(id, params)
       default:
         return new Element(id, params)
     }

@@ -7,7 +7,7 @@ class OutputNode extends CircuitNode {
    * @override CircuitNode.update
    * @param {LogicValue} value
    */
-  public update (value: number): void {
+  public update = (value: number): void => {
     this.newValue = value
   }
 }

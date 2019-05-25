@@ -19,13 +19,29 @@
         class="properties__field__label">
         {{ key }}
       </label>
+      <select
+        v-if="data.type === 'select'"
+        v-model="values[key]"
+        @change="change(key)"
+        class="properties__field__input">
+        <option
+          v-for="(value, key) in data.options"
+          :key="key"
+          :value="key">
+          {{ value }}
+        </option>
+      </select>
       <input
+        v-else
         v-model="values[key]"
         :type="data.type"
         :value="data.value"
-        @input="change(key)"
+        :step="data.step"
+        :min="data.min"
+        :max="data.max"
+        @change="change(key)"
         class="properties__field__input"
-      >
+      />
     </div>
   </div>
 </template>
@@ -59,7 +75,12 @@ export default {
   },
   methods: {
     change (key) {
-      this.$emit('change', { [key]: this.values[key] })
+      this.$emit('change', {
+        elementId: this.settings.elementId,
+        data: {
+          [key]: this.values[key]
+        }
+      })
     },
     close () {
       this.$emit('close')
@@ -73,7 +94,7 @@ export default {
   position: absolute;
   background-color: #fff;
   border: 1px solid #000;
-  width: 150px;
+  width: 200px;
   padding: 0.5em;
 }
 

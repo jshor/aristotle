@@ -24,16 +24,18 @@ export default {
   },
   computed: {
     oscillations () {
-      const displays = {}
-      const getPoints = ({ segments }) => segments
-          .map(({ x, y }) => `${x},${y}`)
-          .join(' ')
+      return this.waves.waves
+      // const displays = {}
+      // const { waves } = this.waves
+      // const getPoints = ({ segments }) => segments
+      //     .map(({ x, y }) => `${x},${y}`)
+      //     .join(' ')
 
-      for (let name in this.waves) {
-        displays[name] = getPoints(this.waves[name])
-      }
+      // for (let name in waves) {
+      //   displays[name] = getPoints(waves[name])
+      // }
 
-      return displays
+      // return displays
     }
   }
 }
