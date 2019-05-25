@@ -1,32 +1,31 @@
 import draw2d from 'draw2d'
 import { InputNode, LogicValue } from '@aristotle/logic-circuit'
 import ToggleService from '../services/ToggleService'
-import Element from '../Element'
-import { SwitchSVG } from '../svg'
+import IOElement from './IOElement'
+import { TemplateSVG } from '../svg'
 
-export default class Switch extends Element {
+export default class Switch extends IOElement {
   constructor (id) {
     super(id)
 
-    this.svgRenderer = new SwitchSVG({
+    this.registerSvgRenderer()
+    this.registerCircuitNode()
+    this.attachClickableArea()
+    this.render()
+  }
+
+  registerSvgRenderer = () => {
+    this.svgRenderer = new TemplateSVG({
       template: 'switch',
       primaryColor: '#ffffff',
       secondaryColor: '#1C1D24'
     })
-    this.node = new InputNode(id)
-    this.node.on('change', this.updateWireColor)
-    this.wave = new ToggleService(id)
-    this.wave.onUpdate(this.toggle)
-    this.render()
-    this.attachClickableArea()
-    console.log('renderingfffffffffffffff')
   }
 
-  settings = {
-    // name: {
-    //   type: 'text',
-    //   value: ''
-    // }
+  registerCircuitNode = () => {
+    this.node = new InputNode(this.id)
+    this.node.setValue(this.settings.startValue.value)
+    this.node.on('change', this.updateVisualValue)
   }
 
   attachClickableArea = () => {
@@ -37,14 +36,8 @@ export default class Switch extends Element {
       height: 50,
       cssClass: 'clickable'
     })
-    this.clickableArea.on('click', this.toggle)
+    this.clickableArea.on('click', this.invertValue)
     this.add(this.clickableArea, locator)
-  }
-
-  updateWireColor = (value) => {
-    this.bgColor = this.getWireColor(value)
-    this.setOutputConnectionColor(this.bgColor)
-    this.render(false)
   }
 
   getSvg = () => {
@@ -55,18 +48,5 @@ export default class Switch extends Element {
       .svgRenderer
       .setTemplateVariables({ valueColor, y })
       .getSvgData()
-  }
-
-  toggle = () => {
-    const newValue = this.node.value === LogicValue.TRUE ? LogicValue.FALSE : LogicValue.TRUE
-
-    this.node.setValue(newValue)
-    this.canvas.step(true)
-    this.wave.drawPulseChange()
-
-    // input nodes changes require triggering the head of the circuit queue
-    this.canvas.circuit.queue.push(this.node)
-
-    this.updateSelectionColor()
   }
 }

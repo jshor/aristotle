@@ -1,4 +1,5 @@
 import switchT from '../templates/switch.svg'
+import clock from '../templates/clock.svg'
 import SVGBase from './SVGBase'
 
 const templates = {
@@ -9,10 +10,18 @@ const templates = {
     ports: [
       { type: 'output' }
     ]
+  },
+  clock: {
+    raw: clock,
+    width: 80,
+    height: 50,
+    ports: [
+      { type: 'output' }
+    ]
   }
 }
 
-export default class SwitchSVG extends SVGBase {
+export default class TemplateSVG extends SVGBase {
   constructor (options) {
     super (options)
 
@@ -28,7 +37,6 @@ export default class SwitchSVG extends SVGBase {
   
   getRenderedSvg = (raw) => {
     return raw.replace(/\{\{\s*([a-z]+)\s*\}\}/ig, (...args) => {
-      console.log('replacing ', args[1], this.vars)
       return this.vars[args[1]]
     })
   }

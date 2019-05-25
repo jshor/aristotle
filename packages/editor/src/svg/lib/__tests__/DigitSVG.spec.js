@@ -79,6 +79,10 @@ describe('Digit SVG renderer', () => {
     let data
 
     beforeEach(() => {
+      jest
+        .spyOn(renderer, 'toDataUrl')
+        .mockImplementation(s => s)
+        
       data = renderer.getSvgData()
     })
 
