@@ -1,6 +1,7 @@
 import Digit from '../Digit'
 import { OutputNode, LogicValue } from '@aristotle/logic-circuit'
 import Connection from '../../Connection'
+import { DigitSVG } from '../../svg'
 import Switch from '../Switch'
 
 describe('Digit Element', () => {
@@ -8,6 +9,11 @@ describe('Digit Element', () => {
 
   beforeEach(() => {
     digit = new Digit('foo')
+  })
+
+  it('should have an instance of the SVG renderer assigned', () => {
+    expect(digit).toHaveProperty('svgRenderer')
+    expect(digit.svgRenderer).toBeInstanceOf(DigitSVG)
   })
 
   describe('createInput()', () => {

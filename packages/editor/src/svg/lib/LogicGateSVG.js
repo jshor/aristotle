@@ -86,12 +86,13 @@ export default class LogicGateSVG extends SVGBase {
    * 
    * @param {Number} x - x-axis offset
    * @param {String} pathData - SVG path of the figure
+   * @param {String} [fill = `secondaryColor`] - fill color
    * @returns {String} SVG
    */
-  getFigureSvg = (x, pathData) => {
+  getFigureSvg = (x, pathData, fill) => {
     const path = this.toSvg('path', {
       d: pathData,
-      fill: this.secondaryColor,
+      fill: fill || this.secondaryColor,
       ...this.baseLineAttrs
     })
 
@@ -128,7 +129,7 @@ export default class LogicGateSVG extends SVGBase {
    * @returns {Boolean}
    */
   isNegated = () => {
-    return ['XNOR', 'NOR', 'NAND'].indexOf(this.gateType) !== -1
+    return ['XNOR', 'NOR', 'NAND'].includes(this.gateType)
   }
 
   /**
@@ -153,6 +154,10 @@ export default class LogicGateSVG extends SVGBase {
     return ''
   }
 
+  setInputCount = (inputCount) => {
+    this.inputCount = inputCount
+  }
+
   /**
    * Returns the path, ports and dimensions of the rendered logic gate SVG.
    * 
@@ -172,7 +177,7 @@ export default class LogicGateSVG extends SVGBase {
 
     if (this.gateType === 'XOR' || this.gateType === 'XNOR') {
       // add the curve at the bottom of XOR gates
-      children.push(getFigureSvg(10, PATH.XOR_BASE, 'none'))
+      children.push(this.getFigureSvg(10, PATH.XOR_BASE, 'none'))
     }
 
     children.push(this.getNegation(height))
