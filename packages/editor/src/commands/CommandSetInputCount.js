@@ -37,18 +37,18 @@ class CommandSetInputCount extends draw2d.command.CommandCollection {
   reset = (inputCount) => {
     this.figure.settings.inputs.value = parseInt(inputCount)
     this.figure.resetPorts()
+    this.figure.svgRenderer.setInputCount(inputCount)
     this.repaint()
   }
 
   repaint = () => { // TODO: isn't this IDENTICAL to this.figure.render()??
-    const { path, width, height } = this.figure.getSvg('#000')
+    const { path, width, height } = this.figure.getSvg()
 
     this.figure.setPath(path)
     this.figure.setWidth(width)
     this.figure.setHeight(height)
     this.figure.repaint()
     this.figure.createToolboxButton()
-    this.figure.updateSelectionColor()
   }
 
   addOldPorts = () => {
@@ -62,7 +62,7 @@ class CommandSetInputCount extends draw2d.command.CommandCollection {
   addNewPorts = () => {
     const { ports } = this.figure.getSvg('#000')
 
-    this.figure.addPorts(ports)
+    this.figure.setPorts(ports)
   }
 
   disconnect = () => {

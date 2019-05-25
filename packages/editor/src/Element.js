@@ -1,20 +1,20 @@
 
 import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
-import CommandSetInputCount from './commands/CommandSetInputCount'
+import CommandSetProperty from './commands/CommandSetProperty'
 import uuid from './utils/uuid'
 import getPortLocator from './utils/getPortLocator'
 import inputPortPolicy from './policies/inputPortPolicy'
+import ToolboxButton from './ToolboxButton'
 
 export default class Element extends draw2d.shape.basic.Image {
   constructor (id) {
-    super({ resizeable: false })
+    super({ resizeable: false, onClick () {
+      console.log('CLICKEEEED')
+    } })
 
     if (id) this.setId(id) // TODO: is checking for id necessary?
-    this.on('added', this.addEventListeners) // TODO: add 'removed' event
   }
-
-  settings = {}
 
   /**
    * Returns the value of the given setting key.
@@ -24,15 +24,6 @@ export default class Element extends draw2d.shape.basic.Image {
    */
   getSetting = (key) => {
     return this.settings[key].value
-  }
-
-  /**
-   * Sets the circuit value of the current node.
-   * 
-   * @param {LogicValue} value
-   */
-  setValue = (value) => {
-    this.node.setValue(value)
   }
 
   /**
@@ -48,7 +39,7 @@ export default class Element extends draw2d.shape.basic.Image {
    * Renders the element SVG.
    */
   render = () => {
-    const { path, width, height, ports } = this.getSvg('#000')
+    const { path, width, height, ports } = this.getSvg()
 
     this.setPorts(ports)
     this.setPath(path)
@@ -56,7 +47,6 @@ export default class Element extends draw2d.shape.basic.Image {
     this.setHeight(height)
     this.repaint()
     this.createToolboxButton()
-    this.updateSelectionColor()
   }
 
   /**
@@ -81,7 +71,9 @@ export default class Element extends draw2d.shape.basic.Image {
    * 
    * @param {String} color - hexadecimal color value
    */
-  setOutputConnectionColor = (color) => {
+  setOutputConnectionColor = (value) => {
+    const color = this.getWireColor(value)
+
     this
       .getConnections()
       .data
@@ -89,39 +81,22 @@ export default class Element extends draw2d.shape.basic.Image {
       .forEach((connection) => connection.setColor(color))
   }
 
-  /**
-   * Returns true if the element is selected.
-   * 
-   * @returns {Boolean}
-   */
-  isSelected = () => {
-    if (this.canvas) {
-      const { selection } = this.canvas
-
-      if (selection) {
-        return selection.all.data.includes(this)
-      }
-    }
-    return false
-  }
-
-  /**
-   * Updates the color of the SVG according to the element's selection state.
-   */
-  updateSelectionColor = () => { // TODO: MAJOR: DO NOT RE-RENDER IF NOT NECESSARY
-    if (this.canvas) {
-      const color = this.isSelected() ? '#ff0000' : '#000'
-
-      this.setPath(this.getSvg(color).path)
-    }
+  updateVisualValue = (value) => {
+    this.setOutputConnectionColor(value)
+    this.render()
   }
 
   updateSettings = (settings) => {
-    this.canvas.commandStack.execute(new CommandSetInputCount(this, settings.inputs))
-    // const cmd = new CommandUpdateSettings(this, settings)
+    for (let propertyName in settings) {
+      const command = new CommandSetProperty(this)
 
-    // this.canvas.commandStack.execute(cmd)
-    this.fireToolboxEvent(this.toolboxButton) // keep toolbox open
+      command.propertyName = propertyName
+      command.newValue = settings[propertyName]
+      command.callback = this.settings[propertyName].onUpdate
+
+      this.canvas.commandStack.execute(command)
+    }
+    this.persistToolbox()
   }
 
   /**
@@ -132,59 +107,14 @@ export default class Element extends draw2d.shape.basic.Image {
   setPorts = (ports) => {
     ports.forEach((params) => {
       const port = this.createPort(params.type, getPortLocator(params))
+      /*
       if (params.type === "input") {
         port.installEditPolicy(inputPortPolicy)
       }// else {
       //   port.installEditPolicy()
       // }
+      */
       port.setId(params.id)
-    })
-  }
-
-  /**
-   * Returns the value of whether settings are defined.
-   * 
-   * @return {Boolean}
-   */
-  hasSettings = () => {
-    return Object.keys(this.settings).length
-  }
-
-  onSelectChanged = () => {
-    this.updateSelectionColor()
-    this.toggleToolboxVisibility()
-  }
-
-  addEventListeners = () => {
-    this.canvas.on('deselect', this.onSelectChanged)
-    this.canvas.on('select', this.onSelectChanged)
-    this.canvas.on('reset', this.updateSelectionColor)
-  }
-
-  /**
-   * Sets the visibility of the toolbox button if it exists.
-   */
-  toggleToolboxVisibility = () => {
-    if (this.toolboxButton) {
-      this.toolboxButton.setVisible(this.isSelected())
-    }
-  }
-
-  /**
-   * Fires a `toolbox` update event with the element setting(s) to present a toolbox to the user.
-   * The payload will contain cartesian screen coordinates to indicate where to place the toolbox.
-   * 
-   * @emits `toolbox`
-   * @param {draw2d.shape} button - toolbox button that was clicked
-   */
-  fireToolboxEvent = (button) => {
-    const x = button.x + this.x
-    const y = button.y + this.y
-    const position = this.canvas.fromCanvasToDocumentCoordinate(x, y)
-
-    this.canvas.fireEvent('toolbox', {
-      settings: this.settings,
-      position
     })
   }
 
@@ -192,17 +122,18 @@ export default class Element extends draw2d.shape.basic.Image {
    * Defines the toolbox button if one is not already present and settings are defined.
    */
   createToolboxButton = () => {
-    if (this.toolboxButton || !this.hasSettings()) {
-      return
+    if (!this.toolboxButton && this.settings) {
+      this.toolboxButton = new ToolboxButton(this)
     }
-    const locator = new draw2d.layout.locator.XYAbsPortLocator(this.width + 10, 0)
-    const settings = { width: 16, height: 16, visible: false }
+  }
 
-    this.toolboxButton = new draw2d.shape.icon.Wrench2(settings)
-    this.toolboxButton.on('click', this.fireToolboxEvent)
-    this.toolboxButton.setColor('#ffffff')
-    this.toolboxButton.addCssClass('clickable')
-    this.add(this.toolboxButton, locator)
+  /**
+   * Keeps the toolbox open.
+   */
+  persistToolbox = () => {
+    if (this.toolboxButton) {
+      this.toolboxButton.fireToolboxEvent() 
+    }
   }
 
   serialize = () => {

@@ -18,6 +18,12 @@ jest.mock('./Draw2DCanvas', () => {
     }
 
     calculateConnectionIntersection = jest.fn()
+
+    on = jest.fn()
+
+    commandStack = {
+      addEventListener: jest.fn()
+    }
   }
 
   return Canvas
@@ -54,10 +60,6 @@ describe('Canvas', () => {
       expect(document.addEventListener).toHaveBeenCalledWith('mouseup', canvas.onBoundlessMouseUp)
     })
 
-    it('should attach the item deselection listener on canvas click', () => {
-      expect(canvas.wrapper.addEventListener).toHaveBeenCalledWith('click', canvas.onDeselect)
-    })
-
     it('should fire `commandStackChanged` when the command stack changes', () => {
       jest.spyOn(canvas, 'fireEvent')
       jest
@@ -81,14 +83,14 @@ describe('Canvas', () => {
       canvas.getSelection = jest.fn(() => selection)
     })
 
-    it('should fire `deselect` when the selection is empty', () => {
+    it('should fire `toolbox.close` when the selection is empty', () => {
       canvas.onDeselect()
 
       expect(canvas.fireEvent).toHaveBeenCalledTimes(1)
-      expect(canvas.fireEvent).toHaveBeenCalledWith('deselect')
+      expect(canvas.fireEvent).toHaveBeenCalledWith('toolbox.close')
     })
 
-    it('should not fire `deselect` when an item is present in the selection', () => {
+    it('should not fire `toolbox.close` when an item is present in the selection', () => {
       selection.add('foo')
       canvas.onDeselect()
 
@@ -228,6 +230,11 @@ describe('Canvas', () => {
   })
 
   describe('onDrop()', () => {
+    const data = { type: 'LogicGate' }
+    const el = {
+      data: () => data
+    }
+
     function mockParentBoundary (top, right, bottom, left) {
       canvas.parent = {
         getBoundingClientRect: jest.fn(() => ({
@@ -250,7 +257,7 @@ describe('Canvas', () => {
       it('should not add the element if the mouse X is left of the canvas', () => {
         mockParentBoundary(20, 20, 20, 20)
         mockMouse(0, 0)
-        canvas.onDrop()
+        canvas.onDrop(el)
 
         expect(canvas.addElement).not.toHaveBeenCalled()
       })
@@ -258,7 +265,7 @@ describe('Canvas', () => {
       it('should not add the element if the mouse X is right of the canvas', () => {
         mockParentBoundary(20, 20, 20, 20)
         mockMouse(40, 0)
-        canvas.onDrop()
+        canvas.onDrop(el)
 
         expect(canvas.addElement).not.toHaveBeenCalled()
       })
@@ -266,7 +273,7 @@ describe('Canvas', () => {
       it('should not add the element if the mouse Y is above of the canvas', () => {
         mockParentBoundary(20, 20, 20, 20)
         mockMouse(20, 0)
-        canvas.onDrop()
+        canvas.onDrop(el)
 
         expect(canvas.addElement).not.toHaveBeenCalled()
       })
@@ -274,7 +281,7 @@ describe('Canvas', () => {
       it('should not add the element if the mouse Y is below of the canvas', () => {
         mockParentBoundary(20, 20, 20, 20)
         mockMouse(20, 50)
-        canvas.onDrop()
+        canvas.onDrop(el)
 
         expect(canvas.addElement).not.toHaveBeenCalled()
       })
@@ -290,10 +297,10 @@ describe('Canvas', () => {
           .mockReturnValue({ x, y })
         mockParentBoundary(20, 20, 20, 20)
         mockMouse(20, 20)
-        canvas.onDrop()
+        canvas.onDrop(el)
 
         expect(canvas.addElement).toHaveBeenCalledTimes(1)
-        expect(canvas.addElement).toHaveBeenCalledWith(expect.any(Object), x, y)
+        expect(canvas.addElement).toHaveBeenCalledWith(data, x, y)
       })
     })
   })

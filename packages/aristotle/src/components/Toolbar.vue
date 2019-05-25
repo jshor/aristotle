@@ -137,7 +137,7 @@ export default {
   name: 'Toolbar',
   props: {
     document: {
-      type: DocumentModel,
+      type: Object,
       required: true
     }
   },

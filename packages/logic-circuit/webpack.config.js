@@ -6,10 +6,10 @@ module.exports = {
     filename: 'logic-circuit.js',
     path: path.resolve(__dirname, 'dist'),
     libraryTarget: 'umd',
-    // library: 'editor',
-    // umdNamedDefine: true,
+    library: 'editor',
+    umdNamedDefine: true,
     // // https://stackoverflow.com/a/49119917
-    // globalObject: `(typeof self !== 'undefined' ? self : this)`
+    globalObject: `(typeof self !== 'undefined' ? self : this)`
   },
   resolve: {
     // modulesDirectories: ['node_modules'],
@@ -27,5 +27,5 @@ module.exports = {
     ]
   },
   mode: 'development',
-  devtool: 'source-map'
+  devtool: 'eval-source-map'
 }

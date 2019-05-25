@@ -11,7 +11,6 @@
   "dependencies": {
     "@aristotle/editor": "1.0.0",
     "@aristotle/logic-circuit": "1.0.0",
-    "@aristotle/logic-gates": "1.0.0",
     "@fortawesome/fontawesome-free": "^5.8.1",
     "jquery": "^3.3.1",
     "jquery-ui": "^1.12.1",

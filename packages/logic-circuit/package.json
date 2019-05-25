@@ -2,7 +2,7 @@
   "name": "@aristotle/logic-circuit",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "dist/logic-circuit.js",
   "scripts": {
     "dev": "webpack -w",
     "build": "webpack",
@@ -18,7 +18,7 @@
     "@babel/core": "^7.4.3",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/preset-env": "^7.4.3",
-    "@babel/preset-typescript": "^7.4.3",
+    "@babel/preset-typescript": "^7.3.3",
     "@types/jest": "^23.3.10",
     "babel-loader": "^8.0.6",
     "jest": "^24.8.0",
