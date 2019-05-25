@@ -10,12 +10,12 @@ class Buffer extends CircuitNode {
    * @param {LogicValue} value - new value
    * @param {Number} index - source index
    */
-  public update (value: number): void {
+  public update = (value: number): void => {
     this.inputValues[0] = value
     this.newValue = this.eval()
   }
 
-  protected eval (): number {
+  protected eval = (): number => {
     return this.inputValues[0]
   }
 }

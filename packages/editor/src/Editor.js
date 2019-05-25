@@ -20,7 +20,7 @@ export default class Editor extends Canvas {
     this.installEditPolicies()
 
     this.drawn = false
-    this.setMouseMode('PANNING') // TODO: remove
+    // this.setMouseMode('PANNING') // TODO: remove
 
     this.oscillation.start()
     // this.on('select', (...args) => {
@@ -36,8 +36,8 @@ export default class Editor extends Canvas {
     // })
   }
 
-  oscillate = (waves) => {
-    this.fireEvent('oscillate', waves)
+  oscillate = (waves, secondsElapsed) => {
+    this.fireEvent('oscillate', { waves, secondsElapsed})
     // console.log('oscillating', waves)
   }
 
@@ -149,10 +149,12 @@ export default class Editor extends Canvas {
     })
   }
 
-  updateElement = (payload) => {
+  updateElement = ({ elementId, data }) => {
     this
-      .getPrimarySelection()
-      .updateSettings(payload)
+      .getFigures()
+      .asArray()
+      .filter(({ id }) => elementId === id)[0]
+      .updateSettings(data)
   }
 
   load = (data) => {

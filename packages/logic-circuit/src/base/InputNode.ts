@@ -14,7 +14,7 @@ class InputNode extends CircuitNode {
    * @override CircuitNode.setValue
    * @param {LogicValue} value
    */
-  public setValue (value: number): void {
+  public setValue = (value: number): void => {
     this.newValue = value
     this.eval = () => value
   }
@@ -24,7 +24,7 @@ class InputNode extends CircuitNode {
    *
    * @override CircuitNode.reset
    */
-  public reset (): void {
+  public reset = (): void => {
     // do nothing
   }
 }

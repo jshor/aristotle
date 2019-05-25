@@ -8,18 +8,18 @@
           height: '4998px'
         }"
       />
+      <properties
+        v-if="elementSettings && toolboxOpen"
+        :settings="elementSettings"
+        @change="toolboxChanged"
+        @close="propertiesClosed"
+      />
     </template>
 
     <template v-slot:oscilloscope>
       <oscilloscope-container :waves="waves" />
     </template>
 
-    <properties
-      v-if="elementSettings && toolboxOpen"
-      :settings="elementSettings"
-      @change="toolboxChanged"
-      @close="propertiesClosed"
-    />
   </document>
 </template>
 
@@ -43,12 +43,12 @@ export default {
       canvas: null,
       waves: {},
       toolboxOpen: false,
-      elementSettings: {}
+      elementSettings: null
     }
   },
   props: {
     document: {
-      type: DocumentModel,
+      type: Object,
       required: true
     }
   },
@@ -74,7 +74,6 @@ export default {
       this.onRelayCommand({ command: 'UPDATE_ELEMENT', payload })
     },
     openSettingsDialog (editor, settings) {
-      console.log('OPENdddd', settings)
       this.elementSettings = settings
       this.toolboxOpen = true
     },
@@ -85,7 +84,7 @@ export default {
       const model = canvas.getEditorModel() // should be v-model (emit `value`)
 
       this.$store.commit('SET_EDITOR_MODEL', model)
-      this.$store.commit('SET_TOOLBOX_VISIBILITY', false)
+      this.toolboxOpen = false
     }
   },
   mounted () {
@@ -95,7 +94,8 @@ export default {
       // maybe create an action for this that is called in mounted() of ToolboxContainer?
       this.canvas = new Editor(this.document.id.toString())
 
-      this.canvas.on('toolbox', this.openSettingsDialog)
+      this.canvas.on('toolbox.open', this.openSettingsDialog)
+      this.canvas.on('toolbox.close', this.propertiesClosed)
       this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
       this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
       this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))

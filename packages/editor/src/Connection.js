@@ -22,6 +22,41 @@ class Connection extends draw2d.Connection {
    * Connects the circuit nodes of the source and target in the circuit instance.
    */
   addCircuitConnection = () => {
+    // this.shape.forEach((element) => {
+    //   if (element[0]) {
+    //     // $(element[0]).off('click touchstart')
+    //     // $(element[0]).on('click touchstart', () => {
+    //     //   console.log('CLICKED')
+    //     // })
+    //     const el = $(element[0]).clone()
+
+
+    //     $(element[0]).css('pointer-events', 'none')
+    //     el.insertAfter($(element[0]))
+    //     el.attr('stroke', 'transparent')
+    //     el.attr('stroke-width', '15')
+    //     el.off('click touchstart')
+    //     el.on('click touchstart', (e) => {
+    //       this.canvas.setCurrentSelection(this)
+    //       e.stopPropagation()
+    //     })
+
+    //     this.on('change:start', () => {
+    //       el.attr('d', $(element[0]).attr('d'))
+    //     })
+
+    //     this.on('change:end', () => {
+    //       el.attr('d', $(element[0]).attr('d'))
+    //     })
+    //   }
+    //   // console.log('html: ',element[0])
+    // })
+
+    // this.on('change:end', () => {
+    //   console.log('ebd')
+    // })
+
+
     const source = this.sourcePort.parent
     const target = this.targetPort.parent
     const sourceNode = source.getCircuitNode(this)

@@ -4,7 +4,7 @@ import LogicValue from '../types/LogicValue'
 class Or extends CircuitNode {
   inputValues = [LogicValue.UNKNOWN, LogicValue.UNKNOWN]
 
-  protected eval (): number {
+  protected eval = (): number => {
     if (super.valueCount(LogicValue.TRUE)) {
       return LogicValue.TRUE
     }

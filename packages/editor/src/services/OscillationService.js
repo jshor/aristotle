@@ -8,12 +8,13 @@ export default class OscillationService {
     this.waves = {}
     this.refreshRate = BASE_REFRESH_RATE
     this.editor = editor
+    this.lastUpdateTime = Date.now()
+    this.lastSignalTime = 0
+    this.secondsElapsed = 0
     this.ticks = 0
-    this.lastSignal = 0
-    this.lastUpdate = Date.now()
     this.interval.onTick(this.tick.bind(this))
 
-    setTimeout(this.interval.stop.bind(this), 20000)
+    setTimeout(this.interval.stop.bind(this), 20000) // temporary, for dev purposes
   }
 
   /**
@@ -30,22 +31,45 @@ export default class OscillationService {
     this.interval.stop()
   }
 
+  incrementElapsed = () => {
+    const r = this.refreshRate
+    const s = this.secondsElapsed
+    const oneSecond = 1000
+
+    this.secondsElapsed = Math.round(r * (s + r / oneSecond)) / r
+  }
+
+  computeWaveGeometry = () => {
+    const displays = {}
+    const getPoints = ({ segments }) => segments
+        .map(({ x, y }) => `${x},${y}`)
+        .join(' ')
+
+    for (let name in this.waves) {
+      if (this.waves[name].segments) {
+        displays[name] = getPoints(this.waves[name])
+      }
+    }
+
+    return displays
+  }
+
   /**
    * Triggers all oscillation update events.
    */
   tick = () => {
     const now = Date.now()
 
-    if (now >= this.lastUpdate + this.refreshRate) {
+    if (now >= this.lastUpdateTime + this.refreshRate) {
       this.update(++this.ticks)
-      this.lastUpdate = now
+      this.lastUpdateTime = now
+      this.incrementElapsed()
     }
 
-    if (this.lastSignal % 10 === 0) {
-      this.lastSignal = 0
-      this.editor.oscillate(this.waves)
-    } else {
-      this.lastSignal++
+    if (this.secondsElapsed % 1 === 0 && this.lastSignalTime !== this.secondsElapsed) {
+      this.lastSignalTime = this.secondsElapsed
+  
+      this.editor.oscillate(this.computeWaveGeometry(), this.secondsElapsed)
     }
   }
 
@@ -66,8 +90,9 @@ export default class OscillationService {
    * @param {Wave} wave
    */
   add = (wave) => {
-    this.waves[wave.id] = wave
-    this.waves[wave.id].interval = wave.interval / this.refreshRate
+    if (!this.waves.hasOwnProperty(wave.id)) {
+      this.waves[wave.id] = wave
+    }
   }
 
   /**
@@ -75,7 +100,7 @@ export default class OscillationService {
    *
    * @param {String} waveId
    */
-  remove = (waveId) => {
-    delete this.waves[waveId]
+  remove = ({ id }) => {
+    delete this.waves[id]
   }
 }
