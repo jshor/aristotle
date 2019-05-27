@@ -1,6 +1,9 @@
 const webpack = require('webpack')
+const path = require('path')
 
 module.exports = {
+  outputDir: path.join(__dirname, '../../build/app'),
+  publicPath: '/app',
   configureWebpack: {
     // module: {
     //   rules: [

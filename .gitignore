@@ -11,6 +11,7 @@ node_modules
 # dist
 packages/**/build
 packages/**/dist
+build
 
 # Log files
 npm-debug.log*
