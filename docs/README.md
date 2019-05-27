@@ -1,35 +1,17 @@
 ---
 home: true
-heroImage: /logo.png
-actionText: Get Started →
-actionLink: /guide/
-meta:
-  - name: google-site-verification
-    content: 1a3AJnjk7DhVoOQtRPd001OjW9bRrAgIgsIVlZApcgE
-features:
-- title: Monorepo
-  details: Managing monorepo packages with Lerna and Yarn workspaces
-- title: FullStack
-  details: UI, Server, Common module
-- title: Vue
-  details: Vue SPA using Vue-cli 3 
-- title: Vuepress
-  details: Docs using Vuepress
-- title: Docker
-  details: Docker image build with fullstack app
-- title: CI/CD
-  details: Travis CI
-footer: MIT Licensed | Copyright © 2018 slana.tech
+pageClass: homepage
+footer: © 2019 Aristotle.
 ---
 
-## Quick start
+<landing />
 
 ```bash
 # 1. Clone the repository.
-git clone https://github.com/slanatech/vue-monorepo-boilerplate.git my-new-project
+git clone https://github.com/jshor/aristotle
 
 # 2. Enter your newly-cloned folder
-cd my-new-project
+cd aristotle
 
 # 3. Bootstrap
 yarn run bootstrap

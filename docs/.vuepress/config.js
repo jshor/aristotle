@@ -1,16 +1,20 @@
+const path = require('path')
+
 module.exports = {
-  base: '/vue-monorepo-boilerplate/',
+  base: '/',
+  dest: path.join(__dirname, '../../build'),
   locales: {
     '/': {
       lang: 'en-US',
-      title: 'vue-monorepo-boilerplate',
-      description: 'Fullstack Vue App Monorepo Boilerplate'
+      title: 'Aristotle',
+      description: 'The digital logic simulator'
     }
   },
   host: 'localhost',
   serviceWorker: true,
   themeConfig: {
-    repo: 'slanatech/vue-monorepo-boilerplate',
+    logo: '/assets/logo.svg',
+    repo: 'jshor/aristotle',
     docsDir: 'docs',
     editLinks: true,
     sidebarDepth: 2,
@@ -24,64 +28,30 @@ module.exports = {
           {
             text: 'Guide',
             link: '/guide/'
-          },
-          {
-            text: 'Changelog',
-            link: 'https://github.com/vue-monorepo-boilerplate/blob/dev/CHANGELOG.md'
           }
         ],
         sidebar: [
+          {
+            title: 'Guide',
+            path: '/guide/'
+          }
+          /*
           {
             title: 'Documentation',
             path: '/docs/',
             sidebarDepth: 3,
             children: [
               {
-                title: 'Editorrrrr',
-                path: '/docs/editor/',
+                title: 'Circuit',
+                path: '/docs/circuit/',
                 children: [
-                  '/docs/editor/reference/'
+                  '/docs/circuit/classes/'
                 ]
               }
             ]
-          },
-          
-          // {
-          //   title: 'Documentatssssion',
-          //   path: '/docs/',
-          //   sidebarDepth: 2,
-          //   children: [
-          //     {
-          //       title: 'Editor',
-          //       path: '/docs/editor/',
-          //       // sidebarDepth: 2,
-          //       children: [
-          //         // '/docs/editor/'//,
-          //         // {
-          //         //   title: 'Reference',
-          //         //   path: '/docs/editor/reference/',
-          //         //   children: [
-          //         //     '/docs/editor/reference/'
-          //         //   ]
-          //         // }
-          //       ]
-          //     }
-          //   ]
-          // }
-          // {
-          //   title: 'Group 1',
-          //   collapsable: false,
-          //   children: [
-          //     '/guide/README.md'
-          //   ]
-          // }
+          }
+          */
         ]
-        
-        // {
-        //   '/guide/': [
-        //     '/guide/'
-        //   ]
-        // }
       }
     }
   }
