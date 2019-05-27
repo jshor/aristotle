@@ -4,32 +4,32 @@ The digital logic simulator.
 
 ### Monorepo Design
 
-* Lerna and Yarn Workspaces to manage monorepo
+* Lerna and Yarn Workspaces to manage the monorepo
 * Docs using Vuepress and Github pages
 
 ## Prerequisites
 
 This project uses [Lerna](https://lernajs.io/) and [Yarn](https://yarnpkg.com/lang/en/) workspaces to manage packages in a monorepo design.
 
-[vue-cli](https://cli.vuejs.org/) is used in for `@aristotle/aristotle`, along with [TypeScript](https://www.typescriptlang.org/) in all packages. It's recommended that you install [Lerna](https://lernajs.io/), [Yarn](https://yarnpkg.com/en/docs/install) and [vue-cli](https://cli.vuejs.org/) globally.
+[vue-cli](https://cli.vuejs.org/) is used to bootstrap `@aristotle/aristotle`. `@aristotle/logic-circuit` is written in [TypeScript](https://www.typescriptlang.org/), and `@aristotle/editor` is written in ES6 and extends [Draw2D](https://draw2d.org).
 
 
 ## Quick start
 
 ```bash
 # 1. Clone the repository.
-git clone https://github.com/jshor/aristotle.git
+git clone https://github.com/jshor/aristotle
 
 # 2. Enter your newly-cloned folder
-cd my-new-project
+cd aristotle
 
-# 3. Install dependencies
-yarn
+# 3. Bootstrap
+yarn run bootstrap
 
-# 4. Bootstrap
-yarn bootstrap
+# 4. Run Build in all packages 
+yarn run build
 
-# 5. Start the dev server
-yarn dev
+# 5. Dev: Run Server and in parallel start UI Serve with hot reload 
+yarn run dev
 
 ```

@@ -1,0 +1,26 @@
+
+
+.navbar
+  .site-name.can-hide,
+  .nav-links a
+    font-weight normal
+
+/* homepage overrides */
+.homepage
+  padding-top 100vh
+
+@media (min-width: 719px)
+  .homepage 
+    .navbar
+      &, .links
+        background-color transparent
+        border 0
+
+      .site-name
+        color #fff
+
+      .nav-links a
+        color #fff
+
+        &:hover, &.router-link-active
+          color #3eaf7c
