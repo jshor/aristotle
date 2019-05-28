@@ -10,6 +10,12 @@ module.exports = {
       description: 'The digital logic simulator'
     }
   },
+  head: [
+    ['link', {
+      rel: 'icon',
+      href: '/assets/logo.png'
+    }]
+  ],
   host: 'localhost',
   serviceWorker: true,
   themeConfig: {
