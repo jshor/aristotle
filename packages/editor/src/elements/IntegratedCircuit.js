@@ -39,7 +39,7 @@ export default class IntegratedCircuit extends Element {
       primaryColor: '#ffffff',
       secondaryColor: '#1C1D24',
       wires: this.ports,
-      title: 'test' // TODO
+      title: 'testverylongnamehere' // TODO
     })
   }
 

@@ -1,5 +1,5 @@
-import { OutputNode } from '@aristotle/logic-circuit'
-// import { renderIc } from '@aristotle/logic-gates'
+import { OutputNode, LogicValue } from '@aristotle/logic-circuit'
+import { TemplateSVG } from '../svg'
 import Element from '../Element'
 
 export default class Lightbulb extends Element {
@@ -8,6 +8,7 @@ export default class Lightbulb extends Element {
 
     this.node = new OutputNode(id)
     this.node.on('change', this.updateWireColor)
+    this.registerSvgRenderer()
     this.render()
   }
 
@@ -18,25 +19,32 @@ export default class Lightbulb extends Element {
     }
   }
 
+  registerSvgRenderer = () => {
+    this.svgRenderer = new TemplateSVG({
+      template: 'lightbulb',
+      primaryColor: '#ffffff',
+      secondaryColor: '#1C1D24'
+    })
+  }
+
   updateWireColor = (value) => {
     this.bgColor = this.getWireColor(value)
     this.render(false)
   }
 
-  getSvg = (color) => {
-    const svg = {
-      right: [],
-      left: [
-        { label: '*', type: 'input' }
-      ],
-      top: [],
-      bottom: []
-    }
 
-    const path = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB4PSIzMCIgeT0iMzAiIHdpZHRoPSI5MCIgaGVpZ2h0PSI2MCIgc3Ryb2tlPSJ1bmRlZmluZWQiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0iI2ZmZiIgLz48bGluZSB4MT0iMCIgeDI9IjMwIiB5MT0iNjAiIHkyPSI2MCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiMwMDAiIC8+PHRleHQgeD0iMzYiIHk9IjY0IiBmb250LWZhbWlseT0iTHVjaWRhIENvbnNvbGUsIE1vbmFjbywgbW9ub3NwYWNlIiBmb250LXNpemU9IjEyIj4qPC90ZXh0Pjwvc3ZnPg=='
-    
+  getSvg = () => {
+    const valueColor = this.getWireColor(this.node.value)
+    const filter = this.node.value === LogicValue.TRUE
+      ? 'lightbulbGlow'
+      : 'lightbulbOff'
+    const outlineColor = this.node.value === LogicValue.TRUE
+      ? valueColor
+      : '#ffffff'
 
-    return  {path,"ports":[{"x":0,"y":60,"type":"input"}],"width":150,"height":120}
-    
+    return this
+      .svgRenderer
+      .setTemplateVariables({ valueColor, outlineColor, filter })
+      .getSvgData()
   }
 }

@@ -1,12 +1,13 @@
 {
   "name": "@aristotle/logic-circuit",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "",
   "main": "dist/logic-circuit.js",
   "scripts": {
     "dev": "webpack -w",
     "build": "webpack",
-    "test": "jest"
+    "test": "jest",
+    "docs": "typedoc --includes ./manual ./src --exclude **/*.spec.ts --out ./docs"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +24,8 @@
     "babel-loader": "^8.0.6",
     "jest": "^24.8.0",
     "ts-jest": "^23.10.5",
+    "typedoc": "^0.14.2",
+    "typedoc-plugin-markdown": "^1.2.1",
     "typescript": "~3.0.0",
     "webpack": "^4.31.0",
     "webpack-cli": "^3.3.2"

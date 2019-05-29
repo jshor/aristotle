@@ -27,7 +27,12 @@ export default class Lightbulb extends Element {
   }
 
   registerCircuitNode = () => {
-    this.nodes = Array(4).fill(this.createInput)
+    this.nodes = [
+      this.createInput(),
+      this.createInput(),
+      this.createInput(),
+      this.createInput()
+    ]
   }
 
   /**

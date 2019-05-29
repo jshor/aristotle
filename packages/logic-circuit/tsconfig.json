@@ -3,7 +3,8 @@
     "target": "es6",
     "sourceMap": true,
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "moduleResolution": "node"
   },
   "exclude": [
     "**/*.spec.ts",
