@@ -14,7 +14,7 @@ export default class OscillationService {
     this.ticks = 0
     this.interval.onTick(this.tick.bind(this))
 
-    setTimeout(this.interval.stop.bind(this), 20000) // temporary, for dev purposes
+    // setTimeout(this.interval.stop.bind(this), 20000) // temporary, for dev purposes
   }
 
   /**

@@ -16,6 +16,13 @@ export default class Element extends draw2d.shape.basic.Image {
     if (id) this.setId(id) // TODO: is checking for id necessary?
   }
 
+  onContextMenu = (...vars) => {
+    if (!this.canvas.getSelection().getSize() || !this.isSelected()) {
+      this.canvas.setCurrentSelection(null)
+      this.canvas.setCurrentSelection(this)
+    }
+  }
+
   /**
    * Returns the value of the given setting key.
    * 

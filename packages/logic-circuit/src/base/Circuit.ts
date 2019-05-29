@@ -3,7 +3,7 @@ import InputNode from '../base/InputNode'
 import Connection from '../types/Connection'
 import LogicValue from '../types/LogicValue'
 
-export default class Circuit {
+class Circuit {
   /**
    * The debugger processing queue.
    *
@@ -180,3 +180,5 @@ export default class Circuit {
     })
   }
 }
+
+export default Circuit

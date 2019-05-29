@@ -1,13 +1,15 @@
-import Or from './Or'
+import CircuitNode from '../base/CircuitNode'
 import LogicValue from '../types/LogicValue'
 
-class Nor extends Or {
-  protected eval (): number {
-    if (super.valueCount(LogicValue.TRUE)) {
+class Nor extends CircuitNode {
+  inputValues = [LogicValue.UNKNOWN, LogicValue.UNKNOWN]
+
+  protected eval = (): number => {
+    if (this.valueCount(LogicValue.TRUE)) {
       return LogicValue.FALSE
     }
 
-    if (super.valueCount(LogicValue.UNKNOWN)) {
+    if (this.valueCount(LogicValue.UNKNOWN)) {
       return LogicValue.UNKNOWN
     }
 
