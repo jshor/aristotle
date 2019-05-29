@@ -1,5 +1,6 @@
 import switchT from '../templates/switch.svg'
 import clock from '../templates/clock.svg'
+import lightbulb from '../templates/lightbulb.svg'
 import SVGBase from './SVGBase'
 
 const templates = {
@@ -17,6 +18,14 @@ const templates = {
     height: 50,
     ports: [
       { type: 'output' }
+    ]
+  },
+  lightbulb: {
+    raw: lightbulb,
+    width: 100,
+    height: 70,
+    ports: [
+      { type: 'input' }
     ]
   }
 }

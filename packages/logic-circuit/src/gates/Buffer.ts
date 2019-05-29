@@ -2,7 +2,6 @@ import CircuitNode from '../base/CircuitNode'
 import LogicValue from '../types/LogicValue'
 
 class Buffer extends CircuitNode {
-
   /**
    * Updates the input value at the given index with the given value.
    *

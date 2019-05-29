@@ -3,7 +3,6 @@
     v-if="activeDocument"
     :data-target="activeDocument.id">
     <toolbox-group heading="Gates">
-      <!--
       <toolbox-item
         type="LogicGate"
         subtype="NOR"
@@ -12,7 +11,6 @@
         :width="100"
         :zoom-factor="activeDocument.zoomFactor"
       />
-      -->
       <toolbox-item
         type="IntegratedCircuit"
         caption="R-S Flip-Flop"

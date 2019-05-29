@@ -5,11 +5,11 @@ class Or extends CircuitNode {
   inputValues = [LogicValue.UNKNOWN, LogicValue.UNKNOWN]
 
   protected eval = (): number => {
-    if (super.valueCount(LogicValue.TRUE)) {
+    if (this.valueCount(LogicValue.TRUE)) {
       return LogicValue.TRUE
     }
 
-    if (super.valueCount(LogicValue.UNKNOWN)) {
+    if (this.valueCount(LogicValue.UNKNOWN)) {
       return LogicValue.UNKNOWN
     }
 

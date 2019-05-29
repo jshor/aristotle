@@ -366,7 +366,7 @@ describe('Circuit', () => {
 
         jest
           .spyOn(circuit, 'isComplete')
-          .mockReturnValue(() => ++nextCallCount > 2)
+          .mockImplementation(() => ++nextCallCount > 2)
       })
 
       describe('when one of the nodes\' values have changed', () => {
@@ -387,7 +387,7 @@ describe('Circuit', () => {
 
           circuit.next()
 
-          expect(circuit.next).toHaveBeenCalledTimes(1)
+          expect(circuit.next).not.toHaveBeenCalled()
         })
       })
     })

@@ -1,8 +1,8 @@
 import { LogicValue } from '@aristotle/logic-circuit'
 
 const BASE_INTERVAL = 1000
-const SIGNAL_HEIGHT = 40
-const SEGMENT_WIDTH = 2 // px per refresh rate
+const SIGNAL_HEIGHT = 2
+const SEGMENT_WIDTH = 4 // px per refresh rate
 
 // TODO: rename to BinaryWaveService
 export default class ToggleService {

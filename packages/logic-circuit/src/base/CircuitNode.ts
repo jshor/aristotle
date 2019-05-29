@@ -79,7 +79,7 @@ class CircuitNode {
    * @param {String} eventType - 'change' or 'reset'
    * @param {LogicValue} value
    */
-  protected invokeEvent (eventType: string, value: number): void {
+  protected invokeEvent = (eventType: string, value: number): void => {
     this.events.forEach((event) => {
       if (event.eventType === eventType) {
         event.callback(value)
@@ -92,7 +92,7 @@ class CircuitNode {
    *
    * @returns {LogicValue}
    */
-  protected eval (): number {
+  protected eval = (): number => {
     return this.value
   }
 
@@ -102,7 +102,7 @@ class CircuitNode {
    * @param {LogicValue} compare - value to get count of
    * @returns {Number}
    */
-  protected valueCount (compare: number): number {
+  protected valueCount = (compare: number): number => {
     return this
       .inputValues
       .filter((value) => value === compare)
@@ -114,7 +114,7 @@ class CircuitNode {
    *
    * @param {LogicValue} newValue - new value to output to the nodes
    */
-  public updateOutputs (newValue: number): void {
+  public updateOutputs = (newValue: number): void => {
     this.outputs.forEach(({ node, index }: Connection) => {
       node.update(newValue, index)
     })
@@ -126,7 +126,7 @@ class CircuitNode {
    * @param {LogicValue} value - new value
    * @param {Number} index - source index
    */
-  public update (value: number, index: number): void {
+  public update = (value: number, index: number): void => {
     this.inputValues[index] = value
     this.newValue = this.eval()
   }
@@ -136,7 +136,7 @@ class CircuitNode {
    *
    * @returns {Array<CircuitNodes>} list of all outgoing connected nodes
    */
-  public propagate (): Array<CircuitNode> {
+  public propagate = (): Array<CircuitNode> => {
     if (this.value !== this.newValue) {
       this.isValueChanged = true
       this.value = this.newValue
@@ -151,7 +151,7 @@ class CircuitNode {
   /**
    * Resets the value and subsequent value of the node with Hi-Z.
    */
-  public reset (): void {
+  public reset = (): void => {
     this.value = LogicValue.UNKNOWN
     this.newValue = LogicValue.UNKNOWN
     this.invokeEvent('change', this.newValue)
@@ -163,7 +163,7 @@ class CircuitNode {
    * @param {String} eventType - 'change' or 'reset'
    * @param {Function} callback - method to invoke on event
    */
-  public on (eventType: string, callback: Function): void {
+  public on = (eventType: string, callback: Function): void => {
     this.events.push({ eventType, callback })
   }
 }
