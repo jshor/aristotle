@@ -11,11 +11,11 @@
         :style="{ width }"
         class="oscilloscope__wave">
         <svg
-          :width="width"
-          :viewBox="`0 0 ${width.replace('px', '')} 2`"
+          :width="value.width"
+          :viewBox="`0 0 ${value.width} 2`"
           preserveAspectRatio="none">
           <polyline
-            :points="value"
+            :points="value.points"
             stroke="#ffffff"
             stroke-width="2"
             fill="none"
