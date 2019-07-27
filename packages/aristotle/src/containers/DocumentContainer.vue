@@ -43,7 +43,8 @@ export default {
       canvas: null,
       waves: {},
       toolboxOpen: false,
-      elementSettings: null
+      elementSettings: null,
+      isActive: true
     }
   },
   props: {
@@ -53,7 +54,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(['relayedCommand'])
+    ...mapState([
+      'relayedCommand',
+      'activeDocumentId'
+    ])
   },
   watch: {
     relayedCommand: {
@@ -61,9 +65,22 @@ export default {
       handler (command) {
         this.canvas.applyCommand(command)
       }
+    },
+    activeDocumentId: {
+      handler (documentId) {
+        this.isActive = documentId === this.document.id
+        this.setDocumentActive()
+      }
     }
   },
   methods: {
+    setDocumentActive () {
+      if (this.isActive && document.hasFocus()) {
+        this.canvas.oscillation.start()
+      } else { 
+        this.canvas.oscillation.stop()
+      }
+    },
     onRelayCommand ({ command, payload }) {
       this.$store.commit('RELAY_COMMAND', new CommandModel(command, payload))
     },
@@ -106,6 +123,8 @@ export default {
         this.waves = waves
       })
       this.canvas.load(this.document.data)
+
+      setInterval(() => this.setDocumentActive(), 300)
     })
   }
 }
