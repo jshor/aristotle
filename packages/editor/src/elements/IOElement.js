@@ -40,7 +40,11 @@ export default class IOElement extends Element {
   }
 
   resetWave = () => {
-    console.log('will reset wave')
+    if (this.settings.oscilloscope.value === '0') {
+      this.unregisterWave()
+    } else {
+      this.registerWave()
+    }
   }
 
   unregisterWave = () => {

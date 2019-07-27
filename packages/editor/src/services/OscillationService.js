@@ -47,7 +47,10 @@ export default class OscillationService {
 
     for (let name in this.waves) {
       if (this.waves[name].segments) {
-        displays[name] = getPoints(this.waves[name])
+        displays[name] = {
+          points: getPoints(this.waves[name]),
+          width: this.waves[name].width
+        }
       }
     }
 

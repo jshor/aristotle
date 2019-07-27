@@ -9,12 +9,14 @@ export default class ToggleService {
   constructor (id) {
     this.id = id
     this.interval = 0
+    this.width = 0
     this.segments = [{ x: 0, y: SIGNAL_HEIGHT }]
     this.segmentWidth = SEGMENT_WIDTH // TODO
   }
 
   update = () => {
     this.drawPulseConstant()
+    this.width += this.segmentWidth
   }
   
   getLastSegment = () => {
@@ -33,9 +35,17 @@ export default class ToggleService {
   }
   
   drawPulseConstant = () => {
-    const pos = this.segments[this.segments.length - 1] // .pop()
-    const x = pos.x + this.segmentWidth
+    const previous = this.segments[this.segments.length - 1]
+    // if the y value from the previous segment is unchanged, just extend its x value
+    const pos = this.lastY !== previous.y
+      ? previous
+      : this.segments.pop()
+
+    this.lastY = previous.y
     
-    this.addSegments({ x, y: pos.y })
+    this.addSegments({
+      x: pos.x + this.segmentWidth,
+      y: pos.y
+    })
   }
 }
