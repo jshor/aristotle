@@ -1,15 +1,21 @@
 <template>
   <div class="oscilloscope">
-    <div class="oscilloscope__list">
-      <span>testIt</span>
+    <div class="oscilloscope-list">
+      <div
+        v-for="(v, key) in oscillations"
+        :key="key"
+        class="oscilloscope-list__item">
+        {{ key }}
+      </div>
+      <div class="oscilloscope-list__item">Elapsed (s)</div> 
     </div>
-    <div class="oscilloscope__inner" ref="timeline" 
+    <div class="binary-wave" ref="timeline" 
         :style="{ width }">
       <div
         v-for="(value, key) in oscillations"
         :key="key"
         :style="{ width }"
-        class="oscilloscope__wave">
+        class="binary-wave__svg">
         <svg
           :width="value.width"
           :viewBox="`0 0 ${value.width} 2`"
@@ -95,20 +101,38 @@ export default {
   width: 100%;
   text-align: right;
   display: flex;
+}
 
-  &__list {
-    width: 60px;
-  }
+.oscilloscope-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 0.5em;
 
-  &__inner {
+  &__item {
+    text-align: right;
+    color: #fff;
     flex: 1;
-    overflow-x: scroll;
-    position: relative;
     display: flex;
-    flex-direction: column;
-  }
+    align-items: center;
 
-  &__wave {
+    &:last-of-type {
+      color: $color-secondary;
+      text-align: right;
+      justify-content: flex-end;
+      flex: 0;
+    }
+  }
+}
+
+.binary-wave {
+  flex: 1;
+  overflow-x: scroll;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  &__svg {
     flex: 1;
     background-attachment: scroll;
     background-size: 40px 40px;
