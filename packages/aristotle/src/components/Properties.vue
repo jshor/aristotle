@@ -1,6 +1,7 @@
 <template>
   <div
     class="properties"
+    ref="properties"
     :style="style">
     <div class="properties__heading">
       <div class="properties__heading__text properties__heading__text--expand">Properties</div>
@@ -52,8 +53,8 @@ export default {
   computed: {
     style () {
       return {
-        left: `${this.settings.position.x}px`,
-        top: `${this.settings.position.y}px`
+        left: `${this.settings.position.x - this.offsetX}px`,
+        top: `${this.settings.position.y - this.offsetY}px`
       }
     }
   },
@@ -71,7 +72,14 @@ export default {
       values[key] = settings[key].value
     }
 
-    return { values }
+    return {
+      values,
+      offsetX: 0,
+      offsetY: 0
+    }
+  },
+  mounted () {
+    this.adjustToFitViewport()
   },
   methods: {
     change (key) {
@@ -84,6 +92,19 @@ export default {
     },
     close () {
       this.$emit('close')
+    },
+    adjustToFitViewport () {
+      const container = this.$refs.properties
+      const containerRect = container.getBoundingClientRect()
+      const parentRect = container.parentNode.getBoundingClientRect()
+
+      if (containerRect.right > parentRect.right) {
+        this.offsetX = containerRect.right - parentRect.right
+      }
+
+      if (containerRect.bottom > parentRect.bottom) {
+        this.offsetY = containerRect.bottom - parentRect.bottom
+      }
     }
   }
 }
@@ -96,6 +117,7 @@ export default {
   border: 1px solid #000;
   width: 200px;
   padding: 0.5em;
+  z-index: 1000;
 }
 
 .properties__field {
