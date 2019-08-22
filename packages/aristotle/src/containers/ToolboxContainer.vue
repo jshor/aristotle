@@ -7,7 +7,7 @@
         type="LogicGate"
         subtype="NOR"
         caption="NOR"
-        :src="buffer"
+        :src="switchSvg"
         :width="100"
         :zoom-factor="activeDocument.zoomFactor"
       />

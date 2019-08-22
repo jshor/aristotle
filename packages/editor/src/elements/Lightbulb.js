@@ -3,8 +3,8 @@ import { TemplateSVG } from '../svg'
 import Element from '../Element'
 
 export default class Lightbulb extends Element {
-  constructor (id) {
-    super(id)
+  constructor (id, params) {
+    super(id, params)
 
     this.node = new OutputNode(id)
     this.node.on('change', this.updateWireColor)
