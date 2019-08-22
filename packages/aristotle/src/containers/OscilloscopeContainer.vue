@@ -77,15 +77,24 @@ export default {
       // return displays
     }
   },
+  mounted () {
+    this.$refs.timeline.scrollLeft = this.$refs.timeline.scrollWidth
+    this.scrollToNextInterval()
+  },
+  methods: {
+    scrollToNextInterval () {
+      setTimeout(() => {
+        this.$refs.timeline.scrollLeft += 40
+      })
+    }
+  },
   watch: {
     waves: {
       handler () {
         const { scrollLeft, offsetWidth, scrollWidth } = this.$refs.timeline
 
-        if (Math.abs(scrollLeft + offsetWidth - scrollWidth) <= 42) {
-          setTimeout(() => {
-            this.$refs.timeline.scrollLeft += 40
-          })
+        if (Math.abs(scrollLeft + offsetWidth - scrollWidth) <= 40) {
+          this.scrollToNextInterval()
         }
       },
       deep: true

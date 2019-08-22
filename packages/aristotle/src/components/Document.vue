@@ -1,15 +1,16 @@
 <template>
   <div class="document">
     <split-pane
-      :default-percent="80"
+      :default-percent="editorDisplayPercent"
       split="horizontal"
-      class="document__pane">
+      class="document__pane"
+      :class="{ 'document__pane--resize-disabled': !oscilloscopeEnabled }">
       <template v-slot:paneL>
         <div id="canvasWrapper" class="document__editor">
           <slot name="editor" />
         </div>
       </template>
-      <template v-slot:paneR>
+      <template v-if="oscilloscopeEnabled" v-slot:paneR>
         <div class="document__oscilloscope">
           <slot name="oscilloscope" />
         </div>
@@ -17,6 +18,23 @@
     </split-pane>
   </div>
 </template>
+
+<script>
+export default {
+  name: 'Document',
+  props: {
+    oscilloscopeEnabled: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    editorDisplayPercent () {
+      return this.oscilloscopeEnabled ? 80 : 100
+    }
+  }
+}
+</script>
 
 <style lang="scss">
 .document {
@@ -39,6 +57,11 @@
         padding-top: 11px;
         box-sizing: border-box;
       }
+    }
+
+    &--resize-disabled .splitter-pane-resizer {
+      pointer-events: none;
+      cursor: default;
     }
   }
 

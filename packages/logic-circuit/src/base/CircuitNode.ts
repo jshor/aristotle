@@ -166,6 +166,15 @@ class CircuitNode {
   public on = (eventType: string, callback: Function): void => {
     this.events.push({ eventType, callback })
   }
+
+  /**
+   * Returns the value of the node next time the circuit is evaluated.
+   * 
+   * @returns {Number}
+   */
+  public getProjectedValue = (): number => {
+    return this.newValue || this.value
+  }
 }
 
 

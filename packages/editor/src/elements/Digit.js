@@ -4,8 +4,8 @@ import getPortIndex from '../utils/getPortIndex'
 import { DigitSVG } from '../svg'
 
 export default class Lightbulb extends Element {
-  constructor (id) {
-    super(id)
+  constructor (id, params) {
+    super(id, params)
 
     this.registerSvgRenderer()
     this.registerCircuitNode()

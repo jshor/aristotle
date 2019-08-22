@@ -1,5 +1,5 @@
 <template>
-  <document>
+  <document :oscilloscope-enabled="document.editorModel.oscilloscopeEnabled" >
     <template v-slot:editor>
       <div
         :id="document.id"
@@ -44,7 +44,8 @@ export default {
       waves: {},
       toolboxOpen: false,
       elementSettings: null,
-      isActive: true
+      isActive: true,
+      focused: true
     }
   },
   props: {
@@ -62,8 +63,10 @@ export default {
   watch: {
     relayedCommand: {
       deep: true,
-      handler (command) {
-        this.canvas.applyCommand(command)
+      handler (payload) {
+        if (payload.documentId === this.document.id) {
+          this.canvas.applyCommand(payload)
+        }
       }
     },
     activeDocumentId: {
@@ -75,10 +78,14 @@ export default {
   },
   methods: {
     setDocumentActive () {
-      if (this.isActive && document.hasFocus()) {
-        this.canvas.oscillation.start()
-      } else { 
-        this.canvas.oscillation.stop()
+      const focused = this.isActive && document.hasFocus()
+
+      if (!this.canvas.debugMode) {
+        if (!focused) {
+          this.canvas.oscillation.stop()
+        } else {
+          this.canvas.oscillation.start()
+        }
       }
     },
     onRelayCommand ({ command, payload }) {
