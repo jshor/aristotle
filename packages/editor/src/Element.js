@@ -8,7 +8,7 @@ import inputPortPolicy from './policies/inputPortPolicy'
 import ToolboxButton from './ToolboxButton'
 
 export default class Element extends draw2d.shape.basic.Image {
-  constructor (id, { settings }) {
+  constructor (id, { settings } = {}) {
     super({ resizeable: false })
 
     if (id) this.setId(id) // TODO: is checking for id necessary?

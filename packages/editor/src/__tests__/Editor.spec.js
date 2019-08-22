@@ -5,6 +5,7 @@ import Element from '../Element'
 
 jest.mock('../Canvas')
 jest.mock('../Connection')
+jest.mock('../services/OscillationService')
 
 describe('Editor', () => {
   let editor

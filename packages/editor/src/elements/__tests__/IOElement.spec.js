@@ -1,6 +1,7 @@
 import { LogicValue, InputNode } from '@aristotle/logic-circuit'
 import ToggleService from '../../services/ToggleService'
 import IOElement from '../IOElement'
+import Element from '../../Element'
 
 describe('Input/Output Element', () => {
   let element
@@ -101,6 +102,10 @@ describe('Input/Output Element', () => {
       element.wave = {
         drawPulseChange: jest.fn()
       }
+
+      jest
+        .spyOn(element, 'render')
+        .mockImplementation(jest.fn())
     })
 
     it('should set the value on the circuit node', () => {
@@ -131,6 +136,12 @@ describe('Input/Output Element', () => {
 
       expect(element.canvas.step).toHaveBeenCalledTimes(1)
     })
+
+    it('should re-render the element', () => {
+      element.setValue(newValue)
+
+      expect(element.render).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('invertValue()', () => {
@@ -142,7 +153,7 @@ describe('Input/Output Element', () => {
 
     it(`should set the value of the node to ${LogicValue.TRUE} if the present value is ${LogicValue.FALSE}`, () => {
       element.node = {
-        value: LogicValue.FALSE
+        getProjectedValue: jest.fn(() => LogicValue.FALSE)
       }
       element.invertValue()
 
@@ -152,7 +163,7 @@ describe('Input/Output Element', () => {
     
     it(`should set the value of the node to ${LogicValue.TRUE} if the present value is ${LogicValue.UNKNOWN}`, () => {
       element.node = {
-        value: LogicValue.UNKNOWN
+        getProjectedValue: jest.fn(() => LogicValue.UNKNOWN)
       }
       element.invertValue()
 
@@ -162,7 +173,7 @@ describe('Input/Output Element', () => {
     
     it(`should set the value of the node to ${LogicValue.FALSE} if the present value is ${LogicValue.TRUE}`, () => {
       element.node = {
-        value: LogicValue.TRUE
+        getProjectedValue: jest.fn(() => LogicValue.TRUE)
       }
       element.invertValue()
 
