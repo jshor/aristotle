@@ -4,16 +4,15 @@ import LogicGateSVG from '../svg/lib/LogicGateSVG'
 import Element from '../Element'
 
 export default class LogicGate extends Element {
-  constructor (id, { subtype }) {
-    super(id)
+  constructor (id, params) {
+    super(id, params)
 
-    this.gateType = subtype
     this.node = this.getLogicGate(id)
     this.node.on('change', this.setOutputConnectionColor)
     this.svgRenderer = new LogicGateSVG({
       primaryColor: '#ffffff',
       secondaryColor: '#1C1D24',
-      gateType: this.gateType,
+      gateType: this.settings.gateType.value,
       inputCount: this.settings.inputs.value
     })
     
@@ -24,6 +23,10 @@ export default class LogicGate extends Element {
     inputs: {
       type: 'number',
       value: 2
+    },
+    gateType: {
+      type: 'readonly',
+      value: 'NOR'
     }
   }
 
@@ -44,7 +47,7 @@ export default class LogicGate extends Element {
   }
 
   getLogicGate = (id) => {
-    switch (this.gateType) {
+    switch (this.settings.gateType.value) {
       case 'NOR':
         return new Nor(id)
       case 'OR':

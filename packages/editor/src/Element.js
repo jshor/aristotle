@@ -8,12 +8,11 @@ import inputPortPolicy from './policies/inputPortPolicy'
 import ToolboxButton from './ToolboxButton'
 
 export default class Element extends draw2d.shape.basic.Image {
-  constructor (id) {
-    super({ resizeable: false, onClick () {
-      console.log('CLICKEEEED')
-    } })
+  constructor (id, { settings }) {
+    super({ resizeable: false })
 
     if (id) this.setId(id) // TODO: is checking for id necessary?
+    this.applySettings(settings)
   }
 
   onContextMenu = (...vars) => {
@@ -93,6 +92,22 @@ export default class Element extends draw2d.shape.basic.Image {
     this.render()
   }
 
+  applySettings = (settings) => {
+    for (let propertyName in settings) {
+      this.settings[propertyName].value = settings[propertyName]
+    }
+  }
+
+  getSettings = () => {
+    const settings = {}
+
+    // for (let propertyName in this.settings) {
+    //   settings[propertyName] = this.settings[propertyName].value
+    // }
+
+    return settings
+  }
+
   updateSettings = (settings) => {
     for (let propertyName in settings) {
       const command = new CommandSetProperty(this)
@@ -149,7 +164,8 @@ export default class Element extends draw2d.shape.basic.Image {
       x: this.x,
       y: this.y,
       type: this.constructor.name,
-      name: uuid()
+      name: uuid(),
+      settings: this.getSettings()
     }
   }
 }

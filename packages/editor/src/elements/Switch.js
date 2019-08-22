@@ -5,8 +5,8 @@ import IOElement from './IOElement'
 import { TemplateSVG } from '../svg'
 
 export default class Switch extends IOElement {
-  constructor (id) {
-    super(id)
+  constructor (id, params) {
+    super(id, params)
 
     this.registerSvgRenderer()
     this.registerCircuitNode()
@@ -41,8 +41,9 @@ export default class Switch extends IOElement {
   }
 
   getSvg = () => {
-    const valueColor = this.getWireColor(this.node.value)
-    const y = this.node.value === LogicValue.TRUE ? 15 : 48
+    const value = this.node.getProjectedValue()
+    const valueColor = this.getWireColor(value)
+    const y = value === LogicValue.TRUE ? 15 : 48
 
     return this
       .svgRenderer

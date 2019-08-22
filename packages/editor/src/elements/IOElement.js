@@ -3,8 +3,8 @@ import ToggleService from '../services/ToggleService'
 import Element from '../Element'
 
 export default class IOElement extends Element {
-  constructor (id) {
-    super(id)
+  constructor (id, params) {
+    super(id, params)
 
     this.on('added', this.registerWave)
     this.on('added', this.setInitialValue)
@@ -66,11 +66,15 @@ export default class IOElement extends Element {
 
     // input nodes changes require triggering the head of the circuit queue
     this.canvas.circuit.queue.push(this.node)
-    this.canvas.step(true)
+    
+    if (!this.canvas.debugMode) {
+      this.canvas.step(true)
+    }
+    this.render()
   }
 
   invertValue = () => {
-    const newValue = this.node.value === LogicValue.TRUE
+    const newValue = this.node.getProjectedValue() === LogicValue.TRUE
       ? LogicValue.FALSE
       : LogicValue.TRUE
 

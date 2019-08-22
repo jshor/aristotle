@@ -104,26 +104,28 @@
     <div class="toolbar__group toolbar__group--right">
       <button
         @click="relayCommand('TOGGLE_DEBUG')"
-        class="toolbar-button">
+        class="toolbar-button"
+        :class="{ 'toolbar-button--active': editor.debugMode }">
         <i class="fas fa-bug" />
       </button>
       <div class="toolbar__separator" />
       <button
-        :disabled="!editor.canRedo"
+        :disabled="!editor.debugMode"
         @click="relayCommand('RESET')"
         class="toolbar-button toolbar-button--pull-right">
         <i class="fas fa-sync-alt" />
       </button>
       <button
-        :disabled="!editor.canRedo"
+        :disabled="!editor.debugMode || editor.circuitComplete"
         @click="relayCommand('STEP')"
         class="toolbar-button toolbar-button--pull-right">
         <i class="fas fa-step-forward" />
       </button>
       <div class="toolbar__separator" />
       <button
-        @click="relayCommand('STEP')"
-        class="toolbar-button toolbar-button--pull-right">
+        @click="relayCommand('TOGGLE_OSCILLATOR')"
+        class="toolbar-button toolbar-button--pull-right"
+        :class="{ 'toolbar-button--active': editor.oscilloscopeEnabled }">
         <i class="fas fa-wave-square" />
       </button>
     </div>
@@ -131,8 +133,6 @@
 </template>
 
 <script>
-import DocumentModel from '@/models/DocumentModel'
-
 export default {
   name: 'Toolbar',
   props: {
@@ -148,7 +148,11 @@ export default {
   },
   methods: {
     relayCommand (command, payload) {
-      return this.$emit('relayCommand', { command, payload })
+      return this.$emit('relayCommand', {
+        command,
+        payload,
+        documentId: this.document.id
+      })
     }
   }
 }
@@ -189,12 +193,20 @@ export default {
   padding: 0.25rem 0;
   width: 1.85rem;
   font-size: 1.25rem;
+  border-radius: 2px;
   text-shadow: drop-shadow(0 0 1px $color-shadow);
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
   border: 0;
   background: none;
+  outline: none;
+  cursor: pointer;
+
+  &--active {
+    background: linear-gradient(0, $color-secondary, $color-primary);
+    color: $color-bg-secondary;
+  }
 
   &:disabled {
     opacity: 0.25;

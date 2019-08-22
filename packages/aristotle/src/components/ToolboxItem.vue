@@ -31,7 +31,8 @@ export default {
     },
     src: {
       type: String,
-      required: true
+      default: ' '
+      // required: true
     },
     type: {
       type: String,

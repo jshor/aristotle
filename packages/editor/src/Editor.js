@@ -17,28 +17,16 @@ export default class Editor extends Canvas {
     this.deserializer = new DeserializerService(this)
     this.serializer = new SerializerService(this)
     this.oscillation = new OscillationService(this)
+
     this.installEditPolicies()
 
+    this.debugMode = false
     this.drawn = false
-    // this.setMouseMode('PANNING') // TODO: remove
-
-    this.oscillation.start()
-    // this.on('select', (...args) => {
-    //   if (!this.drawn) {
-    //     const serialized = JSON.stringify(this.serializer.serializeAll())
-    //     // this.clear()
-
-    //     setTimeout(() => {
-    //       this.deserializer.deserialize(JSON.parse(serialized))
-    //     }, 1000)
-    //     this.drawn = true
-    //   }
-    // })
+    this.oscilloscopeEnabled = false
   }
 
   oscillate = (waves, secondsElapsed) => {
-    this.fireEvent('oscillate', { waves, secondsElapsed})
-    // console.log('oscillating', waves)
+    this.fireEvent('oscillate', { waves, secondsElapsed })
   }
 
   /**
@@ -81,7 +69,7 @@ export default class Editor extends Canvas {
 
   /**
    * Runs the circuit evaluation.
-   * It will debug in a step-through manner if the `debug` property is set to `true`.
+   * It will debug in a step-through manner if the `debugMode` property is set to `true`.
    * It will evaluate automatically until the circuit has no more updates.
    *
    * @param {Boolean} [force = false] - if true, forces the circuit to re-evaluate even if complete
@@ -90,10 +78,31 @@ export default class Editor extends Canvas {
     if (!this.circuit.isComplete() || force) {
       this.circuit.next()
 
-      if (!this.debug) {
+      if (!this.debugMode) {
         setTimeout(() => this.step())
       }
     }
+    this.fireEvent('commandStackChanged')
+  }
+
+  toggleDebug = (debugMode) => {
+    if (this.debugMode !== debugMode) {
+      if (debugMode) {
+        this.oscillation.stop()
+      } else {
+        this.oscillation.start()
+      }
+    }
+    this.debugMode = debugMode
+    this.fireEvent('commandStackChanged')
+  }
+
+  reset = () => {
+    const serialized = JSON.stringify(this.serializer.serializeAll())
+
+    this.clear()
+    this.deserializer.deserialize(JSON.parse(serialized))
+    this.drawn = true // TODO: ???
   }
 
   /**
@@ -145,7 +154,9 @@ export default class Editor extends Canvas {
       canRedo: this.commandStack.canRedo(),
       selectionCount: this.getSelection().getSize(),
       mouseMode: this.mouseMode,
-      debug: this.debug
+      debugMode: this.debugMode,
+      oscilloscopeEnabled: this.oscilloscopeEnabled,
+      circuitComplete: this.circuit.isComplete() || false
     })
   }
 
@@ -181,11 +192,23 @@ export default class Editor extends Canvas {
           this.fireEvent('commandStackChanged')
         }
         break
-      case 'CUT':
-        console.log('not implemented')
-        break
       case 'UPDATE_ELEMENT':
         this.updateElement(command.payload)
+        break
+      case 'TOGGLE_OSCILLATOR':
+        this.oscilloscopeEnabled = !this.oscilloscopeEnabled
+        this.fireEvent('commandStackChanged')
+        break
+      case 'TOGGLE_DEBUG':
+        this.toggleDebug(!this.debugMode)
+        break
+      case 'STEP':
+        this.step()
+        this.fireEvent('commandStackChanged')
+        break
+      case 'RESET':
+        this.reset()
+        this.fireEvent('commandStackChanged')
         break
     }
   }

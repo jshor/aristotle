@@ -4,7 +4,7 @@
     <toolbar
       v-if="activeDocument"
       :document="activeDocument"
-      @relayCommand="onRelayCommand"
+      @relayCommand="relayCommand"
       @openDocument="openDocument"
     />
 
@@ -31,14 +31,13 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 import Toolbar from '@/components/Toolbar'
 import DocumentContainer from '@/containers/DocumentContainer'
 import TabsContainer from '@/containers/TabsContainer'
 import ToolboxContainer from '@/containers/ToolboxContainer'
 import DocumentModel from '@/models/DocumentModel'
-import { CommandModel } from '@aristotle/editor'
-import data from '@/mocks/document2.json'
+import data from '@/mocks/document.json'
 import filters from '@/assets/filters.svg'
 
 export default {
@@ -60,8 +59,8 @@ export default {
     ...mapGetters(['activeDocument'])
   },
   methods: {
-    onRelayCommand ({ command, payload }) {
-      this.$store.commit('RELAY_COMMAND', new CommandModel(command, payload))
+    relayCommand (payload) {
+      this.$store.commit('RELAY_COMMAND', payload)
     },
     openDocument () {
       const document = new DocumentModel()

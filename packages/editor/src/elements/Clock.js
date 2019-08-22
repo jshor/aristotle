@@ -4,8 +4,8 @@ import WaveService from '../services/WaveService'
 import { TemplateSVG } from '../svg'
 
 export default class Clock extends IOElement {
-  constructor (id) {
-    super(id)
+  constructor (id, params) {
+    super(id, params)
 
     this.registerSvgRenderer()
     this.registerCircuitNode()
@@ -52,7 +52,7 @@ export default class Clock extends IOElement {
   }
 
   getSvg = () => {
-    const valueColor = this.getWireColor(this.node.value)
+    const valueColor = this.getWireColor(this.node.getProjectedValue())
 
     return this
       .svgRenderer
