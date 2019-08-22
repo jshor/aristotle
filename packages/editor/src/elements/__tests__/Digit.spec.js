@@ -20,15 +20,6 @@ describe('Digit Element', () => {
     it('should return a new OutputNode', () => {
       expect(digit.createInput()).toBeInstanceOf(OutputNode)
     })
-
-    it('should attach the `change` event listener', () => {
-      jest.spyOn(OutputNode.prototype, 'on')
-
-      digit.createInput()
-
-      expect(OutputNode.prototype.on).toHaveBeenCalledTimes(1)
-      expect(OutputNode.prototype.on).toHaveBeenCalledWith('change', digit.change)
-    })
   })
 
   describe('getBinaryValue()', () => {

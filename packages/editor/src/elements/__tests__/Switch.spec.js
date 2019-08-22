@@ -4,7 +4,7 @@ import ToggleService from '../../services/ToggleService'
 import Switch from '../Switch'
 import { TemplateSVG } from '../../svg'
 
-describe('element element', () => {
+describe('Switch element', () => {
   let element
 
   beforeEach(() => {
@@ -34,15 +34,6 @@ describe('element element', () => {
 
       expect(InputNode.prototype.setValue).toHaveBeenCalledTimes(1)
       expect(InputNode.prototype.setValue).toHaveBeenCalledWith(value)
-    })
-
-    it('should call `updateVisualValue()` when the node changes', () => {
-      jest.spyOn(InputNode.prototype, 'on')
-      
-      element.registerCircuitNode()
-
-      expect(InputNode.prototype.on).toHaveBeenCalledTimes(1)
-      expect(InputNode.prototype.on).toHaveBeenCalledWith('change', element.updateVisualValue)
     })
   })
 
@@ -79,10 +70,10 @@ describe('element element', () => {
   describe('getSvg()', () => {
     it('should return the SVG data from the renderer with the active wire color and on position', () => {
       element.node = {
-        value: LogicValue.TRUE
+        getProjectedValue: jest.fn(() => LogicValue.TRUE)
       }
 
-      const valueColor = element.getWireColor(element.node.value)
+      const valueColor = element.getWireColor(element.node.getProjectedValue())
       const y = 15
       const expectedData = element
         .svgRenderer
@@ -94,10 +85,10 @@ describe('element element', () => {
 
       it('should return the SVG data from the renderer with the inactive wire color and off position', () => {
       element.node = {
-        value: LogicValue.FALSE
+        getProjectedValue: jest.fn(() => LogicValue.FALSE)
       }
 
-      const valueColor = element.getWireColor(element.node.value)
+      const valueColor = element.getWireColor(element.node.getProjectedValue())
       const y = 48
       const expectedData = element
         .svgRenderer

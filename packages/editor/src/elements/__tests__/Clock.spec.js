@@ -42,15 +42,6 @@ describe('Clock Element', () => {
       expect(InputNode.prototype.setValue).toHaveBeenCalledTimes(1)
       expect(InputNode.prototype.setValue).toHaveBeenCalledWith(value)
     })
-
-    it('should call `updateVisualValue()` when the node changes', () => {
-      jest.spyOn(InputNode.prototype, 'on')
-      
-      clock.registerCircuitNode()
-
-      expect(InputNode.prototype.on).toHaveBeenCalledTimes(1)
-      expect(InputNode.prototype.on).toHaveBeenCalledWith('change', clock.updateVisualValue)
-    })
   })
 
   describe('registerClock()', () => {
@@ -93,7 +84,7 @@ describe('Clock Element', () => {
 
   describe('getSvg()', () => {
     it('should return the SVG data from the renderer with the proper wire color applied', () => {
-      const valueColor = clock.getWireColor(clock.node.value)
+      const valueColor = clock.getWireColor(clock.node.getProjectedValue())
       const expectedData = clock
         .svgRenderer
         .setTemplateVariables({ valueColor })
