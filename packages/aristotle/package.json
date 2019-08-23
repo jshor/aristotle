@@ -10,10 +10,11 @@
   },
   "dependencies": {
     "@aristotle/editor": "1.0.0",
-    "@aristotle/logic-circuit": "1.0.0",
+    "@aristotle/logic-circuit": "0.9.0",
     "@fortawesome/fontawesome-free": "^5.8.1",
     "jquery": "^3.3.1",
     "jquery-ui": "^1.12.1",
+    "open-sans-fonts": "^1.5.1",
     "vue": "^2.5.21",
     "vue-splitpane": "^1.0.4",
     "vuex": "^3.0.1"

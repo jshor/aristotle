@@ -39,6 +39,8 @@ module.exports = {
           @import "@/styles/_overrides.scss";
           @import '~@fortawesome/fontawesome-free/scss/fontawesome';
           @import '~@fortawesome/fontawesome-free/scss/solid';
+
+          @import '~open-sans-fonts/open-sans.scss';
         `
       }
     }

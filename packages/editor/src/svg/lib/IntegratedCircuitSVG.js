@@ -17,6 +17,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
 
     this.title = options.title
     this.wires = options.wires
+    console.log('WIRES RECIVED: ', this.wires)
     this.outerDimensions = this.getOuterSvgDimensions()
     this.innerDimensions = this.getInnerSvgDimensions()
   }
