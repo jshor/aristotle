@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import Toolbar from '@/components/Toolbar'
 import DocumentContainer from '@/containers/DocumentContainer'
 import TabsContainer from '@/containers/TabsContainer'
@@ -80,7 +80,7 @@ body {
   user-select: none;
   margin: 0;
   background: #1D1E25;
-  font-family: Segoe UI;
+  font-family: Segoe UI, "Open Sans";
   font-size: 0.8rem;
   position: fixed;
   overflow: hidden;

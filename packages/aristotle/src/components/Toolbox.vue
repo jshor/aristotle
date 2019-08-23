@@ -32,6 +32,7 @@ export default {
   &__pane {
     height: 100%;
     background-color: $color-bg-primary;
+    overflow: auto;
   }
 }
 </style>
