@@ -171,10 +171,11 @@ export default class DigitSVG extends SVGBase {
    * @returns {Object<{ ports: Object[], path: Buffer, width: Number, height: Number }>}
    */
   getSvgData = () => {
-    const width = (this.chars.length * DIGIT_WIDTH) + DIGIT_PADDING + DIGIT_LINE_SPACING
+    const digitWidth = (this.chars.length * DIGIT_WIDTH) + DIGIT_PADDING + DIGIT_LINE_SPACING
+    const width = digitWidth + DIGIT_PADDING + DIGIT_LINE_SPACING
     const height = DIGIT_DISPLAY_HEIGHT
 
-    const digitDisplay = this.getDigitDisplay(width, height)
+    const digitDisplay = this.getDigitDisplay(digitWidth, height)
     const lines = DIGIT_PORTS.map(this.getInputLine)
 
     /* render the entire figure */
@@ -186,7 +187,9 @@ export default class DigitSVG extends SVGBase {
     const ports = this.getPortDefinitions()
 
     const svg = this.toSvg('svg', {
-      xmlns: 'http://www.w3.org/2000/svg'
+      xmlns: 'http://www.w3.org/2000/svg',
+      width,
+      height
     }, [figure])
 
     const path = this.toDataUrl(svg)
@@ -194,7 +197,7 @@ export default class DigitSVG extends SVGBase {
     return {
       path,
       ports,
-      width: width + DIGIT_PADDING + DIGIT_LINE_SPACING,
+      width,
       height
     }
   }

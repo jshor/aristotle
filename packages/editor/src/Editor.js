@@ -43,7 +43,7 @@ export default class Editor extends Canvas {
   }
 
 
-  addElement = (params, x, y) => {
+  createElement = (params, x, y) => {
     const element = ElementInitializerService
       .getInitializedElement(uuid(), params)
 

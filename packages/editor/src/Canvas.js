@@ -140,7 +140,7 @@ export default class Canvas extends Draw2DCanvas {
       const { x, y } = this.getDraggedCoordinates()
 
       // TODO: must get params from `data-` attrs on `el`
-      this.addElement(el.data(), x, y)
+      this.createElement(el.data(), x, y)
     }
   }
 
