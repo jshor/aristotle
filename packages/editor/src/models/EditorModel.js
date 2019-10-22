@@ -6,7 +6,8 @@ class EditorModel {
     circuitComplete = false,
     oscilloscopeEnabled = false,
     selectionCount = 0,
-    mouseMode = 'PANNING'
+    zoomLevel = 1,
+    mouseMode = 'SELECTION'
   }) {
     this.canUndo = canUndo
     this.canRedo = canRedo
@@ -14,6 +15,7 @@ class EditorModel {
     this.selectionCount = selectionCount
     this.mouseMode = mouseMode
     this.oscilloscopeEnabled = oscilloscopeEnabled
+    this.zoomLevel = zoomLevel
     this.circuitComplete = circuitComplete
   }
 }
