@@ -6,7 +6,7 @@
       class="document__pane"
       :class="{ 'document__pane--resize-disabled': !oscilloscopeEnabled }">
       <template v-slot:paneL>
-        <div id="canvasWrapper" class="document__editor">
+        <div id="canvasWrapper" ref="editor" class="document__editor">
           <slot name="editor" />
         </div>
       </template>

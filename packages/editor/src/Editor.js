@@ -121,6 +121,7 @@ export default class Editor extends Canvas {
         break
     }
     this.mouseMode = mode
+    this.fireEvent('commandStackChanged')
   }
 
   /**
@@ -156,6 +157,7 @@ export default class Editor extends Canvas {
       mouseMode: this.mouseMode,
       debugMode: this.debugMode,
       oscilloscopeEnabled: this.oscilloscopeEnabled,
+      zoomLevel: this.getZoom(),
       circuitComplete: this.circuit.isComplete() || false
     })
   }
@@ -170,6 +172,28 @@ export default class Editor extends Canvas {
 
   load = (data) => {
     this.deserializer.deserialize(data)
+    this.centerAllFigures()
+  }
+
+  centerAllFigures = () => {
+    const group = new draw2d.shape.composite.Group()
+    const figures = this.getFigures()
+
+    figures.each((i, figure) => {
+      group.assignFigure(figure)
+    })
+
+    const x = (this.getWidth() - group.width) / 2
+    const y = (this.getHeight() - group.height) / 2
+
+    group.setX(x)
+    group.setY(y)
+
+    figures.each((i, figure) => {
+      group.unassignFigure(figure)
+    })
+  
+    this.remove(group)
   }
 
   applyCommand = (command) => {
@@ -192,6 +216,9 @@ export default class Editor extends Canvas {
           this.fireEvent('commandStackChanged')
         }
         break
+      case 'SET_MOUSE_MODE':
+        this.setMouseMode(command.payload)
+        break
       case 'UPDATE_ELEMENT':
         this.updateElement(command.payload)
         break
@@ -210,6 +237,80 @@ export default class Editor extends Canvas {
         this.reset()
         this.fireEvent('commandStackChanged')
         break
+      case 'SET_ZOOM':
+        console.log('ZOOM TO: ', command.payload)
+        // this.setZoom(command.payload)
+        this.doZoom(command.payload)
     }
+  }
+
+  panTo = (x, y) => {
+    console.log('pan to: ', x, y)
+    const {
+      width,
+      height
+    } = this.parent.getBoundingClientRect()
+    const z = 1 / this.getZoom()
+    const panX = x * z
+    const panY = y * z
+    console.log('Pan: ', panX, panY, panX - width / 2, panY - height / 2)
+    const left = Math.min(panX - width / 2, 0)
+    const top = Math.min(panY - height / 2, 0)
+
+    this.scrollTo(left, top)
+  }
+
+  doZoom = (factor) => {
+    const { left, top, width, height } = this.parent.getBoundingClientRect()
+    const z = this.getZoom()
+    const x = (this.getScrollLeft() * z) + width / 2
+    const y = (this.getScrollTop() * z) + height / 2
+    const zoomDelta = factor * 0.25
+    const zoomFactor = this.getZoom() + zoomDelta
+
+    this.setZoom(zoomFactor)
+
+    setTimeout(() => {
+      this.panTo(x, y)
+    })
+
+
+    // this.paper.setViewBox(0, 0, this.initialWidth, this.initialHeight)
+    // this.setZoom(factor)
+    // const { top, left, width, height } = this.parent.getBoundingClientRect()
+    // const { x, y } = left + width / 2
+    // const y = top + height / 2
+    // const before = this.fromDocumentToCanvasCoordinate(left + width / 2, top + height / 2)
+    // this.setZoom(zoomFactor)
+    // const after = this.fromDocumentToCanvasCoordinate(left + width / 2, top + height / 2)
+    // const deltaX = (after.x - before.x) / zoomFactor
+    // const deltaY = (after.y - before.y) / zoomFactor
+
+    // console.log('DELTA: ', this.getWidth() * zoomFactor)
+    // setTimeout(() => {
+    //   this.scrollTo(this.getScrollLeft() - deltaX, this.getScrollTop() - deltaY)
+    // }, 2000)
+
+
+
+
+
+    // const x = left + width / 2
+    // const y = top + height / 2
+    // const wheelZoomPolicy = this
+    //   .editPolicy
+    //   .asArray()
+    //   .filter(e => e instanceof draw2d.policy.canvas.ZoomPolicy)
+    //   .pop()
+
+   
+    // while (auf > 0) {
+    //   wheelZoomPolicy.onMouseWheel(-24, x, y, true)
+    //   auf -= 3
+    // }
+    // wheelZoomPolicy.setZoom(1.25, true)
+
+      // console.log('wee', wheelZoomPolicy)
+    // this.setZoom(factor, true)
   }
 }
