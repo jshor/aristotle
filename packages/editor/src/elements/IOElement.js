@@ -69,6 +69,9 @@ export default class IOElement extends Element {
     
     if (!this.canvas.debugMode) {
       this.canvas.step(true)
+    } else {
+      // if the editor is in debug mode, tell the user the circuit evaluation is incomplete
+      this.canvas.fireEvent('commandStackChanged') // TODO: rename this event
     }
     this.render()
   }

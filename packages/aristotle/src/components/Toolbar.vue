@@ -49,15 +49,15 @@
       </button>
       <div class="toolbar__separator" />
       <button
-        :disabled="!editor.canRedo"
-        @click="relayCommand('REDO')"
-        class="toolbar-button">
+        @click="relayCommand('SET_MOUSE_MODE', 'PANNING')"
+        class="toolbar-button"
+        :class="{ 'toolbar-button--active': editor.mouseMode === 'PANNING' }">
         <i class="fas fa-arrows-alt" />
       </button>
       <button
-        :disabled="!editor.canRedo"
-        @click="relayCommand('REDO')"
-        class="toolbar-button">
+        @click="relayCommand('SET_MOUSE_MODE', 'SELECTION')"
+        class="toolbar-button"
+        :class="{ 'toolbar-button--active': editor.mouseMode === 'SELECTION' }">
         <i class="fas fa-mouse-pointer" />
       </button>
       <div class="toolbar__separator" />

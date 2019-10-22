@@ -7,6 +7,7 @@
           width: '4998px',
           height: '4998px'
         }"
+        ref="editor"
       />
       <properties
         v-if="elementSettings && toolboxOpen"
@@ -14,6 +15,20 @@
         @change="toolboxChanged"
         @close="propertiesClosed"
       />
+      <div class="zoom">
+        <button
+          class="zoom__out"
+          :disabled="false"
+          @click="zoom(1)">
+          <i class="fas fa-search-minus" />
+        </button>
+        <div class="zoom__level">{{ zoomLevel }}</div>
+        <button
+          class="zoom__out"
+          @click="zoom(-1)">
+          <i class="fas fa-search-plus" />
+        </button>
+      </div>
     </template>
 
     <template v-slot:oscilloscope>
@@ -24,12 +39,11 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import Document from '@/components/Document'
 import Properties from '@/components/Properties'
 import OscilloscopeContainer from './OscilloscopeContainer'
 import { Editor, CommandModel } from '@aristotle/editor'
-import DocumentModel from '@/models/DocumentModel'
 
 export default {
   name: 'DocumentContainer',
@@ -58,7 +72,10 @@ export default {
     ...mapState([
       'relayedCommand',
       'activeDocumentId'
-    ])
+    ]),
+    zoomLevel () {
+      return this.document.editorModel.zoomLevel
+    }
   },
   watch: {
     relayedCommand: {
@@ -89,7 +106,11 @@ export default {
       }
     },
     onRelayCommand ({ command, payload }) {
-      this.$store.commit('RELAY_COMMAND', new CommandModel(command, payload))
+      this.$store.commit('RELAY_COMMAND', {
+        command,
+        payload,
+        documentId: this.document.id
+      })
     },
     onUpdateEditor (editorModel) {
       this.$store.commit('SET_EDITOR_MODEL', editorModel)
@@ -109,6 +130,27 @@ export default {
 
       this.$store.commit('SET_EDITOR_MODEL', model)
       this.toolboxOpen = false
+    },
+    panToCenter () {
+      const el = this.$refs.editor.parentNode
+      const { scrollWidth, scrollHeight } = el
+      const x = (scrollWidth - el.offsetWidth) / 2
+      const y = (scrollHeight - el.offsetHeight) / 2
+
+      this.canvas.scrollTo(x, y)
+    },
+    zoom (factor) {
+      const minZoom = 0.5
+      const maxZoom = 5
+      const increment = 0.25
+      const l = this.zoomLevel + (factor * increment)
+
+      this.onRelayCommand({
+        command: 'SET_ZOOM',
+        payload: factor
+      })
+      // setTimeout(() => this.panToCenter())
+      console.log('new zoom: ', l, this.zoomLevel)
     }
   },
   mounted () {
@@ -123,24 +165,70 @@ export default {
       this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
       this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
       this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))
-      this.canvas.on('zoomed', (editor, { value }) => {
-        this.$store.commit('SET_ZOOM_FACTOR', value)
-      })
+      this.canvas.on('zoomed', () => this.onCanvasUpdate(this.canvas))
       this.canvas.on('oscillate', (editor, waves) => {
         this.waves = waves
       })
       this.canvas.load(this.document.data)
 
       setInterval(() => this.setDocumentActive(), 300)
+
+      this.panToCenter()
     })
   }
 }
 </script>
 
-<style>
+<style lang="scss">
 .oscilloscope-inner {
   background-color: #1C1D24;
   height: 100%;
   box-sizing: border-box;
+}
+
+.zoom {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background-color: $color-bg-primary;
+  border-radius: 2px;
+  color: $color-primary;
+  display: flex;
+  box-sizing: border-box;
+  border: 1px solid $color-bg-tertiary;
+
+  &__in, &__out, &__level {
+    padding: 0.25rem;
+  }
+
+  &__level {
+    border-style: solid;
+    border-color: $color-bg-tertiary;
+    border-width: 0 1px;
+    width: 2rem;
+  }
+
+  &__in, &__out {
+    border: 0;
+    outline: none;
+    background-color: transparent;
+    color: $color-primary;
+    
+    &:not(:disabled) {
+      cursor: pointer;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: $color-bg-secondary;
+    }
+
+    &:active:not(:disabled) {
+      background-color: $color-bg-tertiary;
+    }
+
+    &:disabled {
+      color: $color-bg-secondary;
+    }
+  }
 }
 </style>
