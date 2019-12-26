@@ -35,6 +35,30 @@ describe('Input/Output Element', () => {
     })
   })
 
+  describe('resetWave()', () => {
+    it('should unregister the wave if the oscilloscope value is string 0', () => {
+      jest
+        .spyOn(element, 'unregisterWave')
+        .mockImplementation(jest.fn())
+
+      element.settings.oscilloscope.value = '0'
+      element.resetWave()
+
+      expect(element.unregisterWave).toHaveBeenCalledTimes(1)
+    })
+
+    it('should register the wave if the oscilloscope value is not string 0', () => {
+      jest
+        .spyOn(element, 'registerWave')
+        .mockImplementation(jest.fn())
+
+      element.settings.oscilloscope.value = '1'
+      element.resetWave()
+
+      expect(element.registerWave).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('unregisterWave()', () => {
     it('should remove the wave from the oscillation instance', () => {
       const wave = { id: 'wave1' }
@@ -142,6 +166,22 @@ describe('Input/Output Element', () => {
 
       expect(element.render).toHaveBeenCalledTimes(1)
     })
+
+    describe('when in debugging mode', () => {
+      beforeEach(() => {
+        element.canvas.fireEvent = jest.fn()
+        element.canvas.debugMode = true
+        element.setValue(newValue)
+      })
+
+      it('should not trigger the circuit', () => {
+        expect(element.canvas.step).not.toHaveBeenCalled()
+      })
+
+      it('should notify the event listeners that the command stack changed', () => {
+        expect(element.canvas.fireEvent).toHaveBeenCalledTimes(1)
+      })
+    })
   })
 
   describe('invertValue()', () => {
@@ -160,7 +200,7 @@ describe('Input/Output Element', () => {
       expect(element.setValue).toHaveBeenCalledTimes(1)
       expect(element.setValue).toHaveBeenCalledWith(LogicValue.TRUE)
     })
-    
+
     it(`should set the value of the node to ${LogicValue.TRUE} if the present value is ${LogicValue.UNKNOWN}`, () => {
       element.node = {
         getProjectedValue: jest.fn(() => LogicValue.UNKNOWN)
@@ -170,7 +210,7 @@ describe('Input/Output Element', () => {
       expect(element.setValue).toHaveBeenCalledTimes(1)
       expect(element.setValue).toHaveBeenCalledWith(LogicValue.TRUE)
     })
-    
+
     it(`should set the value of the node to ${LogicValue.FALSE} if the present value is ${LogicValue.TRUE}`, () => {
       element.node = {
         getProjectedValue: jest.fn(() => LogicValue.TRUE)

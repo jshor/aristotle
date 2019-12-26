@@ -4,7 +4,6 @@ import { LogicValue } from '@aristotle/logic-circuit'
 import CommandSetProperty from './commands/CommandSetProperty'
 import uuid from './utils/uuid'
 import getPortLocator from './utils/getPortLocator'
-import inputPortPolicy from './policies/inputPortPolicy'
 import ToolboxButton from './ToolboxButton'
 
 export default class Element extends draw2d.shape.basic.Image {
@@ -15,7 +14,12 @@ export default class Element extends draw2d.shape.basic.Image {
     this.applySettings(settings)
   }
 
-  onContextMenu = (...vars) => {
+  /**
+   * Selects the element if no other elements are is selected in the canvas.
+   *
+   * @override draw2d.shape.basic.Image
+   */
+  onContextMenu = () => {
     if (!this.canvas.getSelection().getSize() || !this.isSelected()) {
       this.canvas.setCurrentSelection(null)
       this.canvas.setCurrentSelection(this)
@@ -24,7 +28,7 @@ export default class Element extends draw2d.shape.basic.Image {
 
   /**
    * Returns the value of the given setting key.
-   * 
+   *
    * @param {String} key
    * @returns {String} setting value
    */
@@ -34,7 +38,7 @@ export default class Element extends draw2d.shape.basic.Image {
 
   /**
    * Returns the default circuit node.
-   * 
+   *
    * @returns {CircuitNode}
    */
   getCircuitNode = () => {
@@ -57,7 +61,7 @@ export default class Element extends draw2d.shape.basic.Image {
 
   /**
    * Returns the wire color based on the given logic value.
-   * 
+   *
    * @param {LogicValue} value
    * @returns {String} hexadecimal color value
    */
@@ -74,7 +78,7 @@ export default class Element extends draw2d.shape.basic.Image {
 
   /**
    * Updates the color(s) of the outgoing wire(s).
-   * 
+   *
    * @param {String} color - hexadecimal color value
    */
   setOutputConnectionColor = (value) => {
@@ -123,7 +127,7 @@ export default class Element extends draw2d.shape.basic.Image {
 
   /**
    * Assigns the ports according to the given definition.
-   * 
+   *
    * @param {Object[]} <{ x: Number, y: Number, type: String, id: String }>
    */
   setPorts = (ports) => {
@@ -154,7 +158,7 @@ export default class Element extends draw2d.shape.basic.Image {
    */
   persistToolbox = () => {
     if (this.toolboxButton) {
-      this.toolboxButton.fireToolboxEvent() 
+      this.toolboxButton.fireToolboxEvent()
     }
   }
 

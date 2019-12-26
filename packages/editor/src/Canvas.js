@@ -21,7 +21,7 @@ export default class Canvas extends Draw2DCanvas {
     // <filter id="filter-0" width="1" height="1"><feOffset in="SourceAlpha" dx="1" dy="1" result="1"></feOffset><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0 " in="1" result="2"></feColorMatrix><feGaussianBlur stdDeviation="2" in="2" result="3"></feGaussianBlur><feMerge in="3" result="4"><feMergeNode in="3"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge></filter>
     // </svg>
     // `)
-    
+
     // this.html.on("touchend", (event) => {
     //   event = this._getEvent(event)
 
@@ -138,9 +138,12 @@ export default class Canvas extends Draw2DCanvas {
 
     if (isInViewport) {
       const { x, y } = this.getDraggedCoordinates()
+      const data = el.data()
 
-      // TODO: must get params from `data-` attrs on `el`
-      this.createElement(el.data(), x, y)
+      this.createElement({
+        type: data.type,
+        ...JSON.parse(atob(data.params))
+      }, x, y)
     }
   }
 

@@ -15,7 +15,7 @@ export default class LogicGate extends Element {
       gateType: this.settings.gateType.value,
       inputCount: this.settings.inputs.value
     })
-    
+
     this.render()
   }
 
@@ -43,7 +43,7 @@ export default class LogicGate extends Element {
   }
 
   getSvg = (color) => {
-    return this.svgRenderer.getSvgData() // renderGate('NOR', this.settings.inputs.value, color)
+    return this.svgRenderer.getSvgData()
   }
 
   getLogicGate = (id) => {

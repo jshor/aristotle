@@ -6,7 +6,9 @@ import EditorModel from './models/EditorModel'
 import DeserializerService from './services/DeserializerService'
 import SerializerService from './services/SerializerService'
 import OscillationService from './services/OscillationService'
+import CommandRouterService from './services/CommandRouterService'
 import ElementInitializerService from './services/ElementInitializerService'
+import ZoomService from './services/ZoomService'
 import uuid from './utils/uuid'
 
 export default class Editor extends Canvas {
@@ -17,6 +19,8 @@ export default class Editor extends Canvas {
     this.deserializer = new DeserializerService(this)
     this.serializer = new SerializerService(this)
     this.oscillation = new OscillationService(this)
+    this.commandRouter = new CommandRouterService(this)
+    this.zoomService = new ZoomService(this)
 
     this.installEditPolicies()
 
@@ -85,6 +89,13 @@ export default class Editor extends Canvas {
     this.fireEvent('commandStackChanged')
   }
 
+  /**
+   * Updates the circuit debugger flags.
+   * Starts oscillation (i.e., animation) when debugging mode is on.
+   * Stops oscillation when debugging mode is off.
+   *
+   * @param {Boolean} debugMode
+   */
   toggleDebug = (debugMode) => {
     if (this.debugMode !== debugMode) {
       if (debugMode) {
@@ -97,12 +108,21 @@ export default class Editor extends Canvas {
     this.fireEvent('commandStackChanged')
   }
 
+  toggleOscilloscope = () => {
+    this.oscilloscopeEnabled = !this.oscilloscopeEnabled
+    this.fireEvent('commandStackChanged')
+  }
+
+  /**
+   * Resets the circuit by re-drawing it. Each circuit element will re-initialize to its original value.
+   */
   reset = () => {
     const serialized = JSON.stringify(this.serializer.serializeAll())
 
     this.clear()
     this.deserializer.deserialize(JSON.parse(serialized))
     this.drawn = true // TODO: ???
+    this.fireEvent('commandStackChanged')
   }
 
   /**
@@ -157,8 +177,8 @@ export default class Editor extends Canvas {
       mouseMode: this.mouseMode,
       debugMode: this.debugMode,
       oscilloscopeEnabled: this.oscilloscopeEnabled,
-      zoomLevel: this.getZoom(),
-      circuitComplete: this.circuit.isComplete() || false
+      zoomLevel: this.zoomService.getZoomPercentage(),
+      circuitComplete: this.circuit.isComplete()
     })
   }
 
@@ -172,145 +192,37 @@ export default class Editor extends Canvas {
 
   load = (data) => {
     this.deserializer.deserialize(data)
-    this.centerAllFigures()
+    this.zoomService.centerAllFigures()
+    this.zoomService.panToCenter()
   }
 
-  centerAllFigures = () => {
-    const group = new draw2d.shape.composite.Group()
-    const figures = this.getFigures()
-
-    figures.each((i, figure) => {
-      group.assignFigure(figure)
-    })
-
-    const x = (this.getWidth() - group.width) / 2
-    const y = (this.getHeight() - group.height) / 2
-
-    group.setX(x)
-    group.setY(y)
-
-    figures.each((i, figure) => {
-      group.unassignFigure(figure)
-    })
-  
-    this.remove(group)
-  }
-
-  applyCommand = (command) => {
-    switch (command.command) {
-      case 'UNDO':
-        try {
-          this.commandStack.undo()
-        } catch (e) {
-          this.commandStack.redo()
-          this.commandStack.undostack = []
-          this.fireEvent('commandStackChanged')
-        }
-        break
-      case 'REDO':
-        try {
-          this.commandStack.redo()
-        } catch (e) {
-          this.commandStack.undo()
-          this.commandStack.redostack = []
-          this.fireEvent('commandStackChanged')
-        }
-        break
-      case 'SET_MOUSE_MODE':
-        this.setMouseMode(command.payload)
-        break
-      case 'UPDATE_ELEMENT':
-        this.updateElement(command.payload)
-        break
-      case 'TOGGLE_OSCILLATOR':
-        this.oscilloscopeEnabled = !this.oscilloscopeEnabled
-        this.fireEvent('commandStackChanged')
-        break
-      case 'TOGGLE_DEBUG':
-        this.toggleDebug(!this.debugMode)
-        break
-      case 'STEP':
-        this.step()
-        this.fireEvent('commandStackChanged')
-        break
-      case 'RESET':
-        this.reset()
-        this.fireEvent('commandStackChanged')
-        break
-      case 'SET_ZOOM':
-        console.log('ZOOM TO: ', command.payload)
-        // this.setZoom(command.payload)
-        this.doZoom(command.payload)
+  /**
+   * Undo the most recent edit change.
+   */
+  undo = () => {
+    try {
+      this.commandStack.undo()
+    } catch (e) {
+      this.commandStack.redo()
+      this.commandStack.undostack = []
+      this.fireEvent('commandStackChanged')
     }
   }
 
-  panTo = (x, y) => {
-    console.log('pan to: ', x, y)
-    const {
-      width,
-      height
-    } = this.parent.getBoundingClientRect()
-    const z = 1 / this.getZoom()
-    const panX = x * z
-    const panY = y * z
-    console.log('Pan: ', panX, panY, panX - width / 2, panY - height / 2)
-    const left = Math.min(panX - width / 2, 0)
-    const top = Math.min(panY - height / 2, 0)
-
-    this.scrollTo(left, top)
+  /**
+   * Applies the next change in forward (redo) stack.
+   */
+  redo = () => {
+    try {
+      this.commandStack.redo()
+    } catch (e) {
+      this.commandStack.undo()
+      this.commandStack.redostack = []
+      this.fireEvent('commandStackChanged')
+    }
   }
 
-  doZoom = (factor) => {
-    const { left, top, width, height } = this.parent.getBoundingClientRect()
-    const z = this.getZoom()
-    const x = (this.getScrollLeft() * z) + width / 2
-    const y = (this.getScrollTop() * z) + height / 2
-    const zoomDelta = factor * 0.25
-    const zoomFactor = this.getZoom() + zoomDelta
-
-    this.setZoom(zoomFactor)
-
-    setTimeout(() => {
-      this.panTo(x, y)
-    })
-
-
-    // this.paper.setViewBox(0, 0, this.initialWidth, this.initialHeight)
-    // this.setZoom(factor)
-    // const { top, left, width, height } = this.parent.getBoundingClientRect()
-    // const { x, y } = left + width / 2
-    // const y = top + height / 2
-    // const before = this.fromDocumentToCanvasCoordinate(left + width / 2, top + height / 2)
-    // this.setZoom(zoomFactor)
-    // const after = this.fromDocumentToCanvasCoordinate(left + width / 2, top + height / 2)
-    // const deltaX = (after.x - before.x) / zoomFactor
-    // const deltaY = (after.y - before.y) / zoomFactor
-
-    // console.log('DELTA: ', this.getWidth() * zoomFactor)
-    // setTimeout(() => {
-    //   this.scrollTo(this.getScrollLeft() - deltaX, this.getScrollTop() - deltaY)
-    // }, 2000)
-
-
-
-
-
-    // const x = left + width / 2
-    // const y = top + height / 2
-    // const wheelZoomPolicy = this
-    //   .editPolicy
-    //   .asArray()
-    //   .filter(e => e instanceof draw2d.policy.canvas.ZoomPolicy)
-    //   .pop()
-
-   
-    // while (auf > 0) {
-    //   wheelZoomPolicy.onMouseWheel(-24, x, y, true)
-    //   auf -= 3
-    // }
-    // wheelZoomPolicy.setZoom(1.25, true)
-
-      // console.log('wee', wheelZoomPolicy)
-    // this.setZoom(factor, true)
+  applyCommand = (command) => {
+    this.commandRouter.applyCommand(command)
   }
 }
