@@ -288,7 +288,7 @@ describe('Canvas', () => {
     })
 
     describe('when the dragged element is within the canvas bounds', () => {
-      it('should call `addElement()` with the params and the translated document coordinates', () => {
+      xit('should call `addElement()` with the params and the translated document coordinates', () => {
         const x = 20
         const y = 30
 

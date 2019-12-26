@@ -57,37 +57,48 @@ describe('Oscillation Service', () => {
         expect(service.update).toHaveBeenCalledTimes(1)
         expect(service.update).toHaveBeenCalledWith(ticks + 1)
       })
+
+      describe('when the seconds elapsed is divisble by 10', () => {
+        beforeEach(() => {
+          service.lastSignalTime = 10
+          service.secondsElapsed = 20
+          service.editor = {
+            oscillate: jest.fn()
+          }
+          service.tick()
+        })
+
+        it('should update the `lastSignalTime` to the seconds elapsed', () => {
+          expect(service.lastSignalTime).toEqual(service.secondsElapsed)
+        })
+
+        it('should tell the editor that an oscillation has elapsed', () => {
+          expect(service.editor.oscillate).toHaveBeenCalledTimes(1)
+          expect(service.editor.oscillate).toHaveBeenCalledWith(service.computeWaveGeometry(), service.secondsElapsed)
+        })
+      })
     })
+  })
 
-    describe('on each oscillation period (`lastSignal` divisible by 10)', () => {
-      beforeEach(() => {
-        service.lastSignal = 10
-        service.tick()
-      })
+  describe('computeWaveGeometry()', () => {
+    it('should return a list of SVG geometry entries for each wave containing segments', () => {
+      service.waves = {
+        foo: {
+          segments: [{ x: 0, y: 0 }, { x: 10, y: 20 }],
+          width: 40
+        },
+        bar: {}
+      }
 
-      xit('should reset the `lastSignal` counter to 0', () => {
-        expect(service.lastSignal).toEqual(0)
-      })
+      const geometries = service.computeWaveGeometry()
 
-      xit('should call the editor\'s oscillation method', () => {
-        expect(service.editor.oscillate).toHaveBeenCalledTimes(1)
-        expect(service.editor.oscillate).toHaveBeenCalledWith(service.waves)
-      })
-    })
-
-    describe('when an oscillation period is not yet achieved', () => {
-      beforeEach(() => {
-        service.lastSignal = 7
-        service.tick()
-      })
-
-      xit('should increment `lastSignal`', () => {
-        expect(service.lastSignal).toEqual(8)
-      })
-
-      it('should not call the editor\'s oscillation method', () => {
-        expect(service.editor.oscillate).not.toHaveBeenCalled()
-      })
+      expect(geometries).toEqual(expect.objectContaining({
+        foo: {
+          points: '0,0 10,20',
+          width: 40
+        }
+      }))
+      expect(geometries).not.toHaveProperty('bar')
     })
   })
 
@@ -119,6 +130,22 @@ describe('Oscillation Service', () => {
 
       expect(service.waves).toHaveProperty(wave.id)
       expect(service.waves[wave.id]).toEqual(wave)
+    })
+
+    it('should not add the given wave if one with its id is already registered', () => {
+      const wave = {
+        id: 'abc',
+        interval: 500
+      }
+
+      service.waves = {
+        abc: {
+          interval: 400
+        }
+      }
+      service.add(wave)
+
+      expect(service.waves.abc).not.toEqual(wave)
     })
   })
 

@@ -10,6 +10,7 @@ export default class Clock extends IOElement {
     this.registerSvgRenderer()
     this.registerCircuitNode()
     this.on('added', this.registerClock)
+    this.on('removed', this.unregisterClock)
     this.render()
   }
 
@@ -41,10 +42,14 @@ export default class Clock extends IOElement {
   registerClock = () => {
     this.clock = new WaveService(`${this.id}_wave`, this.settings.interval.value)
     this.clock.onUpdate(this.invertValue)
-    
+
     if (this.canvas) {
       this.canvas.oscillation.add(this.clock)
     }
+  }
+
+  unregisterClock = () => {
+    this.oscillation.remove(this.clock)
   }
 
   resetInterval = () => {
