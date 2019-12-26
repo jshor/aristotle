@@ -10,7 +10,7 @@ export default class IOElement extends Element {
     this.on('added', this.setInitialValue)
     this.on('removed', this.unregisterWave)
   }
-  
+
   settings = {
     name: {
       type: 'text',
@@ -50,7 +50,7 @@ export default class IOElement extends Element {
   unregisterWave = () => {
     this.oscillation.remove(this.wave)
   }
-  
+
   registerWave = () => {
     this.wave = new ToggleService(this.id)
 
@@ -66,7 +66,7 @@ export default class IOElement extends Element {
 
     // input nodes changes require triggering the head of the circuit queue
     this.canvas.circuit.queue.push(this.node)
-    
+
     if (!this.canvas.debugMode) {
       this.canvas.step(true)
     } else {

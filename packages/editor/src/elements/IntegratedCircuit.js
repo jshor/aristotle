@@ -20,13 +20,14 @@ export default class IntegratedCircuit extends Element {
    * @param {Object} circuit.elements - list of node definitions
    * @param {Object} circuit.connections - list of connection entries
    */
-  constructor (id, { ports, elements, connections }) {
+  constructor (id, { ports, elements, connections, name }) {
     super(id)
 
     this.connectionEntries = connections
     this.elementEntries = elements
     this.ports = ports
-    
+    this.title = name
+
     this.on('added', this.buildCircuit)
 
     this.initializeSvgRenderer()
@@ -35,11 +36,12 @@ export default class IntegratedCircuit extends Element {
   }
 
   initializeSvgRenderer = () => {
+    console.log('PORTS : ', this.ports)
     this.svgRenderer = new IntegratedCircuitSVG({
       primaryColor: '#ffffff',
       secondaryColor: '#1C1D24',
-      wires: this.ports,
-      title: 'testverylongnamehere' // TODO
+      ports: this.ports,
+      title: this.title // TODO
     })
   }
 
@@ -82,7 +84,7 @@ export default class IntegratedCircuit extends Element {
 
   /**
    * Returns the circuit node that the given connection is connected to.
-   * 
+   *
    * @override {Element.getCircuitNode}
    * @param {Connection} connection
    * @returns {CircuitNode}

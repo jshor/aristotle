@@ -2,10 +2,14 @@ import { Port, policy } from 'draw2d'
 import Editor from '../Editor'
 import Connection from '../Connection'
 import Element from '../Element'
+import EditorModel from '../models/EditorModel'
 
 jest.mock('../Canvas')
 jest.mock('../Connection')
-jest.mock('../services/OscillationService')
+jest.mock('../services/OscillationService', () => () => ({
+  start: jest.fn(),
+  stop: jest.fn()
+}))
 
 describe('Editor', () => {
   let editor
@@ -15,6 +19,48 @@ describe('Editor', () => {
   })
 
   afterEach(() => jest.resetAllMocks())
+
+  it('should initialize the debugMode, drawn, and oscilloscopeEnabled flags to false', () => {
+    expect(editor.debugMode).toEqual(false)
+    expect(editor.drawn).toEqual(false)
+    expect(editor.oscilloscopeEnabled).toEqual(false)
+  })
+
+  describe('toggleDebug()', () => {
+    beforeEach(() => {
+      jest.spyOn(editor.oscillation, 'start')
+      jest.spyOn(editor.oscillation, 'stop')
+    })
+
+    it('should stop the oscillation when in debug mode', () => {
+      editor.debugMode = false
+      editor.toggleDebug(true)
+
+      expect(editor.oscillation.stop).toHaveBeenCalledTimes(1)
+    })
+
+    it('should start the oscillation when in not debug mode', () => {
+      editor.debugMode = true
+      editor.toggleDebug(false)
+
+      expect(editor.oscillation.start).toHaveBeenCalledTimes(1)
+    })
+
+    it('should neither start nor stop the oscillation when the debugging flag has not changed', () => {
+      editor.debugMode = false
+      editor.toggleDebug(false)
+
+      expect(editor.oscillation.start).not.toHaveBeenCalled()
+      expect(editor.oscillation.stop).not.toHaveBeenCalled()
+    })
+
+    it('should update the debugMode flag', () => {
+      editor.debugMode = false
+      editor.toggleDebug(true)
+
+      expect(editor.debugMode).toEqual(true)
+    })
+  })
 
   describe('addNode()', () => {
     const node = new Element('12345', 'testElement')
@@ -202,6 +248,93 @@ describe('Editor', () => {
       expect(editor.installEditPolicy).toHaveBeenCalledWith(
         expect.any(policy.connection.DragConnectionCreatePolicy)
       )
+    })
+  })
+
+  describe('getEditorModel()', () => {
+    xit('should return a new instance of EditorModel', () => {
+      expect(editor.getEditorModel()).toBeInstanceOf(EditorModel)
+    })
+  })
+
+  describe('command stack functions', () => {
+    beforeEach(() => {
+      editor.commandStack = {
+        undo: jest.fn(),
+        redo: jest.fn(),
+        undostack: [],
+        redostack: []
+      }
+    })
+
+    describe('undo()', () => {
+      it('should undo the last command', () => {
+        jest.spyOn(editor.commandStack, 'undo')
+
+        editor.undo()
+
+        expect(editor.commandStack.undo).toHaveBeenCalledTimes(1)
+      })
+
+      describe('when undoing fails', () => {
+        beforeEach(() => {
+          jest
+            .spyOn(editor.commandStack, 'undo')
+            .mockImplementation(() => {
+              throw new Error('Failed to undo')
+            })
+
+          editor.undo()
+        })
+
+        it('should reverse the undo (i.e., redo) of the last command', () => {
+          expect(editor.commandStack.redo).toHaveBeenCalledTimes(1)
+        })
+
+        it('should clear the corrupted undo stack', () => {
+          expect(editor.commandStack.redostack).toHaveLength(0)
+        })
+
+        it('should inform listeners that the command stack has changed', () => {
+          expect(editor.fireEvent).toHaveBeenCalledTimes(1)
+          expect(editor.fireEvent).toHaveBeenCalledWith('commandStackChanged')
+        })
+      })
+    })
+
+    describe('redo()', () => {
+      it('should undo the last command', () => {
+        jest.spyOn(editor.commandStack, 'redo')
+
+        editor.redo()
+
+        expect(editor.commandStack.redo).toHaveBeenCalledTimes(1)
+      })
+
+      describe('when redoing fails', () => {
+        beforeEach(() => {
+          jest
+            .spyOn(editor.commandStack, 'redo')
+            .mockImplementation(() => {
+              throw new Error('Failed to redo')
+            })
+
+          editor.redo()
+        })
+
+        it('should reverse the redo (i.e., undo) of the last command', () => {
+          expect(editor.commandStack.undo).toHaveBeenCalledTimes(1)
+        })
+
+        it('should clear the corrupted redo stack', () => {
+          expect(editor.commandStack.redostack).toHaveLength(0)
+        })
+
+        it('should inform listeners that the command stack has changed', () => {
+          expect(editor.fireEvent).toHaveBeenCalledTimes(1)
+          expect(editor.fireEvent).toHaveBeenCalledWith('commandStackChanged')
+        })
+      })
     })
   })
 })

@@ -9,22 +9,23 @@
         :key="ioElement.type"
         :type="ioElement.type"
         :caption="ioElement.type"
+        :params="ioElement.params"
         :src="ioElement.svg.path"
         :width="ioElement.svg.width"
-        :zoom-factor="activeDocument.zoomFactor"
+        :zoom-level="zoomLevel"
       />
     </toolbox-group>
 
     <toolbox-group heading="Logic Gates">
       <toolbox-item
         v-for="logicGate in logicGates"
-        :key="logicGate.subtype"
+        :key="logicGate.params.gateType"
         type="LogicGate"
-        :caption="logicGate.subtype"
-        :subtype="logicGate.subtype"
+        :caption="logicGate.params.gateType"
+        :params="logicGate.params"
         :src="logicGate.svg.path"
         :width="logicGate.svg.width"
-        :zoom-factor="activeDocument.zoomFactor"
+        :zoom-level="zoomLevel"
       />
     </toolbox-group>
 
@@ -33,10 +34,11 @@
         v-for="integratedCircuit in integratedCircuits"
         :key="integratedCircuit.id"
         type="IntegratedCircuit"
-        :caption="integratedCircuit.caption"
+        :caption="integratedCircuit.params.name"
+        :params="integratedCircuit.params"
         :src="integratedCircuit.svg.path"
         :width="integratedCircuit.svg.width"
-        :zoom-factor="activeDocument.zoomFactor"
+        :zoom-level="zoomLevel"
       />
     </toolbox-group>
   </toolbox>
@@ -49,7 +51,7 @@ import {
   LogicGateSVG,
   DigitSVG,
   TemplateSVG
-  } from '@aristotle/editor'
+} from '@aristotle/editor'
 import Toolbox from '@/components/Toolbox'
 import ToolboxItem from '@/components/ToolboxItem'
 import ToolboxGroup from '@/components/ToolboxGroup'
@@ -68,25 +70,27 @@ export default {
       secondaryColor: '#1C1D24',
       valueColor: '#868686',
       outlineColor: '#ffffff',
-      y: 48 
+      y: 48
     }
 
     return {
       ioElements: ['Switch', 'Clock', 'Lightbulb'].map((element) => ({
         type: element,
+        params: {},
         svg: (new TemplateSVG({
           ...colors,
           template: element.toLowerCase()
         })).getSvgData()
       })).concat({
         type: 'Digit',
+        params: {},
         svg: (new DigitSVG({
           ...colors,
           chars: '0'
         })).getSvgData()
       }),
       logicGates: ['OR', 'AND', 'NOR', 'NAND', 'XOR', 'XNOR'].map((gateType) => ({
-        subtype: gateType,
+        params: { gateType },
         svg: (new LogicGateSVG({
           ...colors,
           inputCount: 2,
@@ -94,18 +98,20 @@ export default {
         })).getSvgData()
       })),
       integratedCircuits: integratedCircuits.map((integratedCircuit) => ({
-        caption: integratedCircuit.name,
-        params: integratedCircuit,
+        params: { ...integratedCircuit },
         svg: (new IntegratedCircuitSVG({
           ...colors,
           title: integratedCircuit.name,
-          wires: integratedCircuit.ports
+          ports: integratedCircuit.ports
         })).getSvgData()
       }))
     }
   },
   computed: {
-    ...mapGetters(['activeDocument'])
+    ...mapGetters(['activeDocument']),
+    zoomLevel () {
+      return this.activeDocument.editorModel.zoomLevel / 100
+    }
   }
 }
 </script>

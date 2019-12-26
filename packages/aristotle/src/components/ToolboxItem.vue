@@ -3,11 +3,11 @@
     <div
       class="toolbox-item__draggable draw2d_droppable ui-draggable"
       :data-type="type"
-      :data-subtype="subtype">
+      :data-params="encodedParams">
       <img
         :src="src"
         :style="{
-          width: `${width * (1 / zoomFactor)}px`
+          width: `${width * zoomLevel}px`
         }"
       />
     </div>
@@ -38,17 +38,22 @@ export default {
       type: String,
       required: true
     },
-    subtype: {
-      type: String,
-      default: ''
+    params: {
+      type: Object,
+      required: true
     },
-    zoomFactor: {
+    zoomLevel: {
       type: Number,
       default: 1
     },
     caption: {
       type: String,
       default: 'TODO' // TODO
+    }
+  },
+  computed: {
+    encodedParams () {
+      return btoa(JSON.stringify(this.params))
     }
   }
 }

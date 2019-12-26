@@ -131,14 +131,6 @@ export default {
       this.$store.commit('SET_EDITOR_MODEL', model)
       this.toolboxOpen = false
     },
-    panToCenter () {
-      const el = this.$refs.editor.parentNode
-      const { scrollWidth, scrollHeight } = el
-      const x = (scrollWidth - el.offsetWidth) / 2
-      const y = (scrollHeight - el.offsetHeight) / 2
-
-      this.canvas.scrollTo(x, y)
-    },
     zoom (factor) {
       const minZoom = 0.5
       const maxZoom = 5
@@ -149,8 +141,6 @@ export default {
         command: 'SET_ZOOM',
         payload: factor
       })
-      // setTimeout(() => this.panToCenter())
-      console.log('new zoom: ', l, this.zoomLevel)
     }
   },
   mounted () {
@@ -172,8 +162,6 @@ export default {
       this.canvas.load(this.document.data)
 
       setInterval(() => this.setDocumentActive(), 300)
-
-      this.panToCenter()
     })
   }
 }
@@ -213,7 +201,7 @@ export default {
     outline: none;
     background-color: transparent;
     color: $color-primary;
-    
+
     &:not(:disabled) {
       cursor: pointer;
     }

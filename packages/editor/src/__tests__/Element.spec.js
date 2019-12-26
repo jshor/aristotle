@@ -1,6 +1,7 @@
 import { shape, layout } from 'draw2d'
 import { LogicValue, Nor } from '@aristotle/logic-circuit'
 import Element from '../Element'
+import CommandSetProperty from '../commands/CommandSetProperty'
 
 jest.mock('../ToolboxButton')
 
@@ -17,6 +18,108 @@ describe('Element base class', () => {
   })
 
   afterEach(() => jest.resetAllMocks())
+
+  describe('onContextMenu()', () => {
+    beforeEach(() => {
+      element.canvas = {
+        getSelection: () => ({
+          getSize: jest.fn()
+        }),
+        setCurrentSelection: jest.fn()
+      }
+    })
+
+    describe('when nothing is selected in the canvas', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(element.canvas, 'getSelection')
+          .mockReturnValue({
+            getSize: jest.fn(() => 0)
+          })
+      })
+
+      it('should select only the element when invoked, if not already selected', () => {
+        jest
+          .spyOn(element, 'isSelected')
+          .mockReturnValue(false)
+
+        element.onContextMenu()
+
+        expect(element.canvas.setCurrentSelection).toHaveBeenCalledTimes(2)
+        expect(element.canvas.setCurrentSelection).toHaveBeenCalledWith(null)
+        expect(element.canvas.setCurrentSelection).toHaveBeenLastCalledWith(element)
+      })
+
+      it('should select the element when invoked, even if it is already selected', () => {
+        jest
+          .spyOn(element, 'isSelected')
+          .mockReturnValue(true)
+
+        element.onContextMenu()
+
+        expect(element.canvas.setCurrentSelection).toHaveBeenCalledTimes(2)
+        expect(element.canvas.setCurrentSelection).toHaveBeenCalledWith(null)
+        expect(element.canvas.setCurrentSelection).toHaveBeenLastCalledWith(element)
+      })
+    })
+
+    describe('when one or more items are selected in the canvas', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(element.canvas, 'getSelection')
+          .mockReturnValue({
+            getSize: jest.fn(() => 1)
+          })
+      })
+
+      it('should select only the element when invoked, if not already selected', () => {
+        jest
+          .spyOn(element, 'isSelected')
+          .mockReturnValue(false)
+
+        element.onContextMenu()
+
+        expect(element.canvas.setCurrentSelection).toHaveBeenCalledTimes(2)
+        expect(element.canvas.setCurrentSelection).toHaveBeenCalledWith(null)
+        expect(element.canvas.setCurrentSelection).toHaveBeenLastCalledWith(element)
+      })
+
+      it('should not select the element when invoked if it is already selected', () => {
+        jest
+          .spyOn(element, 'isSelected')
+          .mockReturnValue(true)
+
+        element.onContextMenu()
+
+        expect(element.canvas.setCurrentSelection).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('getCircuitNode()', () => {
+    it('should return the circuit node instance', () => {
+      expect(element.getCircuitNode()).toEqual(element.node)
+    })
+  })
+
+  describe('updateVisualValue()', () => {
+    it('should re-render the element with an updated the output connection color', () => {
+      const value = '#ff0000'
+
+      jest
+        .spyOn(element, 'setOutputConnectionColor')
+        .mockImplementation(jest.fn())
+      jest
+        .spyOn(element, 'render')
+        .mockImplementation(jest.fn())
+
+      element.updateVisualValue(value)
+
+      expect(element.setOutputConnectionColor).toHaveBeenCalledTimes(1)
+      expect(element.setOutputConnectionColor).toHaveBeenCalledWith(value)
+      expect(element.render).toHaveBeenCalledTimes(1)
+    })
+  })
 
   describe('getSetting()', () => {
     it('should return the value given setting', () => {
@@ -135,6 +238,37 @@ describe('Element base class', () => {
     })
   })
 
+  describe('updateSettings()', () => {
+    beforeEach(() => {
+      element.settings = {
+        foo: {
+          onUpdate: jest.fn()
+        }
+      }
+      element.canvas = {
+        commandStack: {
+          execute: jest.fn()
+        }
+      }
+    })
+
+    it('should execute a CommandSetProperty for each setting present', () => {
+      const newValue = 'baz'
+
+      element.updateSettings({ foo: newValue })
+
+      expect(element.canvas.commandStack.execute).toHaveBeenCalledTimes(1)
+      expect(element.canvas.commandStack.execute).toHaveBeenCalledWith(expect.any(CommandSetProperty))
+    })
+
+    it('should persist the toolbox', () => {
+      jest.spyOn(element, 'persistToolbox')
+      element.updateSettings({ foo: 'baz' })
+
+      expect(element.persistToolbox).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('setPorts()', () => {
     beforeEach(() => {
       jest
@@ -191,6 +325,19 @@ describe('Element base class', () => {
       element.createToolboxButton()
 
       expect(element.add).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('persistToolbox', () => {
+    it('should notify the toolbox to keep open if the button was created', () => {
+      element.toolboxButton = {
+        fireToolboxEvent: jest.fn()
+      }
+      jest.spyOn(element.toolboxButton, 'fireToolboxEvent')
+
+      element.persistToolbox()
+
+      expect(element.toolboxButton.fireToolboxEvent).toHaveBeenCalledTimes(1)
     })
   })
 })
