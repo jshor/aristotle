@@ -125,10 +125,13 @@ export default {
     propertiesClosed () {
       this.toolboxOpen = false
     },
-    onCanvasUpdate (canvas) {
+    updateEditorModel (canvas) {
       const model = canvas.getEditorModel() // should be v-model (emit `value`)
 
       this.$store.commit('SET_EDITOR_MODEL', model)
+    },
+    onCanvasUpdate (canvas) {
+      this.updateEditorModel(canvas)
       this.toolboxOpen = false
     },
     zoom (factor) {
@@ -150,15 +153,23 @@ export default {
       // maybe create an action for this that is called in mounted() of ToolboxContainer?
       this.canvas = new Editor(this.document.id.toString())
 
+      const canvasEvents = [
+        'select',
+        'deselect',
+        'userOptionChanged',
+        'zoomed'
+      ]
+
+      canvasEvents.forEach(eventName => {
+        this.canvas.on(eventName, this.onCanvasUpdate.bind(this))
+      })
+      this.canvas.on('circuitChanged', this.updateEditorModel)
       this.canvas.on('toolbox.open', this.openSettingsDialog)
       this.canvas.on('toolbox.close', this.propertiesClosed)
-      this.canvas.on('select', () => this.onCanvasUpdate(this.canvas))
-      this.canvas.on('deselect', () => this.onCanvasUpdate(this.canvas))
-      this.canvas.on('commandStackChanged', () => this.onCanvasUpdate(this.canvas))
-      this.canvas.on('zoomed', () => this.onCanvasUpdate(this.canvas))
       this.canvas.on('oscillate', (editor, waves) => {
         this.waves = waves
       })
+
       this.canvas.load(this.document.data)
 
       setInterval(() => this.setDocumentActive(), 300)

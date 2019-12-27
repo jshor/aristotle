@@ -11,6 +11,7 @@ describe('Element Initializer Service', () => {
     it('should return an IntegratedCircuit', () => {
       expect(ElementInitializerService.getInitializedElement(id, {
         type: 'IntegratedCircuit',
+        name: 'Test Circuit',
         elements: [],
         connections: [],
         ports: {

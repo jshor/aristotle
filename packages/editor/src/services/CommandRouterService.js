@@ -17,6 +17,31 @@ export default class CommandRouterService {
     this.editor = editor
   }
 
+  getApplicableEvent = (commandType) => {
+    switch (commandType) {
+      case 'SET_MOUSE_MODE':
+      case 'TOGGLE_DEBUG':
+      case 'TOGGLE_OSCILLATOR':
+        return 'userOptionChanged'
+      case 'UNDO':
+      case 'REDO':
+        return 'commandStackChanged'
+      case 'RESET':
+      case 'STEP':
+        return 'circuitUpdated'
+    }
+    return null
+  }
+
+  fireApplicableEvent = (commandType) => {
+    const eventName = this.getApplicableEvent(commandType)
+
+    if (eventName) {
+      console.log('FIRING: ', eventName)
+      this.editor.fireEvent(eventName)
+    }
+  }
+
   applyCommand = (command) => {
     switch (command.command) {
       case 'UNDO':
@@ -45,6 +70,9 @@ export default class CommandRouterService {
         break
       case 'SET_ZOOM':
         this.editor.zoomService.setZoomLevel(command.payload)
+        break
     }
+
+    this.fireApplicableEvent(command.command)
   }
 }

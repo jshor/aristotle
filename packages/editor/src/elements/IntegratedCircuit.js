@@ -36,12 +36,11 @@ export default class IntegratedCircuit extends Element {
   }
 
   initializeSvgRenderer = () => {
-    console.log('PORTS : ', this.ports)
     this.svgRenderer = new IntegratedCircuitSVG({
       primaryColor: '#ffffff',
       secondaryColor: '#1C1D24',
       ports: this.ports,
-      title: this.title // TODO
+      title: this.title
     })
   }
 
