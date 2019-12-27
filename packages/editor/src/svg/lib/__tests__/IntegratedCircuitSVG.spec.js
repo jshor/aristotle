@@ -1,16 +1,7 @@
 import IntegratedCircuitSVG from '../IntegratedCircuitSVG'
-import wires from './__fixtures__/wires.json'
+import ports from './__fixtures__/ports.json'
 
 const WIRE_LENGTH = 30
-const PORT_WIDTH = 30
-const MIN_DIMENSION = 300
-const STROKE_WIDTH = 2
-const LABEL_HEIGHT = 8
-const LABEL_PADDING = 6
-const TEXT_SIZE = 12
-const MIN_WIDTH = 150
-const MIN_HEIGHT = 120
-const STROKE_COLOR = '#ffffff'
 
 describe('Integrated Circuit SVG renderer', () => {
   const title = 'Test circuit'
@@ -19,7 +10,7 @@ describe('Integrated Circuit SVG renderer', () => {
   beforeEach(() => {
     renderer = new IntegratedCircuitSVG({
       title,
-      wires
+      ports
     })
   })
 
@@ -107,7 +98,7 @@ describe('Integrated Circuit SVG renderer', () => {
       jest
         .spyOn(renderer, 'toDataUrl')
         .mockImplementation(s => s)
-        
+
       data = renderer.getSvgData()
     })
 

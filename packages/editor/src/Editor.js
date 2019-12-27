@@ -25,7 +25,6 @@ export default class Editor extends Canvas {
     this.installEditPolicies()
 
     this.debugMode = false
-    this.drawn = false
     this.oscilloscopeEnabled = false
   }
 
@@ -86,7 +85,7 @@ export default class Editor extends Canvas {
         setTimeout(() => this.step())
       }
     }
-    this.fireEvent('commandStackChanged')
+    this.fireEvent('circuitChanged')
   }
 
   /**
@@ -105,12 +104,10 @@ export default class Editor extends Canvas {
       }
     }
     this.debugMode = debugMode
-    this.fireEvent('commandStackChanged')
   }
 
   toggleOscilloscope = () => {
     this.oscilloscopeEnabled = !this.oscilloscopeEnabled
-    this.fireEvent('commandStackChanged')
   }
 
   /**
@@ -121,8 +118,6 @@ export default class Editor extends Canvas {
 
     this.clear()
     this.deserializer.deserialize(JSON.parse(serialized))
-    this.drawn = true // TODO: ???
-    this.fireEvent('commandStackChanged')
   }
 
   /**
@@ -141,7 +136,6 @@ export default class Editor extends Canvas {
         break
     }
     this.mouseMode = mode
-    this.fireEvent('commandStackChanged')
   }
 
   /**
@@ -205,7 +199,6 @@ export default class Editor extends Canvas {
     } catch (e) {
       this.commandStack.redo()
       this.commandStack.undostack = []
-      this.fireEvent('commandStackChanged')
     }
   }
 
@@ -218,7 +211,6 @@ export default class Editor extends Canvas {
     } catch (e) {
       this.commandStack.undo()
       this.commandStack.redostack = []
-      this.fireEvent('commandStackChanged')
     }
   }
 

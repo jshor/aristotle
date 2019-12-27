@@ -20,9 +20,8 @@ describe('Editor', () => {
 
   afterEach(() => jest.resetAllMocks())
 
-  it('should initialize the debugMode, drawn, and oscilloscopeEnabled flags to false', () => {
+  it('should initialize the debugMode and oscilloscopeEnabled flags to false', () => {
     expect(editor.debugMode).toEqual(false)
-    expect(editor.drawn).toEqual(false)
     expect(editor.oscilloscopeEnabled).toEqual(false)
   })
 
@@ -294,11 +293,6 @@ describe('Editor', () => {
         it('should clear the corrupted undo stack', () => {
           expect(editor.commandStack.redostack).toHaveLength(0)
         })
-
-        it('should inform listeners that the command stack has changed', () => {
-          expect(editor.fireEvent).toHaveBeenCalledTimes(1)
-          expect(editor.fireEvent).toHaveBeenCalledWith('commandStackChanged')
-        })
       })
     })
 
@@ -328,11 +322,6 @@ describe('Editor', () => {
 
         it('should clear the corrupted redo stack', () => {
           expect(editor.commandStack.redostack).toHaveLength(0)
-        })
-
-        it('should inform listeners that the command stack has changed', () => {
-          expect(editor.fireEvent).toHaveBeenCalledTimes(1)
-          expect(editor.fireEvent).toHaveBeenCalledWith('commandStackChanged')
         })
       })
     })
