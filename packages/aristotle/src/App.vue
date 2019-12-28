@@ -1,8 +1,6 @@
 <template>
-  <div id="app" class="main">
-    <button @click="openDocument" v-if="!activeDocument">Open document</button>
+  <div id="app" class="main" v-if="activeDocument">
     <toolbar
-      v-if="activeDocument"
       :document="activeDocument"
       @relayCommand="relayCommand"
       @openDocument="openDocument"
@@ -28,10 +26,18 @@
       </template>
     </split-pane>
   </div>
+
+  <div class="app--no-doc" v-else>
+    <splash
+      @open="openDocument"
+      @new="newDocument"
+    />
+  </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex'
+import Splash from '@/components/Splash'
 import Toolbar from '@/components/Toolbar'
 import DocumentContainer from '@/containers/DocumentContainer'
 import TabsContainer from '@/containers/TabsContainer'
@@ -44,6 +50,7 @@ export default {
   name: 'App',
   components: {
     DocumentContainer,
+    Splash,
     TabsContainer,
     ToolboxContainer,
     Toolbar
@@ -66,6 +73,11 @@ export default {
       const document = new DocumentModel()
 
       document.data = data
+      this.$store.commit('OPEN_DOCUMENT', document)
+    },
+    newDocument () {
+      const document = new DocumentModel()
+
       this.$store.commit('OPEN_DOCUMENT', document)
     },
     changeDocument () {
@@ -91,6 +103,15 @@ body {
     stroke-dashoffset: -1000;
  }
 }
+
+.app--no-doc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
 .main {
   display: flex;
   height: 100vh;
