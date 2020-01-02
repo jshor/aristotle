@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/index.ts',
   output: {
     filename: 'editor.js',
     path: path.resolve(__dirname, 'dist'),
@@ -22,6 +22,11 @@ module.exports = {
   ],
   module: {
     rules: [
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        loader: 'ts-loader'
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
