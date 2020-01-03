@@ -1,3 +1,5 @@
+import Editor from "Editor"
+
 /**
  * @class CommandService
  * @description Command manager for all requested UI commands.
@@ -8,16 +10,18 @@
  * ```
  */
 export default class CommandRouterService {
+  public editor: Editor
+
   /**
    * Constructor.
    *
    * @param {Editor} editor
    */
-  constructor (editor) {
+  constructor (editor: Editor) {
     this.editor = editor
   }
 
-  getApplicableEvent = (commandType) => {
+  getApplicableEvent = (commandType: string): string => {
     switch (commandType) {
       case 'SET_MOUSE_MODE':
       case 'TOGGLE_DEBUG':
@@ -33,7 +37,7 @@ export default class CommandRouterService {
     return null
   }
 
-  fireApplicableEvent = (commandType) => {
+  fireApplicableEvent = (commandType: string): void => {
     const eventName = this.getApplicableEvent(commandType)
 
     if (eventName) {
@@ -42,7 +46,7 @@ export default class CommandRouterService {
     }
   }
 
-  applyCommand = (command) => {
+  applyCommand = (command): void => {
     switch (command.command) {
       case 'UNDO':
         this.editor.undo()

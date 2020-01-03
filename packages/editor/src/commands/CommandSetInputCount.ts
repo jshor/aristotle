@@ -1,6 +1,13 @@
 import draw2d from 'draw2d'
 
 class CommandSetInputCount extends draw2d.command.CommandCollection {
+  private oldPortCount: number
+  private newPortCount: number
+  private figure: draw2d.Figure
+  private canvas: draw2d.Canvas
+  private connections: draw2d.util.ArrayList
+  private ports: draw2d.util.ArrayList
+
   constructor (figure, newPortCount) {
     super()
 
@@ -71,7 +78,7 @@ class CommandSetInputCount extends draw2d.command.CommandCollection {
     }
   }
 
-  reconnect = (count) => {
+  reconnect = () => {
     this.reconnectInputs()
     this.reconnectOutputs()
     this.figure.repaint()

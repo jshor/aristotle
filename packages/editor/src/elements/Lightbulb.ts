@@ -7,7 +7,7 @@ export default class Lightbulb extends Element {
     super(id, params)
 
     this.node = new OutputNode(id)
-    this.node.on('change', this.updateWireColor)
+    this.node.on('change', this.render)
     this.registerSvgRenderer()
     this.render()
   }
@@ -27,10 +27,10 @@ export default class Lightbulb extends Element {
     })
   }
 
-  updateWireColor = (value) => {
-    this.bgColor = this.getWireColor(value)
-    this.render(false)
-  }
+  // updateWireColor = (value) => {
+  //   this.bgColor = this.getWireColor(value)
+  //   this.render()
+  // }
 
 
   getSvg = () => {
@@ -41,9 +41,9 @@ export default class Lightbulb extends Element {
     const outlineColor = this.node.value === LogicValue.TRUE
       ? valueColor
       : '#ffffff'
+    const renderer = this.svgRenderer as TemplateSVG
 
-    return this
-      .svgRenderer
+    return renderer
       .setTemplateVariables({ valueColor, outlineColor, filter })
       .getSvgData()
   }

@@ -5,6 +5,8 @@ import IOElement from './IOElement'
 import { TemplateSVG } from '../svg'
 
 export default class Switch extends IOElement {
+  public clickableArea: draw2d.shape.basic.Rectangle
+
   constructor (id, params) {
     super(id, params)
 
@@ -23,7 +25,7 @@ export default class Switch extends IOElement {
   }
 
   registerCircuitNode = () => {
-    this.node = new InputNode(this.id)
+    this.node = new InputNode(this.getId())
     this.node.setValue(this.settings.startValue.value)
     this.node.on('change', this.updateVisualValue)
   }
@@ -37,16 +39,19 @@ export default class Switch extends IOElement {
       cssClass: 'clickable'
     })
     this.clickableArea.on('click', this.invertValue)
-    this.add(this.clickableArea, locator)
+
+    const el: draw2d.Figure = this as draw2d.Figure
+
+    el.add(this.clickableArea, locator)
   }
 
   getSvg = () => {
     const value = this.node.getProjectedValue()
     const valueColor = this.getWireColor(value)
     const y = value === LogicValue.TRUE ? 15 : 48
+    const renderer = this.svgRenderer as TemplateSVG
 
-    return this
-      .svgRenderer
+    return renderer
       .setTemplateVariables({ valueColor, y })
       .getSvgData()
   }

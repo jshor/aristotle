@@ -11,17 +11,56 @@ const MIN_WIDTH = 120
 const MIN_HEIGHT = 120
 
 /**
+ * Represents the translations of an SVG figure.
+ */
+type SvgDimensions = {
+  width: number
+  height: number
+  offsetX?: number
+  offsetY?: number
+}
+
+/**
+ * Represents information about an SVG label.
+ */
+type LabelData = {
+  width: number
+  text: string
+}
+
+/**
+ * Represents information about a wire (a port with a line and label).
+ */
+type Wire = {
+  svg: string
+  label: string
+  port: PortDefinition
+}
+
+/**
  * Creates an integrated circuit image based on configured port definitions and label.
  *
  * @note A *wire group* is a collection of lines, connectors (circles), and labels (text).
  */
 export default class IntegratedCircuitSVG extends SVGBase {
+  protected primaryColor: string
+
+  protected secondaryColor: string
+
+  private innerDimensions: SvgDimensions
+
+  private outerDimensions: SvgDimensions
+
+  private title: string
+
+  private ports: PortSchematic
+
   /**
    * Constructor.
    *
    * @param {Object} options
-   * @param {String} options.title - title label of the IC
-   * @param {Object[]} options.ports - port configurations
+   * @param {String} options.title
+   * @param {PortSchematic} options.ports - port configurations
    */
   constructor (options) {
     super(options)
@@ -40,7 +79,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
    * @param {Number} x - y-axis coordinate to start the line
    * @returns {String} svg rendering of the horizontal line
    */
-  getHorizontalWire = (x, y) => {
+  getHorizontalWire = (x: number, y: number): string => {
     return this.toSvg('line', {
       x1: x,
       x2: x + WIRE_LENGTH,
@@ -58,7 +97,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
    * @param {Number} x - y-axis coordinate to start the line
    * @returns {String} svg rendering of the vertical line
    */
-  getVerticalWire = (x, y) => {
+  getVerticalWire = (x: number, y: number): string => {
     return this.toSvg('line', {
       x1: x,
       x2: x,
@@ -75,7 +114,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
    * @param {String} label - the text to calculate
    * @returns {Object<{ text: String, width: Number }>}
    */
-  getLabelData = (label) => {
+  getLabelData = (label: string): LabelData => {
     let text = label.toUpperCase()
 
     if (text.length > 3) {
@@ -96,7 +135,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
    * @param {Object} [params] - optional params
    * @returns {String}
    */
-  getLabel = (x, y, text, params) => {
+  getLabel = (x: number, y: number, text: string, params?: any): string => {
     const attrs = {
       'font-family': 'Lucida Console, Monaco, monospace',
       'font-size': TEXT_SIZE,
@@ -114,7 +153,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
    * @param {Number} y - y-axis coordinate to place the label
    * @returns {String}
    */
-  getTopLabel = (label, x, y) => {
+  getTopLabel = (label: string, x: number, y: number): string => {
     const { text, width } = this.getLabelData(label)
 
     return this.getLabel(x - width / 2, y + LABEL_PADDING, text)
@@ -128,8 +167,8 @@ export default class IntegratedCircuitSVG extends SVGBase {
    * @param {Number} y - y-axis coordinate to place the label
    * @returns {String}
    */
-  getLeftLabel = (label, x, y) => {
-    const { text, width } = this.getLabelData(label)
+  getLeftLabel = (label: string, x: number, y: number): string => {
+    const { text } = this.getLabelData(label)
 
     return this.getLabel(x + LABEL_PADDING, y, text)
   }
@@ -142,7 +181,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
    * @param {Number} y - y-axis coordinate to place the label
    * @returns {String}
    */
-  getRightLabel = (label, x, y) => {
+  getRightLabel = (label: string, x: number, y: number): string => {
     const { text, width } = this.getLabelData(label)
 
     return this.getLabel(x - width - LABEL_PADDING, y, text)
@@ -156,28 +195,35 @@ export default class IntegratedCircuitSVG extends SVGBase {
    * @param {Number} y - y-axis coordinate to place the label
    * @returns {String}
    */
-  getBottomLabel = (label, x, y) => {
+  getBottomLabel = (label: string, x: number, y: number): string => {
     const { text, width } = this.getLabelData(label)
 
     return this.getLabel(x - width / 2, y - WIRE_LENGTH - LABEL_HEIGHT - LABEL_PADDING, text)
   }
 
-  getPortOffset = (dimension, wireLength) => {
+  /**
+   * Returns the offset (horizontal or vertical) of the port for the given dimension.
+   *
+   * @param {number} dimension
+   * @param {number} wireLength
+   * @returns {number}
+   */
+  getPortOffset = (dimension: number, wireLength: number): number => {
     return dimension / 2 - (wireLength * PORT_WIDTH) / 2 + PORT_WIDTH / 2
   }
 
   /**
-   * Returns a list of rendered <line> elements for the left wires.
+   * Returns a list of rendered `<line>` SVG elements for the left wires.
    *
-   * @param {Object[]} wireGroup - the input data entry for the left wires
-   * @param {Number} groupHeight - height of the wire group
-   * @returns {String[]} list of <line> elements for the left wires
+   * @param {PortLabel[]} wireGroup - the input data entry for the left wires
+   * @param {number} groupHeight - height of the wire group
+   * @returns {Wire[]} list of <line> elements for the left wires
    */
-  getLeftWires = (wireGroup, groupHeight, x) => {
+  getLeftWires = (wireGroup: PortLabel[], groupHeight: number, x: number): Wire[] => {
     const y = this.getPortOffset(groupHeight, wireGroup.length)
 
-    return wireGroup.map(({ label, type }, i) => ({
-      wire: this.getHorizontalWire(x, y + i * PORT_WIDTH),
+    return wireGroup.map(({ label, type }: PortLabel, i: number): Wire => ({
+      svg: this.getHorizontalWire(x, y + i * PORT_WIDTH),
       label: this.getLeftLabel(label, x + PORT_WIDTH, y + i * PORT_WIDTH + LABEL_HEIGHT / 2),
       port: {
         x,
@@ -190,15 +236,15 @@ export default class IntegratedCircuitSVG extends SVGBase {
   /**
    * Returns a list of rendered <line> elements for the right wires.
    *
-   * @param {Object[]} wireGroup - the input data entry for the right wires
-   * @param {Number} groupHeight - height of the wire group
-   * @returns {String[]} list of <line> elements for the right wires
+   * @param {PortLabel[]} wireGroup - the input data entry for the right wires
+   * @param {number} groupHeight - height of the wire group
+   * @returns {Wire[]} list of <line> elements for the right wires
    */
-  getRightWires = (wireGroup, groupHeight, x) => {
+  getRightWires = (wireGroup: PortLabel[], groupHeight: number, x: number): Wire[] => {
     const y = this.getPortOffset(groupHeight, wireGroup.length)
 
-    return wireGroup.map(({ label, type }, i) => ({
-      wire: this.getHorizontalWire(x, y + i * PORT_WIDTH),
+    return wireGroup.map(({ label, type }: PortLabel, i: number): Wire => ({
+      svg: this.getHorizontalWire(x, y + i * PORT_WIDTH),
       label: this.getRightLabel(label, x,  y + i * PORT_WIDTH + LABEL_HEIGHT / 2),
       port: {
         x: x + WIRE_LENGTH,
@@ -211,15 +257,15 @@ export default class IntegratedCircuitSVG extends SVGBase {
   /**
    * Returns a list of rendered <line> elements for the top wires.
    *
-   * @param {Object[]} wireGroup - the input data entry for the top wires
-   * @param {Number} groupWidth - width of the wire group
-   * @returns {String[]} list of <line> elements for the top wires
+   * @param {PortLabel[]} wireGroup - the input data entry for the top wires
+   * @param {number} groupWidth - width of the wire group
+   * @returns {Wire[]} list of <line> elements for the top wires
    */
-  getTopWires = (wireGroup, groupWidth, y) => {
+  getTopWires = (wireGroup: PortLabel[], groupWidth: number, y: number): Wire[] => {
     const x = this.getPortOffset(groupWidth, wireGroup.length)
 
-    return wireGroup.map(({ label, type }, i) => ({
-      wire: this.getVerticalWire(x + i * PORT_WIDTH, y),
+    return wireGroup.map(({ label, type }: PortLabel, i: number): Wire => ({
+      svg: this.getVerticalWire(x + i * PORT_WIDTH, y),
       label: this.getTopLabel(label, x + i * PORT_WIDTH,  y + PORT_WIDTH + LABEL_HEIGHT),
       port: {
         x: x + i * PORT_WIDTH,
@@ -232,15 +278,15 @@ export default class IntegratedCircuitSVG extends SVGBase {
   /**
    * Returns a list of rendered <line> elements for the bottom wires.
    *
-   * @param {Object[]} wireGroup - the input data entry for the bottom wires
-   * @param {Number} groupWidth - width of the wire group
-   * @returns {String[]} list of <line> elements for the bottom wires
+   * @param {PortLabel[]} wireGroup - the input data entry for the bottom wires
+   * @param {number} groupWidth - width of the wire group
+   * @returns {Wire[]} list of <line> elements for the bottom wires
    */
-  getBottomWires = (wireGroup, groupWidth, y) => {
+  getBottomWires = (wireGroup: PortLabel[], groupWidth: number, y: number): Wire[] => {
     const x = this.getPortOffset(groupWidth, wireGroup.length)
 
-    return wireGroup.map(({ label, type }, i) => ({
-      wire: this.getVerticalWire(x + i * PORT_WIDTH, y),
+    return wireGroup.map(({ label, type }: PortLabel, i: number): Wire => ({
+      svg: this.getVerticalWire(x + i * PORT_WIDTH, y),
       label: this.getBottomLabel(label, x + i * PORT_WIDTH, y + PORT_WIDTH + LABEL_HEIGHT),
       port: {
         x: x + i * PORT_WIDTH,
@@ -253,9 +299,9 @@ export default class IntegratedCircuitSVG extends SVGBase {
   /**
    * Returns the groups of SVG elements (wires, labels, and ports).
    *
-   * @returns {Object<{ wires: String[], labels: String[], ports: String[] }>}
+   * @returns {Object<{ wires: string[], labels: string[], ports: PortDefinition[] }>}
    */
-  getWireGroups = () => {
+  getWireGroups = (): { lines: string[], labels: string[], ports: PortDefinition[] } => {
     const { width, height } = this.outerDimensions
 
     const left = this.getLeftWires(this.ports.left, height, 0)
@@ -267,10 +313,10 @@ export default class IntegratedCircuitSVG extends SVGBase {
 
     return {
       lines: [
-        ...get(left, 'wire'),
-        ...get(right, 'wire'),
-        ...get(top, 'wire'),
-        ...get(bottom, 'wire')
+        ...get(left, 'svg'),
+        ...get(right, 'svg'),
+        ...get(top, 'svg'),
+        ...get(bottom, 'svg')
       ],
       labels: [
         ...get(left, 'label'),
@@ -278,7 +324,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
         ...get(top, 'label'),
         ...get(bottom, 'label')
       ],
-      connectors: [
+      ports: [
         ...get(left, 'port'),
         ...get(right, 'port'),
         ...get(top, 'port'),
@@ -290,12 +336,12 @@ export default class IntegratedCircuitSVG extends SVGBase {
   /**
    * Renders the label of the integrated circuit block.
    *
-   * @param {Number} width - width of the IC block
-   * @param {Number} height - height of the IC block
-   * @returns {String} SVG <text> element
+   * @param {number} width - width of the IC block
+   * @param {number} height - height of the IC block
+   * @returns {string} SVG <text> element
    */
-  getTitleLabel = (width, height) => {
-    const labelWidth = this.title.length * TEXT_SIZE
+  getTitleLabel = (width: number, height: number): string => {
+    // const labelWidth = this.title.length * TEXT_SIZE // TODO
     const x = width / 2
     const y = height / 2
 
@@ -308,9 +354,11 @@ export default class IntegratedCircuitSVG extends SVGBase {
   }
 
   /**
-   * Returns the inner rect of the IC.
+   * Generates the SVG data of the IC inner rectangle.
+   *
+   * @returns {string}
    */
-  getBoundary = () => {
+  getBoundary = (): string => {
     const width = this.outerDimensions.width - WIRE_LENGTH * 2
     const height = this.outerDimensions.height - WIRE_LENGTH * 2
     const rect = this.toSvg('rect', {
@@ -335,9 +383,9 @@ export default class IntegratedCircuitSVG extends SVGBase {
   /**
    * Returns the dimensions of the entire SVG.
    *
-   * @returns {Object}
+   * @returns {SvgDimensions}
    */
-  getOuterSvgDimensions = () => {
+  getOuterSvgDimensions = (): SvgDimensions => {
     const baseDim = PORT_WIDTH / 2 + PORT_WIDTH
     const getMaxDim = (a, b) => Math.max(this.ports[a].length, this.ports[b].length)
 
@@ -356,9 +404,9 @@ export default class IntegratedCircuitSVG extends SVGBase {
   /**
    * Returns the dimensions of the square block of the integrated circuit.
    *
-   * @returns {Object}
+   * @returns {SvgDimensions}
    */
-  getInnerSvgDimensions = () => {
+  getInnerSvgDimensions = (): SvgDimensions => {
     const offset = a => a.length ? 0 : 1
     const leftOffset = (offset(this.ports.left) + offset(this.ports.right)) * WIRE_LENGTH
     const topOffset = (offset(this.ports.top) + offset(this.ports.bottom)) * WIRE_LENGTH
@@ -375,12 +423,12 @@ export default class IntegratedCircuitSVG extends SVGBase {
   /**
    * Maps the coordinates of each port according to the given (x, y) offset.
    *
-   * @param {Object[]}
+   * @param {PortDefinition[]}
    * @param {Number} offsetX
    * @param {Number} offsetY
-   * @returns {Object[]}
+   * @returns {PortDefinition[]}
    */
-  getPortLocations = (ports, offsetX, offsetY) => {
+  getPortLocations = (ports: PortDefinition[], offsetX: number, offsetY: number): PortDefinition[] => {
     return ports
       .map(({ x, y, type }) => {
         return {
@@ -394,9 +442,9 @@ export default class IntegratedCircuitSVG extends SVGBase {
   /**
    * Returns the path, ports and dimensions of the rendered integrated circuit SVG.
    *
-   * @returns {Object<{ ports: Object[], path: Buffer, width: Number, height: Number }>}
+   * @returns {SvgData}
    */
-  getSvgData = () => {
+  getSvgData = (): SvgData => {
     const {
       width,
       height,
@@ -404,7 +452,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
       offsetY
     } = this.innerDimensions
 
-    const { lines, labels, connectors } = this.getWireGroups()
+    const { lines, labels, ports } = this.getWireGroups()
     const boundary = this.getBoundary()
 
     const group = this.toSvg('g', {
@@ -425,7 +473,7 @@ export default class IntegratedCircuitSVG extends SVGBase {
 
     return {
       path,
-      ports: this.getPortLocations(connectors, offsetX, offsetY),
+      ports: this.getPortLocations(ports, offsetX, offsetY),
       width,
       height
     }

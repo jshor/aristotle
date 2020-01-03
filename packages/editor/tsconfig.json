@@ -7,6 +7,7 @@
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
+    "allowJs": true,
     "esModuleInterop": true,
     "baseUrl": "src",
     "paths": {
@@ -20,6 +21,7 @@
     "src/**/*.js"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/**/*.spec.ts"
   ]
 }

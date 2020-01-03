@@ -12,6 +12,9 @@ module.exports = {
     // https://stackoverflow.com/a/49119917
     globalObject: `(typeof self !== 'undefined' ? self : this)`
   },
+  resolve: {
+    extensions: ['.ts', '.js']
+  },
   plugins: [
     new webpack.ProvidePlugin({
       '$': 'jquery',

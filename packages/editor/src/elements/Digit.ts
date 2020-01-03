@@ -1,9 +1,12 @@
-import { OutputNode, LogicValue } from '@aristotle/logic-circuit'
+import { OutputNode, LogicValue, CircuitNode } from '@aristotle/logic-circuit'
 import Element from '../Element'
 import getPortIndex from '../utils/getPortIndex'
 import { DigitSVG } from '../svg'
+import draw2d from 'draw2d'
 
 export default class Lightbulb extends Element {
+  protected nodes: OutputNode[] = []
+
   constructor (id, params) {
     super(id, params)
 
@@ -19,14 +22,14 @@ export default class Lightbulb extends Element {
     }
   }
 
-  registerSvgRenderer = () => {
+  registerSvgRenderer = (): void => {
     this.svgRenderer = new DigitSVG({
       primaryColor: '#ffffff',
       secondaryColor: '#1C1D24'
     })
   }
 
-  registerCircuitNode = () => {
+  registerCircuitNode = (): void => {
     this.nodes = [
       this.createInput(),
       this.createInput(),
@@ -40,7 +43,7 @@ export default class Lightbulb extends Element {
    *
    * @returns {OutputNode}
    */
-  createInput = () => {
+  createInput = (): OutputNode => {
     const node = new OutputNode()
 
     node.on('change', this.change)
@@ -53,7 +56,7 @@ export default class Lightbulb extends Element {
    *
    * @returns {String}
    */
-  getBinaryValue = () => {
+  getBinaryValue = (): string => {
     return this
       .nodes
       .map(({ value }) => value === LogicValue.TRUE ? 1 : 0)
@@ -66,17 +69,17 @@ export default class Lightbulb extends Element {
    *
    * @returns {String}
    */
-  getHexadecimalValue = () => {
+  getHexadecimalValue = (): string => {
     return parseInt(this.getBinaryValue(), 2).toString(16)
   }
 
   /**
    * Repaints the SVG after an input change.
    */
-  change = () => {
-    const { path } = this.getSvg()
+  change = (): void => {
+    const { path } = this.getSvg() as SvgData
 
-    this.setPath(path)
+    (this as draw2d.Figure).setPath(path) // TODO
   }
 
   /**
@@ -85,18 +88,19 @@ export default class Lightbulb extends Element {
    * @param {Connection} connection
    * @returns {CircuitNode}
    */
-  getCircuitNode = (connection) => {
+  getCircuitNode = (connection): CircuitNode => {
     const target = connection.getTarget()
     const index = getPortIndex(target, 'input')
 
     return this.nodes[index]
   }
 
-  getSvg = () => {
+  getSvg = (): SvgData => {
     const chars = this.getHexadecimalValue()
+    const renderer = this.svgRenderer as DigitSVG
 
-    this.svgRenderer.setChars(chars)
-
-    return this.svgRenderer.getSvgData()
+    return renderer
+      .setChars(chars)
+      .getSvgData()
   }
 }

@@ -1,4 +1,8 @@
 export default class SVGBase {
+  protected primaryColor: string
+
+  protected secondaryColor: string
+
   constructor (options) {
     this.primaryColor = options.primaryColor
     this.secondaryColor = options.secondaryColor

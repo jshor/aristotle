@@ -5,12 +5,23 @@ import CommandSetProperty from './commands/CommandSetProperty'
 import uuid from './utils/uuid'
 import getPortLocator from './utils/getPortLocator'
 import ToolboxButton from './ToolboxButton'
+import SVGBase from 'svg/lib/SVGBase'
 
 export default class Element extends draw2d.shape.basic.Image {
-  constructor (id, { settings } = {}) {
+  node = null
+
+  toolboxButton: ToolboxButton
+
+  canvas: draw2d.Canvas
+
+  svgRenderer: SVGBase
+
+  settings: any
+
+  constructor (id, { settings } = { settings: null }) {
     super({ resizeable: false })
 
-    if (id) this.setId(id) // TODO: is checking for id necessary?
+    super.setId(id)
     this.applySettings(settings)
   }
 
@@ -20,7 +31,7 @@ export default class Element extends draw2d.shape.basic.Image {
    * @override draw2d.shape.basic.Image
    */
   onContextMenu = () => {
-    if (!this.canvas.getSelection().getSize() || !this.isSelected()) {
+    if (!this.canvas.getSelection().getSize() || !super.isSelected()) {
       this.canvas.setCurrentSelection(null)
       this.canvas.setCurrentSelection(this)
     }
@@ -41,7 +52,7 @@ export default class Element extends draw2d.shape.basic.Image {
    *
    * @returns {CircuitNode}
    */
-  getCircuitNode = () => {
+  getCircuitNode = (connection?) => {
     return this.node
   }
 
@@ -49,13 +60,13 @@ export default class Element extends draw2d.shape.basic.Image {
    * Renders the element SVG.
    */
   render = () => {
-    const { path, width, height, ports } = this.getSvg()
+    const { path, width, height, ports } = this.getSvg() as any // TODO
 
     this.setPorts(ports)
-    this.setPath(path)
-    this.setWidth(width)
-    this.setHeight(height)
-    this.repaint()
+    super.setPath(path)
+    super.setWidth(width)
+    super.setHeight(height)
+    super.repaint()
     this.createToolboxButton()
   }
 
@@ -81,10 +92,10 @@ export default class Element extends draw2d.shape.basic.Image {
    *
    * @param {String} color - hexadecimal color value
    */
-  setOutputConnectionColor = (value) => {
+  setOutputConnectionColor = (value: LogicValue, portIndex?: number) => {
     const color = this.getWireColor(value)
 
-    this
+    super
       .getConnections()
       .data
       .filter((connection) => connection.getSource().parent === this)
@@ -114,7 +125,7 @@ export default class Element extends draw2d.shape.basic.Image {
 
   updateSettings = (settings) => {
     for (let propertyName in settings) {
-      const command = new CommandSetProperty(this)
+      const command: any = new CommandSetProperty(this) // TODO
 
       command.propertyName = propertyName
       command.newValue = settings[propertyName]
@@ -132,7 +143,7 @@ export default class Element extends draw2d.shape.basic.Image {
    */
   setPorts = (ports) => {
     ports.forEach((params) => {
-      const port = this.createPort(params.type, getPortLocator(params))
+      const port = super.createPort(params.type, getPortLocator(params))
       /*
       if (params.type === "input") {
         port.installEditPolicy(inputPortPolicy)
@@ -164,12 +175,19 @@ export default class Element extends draw2d.shape.basic.Image {
 
   serialize = () => {
     return {
-      id: this.id,
-      x: this.x,
-      y: this.y,
+      id: super.getId(),
+      x: super.getX(),
+      y: super.getY(),
       type: this.constructor.name,
       name: uuid(),
       settings: this.getSettings()
     }
   }
+
+  // TODO
+  getSvg = () => {}
+
+  on = super.on
+
+  getId = super.getId
 }

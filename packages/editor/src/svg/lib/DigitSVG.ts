@@ -1,5 +1,4 @@
-import SVGBase from "./SVGBase";
-
+import SVGBase from './SVGBase'
 
 /**
  * Mapping of characters to numeric digit line.
@@ -54,6 +53,8 @@ const paths = [
 ]
 
 export default class DigitSVG extends SVGBase {
+  private chars: string
+
   /**
    * Constructor.
    *
@@ -67,14 +68,14 @@ export default class DigitSVG extends SVGBase {
   }
 
   /**
-   * Returns a string with all SVG paths to represent the given character.
+   * Renders a string with all SVG paths to represent the given character.
    * The paths will be filled in according to how the digit is represented in the digit map.
    * See the digit map constant for more details.
    *
-   * @param {String} char - single character to represent
-   * @returns {String} joined <path> SVG elements
+   * @param {string} char - single character to represent
+   * @returns {string} joined <path> SVG elements
    */
-  getNumber = (char) => {
+  getNumber = (char: string): string => {
     const map = charMap[char]
 
     return paths
@@ -87,11 +88,12 @@ export default class DigitSVG extends SVGBase {
   }
 
   /**
-   * Returns a <g> SVG element with rendered digit character(s) present.
+   * Renders a <g> SVG element with rendered digit character(s) present.
    *
-   * @returns {String} SVG element
+   * @param {string} chars - characters to render
+   * @returns {string} SVG element
    */
-  getSequence = (chars) => {
+  getSequence = (chars: string): string => {
     return chars
       .split('')
       .map((char, index) => {
@@ -108,10 +110,10 @@ export default class DigitSVG extends SVGBase {
   /**
    * Renders a horizontal wire (line).
    *
-   * @param {Number} y - y-axis coordinate to start the line
-   * @returns {String} svg rendering of the horizontal line
+   * @param {number} y - y-axis coordinate to start the line
+   * @returns {string} svg rendering of the horizontal line
    */
-  getInputLine = (y) => {
+  getInputLine = (y: number): string => {
     return this.toSvg('line', {
       x1: 0,
       x2: WIRE_LENGTH,
@@ -125,18 +127,21 @@ export default class DigitSVG extends SVGBase {
   /**
    * Sets the character(s) to display.
    *
-   * @param {String} chars
+   * @param {string} chars
+   * @returns {DigitSVG}
    */
-  setChars = (chars) => {
+  setChars = (chars: string): DigitSVG => {
     this.chars = chars
+
+    return this
   }
 
   /**
    * Renders the box with the digit characters in it.
    *
-   * @returns {String} SVG element
+   * @returns {string} SVG element
    */
-  getDigitDisplay = (width, height) => {
+  getDigitDisplay = (width: number, height: number): string => {
     return this.toSvg('g', {
       transform: `translate(${WIRE_LENGTH}, 2)`
     }, [
@@ -155,10 +160,10 @@ export default class DigitSVG extends SVGBase {
    * Returns the definitions for the ports.
    * All ports are inputs, as this is a terminal node.
    *
-   * @returns {Object<{ type: String, x: Number, y: Number }>[]}
+   * @returns {PortDefinition[]}
    */
-  getPortDefinitions = () => {
-    return [12, 32, 54, 75].map(y => ({
+  getPortDefinitions = (): PortDefinition[] => {
+    return [12, 32, 54, 75].map((y: number): PortDefinition => ({
       type: 'input',
       x: 0,
       y
@@ -168,9 +173,9 @@ export default class DigitSVG extends SVGBase {
   /**
    * Returns the path, ports and dimensions of the rendered digit SVG.
    *
-   * @returns {Object<{ ports: Object[], path: Buffer, width: Number, height: Number }>}
+   * @returns {SvgData}
    */
-  getSvgData = () => {
+  getSvgData = (): SvgData => {
     const digitWidth = (this.chars.length * DIGIT_WIDTH) + DIGIT_PADDING + DIGIT_LINE_SPACING
     const width = digitWidth + DIGIT_PADDING + DIGIT_LINE_SPACING
     const height = DIGIT_DISPLAY_HEIGHT
