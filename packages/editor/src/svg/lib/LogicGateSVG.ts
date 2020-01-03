@@ -21,28 +21,33 @@ const NEGATION_X = {
 }
 
 export default class LogicGateSVG extends SVGBase {
+  private inputCount: number
+
+  private gateType: string
+
+  private baseLineAttrs = {
+    'stroke': this.primaryColor,
+    'stroke-linecap': 'square',
+    'stroke-width': STROKE_WIDTH,
+    'vector-effect': 'non-scaling-stroke'
+  }
+
   constructor (options) {
     super(options)
 
     this.inputCount = options.inputCount
     this.gateType = options.gateType
-    this.baseLineAttrs = {
-      'stroke': this.primaryColor,
-      'stroke-linecap': 'square',
-      'stroke-width': STROKE_WIDTH,
-      'vector-effect': 'non-scaling-stroke'
-    }
   }
 
   /**
    * Renders a set of horizontal wire(s) for the given parameters.
-   * 
-   * @param {Number} wireCount - number of wires to render
-   * @param {Number} x-axis offset
-   * @param {Number} svgHeight - total outer height of the SVG
-   * @returns {String[]} list of <line> elements
+   *
+   * @param {number} wireCount - number of wires to render
+   * @param {number} x-axis offset
+   * @param {number} svgHeight - total outer height of the SVG
+   * @returns {string[]} list of <line> elements
    */
-  getWires = (wireCount, x, svgHeight) => {
+  getWires = (wireCount: number, x: number, svgHeight: number): string[] => {
     const inputHeight = (wireCount - 1) * PORT_WIDTH
     const yOffset = svgHeight / 2 - inputHeight / 2
     const wires = []
@@ -62,11 +67,11 @@ export default class LogicGateSVG extends SVGBase {
 
   /**
    * Calculates the locations of the input ports.
-   * 
-   * @param {Number} svgHeight - total outer height of the SVG
-   * @returns {Object<{ x: Number, y: Number, type: String }>[]}
+   *
+   * @param {number} svgHeight - total outer height of the SVG
+   * @returns {PortDefinition[]}
    */
-  getInputPorts = (svgHeight) => {
+  getInputPorts = (svgHeight: number): PortDefinition[] => {
     const inputHeight = (this.inputCount - 1) * PORT_WIDTH
     const yOffset = svgHeight / 2 - inputHeight / 2
     const ports = []
@@ -83,16 +88,15 @@ export default class LogicGateSVG extends SVGBase {
 
   /**
    * Returns the inner figure (the gate minus the wires or symbols).
-   * 
-   * @param {Number} x - x-axis offset
+   *
+   * @param {number} x - x-axis offset
    * @param {String} pathData - SVG path of the figure
-   * @param {String} [fill = `secondaryColor`] - fill color
-   * @returns {String} SVG
+   * @returns {string} SVG
    */
-  getFigureSvg = (x, pathData, fill) => {
+  getFigureSvg = (x: number, pathData: string): string => {
     const path = this.toSvg('path', {
       d: pathData,
-      fill: fill || this.secondaryColor,
+      fill: this.secondaryColor,
       ...this.baseLineAttrs
     })
 
@@ -106,18 +110,17 @@ export default class LogicGateSVG extends SVGBase {
 
   /**
    * Returns the inner figure path for the gate type.
-   * 
-   * @returns {String} SVG path data
+   *
+   * @returns {string} SVG path data
    */
-  getPathData = () => {
+  getPathData = (): string => {
     switch (this.gateType) {
-      case 'AND':
-      case 'NAND':
-        return PATH.AND
-      case 'OR':
-      case 'XOR':
-      case 'XNOR':
-        return PATH.OR
+      // case GateType.AND:
+      // case GateType.NAND:
+      //   return PATH.AND
+      // case GateType.OR:
+      // case GateType.XOR:
+      // case GateType.XNOR:
       default:
         return PATH.OR
     }
@@ -125,20 +128,20 @@ export default class LogicGateSVG extends SVGBase {
 
   /**
    * Determines whether a negation symbol is required for the gate type.
-   * 
-   * @returns {Boolean}
+   *
+   * @returns {boolean}
    */
-  isNegated = () => {
+  isNegated = (): boolean => {
     return ['XNOR', 'NOR', 'NAND'].includes(this.gateType)
   }
 
   /**
    * Renders a negation symbol.
-   * 
-   * @param {Number} height - total SVG height
-   * @returns {String} SVG <circle> element
+   *
+   * @param {number} height - total SVG height
+   * @returns {string} SVG <circle> element
    */
-  getNegation = (height) => {
+  getNegation = (height: number): string => {
     const x = NEGATION_X[this.gateType]
     const r = 4
 
@@ -154,16 +157,21 @@ export default class LogicGateSVG extends SVGBase {
     return ''
   }
 
-  setInputCount = (inputCount) => {
+  /**
+   * Sets the input count.
+   *
+   * @param {number} inputCount
+   */
+  setInputCount = (inputCount: number): void => {
     this.inputCount = inputCount
   }
 
   /**
    * Returns the path, ports and dimensions of the rendered logic gate SVG.
-   * 
-   * @returns {Object<{ ports: Object[], path: Buffer, width: Number, height: Number }>}
+   *
+   * @returns {SvgData}
    */
-  getSvgData = () => {
+  getSvgData = (): SvgData => {
     const height = this.inputCount > 2
       ? this.inputCount * PORT_WIDTH + this.inputCount * STROKE_WIDTH
       : LOGIC_GATE_HEIGHT
@@ -175,9 +183,10 @@ export default class LogicGateSVG extends SVGBase {
       this.getFigureSvg(20, pathData)
     ]
 
+    // if (this.gateType === GateType.XOR || GateType.XNOR) {
     if (this.gateType === 'XOR' || this.gateType === 'XNOR') {
       // add the curve at the bottom of XOR gates
-      children.push(this.getFigureSvg(10, PATH.XOR_BASE, 'none'))
+      children.push(this.getFigureSvg(10, PATH.XOR_BASE))
     }
 
     children.push(this.getNegation(height))
@@ -190,12 +199,14 @@ export default class LogicGateSVG extends SVGBase {
 
     const path = this.toDataUrl(svg)
 
-    const ports = [
-      // input ports
-      ...this.getInputPorts(height),
-      // single output port
-      { x: width, y: height / 2, type: 'output' }
-    ]
+    const outputPort: PortDefinition = {
+      x: width,
+      y: height / 2,
+      type: 'output'
+    }
+    const ports = this
+      .getInputPorts(height)
+      .concat(outputPort)
 
     return {
       path,

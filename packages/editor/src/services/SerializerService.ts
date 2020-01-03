@@ -1,6 +1,8 @@
-
+import { Canvas } from 'draw2d'
 
 export default class SerializerService {
+  private editor: Canvas
+
   constructor (editor) {
     this.editor = editor
   }
@@ -38,7 +40,7 @@ export default class SerializerService {
           elements.push(figure)
         }
       })
-    
+
     return this.serialize(elements, connections)
   }
 }

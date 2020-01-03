@@ -1,6 +1,8 @@
 import draw2d from 'draw2d'
 
 export default class ZoomService {
+  private editor: draw2d.canvas
+
   constructor (editor) {
     this.editor = editor
   }

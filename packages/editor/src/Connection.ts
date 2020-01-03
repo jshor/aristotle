@@ -1,8 +1,17 @@
 import draw2d from 'draw2d'
+import { Circuit } from '@aristotle/logic-circuit'
 import BezierConnectionRouter from './layout/BezierConnectionRouter'
 import getPortIndex from './utils/getPortIndex'
 
 class Connection extends draw2d.Connection {
+  public circuit: Circuit
+
+  public canvas: draw2d.Canvas
+
+  public sourcePort: draw2d.Port
+
+  public targetPort: draw2d.Port
+
   constructor (circuit) {
     super({
       outlineColor: '#000000',
@@ -14,8 +23,8 @@ class Connection extends draw2d.Connection {
     })
 
     this.circuit = circuit
-    this.on('added', this.addCircuitConnection)
-    this.on('removed', this.removeCircuitConnection)
+    super.on('added', this.addCircuitConnection)
+    super.on('removed', this.removeCircuitConnection)
   }
 
   /**
@@ -80,8 +89,8 @@ class Connection extends draw2d.Connection {
   }
 
   serialize = () => {
-    const source = this.getSource()
-    const target = this.getTarget()
+    const source = super.getSource()
+    const target = super.getTarget()
     const sourceIndex = getPortIndex(source, 'output')
     const targetIndex = getPortIndex(target, 'input')
 
@@ -92,6 +101,9 @@ class Connection extends draw2d.Connection {
       targetIndex
     }
   }
+
+  public setSource = super.setSource
+  public setTarget = super.setTarget
 }
 
 export default Connection

@@ -1,4 +1,12 @@
 class EditorModel {
+  public canUndo: boolean
+  public canRedo: boolean
+  public debugMode: boolean
+  public circuitComplete: boolean
+  public oscilloscopeEnabled: boolean
+  public selectionCount: number
+  public zoomLevel: number
+  public mouseMode: string
   constructor ({
     canUndo = false,
     canRedo = false,

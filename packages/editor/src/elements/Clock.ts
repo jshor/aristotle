@@ -4,6 +4,8 @@ import WaveService from '../services/WaveService'
 import { TemplateSVG } from '../svg'
 
 export default class Clock extends IOElement {
+  private clock: WaveService
+
   constructor (id, params) {
     super(id, params)
 
@@ -34,13 +36,13 @@ export default class Clock extends IOElement {
   }
 
   registerCircuitNode = () => {
-    this.node = new InputNode(this.id)
+    this.node = new InputNode(this.getId())
     this.node.setValue(this.settings.startValue.value)
     this.node.on('change', this.updateVisualValue)
   }
 
   registerClock = () => {
-    this.clock = new WaveService(`${this.id}_wave`, this.settings.interval.value)
+    this.clock = new WaveService(`${this.getId()}_wave`, this.settings.interval.value)
     this.clock.onUpdate(this.invertValue)
 
     if (this.canvas) {
@@ -49,7 +51,7 @@ export default class Clock extends IOElement {
   }
 
   unregisterClock = () => {
-    this.oscillation.remove(this.clock)
+    this.canvas.oscillation.remove(this.clock)
   }
 
   resetInterval = () => {
@@ -58,9 +60,9 @@ export default class Clock extends IOElement {
 
   getSvg = () => {
     const valueColor = this.getWireColor(this.node.getProjectedValue())
+    const renderer = this.svgRenderer as TemplateSVG
 
-    return this
-      .svgRenderer
+    return renderer
       .setTemplateVariables({ valueColor })
       .getSvgData()
   }
