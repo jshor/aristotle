@@ -1,5 +1,6 @@
+import draw2d from 'draw2d'
 import Element from '../Element'
-import { Buffer, Nor } from '@aristotle/logic-circuit'
+import { Buffer, Nor, CircuitNode, LogicValue } from '@aristotle/logic-circuit'
 import getPortIndex from '../utils/getPortIndex'
 import { IntegratedCircuitSVG } from '../svg'
 
@@ -11,6 +12,20 @@ import { IntegratedCircuitSVG } from '../svg'
  * @extends Element
  */
 export default class IntegratedCircuit extends Element {
+  private connectionEntries: CircuitConnection[] = []
+
+  private elementEntries: CircuitElement[] = []
+
+  private ports: PortSchematic
+
+  private title: string
+
+  protected nodes: CircuitNode[] = []
+
+  private inputIds: string[]
+
+  private outputIds: string[]
+
   /**
    * Constructor.
    *
@@ -20,7 +35,7 @@ export default class IntegratedCircuit extends Element {
    * @param {Object} circuit.elements - list of node definitions
    * @param {Object} circuit.connections - list of connection entries
    */
-  constructor (id, { ports, elements, connections, name }) {
+  constructor (id, { ports, elements, connections, name }: CircuitDefinition) {
     super(id)
 
     this.connectionEntries = connections
@@ -35,7 +50,7 @@ export default class IntegratedCircuit extends Element {
     this.render()
   }
 
-  initializeSvgRenderer = () => {
+  initializeSvgRenderer = (): void => {
     this.svgRenderer = new IntegratedCircuitSVG({
       primaryColor: '#ffffff',
       secondaryColor: '#1C1D24',
@@ -44,7 +59,7 @@ export default class IntegratedCircuit extends Element {
     })
   }
 
-  initializeCircuitNode = () => {
+  initializeCircuitNode = (): void => {
     this.nodes = this.elementEntries.map(this.getInitializedNode)
     this.inputIds = this.getNodeListByType(this.elementEntries, 'input')
     this.outputIds = this.getNodeListByType(this.elementEntries, 'output')
@@ -56,9 +71,9 @@ export default class IntegratedCircuit extends Element {
    * The connection can be either to an input port or an output one.
    *
    * @param {Connection} connection
-   * @returns {String} id of connected node
+   * @returns {string} id of connected node
    */
-  getCircuitNodeId = (connection) => {
+  getCircuitNodeId = (connection): string => {
     const source = connection.getSource()
     const target = connection.getTarget()
 
@@ -72,9 +87,9 @@ export default class IntegratedCircuit extends Element {
    * Returns a circuit node with the matching id.
    *
    * @param {String} nodeId
-   * @returns {LogicNode}
+   * @returns {CircuitNode}
    */
-  getCircuitNodeById = (nodeId) => {
+  getCircuitNodeById = (nodeId: string): CircuitNode => {
     return this
       .nodes
       .filter((node) => node.name === nodeId)
@@ -88,7 +103,7 @@ export default class IntegratedCircuit extends Element {
    * @param {Connection} connection
    * @returns {CircuitNode}
    */
-  getCircuitNode = (connection) => {
+  getCircuitNode = (connection): CircuitNode => {
     const nodeId = this.getCircuitNodeId(connection)
 
     return this.getCircuitNodeById(nodeId)
@@ -101,21 +116,23 @@ export default class IntegratedCircuit extends Element {
    * @param {String} type - `input` or `output`
    * @returns {String[]} list of ids
    */
-  getNodeListByType = (nodes, type) => {
+  getNodeListByType = (nodes: CircuitElement[], type: string): string[] => {
     return nodes
       .filter(({ nodeType }) => nodeType === type)
       .sort((a, b) => a.portIndex - b.portIndex)
       .map(({ id }) => id)
   }
 
-  getInitializedNode = ({ id, nodeType, portIndex }) => { // TODO: need to remap ids here too
+  getInitializedNode = ({ id, nodeType, portIndex }: CircuitElement): CircuitNode => { // TODO: need to remap ids here too
     if (nodeType === 'input' || nodeType === 'output') {
       // replace inputs and outputs with buffers
       const node = new Buffer(id)
 
       if (nodeType === 'output') {
         // if the node is an output, propagate the color change
-        node.on('change', this.setOutputConnectionColor.bind(this, id, portIndex))
+        node.on('change', (value: LogicValue) => {
+          this.setOutputConnectionColor(value, portIndex)
+        })
       }
 
       node.forceContinue = true
@@ -129,7 +146,7 @@ export default class IntegratedCircuit extends Element {
   /**
    * Assembles the embedded circuit for the given nodes and connections.
    */
-  buildCircuit = () => {
+  buildCircuit = (): void => {
     this.nodes.forEach((el) => this.canvas.circuit.addNode(el)) //.bind(this))
 
     this.connectionEntries.forEach(({ inputId, outputId, targetIndex }) => {
@@ -140,10 +157,11 @@ export default class IntegratedCircuit extends Element {
     })
   }
 
-  setOutputConnectionColor = (nodeId, portIndex, value) => {
+  setOutputConnectionColor = (value: LogicValue, portIndex: number): void => {
     const color = this.getWireColor(value)
+    const baseElement = this as draw2d.Figure
 
-    super
+    baseElement
       .getConnections()
       .data
       .filter((connection) => connection.getSource().parent === this)
@@ -151,7 +169,7 @@ export default class IntegratedCircuit extends Element {
       .forEach((connection) => connection.setColor(color))
   }
 
-  getSvg = (color) => {
-    return this.svgRenderer.getSvgData()
+  getSvg = (): SvgData => {
+    return (this.svgRenderer as IntegratedCircuitSVG).getSvgData()
   }
 }

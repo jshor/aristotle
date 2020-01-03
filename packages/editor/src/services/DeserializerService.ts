@@ -1,6 +1,7 @@
-import { command } from 'draw2d'
+import { command, Port, Canvas } from 'draw2d'
 import ElementInitializerService from './ElementInitializerService'
 import getIdMapping from '../utils/getIdMapping'
+import Editor from 'Editor'
 
 /**
  * @class DeserializerService
@@ -8,14 +9,19 @@ import getIdMapping from '../utils/getIdMapping'
  *  for construction of the serialized object.
  * @example ```
  *  const deserializer = new DeserializerService(editor)
- * 
+ *
  *  deserializer.deserialize(data)
  * ```
  */
 export default class DeserializerService {
+  private editor: Editor
+  private commandCollection: command.CommandCollection
+  private elements: any // TODO
+  private idMap: { [key: string]: string }
+
   /**
    * Constructor.
-   * 
+   *
    * @param {Editor} editor
    */
   constructor (editor) {
@@ -24,7 +30,7 @@ export default class DeserializerService {
 
   /**
    * Deserializes the given data into elements and connections onto the editor.
-   * 
+   *
    * @param {Object} data - see data format for more details
    */
   deserialize = (data) => {
@@ -35,12 +41,15 @@ export default class DeserializerService {
     data.elements.forEach(this.createElement)
     data.connections.forEach(this.createConnection)
 
-    this.editor.commandStack.execute(this.commandCollection)
+    // console.log('editor: ', this.editor.getCommandStack())
+    const editor: Canvas = this.editor as Canvas
+
+    editor.getCommandStack().execute(this.commandCollection)
   }
 
   /**
    * Adds the element creation command to the list of commands.
-   * 
+   *
    * @param {Object} params
    * @param {Number} params.x - x-axis canvas value
    * @param {Number} params.y - y-axis canvas value
@@ -56,7 +65,7 @@ export default class DeserializerService {
 
   /**
    * Adds the connection creation command to the list of commands.
-   * 
+   *
    * @param {Object} params
    * @param {Number} params.inputId - id of the node having the source port
    * @param {Number} params.outputId - id of the node having the target port
@@ -64,12 +73,11 @@ export default class DeserializerService {
    * @param {Number} params.targetIndex - index of the target port
    */
   createConnection = ({ inputId, outputId, sourceIndex, targetIndex }) => {
-    const source = this
-      .getNodeById(this.idMap[inputId])
-      .getOutputPort(sourceIndex)
-    const target = this
-      .getNodeById(this.idMap[outputId])
-      .getInputPort(targetIndex)
+    const sourceElement = this.getNodeById(this.idMap[inputId]) as Port
+    const targetElement = this.getNodeById(this.idMap[outputId]) as Port
+
+    const source = sourceElement.getOutputPort(sourceIndex)
+    const target = targetElement.getInputPort(targetIndex)
 
     // port is not yet added to the canvas, so this would ordinarily return null
     // force getCanvas() to return the editor, as it is called by CommandConnect
@@ -80,7 +88,7 @@ export default class DeserializerService {
     cmd.setConnection(this.getConnection(source, target))
     this.commandCollection.add(cmd)
   }
-  
+
   /**
    * Connects two elements together in the Editor and its circuit instance.
    *
@@ -100,7 +108,7 @@ export default class DeserializerService {
 
   /**
    * Returns a node by its id.
-   * 
+   *
    * @param {String} id
    * @returns {Element}
    */

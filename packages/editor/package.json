@@ -26,6 +26,7 @@
     "jquery": "^3.3.1",
     "jquery-ui": "^1.12.1",
     "raw-loader": "^2.0.0",
+    "ts-jest": "^24.2.0",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.4",
     "webpack": "^4.31.0",

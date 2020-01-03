@@ -1,8 +1,13 @@
 import { LogicValue } from '@aristotle/logic-circuit'
 import ToggleService from '../services/ToggleService'
+import OscillationService from '../services/OscillationService'
 import Element from '../Element'
 
 export default class IOElement extends Element {
+  public wave: ToggleService
+
+  private oscillation: OscillationService
+
   constructor (id, params) {
     super(id, params)
 
@@ -27,10 +32,10 @@ export default class IOElement extends Element {
     oscilloscope: {
       type: 'select',
       options: {
-        0: 'Hide',
-        1: 'Show'
+        '0': 'Hide',
+        '1': 'Show'
       },
-      value: 1,
+      value: '1',
       onUpdate: () => this.resetWave()
     }
   }
@@ -52,11 +57,11 @@ export default class IOElement extends Element {
   }
 
   registerWave = () => {
-    this.wave = new ToggleService(this.id)
+    this.wave = new ToggleService(this.getId())
 
     if (this.canvas) {
       this.oscillation = this.canvas.oscillation
-      this.oscillation.add(this.wave)
+      this.canvas.oscillation.add(this.wave)
     }
   }
 

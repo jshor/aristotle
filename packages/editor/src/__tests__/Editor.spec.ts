@@ -1,9 +1,10 @@
-import { Port, policy } from 'draw2d'
+import draw2d from 'draw2d'
 import Editor from '../Editor'
 import Connection from '../Connection'
 import Element from '../Element'
 import EditorModel from '../models/EditorModel'
 
+jest.mock('draw2d')
 jest.mock('../Canvas')
 jest.mock('../Connection')
 jest.mock('../services/OscillationService', () => () => ({
@@ -62,7 +63,11 @@ describe('Editor', () => {
   })
 
   describe('addNode()', () => {
-    const node = new Element('12345', 'testElement')
+    const node = new Element('12345', {
+      settings: {
+        name: 'testElement'
+      }
+    })
     const x = 40
     const y = 60
 
@@ -92,39 +97,44 @@ describe('Editor', () => {
   })
 
   describe('addConnection()', () => {
-    const source = new Element('12345', 'sourceElement')
-    const target = new Element('12346', 'targetElement')
-    const outputPort = new Port()
-    const inputPort = new Port()
+    const source: any = new Element('12345', {
+      settings: {
+        name: 'sourceElement'
+      }
+    })
+    const target: any = new Element('12346', {
+      settings: {
+        name: 'targetElement'
+      }
+    })
+    const outputPort = new draw2d.Port()
+    const inputPort = new draw2d.Port()
     const index = 1
 
     beforeEach(() => {
       jest
-        .spyOn(Connection.prototype, 'setSource')
+        .spyOn(draw2d.Connection.prototype, 'setSource')
         .mockImplementation(jest.fn())
       jest
-        .spyOn(Connection.prototype, 'setTarget')
+        .spyOn(draw2d.Connection.prototype, 'setTarget')
         .mockImplementation(jest.fn())
-      jest
-        .spyOn(source, 'getOutputPort')
-        .mockReturnValue(outputPort)
-      jest
-        .spyOn(target, 'getInputPort')
-        .mockReturnValue(inputPort)
+
+      source.getOutputPort = jest.fn(() => outputPort)
+      source.getInputPort = jest.fn(() => inputPort)
     })
 
     it('should set the output port to the 0th index of the source', () => {
       editor.addConnection(source, target, index)
 
       expect(source.getOutputPort).toHaveBeenCalledWith(0)
-      expect(Connection.prototype.setSource).toHaveBeenCalledWith(outputPort)
+      expect(draw2d.Connection.prototype.setSource).toHaveBeenCalledWith(outputPort)
     })
 
     it('should set the input port to the index-th of the target', () => {
       editor.addConnection(source, target, index)
 
       expect(target.getInputPort).toHaveBeenCalledWith(index)
-      expect(Connection.prototype.setTarget).toHaveBeenCalledWith(inputPort)
+      expect(draw2d.Connection.prototype.setTarget).toHaveBeenCalledWith(inputPort)
     })
 
     it('should add the connection to the editor instance', () => {
@@ -151,7 +161,7 @@ describe('Editor', () => {
 
     describe('in debug mode', () => {
       beforeEach(() => {
-        editor.debug = true
+        editor.debugMode = true
       })
 
       describe('when the circuit starts incomplete', () => {
@@ -193,7 +203,7 @@ describe('Editor', () => {
 
     describe('in automatic mode', () => {
       beforeEach(() => {
-        editor.debug = false
+        editor.debugMode = false
       })
 
       it('should step the circuit once', () => {
@@ -219,7 +229,7 @@ describe('Editor', () => {
       editor.setMouseMode('PANNING')
 
       expect(editor.installEditPolicy).toHaveBeenCalledWith(
-        expect.any(policy.canvas.PanningSelectionPolicy)
+        expect.any(draw2d.policy.canvas.PanningSelectionPolicy)
       )
     })
 
@@ -227,7 +237,7 @@ describe('Editor', () => {
       editor.setMouseMode('SELECTION')
 
       expect(editor.installEditPolicy).toHaveBeenCalledWith(
-        expect.any(policy.canvas.BoundingboxSelectionPolicy)
+        expect.any(draw2d.policy.canvas.BoundingboxSelectionPolicy)
       )
     })
   })
@@ -245,7 +255,7 @@ describe('Editor', () => {
 
     it('should install the drag-connection-edit policy', () => {
       expect(editor.installEditPolicy).toHaveBeenCalledWith(
-        expect.any(policy.connection.DragConnectionCreatePolicy)
+        expect.any(draw2d.policy.connection.DragConnectionCreatePolicy)
       )
     })
   })
@@ -257,13 +267,16 @@ describe('Editor', () => {
   })
 
   describe('command stack functions', () => {
+    let commandStack
+
     beforeEach(() => {
-      editor.commandStack = {
+      commandStack = {
         undo: jest.fn(),
         redo: jest.fn(),
         undostack: [],
         redostack: []
       }
+      editor.getCommandStack = () => commandStack
     })
 
     describe('undo()', () => {

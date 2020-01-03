@@ -42,8 +42,8 @@ export default class LogicGate extends Element {
     }
   }
 
-  getSvg = (color) => {
-    return this.svgRenderer.getSvgData()
+  getSvg = () => {
+    return (this.svgRenderer as LogicGateSVG).getSvgData()
   }
 
   getLogicGate = (id) => {

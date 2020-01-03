@@ -14,7 +14,7 @@ export default class ElementInitializerService {
    * @param {String} params.type - element class name
    * @returns {Element}
    */
-  static getInitializedElement = (id, params) => {
+  static getInitializedElement = (id: string, params: any): Element => {
     switch (params.type) {
       case 'IntegratedCircuit':
         return new IntegratedCircuit(id, params)

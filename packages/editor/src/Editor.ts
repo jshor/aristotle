@@ -195,7 +195,7 @@ export default class Editor extends draw2d.Canvas {
   }
 
   fromCanvasToDocumentCoordinate = (x, y) => {
-    const coords = this.fromCanvasToDocumentCoordinate(x, y)
+    const coords = super.fromCanvasToDocumentCoordinate(x, y)
 
     coords.x -= this.getAbsoluteX()
     coords.y -= this.getAbsoluteY()

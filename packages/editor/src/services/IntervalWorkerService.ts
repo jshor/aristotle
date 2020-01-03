@@ -1,7 +1,10 @@
 
 export default class IntervalWorkerService {
+  private callbacks: Function[] = []
+
+  private worker: Worker
+
   constructor () {
-    this.callbacks = []
     this.registerServiceWorker()
   }
 
