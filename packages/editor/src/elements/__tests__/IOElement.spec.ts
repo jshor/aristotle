@@ -7,7 +7,7 @@ describe('Input/Output Element', () => {
   let element
 
   beforeEach(() => {
-    element = new IOElement('testElement')
+    element = new IOElement('testElement', {})
   })
 
   describe('when the oscilloscope visibility changes', () => {

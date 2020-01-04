@@ -1,4 +1,4 @@
-import { Nor, Or, LogicValue } from '@aristotle/logic-circuit'
+import { Nor, Or, LogicValue, InputNode } from '@aristotle/logic-circuit'
 import { LogicGateSVG } from '../../svg'
 import LogicGate from '../LogicGate'
 import Element from '../../Element'
@@ -8,7 +8,7 @@ describe('LogicGate element', () => {
   let element
 
   beforeEach(() => {
-    element = new LogicGate('testNor')
+    element = new LogicGate('testNor', {})
   })
 
   afterEach(() => jest.resetAllMocks())

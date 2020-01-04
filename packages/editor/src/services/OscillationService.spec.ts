@@ -1,4 +1,13 @@
 import OscillationService from './OscillationService'
+import Editor from '../Editor'
+import ToggleService from './ToggleService'
+import WaveService from './WaveService'
+
+jest.mock('../Editor', () => {
+  return class {
+    oscillate = jest.fn()
+  }
+})
 
 jest.mock('./IntervalWorkerService', () => {
   return class {
@@ -10,11 +19,10 @@ jest.mock('./IntervalWorkerService', () => {
 
 describe('Oscillation Service', () => {
   let service
+  const editor = new Editor('testId')
 
   beforeEach(() => {
-    service = new OscillationService({
-      oscillate: jest.fn()
-    })
+    service = new OscillationService(editor)
   })
 
   afterEach(() => jest.resetAllMocks())
@@ -82,13 +90,13 @@ describe('Oscillation Service', () => {
 
   describe('computeWaveGeometry()', () => {
     it('should return a list of SVG geometry entries for each wave containing segments', () => {
-      service.waves = {
-        foo: {
-          segments: [{ x: 0, y: 0 }, { x: 10, y: 20 }],
-          width: 40
-        },
-        bar: {}
-      }
+      const foo = new ToggleService('foo')
+      const bar = new WaveService('bar', 5)
+
+      foo.segments = [{ x: 0, y: 0 }, { x: 10, y: 20 }]
+      foo.width = 40
+
+      service.waves = { foo, bar }
 
       const geometries = service.computeWaveGeometry()
 
