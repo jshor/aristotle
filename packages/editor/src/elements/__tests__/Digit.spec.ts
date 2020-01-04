@@ -1,5 +1,5 @@
 import Digit from '../Digit'
-import { OutputNode, LogicValue } from '@aristotle/logic-circuit'
+import { OutputNode, LogicValue, Circuit } from '@aristotle/logic-circuit'
 import Connection from '../../Connection'
 import { DigitSVG } from '../../svg'
 import Switch from '../Switch'
@@ -8,7 +8,7 @@ describe('Digit Element', () => {
   let digit
 
   beforeEach(() => {
-    digit = new Digit('foo')
+    digit = new Digit('foo', {})
   })
 
   it('should have an instance of the SVG renderer assigned', () => {
@@ -68,8 +68,8 @@ describe('Digit Element', () => {
 
   describe('getCircuitNode()', () => {
     const attachToNthPort = (n) => {
-      const target = new Switch()
-      const connection = new Connection()
+      const target: any = new Switch('testSwitch', {})
+      const connection = new Connection(new Circuit())
       const targetPort = digit.getInputPort(n)
       const sourcePort = target.getOutputPort(0)
 

@@ -8,7 +8,7 @@ describe('Switch element', () => {
   let element
 
   beforeEach(() => {
-    element = new Switch('testSwitch')
+    element = new Switch('testSwitch', {})
   })
 
   afterEach(() => jest.resetAllMocks())
@@ -42,7 +42,7 @@ describe('Switch element', () => {
       jest
         .spyOn(element, 'add')
         .mockImplementation(jest.fn())
-      
+
       element.invertValue = jest.fn()
     })
 

@@ -7,7 +7,7 @@ describe('Clock Element', () => {
   let clock
 
   beforeEach(() => {
-    clock = new Clock('testClock')
+    clock = new Clock('testClock', {})
   })
 
   it('should have an instance of the SVG renderer assigned', () => {
