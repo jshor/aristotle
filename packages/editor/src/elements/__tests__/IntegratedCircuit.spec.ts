@@ -1,4 +1,4 @@
-import { InputNode, Buffer } from '@aristotle/logic-circuit'
+import { InputNode, Buffer, Circuit } from '@aristotle/logic-circuit'
 import IntegratedCircuit from '../IntegratedCircuit'
 import LogicGate from '../LogicGate'
 import Connection from '../../Connection'
@@ -10,13 +10,13 @@ describe('Integrated Circuit', () => {
   beforeEach(() => {
     ic = new IntegratedCircuit(fixture.id, fixture)
     jest
-      .spyOn(Connection.prototype, 'on')
+      .spyOn(Connection.prototype as any, 'on')
       .mockImplementation(jest.fn())
   })
-  
+
   /** mock connection creation */
   const connect = (source, target) => {
-    const connection = new Connection()
+    const connection = new Connection(new Circuit())
 
     connection.setSource(source.getOutputPort(0))
     connection.setTarget(target.getInputPort(0))
@@ -79,14 +79,14 @@ describe('Integrated Circuit', () => {
         expect(node).toBeDefined()
         expect(node).toBeInstanceOf(Buffer)
       })
-      
+
       it('should treat the output as a buffer', () => {
         const node = ic.getInitializedNode({ id: 1, nodeType: 'output', portIndex: 0 })
 
         expect(node).toBeDefined()
         expect(node).toBeInstanceOf(Buffer)
       })
-      
+
       xit('should assign the `change` event to call `updateWireColor` on an output node', () => {
         jest.spyOn(Buffer.prototype, 'on')
 
@@ -95,7 +95,7 @@ describe('Integrated Circuit', () => {
         expect(Buffer.prototype.on).toHaveBeenCalledTimes(1)
         expect(Buffer.prototype.on).toHaveBeenCalledWith('change', expect.any(ic.updateWireColor))
       })
-      
+
       it('should assign `forceContinue` to the node', () => {
         const node = ic.getInitializedNode({ id: 1, nodeType: 'output', portIndex: 0 })
 
@@ -113,7 +113,7 @@ describe('Integrated Circuit', () => {
           addNode: jest.fn()
         }
       }
-      
+
       jest.spyOn(ic.canvas.circuit, 'addConnection')
     })
 
