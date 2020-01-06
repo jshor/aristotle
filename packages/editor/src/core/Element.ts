@@ -1,10 +1,10 @@
 
 import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
-import CommandSetProperty from './commands/CommandSetProperty'
-import uuid from './utils/uuid'
-import getPortLocator from './utils/getPortLocator'
-import ToolboxButton from './ToolboxButton'
+import CommandSetProperty from '../commands/CommandSetProperty'
+import uuid from '../utils/uuid'
+import getPortLocator from '../utils/getPortLocator'
+import ToolboxButton from '../interactivity/ToolboxButton'
 import SVGBase from 'svg/lib/SVGBase'
 
 export default class Element extends draw2d.shape.basic.Image {
@@ -17,6 +17,8 @@ export default class Element extends draw2d.shape.basic.Image {
   svgRenderer: SVGBase
 
   settings: any
+
+  id: string
 
   constructor (id, { settings } = { settings: null }) {
     super({ resizeable: false })
@@ -90,7 +92,7 @@ export default class Element extends draw2d.shape.basic.Image {
   /**
    * Updates the color(s) of the outgoing wire(s).
    *
-   * @param {String} color - hexadecimal color value
+   * @param {LogicValue} value - hexadecimal color value
    */
   setOutputConnectionColor = (value: LogicValue, portIndex?: number) => {
     const color = this.getWireColor(value)
@@ -123,7 +125,7 @@ export default class Element extends draw2d.shape.basic.Image {
     return settings
   }
 
-  updateSettings = (settings) => {
+  public updateSettings = (settings: any) => {
     for (let propertyName in settings) {
       const command: any = new CommandSetProperty(this) // TODO
 

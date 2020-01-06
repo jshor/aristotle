@@ -1,6 +1,6 @@
 import { OutputNode, LogicValue } from '@aristotle/logic-circuit'
 import { TemplateSVG } from '../svg'
-import Element from '../Element'
+import Element from '../core/Element'
 
 export default class Lightbulb extends Element {
   constructor (id, params) {

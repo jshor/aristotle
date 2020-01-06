@@ -1,7 +1,6 @@
 import { Nor, Or, LogicValue, InputNode } from '@aristotle/logic-circuit'
 import { LogicGateSVG } from '../../svg'
 import LogicGate from '../LogicGate'
-import Element from '../../Element'
 import CommandSetInputCount from '../../commands/CommandSetInputCount'
 
 describe('LogicGate element', () => {

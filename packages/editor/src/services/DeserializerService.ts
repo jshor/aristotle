@@ -1,7 +1,7 @@
 import { command, Port, Canvas } from 'draw2d'
 import ElementInitializerService from './ElementInitializerService'
 import getIdMapping from '../utils/getIdMapping'
-import Editor from 'Editor'
+import Editor from '../core/Editor'
 
 /**
  * @class DeserializerService

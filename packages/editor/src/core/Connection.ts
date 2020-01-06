@@ -1,7 +1,7 @@
 import draw2d from 'draw2d'
 import { Circuit } from '@aristotle/logic-circuit'
-import BezierConnectionRouter from './layout/BezierConnectionRouter'
-import getPortIndex from './utils/getPortIndex'
+import BezierConnectionRouter from '../layout/BezierConnectionRouter'
+import getPortIndex from '../utils/getPortIndex'
 
 class Connection extends draw2d.Connection {
   public circuit: Circuit

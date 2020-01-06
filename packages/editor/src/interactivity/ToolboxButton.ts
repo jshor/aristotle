@@ -1,5 +1,5 @@
 import draw2d from 'draw2d'
-import { Editor } from 'index'
+import Editor from '../core/Editor'
 
 export default class ToolboxButton extends draw2d.shape.basic.Rectangle {
   private icon: draw2d.shape.icon.Gear2
