@@ -2,14 +2,15 @@ import draw2d from 'draw2d'
 import $ from 'jquery'
 import { Circuit } from '@aristotle/logic-circuit'
 import Connection from './Connection'
-import EditorModel from './models/EditorModel'
-import DeserializerService from './services/DeserializerService'
-import SerializerService from './services/SerializerService'
-import OscillationService from './services/OscillationService'
-import CommandRouterService from './services/CommandRouterService'
-import ElementInitializerService from './services/ElementInitializerService'
-import ZoomService from './services/ZoomService'
-import uuid from './utils/uuid'
+import Element from './Element'
+import EditorModel from '../models/EditorModel'
+import DeserializerService from '../services/DeserializerService'
+import SerializerService from '../services/SerializerService'
+import OscillationService from '../services/OscillationService'
+import CommandRouterService from '../services/CommandRouterService'
+import ElementInitializerService from '../services/ElementInitializerService'
+import ZoomService from '../services/ZoomService'
+import uuid from '../utils/uuid'
 
 export default class Editor extends draw2d.Canvas {
   public circuit: Circuit = new Circuit()
@@ -40,18 +41,14 @@ export default class Editor extends draw2d.Canvas {
   public mouseDragDiffX: number = 0
   public mouseDragDiffY: number = 0
   public zoomFactor: number = 1
-  public editPolicy: any // draw2d.util.ArrayList
-  public currentHoverFigure: any
+  public editPolicy: any // TODO: draw2d.util.ArrayList
+  public currentHoverFigure: any // TODO
 
   constructor (elementId) {
     super(elementId)
 
-    this.wrapper = this.html[0]
-    this.parent = this.wrapper.parentNode as HTMLElement
-    super.setScrollArea(this.parent)
-    this.registerEventListeners()
+    this.registerCanvasDOM()
     this.installEditPolicies()
-    console.log('works')
     // $("body").append(`
     // <svg style="position: absolute; width: 1px; height: 1px">
     // <filter id="filter-0" width="1" height="1"><feOffset in="SourceAlpha" dx="1" dy="1" result="1"></feOffset><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0 " in="1" result="2"></feColorMatrix><feGaussianBlur stdDeviation="2" in="2" result="3"></feGaussianBlur><feMerge in="3" result="4"><feMergeNode in="3"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge></filter>
@@ -70,6 +67,18 @@ export default class Editor extends draw2d.Canvas {
   }
 
   /**
+   * Registers all DOM items relevant to draw2d.Canvas.
+   */
+  registerCanvasDOM = () => {
+    if (this.html) {
+      this.wrapper = this.html[0]
+      this.parent = this.wrapper.parentNode as HTMLElement
+      super.setScrollArea(this.parent)
+      this.registerEventListeners()
+    }
+  }
+
+  /**
    * Registers the user interaction event listeners.
    */
   registerEventListeners = () => {
@@ -81,6 +90,7 @@ export default class Editor extends draw2d.Canvas {
 
   /**
    * Fires `toolbox.close` when the canvas is clicked and no elements are actively selected.
+   * Fires `deselect` when one or more elements are deselected.
    *
    * @emits `deselect`
    * @emits `toolbox.close`
@@ -88,6 +98,8 @@ export default class Editor extends draw2d.Canvas {
   onDeselect = () => {
     if (super.getSelection().getSize() === 0) {
       this.fireEvent('toolbox.close')
+    } else {
+      this.fireEvent('deselect')
     }
   }
 
@@ -219,15 +231,15 @@ export default class Editor extends draw2d.Canvas {
   }
 
   /**
-   * Adds a node to the Editor and its circuit instance.
-   *
-   * @param {Element} node - element node to add
+   * Adds an Element to the Editor and its circuit instance.
+   * TODO: rename to addElement
+   * @param {Element} element - element node to add
    * @param {Number} x - x-axis screen coordinates to add the element at
    * @param {Number} y - y-axis screen coordinates to add the element at
    */
-  addNode = (node, x, y) => {
-    super.add(node, x, y)
-    this.circuit.addNode(node.node)
+  addNode = (element, x, y) => {
+    super.add(element, x, y)
+    this.circuit.addNode(element.node)
     this.step(true)
   }
 
@@ -257,10 +269,19 @@ export default class Editor extends draw2d.Canvas {
   }
 
   /**
+   * Returns a new instance of a Connection.
+   *
+   * @returns {Connection}
+   */
+  createConnection = () => {
+    return new Connection(this.circuit)
+  }
+
+  /**
    * Runs the circuit evaluation.
    * It will debug in a step-through manner if the `debugMode` property is set to `true`.
    * It will evaluate automatically until the circuit has no more updates.
-   *
+   * TODO: rename to evaluateCircuit
    * @param {Boolean} [force = false] - if true, forces the circuit to re-evaluate even if complete
    */
   step = (force = false) => {
@@ -298,6 +319,7 @@ export default class Editor extends draw2d.Canvas {
 
   /**
    * Resets the circuit by re-drawing it. Each circuit element will re-initialize to its original value.
+   * TODO: this is an awful way of doing this -- find an alternative
    */
   reset = () => {
     const serialized = JSON.stringify(this.serializer.serializeAll())
@@ -322,15 +344,6 @@ export default class Editor extends draw2d.Canvas {
         break
     }
     this.mouseMode = mode
-  }
-
-  /**
-   * Returns a new instance of a Connection.
-   *
-   * @returns {Connection}
-   */
-  createConnection = () => {
-    return new Connection(this.circuit)
   }
 
   /**
@@ -363,9 +376,11 @@ export default class Editor extends draw2d.Canvas {
   }
 
   updateElement = ({ elementId, data }) => {
-    super
+    const elements: Element[] = super
       .getFigures()
       .asArray()
+
+    elements
       .filter(({ id }) => elementId === id)[0]
       .updateSettings(data)
   }

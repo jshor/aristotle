@@ -2,6 +2,7 @@
 
   describe('toggleToolboxVisibility()', () => {
     let toolboxButton
+    let element: E
 
     beforeEach(() => {
       toolboxButton = { setVisible: jest.fn() }

@@ -1,7 +1,7 @@
 import { Nor, Or } from '@aristotle/logic-circuit'
 import CommandSetInputCount from '../commands/CommandSetInputCount'
 import LogicGateSVG from '../svg/lib/LogicGateSVG'
-import Element from '../Element'
+import Element from '../core/Element'
 
 export default class LogicGate extends Element {
   constructor (id, params) {

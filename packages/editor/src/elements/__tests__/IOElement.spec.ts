@@ -1,7 +1,7 @@
 import { LogicValue, InputNode } from '@aristotle/logic-circuit'
 import ToggleService from '../../services/ToggleService'
 import IOElement from '../IOElement'
-import Element from '../../Element'
+import Element from '../../core/Element'
 
 describe('Input/Output Element', () => {
   let element

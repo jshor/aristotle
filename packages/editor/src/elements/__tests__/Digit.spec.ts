@@ -1,6 +1,6 @@
 import Digit from '../Digit'
 import { OutputNode, LogicValue, Circuit } from '@aristotle/logic-circuit'
-import Connection from '../../Connection'
+import Connection from '../../core/Connection'
 import { DigitSVG } from '../../svg'
 import Switch from '../Switch'
 

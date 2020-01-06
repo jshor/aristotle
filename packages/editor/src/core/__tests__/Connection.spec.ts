@@ -1,15 +1,14 @@
-import Connection from './Connection'
-import Switch from './elements/Switch'
-import Lightbulb from './elements/Lightbulb'
-import Element from './Element'
-
+import Connection from '../Connection'
+import Element from '../Element'
+import Switch from '../../elements/Switch'
+import Lightbulb from '../../elements/Lightbulb'
 
 describe('Connection', () => {
   let source, target, connection
 
   const sourceNode = { type: 'input' }
   const targetNode = { type: 'output' }
-  const canvas = new Element()
+  const canvas = new Element('foo')
 
   const circuit = {
     addConnection: jest.fn(),
@@ -17,8 +16,8 @@ describe('Connection', () => {
   }
 
   beforeEach(() => {
-    source = new Switch('testSwitch')
-    target = new Lightbulb('testSwitch')
+    source = new Switch('testSwitch', {})
+    target = new Lightbulb('testBulb', {})
     connection = new Connection(circuit)
 
     source.getCircuitNode = () => sourceNode

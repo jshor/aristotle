@@ -1,4 +1,4 @@
-import Element from '../Element'
+import Element from '../core/Element'
 import Switch from '../elements/Switch'
 import Clock from '../elements/Clock'
 import LogicGate from '../elements/LogicGate'
@@ -14,7 +14,7 @@ export default class ElementInitializerService {
    * @param {String} params.type - element class name
    * @returns {Element}
    */
-  static getInitializedElement = (id: string, params: any): Element => {
+  static getInitializedElement = (id: string, params: any): any => {
     switch (params.type) {
       case 'IntegratedCircuit':
         return new IntegratedCircuit(id, params)
