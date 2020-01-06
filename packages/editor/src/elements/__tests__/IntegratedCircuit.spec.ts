@@ -1,7 +1,7 @@
-import { InputNode, Buffer, Circuit } from '@aristotle/logic-circuit'
+import { Buffer, Circuit } from '@aristotle/logic-circuit'
 import IntegratedCircuit from '../IntegratedCircuit'
 import LogicGate from '../LogicGate'
-import Connection from '../../Connection'
+import Connection from '../../core/Connection'
 import fixture from './__fixtures__/ic.json'
 
 describe('Integrated Circuit', () => {

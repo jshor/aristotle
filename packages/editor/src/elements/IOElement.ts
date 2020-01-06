@@ -1,7 +1,7 @@
 import { LogicValue } from '@aristotle/logic-circuit'
 import ToggleService from '../services/ToggleService'
 import OscillationService from '../services/OscillationService'
-import Element from '../Element'
+import Element from '../core/Element'
 
 export default class IOElement extends Element {
   public wave: ToggleService

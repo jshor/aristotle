@@ -1,9 +1,9 @@
 import OscillationService from './OscillationService'
-import Editor from '../Editor'
+import Editor from '../core/Editor'
 import ToggleService from './ToggleService'
 import WaveService from './WaveService'
 
-jest.mock('../Editor', () => {
+jest.mock('../core/Editor', () => {
   return class {
     oscillate = jest.fn()
   }

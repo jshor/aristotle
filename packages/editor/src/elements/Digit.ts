@@ -1,5 +1,5 @@
 import { OutputNode, LogicValue, CircuitNode } from '@aristotle/logic-circuit'
-import Element from '../Element'
+import Element from '../core/Element'
 import getPortIndex from '../utils/getPortIndex'
 import { DigitSVG } from '../svg'
 import draw2d from 'draw2d'

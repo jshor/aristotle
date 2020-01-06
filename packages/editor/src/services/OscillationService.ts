@@ -1,5 +1,5 @@
 import IntervalWorkerService from './IntervalWorkerService'
-import Editor from '../Editor'
+import Editor from '../core/Editor'
 import IPulse from '../interfaces/IPulse'
 
 const BASE_REFRESH_RATE = 100
