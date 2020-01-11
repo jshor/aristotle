@@ -51,8 +51,13 @@ type CircuitConnection = {
 type CircuitDefinition = {
   name: string
   ports: PortSchematic
-  elements: any // TODO
-  connections: any
+  elements: CircuitElement[]
+  connections: CircuitConnection[]
+}
+
+type SerializedCircuit = {
+  elements: CircuitElement[]
+  connections: CircuitConnection[]
 }
 
 type SvgData = {
@@ -65,4 +70,8 @@ type SvgData = {
 type Point = {
   x: number
   y: number
+}
+
+type IdMap = {
+  [key: string]: string
 }

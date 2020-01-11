@@ -1,33 +1,43 @@
 import { command } from 'draw2d'
 import DeserializerService from '../DeserializerService'
 import data from './__fixtures__/circuit.json'
-import ElementInitializerService from '../ElementInitializerService';
+import ElementInitializerService from '../ElementInitializerService'
+import Editor from '../../core/Editor'
+
+jest.mock('../../core/Editor', () => {
+  const commandStack = {
+    execute: jest.fn()
+  }
+
+  return class Editor {
+    getCommandStack () {
+      return commandStack
+    }
+
+    createConnection () {
+      return {
+        setSource: jest.fn(),
+        setTarget: jest.fn()
+      }
+    }
+  }
+})
 
 describe('Deserializer Service', () => {
   let editor
   let service
 
   beforeEach(() => {
-    editor = {
-      commandStack: {
-        execute: jest.fn()
-      },
-
-      createConnection () {
-        return {
-          setSource: jest.fn(),
-          setTarget: jest.fn()
-        }
-      }
-    }
+    editor = new Editor('testEditor')
     service = new DeserializerService(editor)
   })
+
+  afterEach(() => jest.resetAllMocks())
 
   describe('deserialize()', () => {
     beforeEach(() => {
       jest.spyOn(service, 'createElement')
       jest.spyOn(service, 'createConnection')
-      jest.spyOn(editor.commandStack, 'execute')
 
       service.deserialize(data)
     })
@@ -51,8 +61,12 @@ describe('Deserializer Service', () => {
     })
 
     it('should execute the command', () => {
-      expect(service.editor.commandStack.execute).toHaveBeenCalledTimes(1)
-      expect(service.editor.commandStack.execute).toHaveBeenCalledWith(service.commandCollection)
+      const commandStack = editor.getCommandStack()
+
+      jest.spyOn(commandStack, 'execute')
+
+      expect(commandStack.execute).toHaveBeenCalledTimes(1)
+      expect(commandStack.execute).toHaveBeenCalledWith(service.commandCollection)
     })
   })
 
