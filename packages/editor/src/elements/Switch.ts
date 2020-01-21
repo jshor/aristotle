@@ -12,7 +12,12 @@ export default class Switch extends IOElement {
 
     this.registerSvgRenderer()
     this.registerCircuitNode()
-    this.attachClickableArea()
+    this
+      .attachClickableArea(30, 50, {
+        x: 15,
+        y: 10
+      })
+      .on('click', this.invertValue)
     this.render()
   }
 
@@ -28,21 +33,6 @@ export default class Switch extends IOElement {
     this.node = new InputNode(this.getId())
     this.node.setValue(this.settings.startValue.value)
     this.node.on('change', this.updateVisualValue)
-  }
-
-  attachClickableArea = () => {
-    const locator = new draw2d.layout.locator.XYAbsPortLocator(15, 10)
-    this.clickableArea = new draw2d.shape.basic.Rectangle({
-      opacity: 0,
-      width: 30,
-      height: 50,
-      cssClass: 'clickable'
-    })
-    this.clickableArea.on('click', this.invertValue)
-
-    const el: draw2d.Figure = this as draw2d.Figure
-
-    el.add(this.clickableArea, locator)
   }
 
   getSvg = () => {

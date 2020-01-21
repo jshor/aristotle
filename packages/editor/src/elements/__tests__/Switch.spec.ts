@@ -1,6 +1,5 @@
 import draw2d from 'draw2d'
 import { InputNode, LogicValue } from '@aristotle/logic-circuit'
-import ToggleService from '../../services/ToggleService'
 import Switch from '../Switch'
 import { TemplateSVG } from '../../svg'
 
@@ -34,36 +33,6 @@ describe('Switch element', () => {
 
       expect(InputNode.prototype.setValue).toHaveBeenCalledTimes(1)
       expect(InputNode.prototype.setValue).toHaveBeenCalledWith(value)
-    })
-  })
-
-  describe('attachClickableArea()', () => {
-    beforeEach(() => {
-      jest
-        .spyOn(element, 'add')
-        .mockImplementation(jest.fn())
-
-      element.invertValue = jest.fn()
-    })
-
-    it('should add a clickable area to the element', () => {
-      element.attachClickableArea()
-
-      expect(element).toHaveProperty('clickableArea')
-      expect(element.clickableArea).toBeInstanceOf(draw2d.shape.basic.Rectangle)
-      expect(element.add).toHaveBeenCalledTimes(1)
-      expect(element.add).toHaveBeenCalledWith(
-        element.clickableArea,
-        expect.any(draw2d.layout.locator.XYAbsPortLocator)
-      )
-    })
-
-    it('should set the `click` event handler to invert the element\'s value', () => {
-      const spy = jest.spyOn(draw2d.shape.basic.Rectangle.prototype, 'on')
-
-      element.attachClickableArea()
-
-      expect(spy).toHaveBeenCalledWith('click', element.invertValue)
     })
   })
 

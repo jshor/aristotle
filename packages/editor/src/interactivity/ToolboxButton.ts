@@ -1,71 +1,63 @@
 import draw2d from 'draw2d'
 import Editor from '../core/Editor'
+import addTouchEvents from '../utils/addTouchEvents'
 
-export default class ToolboxButton extends draw2d.shape.basic.Rectangle {
-  private icon: draw2d.shape.icon.Gear2
+export default class ToolboxButton extends draw2d.shape.icon.Gear2 {
+  protected container: draw2d.Figure = this
 
-  protected figure: draw2d.Figure = this
+  protected element: draw2d.Figure = this
 
   protected editor: Editor
 
-  constructor (parent) {
+  constructor (container: draw2d.Figure, width: number, height: number) {
     super({
-      width: 16,
-      height: 16,
-      visible: false,
-      opacity: 0
-    })
-
-    super.addCssClass('clickable')
-    this.addIcon()
-    this.addToParent(parent)
-    this.toggleToolboxVisibility()
-  }
-
-  addIcon = () => {
-    const locator = new draw2d.layout.locator.XYAbsPortLocator(0, 0)
-    this.icon = new draw2d.shape.icon.Gear2({
-      width: super.getWidth(),
-      height: super.getHeight(),
+      width,
+      height,
       color: '#ffffff'
     })
 
-    this.icon.addCssClass('clickable')
-    this.icon.on('click', this.fireToolboxEvent) // TODO: add 'removed' event
-    this.figure.add(this.icon, locator)
-  }
+    this.container = container
+    this.element = container.parent
 
-  addEventListeners = () => {
-    this.figure.canvas.on('unselect', this.toggleToolboxVisibility)
-    this.figure.canvas.on('select', this.toggleToolboxVisibility)
-    this.figure.canvas.on('zoomed', this.scaleToZoomFactor)
-  }
+    super.addCssClass('clickable')
 
-  addToParent = (parent) => {
-    const x = parent.width + 10
-    const locator = new draw2d.layout.locator.XYAbsPortLocator(x, 0)
+    this.element.on('added', this.addEventListeners)
+    this.element.on('added', addTouchEvents.bind(this, this))
 
-    parent.on('added', this.addEventListeners)
-    parent.add(this, locator)
+    addTouchEvents(this)
   }
 
   /**
-   * Sets the visibility of the toolbox button if it exists.
+   * Attaches `select`, `unselect`, and `zoomed` event listeners.
    */
-  toggleToolboxVisibility = () => {
-    const isSelected = this.figure.parent.isSelected()
-
-    this.figure.setVisible(isSelected)
-    this.icon.setVisible(isSelected)
+  addEventListeners = (): void => {
+    super.on('click', this.fireToolboxEvent)
+    this.element.on('added', this.toggleVisibility)
+    this.container.canvas.on('unselect', this.toggleVisibility)
+    this.container.canvas.on('select', this.toggleVisibility)
+    this.container.canvas.on('zoomed', this.scaleToZoomFactor)
   }
 
-  scaleToZoomFactor = () => {
-    const zoomFactor = 1 / this.figure.canvas.zoomFactor
+  /**
+   * Sets the visibility of the toolbox button depending on element selection.
+   */
+  toggleVisibility = (): void => {
+    const isSelected = this.element.isSelected()
 
-    this.figure.setWidth(16 / zoomFactor)
-    this.figure.setHeight(16 / zoomFactor)
-    this.icon.setWidth(16 / zoomFactor)
-    this.icon.setHeight(16 / zoomFactor)
+    this.container.setVisible(isSelected)
+    super.setVisible(isSelected)
+  }
+
+  /**
+   * Scales the clickable area and the icon according to the canvas' zoom factor.
+   */
+  scaleToZoomFactor = (): void => {
+    const zoomFactor = 1 / this.container.canvas.zoomFactor
+
+    this.container.setWidth(16 / zoomFactor)
+    this.container.setHeight(16 / zoomFactor)
+    super.setWidth(16 / zoomFactor)
+    super.setHeight(16 / zoomFactor)
   }
 
   /**
@@ -74,15 +66,14 @@ export default class ToolboxButton extends draw2d.shape.basic.Rectangle {
    *
    * @emits `toolbox`
    */
-  fireToolboxEvent = () => {
-    const { parent } = this.figure
-    const x = parent.x + this.figure.x
-    const y = parent.y - 5
-    const position = this.figure.canvas.fromCanvasToDocumentCoordinate(x, y)
+  fireToolboxEvent = (): void => {
+    const x: number = this.element.x + this.container.x
+    const y: number = this.element.y
+    const position: Point = this.container.canvas.fromCanvasToDocumentCoordinate(x, y)
 
-    this.figure.canvas.fireEvent('toolbox.open', {
-      elementId: parent.id,
-      settings: parent.settings,
+    this.container.canvas.fireEvent('toolbox.open', {
+      elementId: this.element.id,
+      settings: this.element.settings,
       position
     })
   }
