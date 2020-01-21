@@ -6,6 +6,7 @@ import uuid from '../utils/uuid'
 import getPortLocator from '../utils/getPortLocator'
 import ToolboxButton from '../interactivity/ToolboxButton'
 import SVGBase from 'svg/lib/SVGBase'
+import addTouchEvents from '../utils/addTouchEvents'
 
 export default class Element extends draw2d.shape.basic.Image {
   node = null
@@ -162,8 +163,31 @@ export default class Element extends draw2d.shape.basic.Image {
    */
   createToolboxButton = () => {
     if (!this.toolboxButton && this.settings) {
-      this.toolboxButton = new ToolboxButton(this)
+      const locator = new draw2d.layout.locator.XYAbsPortLocator(0, 0)
+      const figure: draw2d.Figure = this.attachClickableArea(20, 20, {
+        x: super.getWidth() + 10,
+        y: 0
+      })
+      this.toolboxButton = new ToolboxButton(figure, 16, 16)
+
+      figure.add(this.toolboxButton, locator)
     }
+  }
+
+  attachClickableArea = (width: number, height: number, point: Point) => {
+    const figure: draw2d.Figure = this as draw2d.Figure
+    const locator = new draw2d.layout.locator.XYAbsPortLocator(point.x, point.y)
+    const clickableArea = new draw2d.shape.basic.Rectangle({
+      opacity: 0,
+      width,
+      height,
+      cssClass: 'clickable'
+    })
+
+    figure.on('added', addTouchEvents.bind(this, clickableArea))
+    figure.add(clickableArea, locator)
+
+    return clickableArea
   }
 
   /**

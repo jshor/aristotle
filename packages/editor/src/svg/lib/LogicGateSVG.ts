@@ -115,12 +115,12 @@ export default class LogicGateSVG extends SVGBase {
    */
   getPathData = (): string => {
     switch (this.gateType) {
-      // case GateType.AND:
-      // case GateType.NAND:
-      //   return PATH.AND
-      // case GateType.OR:
-      // case GateType.XOR:
-      // case GateType.XNOR:
+      case 'AND':
+      case 'NAND':
+        return PATH.AND
+      case 'OR':
+      case 'XOR':
+      case 'XNOR':
       default:
         return PATH.OR
     }
