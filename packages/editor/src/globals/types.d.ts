@@ -21,7 +21,8 @@ type PortDefinition = {
 
 type PortLabel = {
   label: string,
-  type: string
+  type: string,
+  elementId?: string
 }
 
 type PortSchematic = {
@@ -34,7 +35,7 @@ type PortSchematic = {
 type CircuitElement = {
   id: string
   type: string
-  nodeType?: string // TODO: rename
+  nodeType?: string // TODO: rename to ioType
   portIndex?: number
   name: string
   x: number

@@ -112,6 +112,9 @@ export default {
         documentId: this.document.id
       })
     },
+    createIntegratedCircuit (editor, circuitData) {
+      this.$store.dispatch('openIntegratedCircuitBuilder', circuitData)
+    },
     onUpdateEditor (editorModel) {
       this.$store.commit('SET_EDITOR_MODEL', editorModel)
     },
@@ -144,6 +147,14 @@ export default {
         command: 'SET_ZOOM',
         payload: factor
       })
+    },
+    contextMenu (editor, { x, y } = {}) {
+      const model = editor.getEditorModel()
+      const position = editor.fromCanvasToDocumentCoordinate(x, y)
+
+      this.$store.commit('SET_EDITOR_MODEL', model)
+      this.$store.commit('SET_CONTEXT_MENU', position)
+      event.preventDefault()
     }
   },
   mounted () {
@@ -163,12 +174,14 @@ export default {
       canvasEvents.forEach(eventName => {
         this.canvas.on(eventName, this.onCanvasUpdate.bind(this))
       })
+      this.canvas.on('contextmenu', this.contextMenu)
       this.canvas.on('circuitChanged', this.updateEditorModel)
       this.canvas.on('toolbox.open', this.openSettingsDialog)
       this.canvas.on('toolbox.close', this.propertiesClosed)
       this.canvas.on('oscillate', (editor, waves) => {
         this.waves = waves
       })
+      this.canvas.on('createIntegratedCircuit', this.createIntegratedCircuit)
 
       this.canvas.load(this.document.data)
 

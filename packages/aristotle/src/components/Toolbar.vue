@@ -62,40 +62,6 @@
       </button>
       <div class="toolbar__separator" />
       <button
-        :disabled="!editor.canRedo"
-        @click="relayCommand('REDO')"
-        class="toolbar-button">
-        <i class="fas fa-undo-alt" />
-      </button>
-      <button
-        :disabled="!editor.canRedo"
-        @click="relayCommand('REDO')"
-        class="toolbar-button">
-        <i class="fas fa-redo-alt" />
-      </button>
-      <div class="toolbar__separator" />
-      <button
-        :disabled="!editor.canRedo"
-        @click="relayCommand('REDO')"
-        class="toolbar-button">
-        <i class="fas fa-object-group" />
-      </button>
-      <button
-        :disabled="!editor.canRedo"
-        @click="relayCommand('REDO')"
-        class="toolbar-button">
-        <i class="fas fa-object-ungroup" />
-      </button>
-      <div class="toolbar__separator" />
-      <button
-        :disabled="true"
-        @click="relayCommand('CREATE_INTEGRATED_CIRCUIT')"
-        class="toolbar-button">
-        <i class="fas fa-table" />
-      </button>
-      <div class="toolbar__separator" />
-      <button
-        :disabled="true"
         @click="relayCommand('CREATE_INTEGRATED_CIRCUIT')"
         class="toolbar-button">
         <i class="fas fa-microchip" />

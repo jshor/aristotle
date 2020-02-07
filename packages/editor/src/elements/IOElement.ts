@@ -2,17 +2,21 @@ import { LogicValue } from '@aristotle/logic-circuit'
 import ToggleService from '../services/ToggleService'
 import OscillationService from '../services/OscillationService'
 import Element from '../core/Element'
+import Editor from '../core/Editor'
 
 export default class IOElement extends Element {
   public wave: ToggleService
 
   private oscillation: OscillationService
 
+  protected type: string
+
   constructor (id, params) {
     super(id, params)
 
     this.on('added', this.registerWave)
     this.on('added', this.setInitialValue)
+    this.on('added', this.setDefaultName)
     this.on('removed', this.unregisterWave)
   }
 
@@ -40,8 +44,23 @@ export default class IOElement extends Element {
     }
   }
 
+  setDefaultName = () => {
+    const editor = this.canvas as Editor
+    const { name } = this.settings
+
+    if (name.value === '') {
+      if (this.type === 'input') {
+        name.value = `I${editor.inputCount++}`
+      } else {
+        name.value = `O${editor.outputCount++}`
+      }
+    }
+  }
+
   setInitialValue = () => {
-    this.setValue(this.settings.startValue.value)
+    if (this.type === 'input') {
+      this.setValue(this.settings.startValue.value)
+    }
   }
 
   resetWave = () => {

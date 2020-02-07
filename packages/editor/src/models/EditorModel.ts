@@ -7,6 +7,7 @@ class EditorModel {
   public selectionCount: number
   public zoomLevel: number
   public mouseMode: string
+  public hasSelectedElements: boolean
   constructor ({
     canUndo = false,
     canRedo = false,
@@ -15,7 +16,8 @@ class EditorModel {
     oscilloscopeEnabled = false,
     selectionCount = 0,
     zoomLevel = 1,
-    mouseMode = 'SELECTION'
+    mouseMode = 'SELECTION',
+    hasSelectedElements = false
   }) {
     this.canUndo = canUndo
     this.canRedo = canRedo
@@ -25,6 +27,7 @@ class EditorModel {
     this.oscilloscopeEnabled = oscilloscopeEnabled
     this.zoomLevel = zoomLevel
     this.circuitComplete = circuitComplete
+    this.hasSelectedElements = hasSelectedElements
   }
 }
 

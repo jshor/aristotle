@@ -11,21 +11,29 @@
     "left": [
       {
         "label": "R",
-        "type": "input"
+        "type": "input",
+        "elementId": "aqLvQGuk27",
+        "elementPortIndex": 0
       },
       {
         "label": "S",
-        "type": "input"
+        "type": "input",
+        "elementId": "VEFvl5BKys",
+        "elementPortIndex": 1
       }
     ],
     "right": [
       {
         "label": "OUT_1",
-        "type": "output"
+        "type": "output",
+        "elementId": "c5XCJ9eill",
+        "elementPortIndex": 0
       },
       {
         "label": "OUT_2",
-        "type": "output"
+        "type": "output",
+        "elementId": "XNTLeHX6dZ",
+        "elementPortIndex": 0
       }
     ]
   },

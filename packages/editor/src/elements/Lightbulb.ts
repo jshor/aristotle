@@ -1,8 +1,11 @@
 import { OutputNode, LogicValue } from '@aristotle/logic-circuit'
 import { TemplateSVG } from '../svg'
-import Element from '../core/Element'
+import IOElement from './IOElement'
 
-export default class Lightbulb extends Element {
+export default class Lightbulb extends IOElement {
+
+  protected type: string = 'output'
+
   constructor (id, params) {
     super(id, params)
 
@@ -12,13 +15,6 @@ export default class Lightbulb extends Element {
     this.render()
   }
 
-  settings = {
-    name: {
-      type: 'text',
-      value: ''
-    }
-  }
-
   registerSvgRenderer = () => {
     this.svgRenderer = new TemplateSVG({
       template: 'lightbulb',
@@ -26,12 +22,6 @@ export default class Lightbulb extends Element {
       secondaryColor: '#1C1D24'
     })
   }
-
-  // updateWireColor = (value) => {
-  //   this.bgColor = this.getWireColor(value)
-  //   this.render()
-  // }
-
 
   getSvg = () => {
     const valueColor = this.getWireColor(this.node.value)

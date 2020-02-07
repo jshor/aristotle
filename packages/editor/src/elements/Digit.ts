@@ -15,13 +15,6 @@ export default class Lightbulb extends Element {
     this.render()
   }
 
-  settings = {
-    name: {
-      type: 'text',
-      value: ''
-    }
-  }
-
   registerSvgRenderer = (): void => {
     this.svgRenderer = new DigitSVG({
       primaryColor: '#ffffff',

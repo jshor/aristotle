@@ -200,13 +200,18 @@ export default class Element extends draw2d.shape.basic.Image {
   }
 
   serialize = () => {
+    const name = this.settings.name
+      ? this.settings.name.value
+      : 'UNKNOWN' // TODO
+
     return {
       id: super.getId(),
       x: super.getX(),
       y: super.getY(),
-      type: this.constructor.name,
-      name: uuid(),
-      settings: this.getSettings()
+      type: this.constructor.name, // TODO
+      name: name, // TODO
+      settings: this.getSettings(), // TODO
+      nodeType: this['type'] // TODO
     }
   }
 

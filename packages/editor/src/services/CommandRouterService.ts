@@ -48,6 +48,19 @@ export default class CommandRouterService {
 
   applyCommand = (command): void => {
     switch (command.command) {
+      case 'CREATE_INTEGRATED_CIRCUIT':
+        this.editor.circuitExport.createIntegratedCircuit()
+        break
+      case 'COPY':
+        this.editor.clipboard.copy()
+        // this.editor.clipboard.copyToClipboard(Math.random().toString())
+        break
+      case 'PASTE':
+        this.editor.clipboard.paste()
+        break
+      case 'SELECT_ALL':
+        this.editor.clipboard.selectAll()
+        break
       case 'UNDO':
         this.editor.undo()
         break

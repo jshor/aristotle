@@ -7,6 +7,8 @@ import { TemplateSVG } from '../svg'
 export default class Switch extends IOElement {
   public clickableArea: draw2d.shape.basic.Rectangle
 
+  protected type: string = 'input'
+
   constructor (id, params) {
     super(id, params)
 

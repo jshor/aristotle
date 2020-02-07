@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="properties"
-    ref="properties"
-    :style="style">
+  <viewport-container :position="settings.position">
     <div class="properties__heading">
       <div class="properties__heading__text properties__heading__text--expand">Properties</div>
       <div
@@ -44,20 +41,15 @@
         class="properties__field__input"
       />
     </div>
-  </div>
+  </viewport-container>
 </template>
 
 <script>
+import ViewportContainer from './ViewportContainer'
+
 export default {
   name: 'properties',
-  computed: {
-    style () {
-      return {
-        left: `${this.settings.position.x - this.offsetX}px`,
-        top: `${this.settings.position.y - this.offsetY}px`
-      }
-    }
-  },
+  components: { ViewportContainer },
   props: {
     settings: {
       type: Object,
@@ -72,14 +64,7 @@ export default {
       values[key] = settings[key].value
     }
 
-    return {
-      values,
-      offsetX: 0,
-      offsetY: 0
-    }
-  },
-  mounted () {
-    this.adjustToFitViewport()
+    return { values }
   },
   methods: {
     change (key) {
@@ -92,19 +77,6 @@ export default {
     },
     close () {
       this.$emit('close')
-    },
-    adjustToFitViewport () {
-      const container = this.$refs.properties
-      const containerRect = container.getBoundingClientRect()
-      const parentRect = container.parentNode.getBoundingClientRect()
-
-      if (containerRect.right > parentRect.right) {
-        this.offsetX = containerRect.right - parentRect.right
-      }
-
-      if (containerRect.bottom > parentRect.bottom) {
-        this.offsetY = containerRect.bottom - parentRect.bottom
-      }
     }
   }
 }
@@ -112,12 +84,10 @@ export default {
 
 <style>
 .properties {
-  position: absolute;
   background-color: #fff;
   border: 1px solid #000;
   width: 200px;
   padding: 0.5em;
-  z-index: 1000;
 }
 
 .properties__field {

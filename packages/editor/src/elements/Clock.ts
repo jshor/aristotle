@@ -9,6 +9,8 @@ export default class Clock extends IOElement {
 
   public clickableArea: draw2d.shape.basic.Rectangle
 
+  protected type: string = 'input'
+
   constructor (id, params) {
     super(id, params)
 

@@ -6,7 +6,7 @@
       class="document__pane"
       :class="{ 'document__pane--resize-disabled': !oscilloscopeEnabled }">
       <template v-slot:paneL>
-        <div id="canvasWrapper" ref="editor" class="document__editor">
+        <div id="canvasWrapper" ref="editor" class="document__editor" @contextmenu="contextMenu">
           <slot name="editor" />
         </div>
       </template>
@@ -31,6 +31,12 @@ export default {
   computed: {
     editorDisplayPercent () {
       return this.oscilloscopeEnabled ? 80 : 100
+    }
+  },
+  methods: {
+    contextMenu (e) {
+      console.log('contextMenu: ', e)
+      e.preventDefault()
     }
   }
 }

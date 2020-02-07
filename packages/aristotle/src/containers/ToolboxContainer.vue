@@ -16,6 +16,19 @@
       />
     </toolbox-group>
 
+    <toolbox-group heading="Displays">
+      <toolbox-item
+        v-for="display in displays"
+        :key="display.type"
+        :type="display.type"
+        :caption="display.type"
+        :params="display.params"
+        :src="display.svg.path"
+        :width="display.svg.width"
+        :zoom-level="zoomLevel"
+      />
+    </toolbox-group>
+
     <toolbox-group heading="Logic Gates">
       <toolbox-item
         v-for="logicGate in logicGates"
@@ -81,14 +94,15 @@ export default {
           ...colors,
           template: element.toLowerCase()
         })).getSvgData()
-      })).concat({
+      })),
+      displays: [{
         type: 'Digit',
         params: {},
         svg: (new DigitSVG({
           ...colors,
           chars: '0'
         })).getSvgData()
-      }),
+      }],
       logicGates: ['OR', 'AND', 'NOR', 'NAND', 'XOR', 'XNOR'].map((gateType) => ({
         params: { gateType },
         svg: (new LogicGateSVG({

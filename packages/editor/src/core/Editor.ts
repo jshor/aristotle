@@ -4,6 +4,8 @@ import { Circuit } from '@aristotle/logic-circuit'
 import Connection from './Connection'
 import Element from './Element'
 import EditorModel from '../models/EditorModel'
+import CircuitExportService from '../services/CircuitExportService'
+import ClipboardService from '../services/ClipboardService'
 import DeserializerService from '../services/DeserializerService'
 import SerializerService from '../services/SerializerService'
 import OscillationService from '../services/OscillationService'
@@ -25,12 +27,19 @@ export default class Editor extends draw2d.Canvas {
 
   public zoomService: ZoomService = new ZoomService(this)
 
+  public clipboard: ClipboardService = new ClipboardService(this)
+
+  public circuitExport: CircuitExportService = new CircuitExportService(this)
+
   public debugMode: boolean = false
 
   public oscilloscopeEnabled: boolean = false
 
   public mouseMode: string = 'PANNING'
 
+  public inputCount: number = 0
+
+  public outputCount: number = 0
 
   public wrapper: HTMLElement
   public parent: HTMLElement
@@ -371,8 +380,18 @@ export default class Editor extends draw2d.Canvas {
       debugMode: this.debugMode,
       oscilloscopeEnabled: this.oscilloscopeEnabled,
       zoomLevel: this.zoomService.getZoomPercentage(),
-      circuitComplete: this.circuit.isComplete()
+      circuitComplete: this.circuit.isComplete(),
+      hasSelectedElements: this.hasSelectedElements()
     })
+  }
+
+  hasSelectedElements = () => {
+    return super
+      .getSelection()
+      .getAll()
+      .data
+      .filter(element => element instanceof Element)
+      .length > 0
   }
 
   updateElement = ({ elementId, data }) => {
@@ -417,5 +436,9 @@ export default class Editor extends draw2d.Canvas {
 
   applyCommand = (command) => {
     this.commandRouter.applyCommand(command)
+  }
+
+  getCanvasInstance = (): draw2d.Canvas => {
+    return this as draw2d.Canvas
   }
 }
