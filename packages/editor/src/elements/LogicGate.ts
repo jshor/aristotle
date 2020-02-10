@@ -38,7 +38,8 @@ export default class LogicGate extends Element {
       this.canvas.commandStack.execute(command)
       this.persistToolbox()
     } else {
-      super.updateSettings(settings)
+      // TS2340: Only public and protected methods of the base class are accessible via the 'super' keyword.
+      // super.updateSettings(settings)
     }
   }
 

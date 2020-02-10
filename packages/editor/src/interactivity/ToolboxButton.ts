@@ -1,6 +1,7 @@
 import draw2d from 'draw2d'
 import Editor from '../core/Editor'
 import addTouchEvents from '../utils/addTouchEvents'
+import { Point } from '../types'
 
 export default class ToolboxButton extends draw2d.shape.icon.Gear2 {
   protected container: draw2d.Figure = this

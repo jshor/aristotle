@@ -1,6 +1,7 @@
 const path = require('path')
 
 module.exports = {
+  stats: 'minimal',
   entry: './src/index.ts',
   output: {
     filename: 'logic-circuit.js',

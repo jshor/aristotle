@@ -1,5 +1,6 @@
 import { LogicValue } from '@aristotle/logic-circuit'
 import IPulse from '../interfaces/IPulse'
+import { Point } from '../types'
 
 const BASE_INTERVAL = 1000
 const SIGNAL_HEIGHT = 2

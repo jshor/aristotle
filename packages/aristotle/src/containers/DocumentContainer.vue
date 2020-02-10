@@ -1,5 +1,5 @@
 <template>
-  <document :oscilloscope-enabled="document.editorModel.oscilloscopeEnabled" >
+  <document :oscilloscope-enabled="document.editorModel.oscilloscopeEnabled">
     <template v-slot:editor>
       <div
         :id="document.id"
@@ -7,25 +7,26 @@
           width: '4998px',
           height: '4998px'
         }"
-        ref="editor"
       />
+
       <properties
-        v-if="elementSettings && toolboxOpen"
+        v-if="isPropertiesDialogOpen"
         :settings="elementSettings"
-        @change="toolboxChanged"
-        @close="propertiesClosed"
+        @change="updateProperties"
+        @close="closePropertiesDialog"
       />
+
       <div class="zoom">
         <button
           class="zoom__out"
           :disabled="false"
-          @click="zoom(1)">
+          @click="setZoom(1)">
           <i class="fas fa-search-minus" />
         </button>
         <div class="zoom__level">{{ zoomLevel }}</div>
         <button
           class="zoom__out"
-          @click="zoom(-1)">
+          @click="setZoom(-1)">
           <i class="fas fa-search-plus" />
         </button>
       </div>
@@ -34,32 +35,29 @@
     <template v-slot:oscilloscope>
       <oscilloscope-container :waves="waves" />
     </template>
-
   </document>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex'
-import Document from '@/components/Document'
-import Properties from '@/components/Properties'
-import OscilloscopeContainer from './OscilloscopeContainer'
-import { Editor, CommandModel } from '@aristotle/editor'
+<script lang="ts">
+import Vue from 'vue'
+import Component from 'vue-class-component'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import Properties from '@/components/Properties.vue'
+import { Editor, PortSchematic } from '@aristotle/editor'
+import ICommand from '@/interfaces/ICommand'
+import Document from '@/components/Document.vue'
+import OscilloscopeContainer from './OscilloscopeContainer.vue'
 
-export default {
+@Component({
   name: 'DocumentContainer',
   components: {
     Document,
-    Properties,
-    OscilloscopeContainer
+    OscilloscopeContainer,
+    Properties
   },
   data () {
     return {
-      canvas: null,
-      waves: {},
-      toolboxOpen: false,
-      elementSettings: null,
-      isActive: true,
-      focused: true
+      waves: {}
     }
   },
   props: {
@@ -70,121 +68,140 @@ export default {
   },
   computed: {
     ...mapState([
-      'relayedCommand',
-      'activeDocumentId'
-    ]),
-    zoomLevel () {
-      return this.document.editorModel.zoomLevel
-    }
-  },
-  watch: {
-    relayedCommand: {
-      deep: true,
-      handler (payload) {
-        if (payload.documentId === this.document.id) {
-          this.canvas.applyCommand(payload)
-        }
-      }
-    },
-    activeDocumentId: {
-      handler (documentId) {
-        this.isActive = documentId === this.document.id
-        this.setDocumentActive()
-      }
-    }
+      'activeDocumentId',
+      'relayedCommand'
+    ])
   },
   methods: {
-    setDocumentActive () {
-      const focused = this.isActive && document.hasFocus()
-
-      if (!this.canvas.debugMode) {
-        if (!focused) {
-          this.canvas.oscillation.stop()
-        } else {
-          this.canvas.oscillation.start()
-        }
-      }
-    },
-    onRelayCommand ({ command, payload }) {
-      this.$store.commit('RELAY_COMMAND', {
-        command,
-        payload,
-        documentId: this.document.id
-      })
-    },
-    onUpdateEditor (editorModel) {
-      this.$store.commit('SET_EDITOR_MODEL', editorModel)
-    },
-    toolboxChanged (payload) {
-      this.onRelayCommand({ command: 'UPDATE_ELEMENT', payload })
-    },
-    openSettingsDialog (editor, settings) {
-      this.elementSettings = settings
-      this.toolboxOpen = true
-    },
-    propertiesClosed () {
-      this.toolboxOpen = false
-    },
-    updateEditorModel (canvas) {
-      const model = canvas.getEditorModel() // should be v-model (emit `value`)
-
-      this.$store.commit('SET_EDITOR_MODEL', model)
-    },
-    onCanvasUpdate (canvas) {
-      this.updateEditorModel(canvas)
-      this.toolboxOpen = false
-    },
-    zoom (factor) {
-      const minZoom = 0.5
-      const maxZoom = 5
-      const increment = 0.25
-      const l = this.zoomLevel + (factor * increment)
-
-      this.onRelayCommand({
-        command: 'SET_ZOOM',
-        payload: factor
-      })
-    }
+    ...mapActions(['relayCommand'])
   },
+  watch: {
+    activeDocumentId: {
+      handler () {
+        this.setActivity()
+      },
+      immediate: true
+    },
+    relayedCommand: {
+      handler (payload) {
+        this.applyCommand(payload)
+      },
+      deep: true
+    }
+  }
+})
+export default class DocumentContainer extends Vue {
+  public editor: Editor
+
+  public isPropertiesDialogOpen: boolean = false
+
+  public elementSettings: any = null
+
+  public document: any
+
+  public waves: any = {} // TODO
+
+  public activeDocumentId: string
+
+  public relayCommand: (command: ICommand) => void
+
+  get zoomLevel () {
+    return this.document.editorModel.zoomLevel
+  }
+
+  get isActive () {
+    return this.document.id === this.activeDocumentId
+  }
+
   mounted () {
-    setTimeout(() => {
-      // TODO: Editor needs to be created AFTER the toolboxContainer is ready
-      // because it looks for all .ui-droppable elements to apply d-n-d ops to.
-      // maybe create an action for this that is called in mounted() of ToolboxContainer?
-      this.canvas = new Editor(this.document.id.toString())
+    this.editor = new Editor(this.document.id)
+    this.editor.load(this.document.data)
+    this.subscribeToEditorEvents(this.editor)
+  }
 
-      const canvasEvents = [
-        'select',
-        'deselect',
-        'userOptionChanged',
-        'zoomed'
-      ]
+  updateEditorModel (editor: Editor) {
+    this.$store.commit('SET_EDITOR_MODEL', editor.getEditorModel())
+  }
 
-      canvasEvents.forEach(eventName => {
-        this.canvas.on(eventName, this.onCanvasUpdate.bind(this))
-      })
-      this.canvas.on('circuitChanged', this.updateEditorModel)
-      this.canvas.on('toolbox.open', this.openSettingsDialog)
-      this.canvas.on('toolbox.close', this.propertiesClosed)
-      this.canvas.on('oscillate', (editor, waves) => {
-        this.waves = waves
-      })
+  applyCommand (command: ICommand) {
+    if (this.isActive) {
+      this.editor.applyCommand(command)
+    }
+  }
 
-      this.canvas.load(this.document.data)
+  onOscillation (editor: Editor, payload) {
+    this.waves = payload
+  }
 
-      setInterval(() => this.setDocumentActive(), 300)
+  updateProperties (editor: Editor, payload) {
+    this.relayCommand({
+      command: 'UPDATE_ELEMENT', // TODO: rename to something better
+      payload,
+      documentId: this.document.id
     })
+  }
+
+  openPropertiesDialog (editor: Editor, payload) {
+    this.elementSettings = payload
+    this.isPropertiesDialogOpen = true
+  }
+
+  closePropertiesDialog () {
+    this.isPropertiesDialogOpen = false
+  }
+
+  setZoom (factor) {
+    const minZoom = 0.5
+    const maxZoom = 5
+    const increment = 0.25
+    const l = this.zoomLevel + (factor * increment)
+
+    this.relayCommand({
+      command: 'SET_ZOOM',
+      payload: factor,
+      documentId: this.document.id
+    })
+  }
+
+  /**
+   * Updates the active status of the Editor.
+   */
+  setActivity () {
+    const isFocused = this.isActive && document.hasFocus()
+
+    this.relayCommand({
+      command: 'SET_ACTIVITY',
+      payload: isFocused,
+      documentId: this.document.id
+    })
+  }
+
+  /**
+   * Maps of all Editor events to DocumentContainer methods.
+   *
+   * @param {Editor} editor
+   */
+  subscribeToEditorEvents = (editor: Editor): void => {
+    //
+    const events = {
+      'select': 'updateEditorModel',
+      'deselect': 'updateEditorModel',
+      'userOptionChanged': 'updateEditorModel',
+      'zoomed': 'updateEditorModel',
+      'circuitChanged': 'updateEditorModel',
+      'toolbox.open': 'openPropertiesDialog',
+      'toolbox.close': 'closePropertiesDialog',
+      'oscillate': 'onOscillation'
+    }
+
+    Object
+      .keys(events)
+      .forEach(event => editor.on(event, this[events[event]]))
   }
 }
 </script>
 
 <style lang="scss">
-.oscilloscope-inner {
-  background-color: #1C1D24;
-  height: 100%;
-  box-sizing: border-box;
-}
-
 .zoom {
   position: absolute;
   bottom: 1rem;
@@ -230,4 +247,5 @@ export default {
     }
   }
 }
+
 </style>

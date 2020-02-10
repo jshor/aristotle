@@ -1,6 +1,7 @@
 import { Canvas, Figure } from 'draw2d'
 import Element from '../core/Element'
 import Connection from '../core/Connection'
+import { SerializedCircuit } from '../types'
 
 /**
  * Service for serializing items in the given Editor.

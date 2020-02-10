@@ -2,6 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 
 module.exports = {
+  stats: 'minimal',
   entry: './src/index.ts',
   output: {
     filename: 'editor.js',

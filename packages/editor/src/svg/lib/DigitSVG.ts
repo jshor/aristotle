@@ -1,4 +1,5 @@
 import SVGBase from './SVGBase'
+import { PortDefinition, SvgData } from '../../types'
 
 /**
  * Mapping of characters to numeric digit line.

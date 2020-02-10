@@ -2,6 +2,7 @@ import svgSwitch from '../templates/switch.svg'
 import svgClock from '../templates/clock.svg'
 import svgLightbulb from '../templates/lightbulb.svg'
 import SVGBase from './SVGBase'
+import { PortDefinition, SvgData } from '../../types'
 
 interface ITemplate {
   raw: string

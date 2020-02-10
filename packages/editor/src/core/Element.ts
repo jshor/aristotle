@@ -7,6 +7,7 @@ import getPortLocator from '../utils/getPortLocator'
 import ToolboxButton from '../interactivity/ToolboxButton'
 import SVGBase from 'svg/lib/SVGBase'
 import addTouchEvents from '../utils/addTouchEvents'
+import { Point } from '../types'
 
 export default class Element extends draw2d.shape.basic.Image {
   node = null

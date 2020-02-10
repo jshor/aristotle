@@ -1,4 +1,10 @@
 import SVGBase from './SVGBase'
+import {
+  PortDefinition,
+  PortLabel,
+  PortSchematic,
+  SvgData
+} from '../../types'
 
 const WIRE_LENGTH = 30
 const PORT_WIDTH = 30
