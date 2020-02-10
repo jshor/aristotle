@@ -1,4 +1,5 @@
 import SVGBase from './SVGBase'
+import { PortDefinition, SvgData } from '../../types'
 
 const PORT_WIDTH = 30
 const STROKE_WIDTH = 2

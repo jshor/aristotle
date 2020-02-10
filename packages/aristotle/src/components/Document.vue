@@ -6,7 +6,7 @@
       class="document__pane"
       :class="{ 'document__pane--resize-disabled': !oscilloscopeEnabled }">
       <template v-slot:paneL>
-        <div id="canvasWrapper" ref="editor" class="document__editor">
+        <div class="document__editor">
           <slot name="editor" />
         </div>
       </template>
@@ -65,13 +65,6 @@ export default {
     }
   }
 
-  &__editor {
-    overflow: hidden;
-    background-color: #333641;
-    box-sizing: border-box;
-    height: 100%;
-  }
-
   &__oscilloscope {
     background-color: #333641;
     border: 1px solid #464857;
@@ -79,10 +72,17 @@ export default {
     height: 100%;
     box-sizing: border-box;
   }
-}
 
-#canvasWrapper svg {
-  background-color: #1D1E25;
-  position: relative !important;
+  &__editor {
+    overflow: hidden;
+    background-color: #333641;
+    box-sizing: border-box;
+    height: 100%;
+
+    svg {
+      background-color: #1D1E25;
+      position: relative !important;
+    }
+  }
 }
 </style>

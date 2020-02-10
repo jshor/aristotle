@@ -1,9 +1,9 @@
-declare enum PortFlow {
+export declare enum PortFlow {
   Input = 'input',
   Output = 'output'
 }
 
-declare enum GateType {
+export declare enum GateType {
   AND = 'AND',
   OR = 'OR',
   NAND = 'NAND',
@@ -13,25 +13,25 @@ declare enum GateType {
   NOT = 'NOT'
 }
 
-type PortDefinition = {
+export declare type PortDefinition = {
   x: number
   y: number
   type: string
 }
 
-type PortLabel = {
+export declare type PortLabel = {
   label: string,
   type: string
 }
 
-type PortSchematic = {
+export declare type PortSchematic = {
   top: PortLabel[]
   left: PortLabel[]
   bottom: PortLabel[]
   right: PortLabel[]
 }
 
-type CircuitElement = {
+export declare type CircuitElement = {
   id: string
   type: string
   nodeType?: string // TODO: rename
@@ -41,37 +41,37 @@ type CircuitElement = {
   y: number
 }
 
-type CircuitConnection = {
+export declare type CircuitConnection = {
   inputId: string
   outputId: string
   sourceIndex: number
   targetIndex: number
 }
 
-type CircuitDefinition = {
+export declare type CircuitDefinition = {
   name: string
   ports: PortSchematic
   elements: CircuitElement[]
   connections: CircuitConnection[]
 }
 
-type SerializedCircuit = {
+export declare type SerializedCircuit = {
   elements: CircuitElement[]
   connections: CircuitConnection[]
 }
 
-type SvgData = {
+export declare type SvgData = {
   path: string
   ports: PortDefinition[]
   width: number
   height: number
 }
 
-type Point = {
+export declare type Point = {
   x: number
   y: number
 }
 
-type IdMap = {
+export declare type IdMap = {
   [key: string]: string
 }

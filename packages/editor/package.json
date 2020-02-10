@@ -2,6 +2,7 @@
   "name": "@aristotle/editor",
   "version": "1.0.0",
   "main": "dist/editor.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "dev": "webpack -w",
     "build": "webpack",

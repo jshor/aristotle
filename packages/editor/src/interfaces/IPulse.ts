@@ -1,3 +1,5 @@
+import { Point } from '../types'
+
 export default interface IPulse {
   id: string
   update: (ticks: number) => void

@@ -1,6 +1,4 @@
 module.exports = {
-  presets: [
-    '@vue/app'
-  ],
-  'ignore': ['logic-circuit.js']
+  "presets": ["@babel/preset-env"],
+  "plugins": ["@babel/plugin-proposal-class-properties"]
 }

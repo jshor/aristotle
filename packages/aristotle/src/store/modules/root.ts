@@ -1,0 +1,66 @@
+import Vue from 'vue'
+// import documents from './documents'
+import IRootState from '../../interfaces/IRootState'
+// import IDocumentState from '../../interfaces/IDocumentState'
+
+import { ActionContext, ActionTree, GetterTree, MutationTree, StoreOptions } from 'vuex'
+import ICommand from 'interfaces/ICommand'
+
+const state: IRootState = {
+  activeDocumentId: '',
+  relayedCommand: null,
+  documents: []
+}
+
+const getters: GetterTree<IRootState, IRootState> = {
+  activeDocument (state) {
+    return state
+      .documents
+      .filter(({ id }) => state.activeDocumentId === id)
+      .pop()
+  }
+}
+
+const actions: ActionTree<IRootState, IRootState> = {
+  /**
+   * Sets the Editor command to be relayed to the assigned Editor instance.
+   *
+   * @param {ActionContext<IRootState, IRootState>} context
+   * @param {ICommand} command - command to relay
+   * @returns {Promise<void>}
+   */
+  relayCommand ({ commit }: ActionContext<IRootState, IRootState>, command: ICommand): void {
+    commit('RELAY_COMMAND', command)
+  }
+}
+
+const mutations: MutationTree<IRootState> = {
+  OPEN_DOCUMENT (state: IRootState, document) {
+    state.activeDocumentId = document.id
+    state.documents.push(document)
+  },
+  ACTIVATE_DOCUMENT (state: IRootState, documentId) {
+    state.activeDocumentId = documentId
+  },
+  SET_EDITOR_MODEL (state: IRootState, editorModel) {
+    state
+      .documents
+      .filter(({ id }) => state.activeDocumentId === id)
+      .forEach((doc) => {
+        doc.editorModel = editorModel
+      })
+  },
+  RELAY_COMMAND (state: IRootState, relayedCommand: ICommand) {
+    state.relayedCommand = relayedCommand
+  }
+}
+
+export default {
+  state,
+  getters,
+  actions,
+  mutations
+  // modules: {
+  //   documents
+  // }
+}

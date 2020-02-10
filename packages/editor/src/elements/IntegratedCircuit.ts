@@ -3,6 +3,13 @@ import Element from '../core/Element'
 import { Buffer, Nor, CircuitNode, LogicValue } from '@aristotle/logic-circuit'
 import getPortIndex from '../utils/getPortIndex'
 import { IntegratedCircuitSVG } from '../svg'
+import {
+  CircuitConnection,
+  CircuitDefinition,
+  CircuitElement,
+  PortSchematic,
+  SvgData
+} from '../types'
 
 /**
  * @description Embedded/integrated circuit element class. This takes an ordinary circuit definition

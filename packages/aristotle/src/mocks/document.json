@@ -1,4 +1,6 @@
 {
+  "id": "test123",
+  "name": "Test Document",
 	"elements": [{
 		"id": "aqLvQGuk27",
 		"type": "Switch",

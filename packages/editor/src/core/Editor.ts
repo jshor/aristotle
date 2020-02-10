@@ -222,7 +222,7 @@ export default class Editor extends draw2d.Canvas {
    */
   getDomEvent = (): MouseEvent => event as MouseEvent
 
-  public fireEvent = (eventName: string, payload: any = null): void  => {
+  public fireEvent = (eventName: string, payload: any = null): void => {
     super.fireEvent(eventName, payload)
   }
 
@@ -418,4 +418,16 @@ export default class Editor extends draw2d.Canvas {
   applyCommand = (command) => {
     this.commandRouter.applyCommand(command)
   }
+
+  setOscilloscopeActivity (focused) {
+    if (!this.debugMode) {
+      if (!focused) {
+        this.oscillation.stop()
+      } else {
+        this.oscillation.start()
+      }
+    }
+  }
+
+  on = super.on
 }

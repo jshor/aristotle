@@ -3,6 +3,12 @@ import ElementInitializerService from './ElementInitializerService'
 import getIdMapping from '../utils/getIdMapping'
 import Editor from '../core/Editor'
 import Connection from 'core/Connection'
+import {
+  CircuitConnection,
+  CircuitDefinition,
+  CircuitElement,
+  IdMap
+} from '../types'
 
 /**
  * @class DeserializerService

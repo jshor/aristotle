@@ -2,6 +2,9 @@ import 'jquery-ui/ui/widgets/draggable'
 import 'jquery-ui/ui/widgets/droppable'
 import 'jquery-ui-touch-punch'
 
+/* export types */
+export * from './types'
+
 /* core components */
 export { default as Editor } from './core/Editor'
 export { default as Connection } from './core/Connection'

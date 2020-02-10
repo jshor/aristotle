@@ -1,24 +1,38 @@
 module.exports = {
-  coverageDirectory: '.coverage',
+  collectCoverage: true,
+  coverageDirectory: '<rootDir>/test/.coverage',
+  coveragePathIgnorePatterns: [
+    '<rootDir>/src/.*/__spec__/.*'
+  ],
+  // moduleDirectories: [
+  //   "node_modules"
+  // ],
   moduleFileExtensions: [
     'js',
-    'jsx',
+    'ts',
     'json',
     'vue'
   ],
+  setupFiles: ['<rootDir>/test/setup.js'],
   transform: {
     '^.+\\.vue$': 'vue-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$': 'jest-transform-stub',
-    '^.+\\.jsx?$': 'babel-jest'
+    '^.+\\.js$': 'babel-jest',
+    '^.+\\.ts$': 'ts-jest'
   },
+  // transformIgnorePatterns: ['node_modules'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   },
   snapshotSerializers: [
     'jest-serializer-vue'
   ],
+  "transformIgnorePatterns": [
+    // Change MODULE_NAME_HERE to your module that isn't being compiled
+    "/node_modules/$"
+  ],
   testMatch: [
-    '**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'
+    '<rootDir>/src/**/*.spec.(js|ts)'
   ],
   testURL: 'http://localhost/'
 }

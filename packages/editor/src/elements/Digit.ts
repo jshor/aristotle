@@ -3,6 +3,7 @@ import Element from '../core/Element'
 import getPortIndex from '../utils/getPortIndex'
 import { DigitSVG } from '../svg'
 import draw2d from 'draw2d'
+import { SvgData } from '../types'
 
 export default class Lightbulb extends Element {
   protected nodes: OutputNode[] = []
