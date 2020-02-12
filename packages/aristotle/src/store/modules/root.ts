@@ -1,10 +1,12 @@
-import Vue from 'vue'
-// import documents from './documents'
+import {
+  ActionContext,
+  ActionTree,
+  GetterTree,
+  MutationTree
+} from 'vuex'
+import { ICommand } from '@aristotle/editor'
 import IRootState from '../../interfaces/IRootState'
-// import IDocumentState from '../../interfaces/IDocumentState'
 
-import { ActionContext, ActionTree, GetterTree, MutationTree, StoreOptions } from 'vuex'
-import ICommand from 'interfaces/ICommand'
 
 const state: IRootState = {
   activeDocumentId: '',

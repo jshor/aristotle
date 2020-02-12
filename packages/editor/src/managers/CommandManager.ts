@@ -1,84 +1,86 @@
 import Editor from '../core/Editor'
+import { Command } from '../types'
+import ICommand from '../interfaces/ICommand'
+import ManagerBase from './ManagerBase'
 
 /**
  * @class CommandManager
  * @description Command manager for all requested UI commands.
- * @example ```
- *  const commandManager = new CommandManager(editor)
- *
- *  commandManager.applyCommand(command)
- * ```
  */
-export default class CommandManager {
-  public editor: Editor
-
+export default class CommandManager extends ManagerBase {
   /**
-   * Constructor.
+   * Performs user-requested functionality on the Editor for the given Command.
    *
-   * @param {Editor} editor
+   * @param {ICommand} command - user-defined command
    */
-  constructor (editor: Editor) {
-    this.editor = editor
+  applyCommand = ({ type, payload }: ICommand): void => {
+    switch (type) {
+      case Command.Undo:
+        this.editor.undo()
+        break
+      case Command.Redo:
+        this.editor.redo()
+        break
+      case Command.SetMouseMode:
+        this.editor.setMouseMode(payload)
+        break
+      case Command.UpdateElementProperties:
+        this.editor
+          .deserializer
+          .updateElementProperties(payload)
+        break
+      case Command.ToggleOscilloscope:
+        this.editor.toggleOscilloscope()
+        break
+      case Command.SetDebugger:
+        this.editor.toggleDebug(!this.editor.debugMode)
+        break
+      case Command.TriggerCircuitStep:
+        this.editor.step()
+        break
+      case Command.ResetCircuit:
+        this.editor.reset()
+        break
+      case Command.SetZoomLevel:
+        this.editor.zoomService.setZoomLevel(payload)
+        break
+    }
+
+    this.fireApplicableEvent(type)
   }
 
-  getApplicableEvent = (commandType: string): string => {
+  /**
+   * Returns the relevant event for the given command type.
+   *
+   * @param {Command} commandType
+   * @returns {string}
+   */
+  private getApplicableEvent = (commandType: Command): string => {
     switch (commandType) {
-      case 'SET_MOUSE_MODE':
-      case 'TOGGLE_DEBUG':
-      case 'TOGGLE_OSCILLATOR':
+      case Command.SetMouseMode:
+      case Command.SetDebugger:
+      case Command.SetActivity:
         return 'config:changed'
-      case 'UNDO':
-      case 'REDO':
+      case Command.Undo:
+      case Command.Redo:
         return 'commandStack:changed'
-      case 'RESET':
-      case 'STEP':
+      case Command.ResetCircuit:
+      case Command.TriggerCircuitStep:
         return 'circuit:changed'
     }
     return null
   }
 
-  fireApplicableEvent = (commandType: string): void => {
+  /**
+   * Fires the relevant event for the given command type.
+   *
+   * @param {Command} commandType
+   */
+  fireApplicableEvent = (commandType: Command): void => {
     const eventName = this.getApplicableEvent(commandType)
 
     if (eventName) {
-      console.log('FIRING: ', eventName)
       this.editor.fireEvent(eventName)
     }
-  }
-
-  applyCommand = (command): void => {
-    switch (command.command) {
-      case 'UNDO':
-        this.editor.undo()
-        break
-      case 'REDO':
-        this.editor.redo()
-        break
-      case 'SET_MOUSE_MODE':
-        this.editor.setMouseMode(command.payload)
-        break
-      case 'UPDATE_ELEMENT':
-        this.editor
-          .deserializer
-          .updateSelectedElementProperties(command.payload)
-        break
-      case 'TOGGLE_OSCILLATOR':
-        this.editor.toggleOscilloscope()
-        break
-      case 'TOGGLE_DEBUG':
-        this.editor.toggleDebug(!this.editor.debugMode)
-        break
-      case 'STEP':
-        this.editor.step()
-        break
-      case 'RESET':
-        this.editor.reset()
-        break
-      case 'SET_ZOOM':
-        this.editor.zoomService.setZoomLevel(command.payload)
-        break
-    }
-
-    this.fireApplicableEvent(command.command)
   }
 }

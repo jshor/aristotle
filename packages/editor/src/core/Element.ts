@@ -32,7 +32,7 @@ export default class Element extends draw2d.shape.basic.Image {
   /**
    * Selects the element if no other elements are is selected in the canvas.
    *
-   * @override draw2d.shape.basic.Image
+   * @overrides {draw2d.Figure.onContextMenu}
    */
   onContextMenu = () => {
     if (!this.canvas.getSelection().getSize() || !super.isSelected()) {
@@ -44,6 +44,7 @@ export default class Element extends draw2d.shape.basic.Image {
   /**
    * Returns the default circuit node.
    *
+   * @param {Connection} [connection]
    * @returns {CircuitNode}
    */
   getCircuitNode = (connection?) => {

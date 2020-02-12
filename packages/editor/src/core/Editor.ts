@@ -1,14 +1,14 @@
 import draw2d from 'draw2d'
 import $ from 'jquery'
 import { Circuit } from '@aristotle/logic-circuit'
-import EditorModel from '../models/EditorModel'
 import DeserializationManager from '../managers/DeserializationManager'
 import SerializationManager from '../managers/SerializationManager'
 import OscillationManager from '../managers/OscillationManager'
 import CommandManager from '../managers/CommandManager'
 import ZoomService from '../services/ZoomService'
-import { CircuitElement } from '../types'
+import { CircuitElement, MouseMode } from '../types'
 import uuid from '../utils/uuid'
+import IEditorModel from '../interfaces/IEditorModel'
 
 export default class Editor extends draw2d.Canvas {
   public circuit: Circuit = new Circuit()
@@ -27,7 +27,7 @@ export default class Editor extends draw2d.Canvas {
 
   public oscilloscopeEnabled: boolean = false
 
-  public mouseMode: string = 'PANNING'
+  public mouseMode: MouseMode = MouseMode.Selection
 
 
   public wrapper: HTMLElement
@@ -290,18 +290,19 @@ export default class Editor extends draw2d.Canvas {
   /**
    * Sets the mouse mode of the editor.
    *
-   * @param {MouseMode} mode - valid values are: PANNING or SELECTION
+   * @param {MouseMode} mode
    */
-  setMouseMode = (mode) => {
+  setMouseMode = (mode: MouseMode): void => {
     switch (mode) {
-      case 'PANNING':
+      case MouseMode.Panning:
         super.installEditPolicy(new draw2d.policy.canvas.PanningSelectionPolicy())
         break
-      case 'SELECTION':
+      case MouseMode.Selection:
       default:
         super.installEditPolicy(new draw2d.policy.canvas.BoundingboxSelectionPolicy())
         break
     }
+
     this.mouseMode = mode
   }
 
@@ -321,8 +322,8 @@ export default class Editor extends draw2d.Canvas {
     }))
   }
 
-  getEditorModel = () => {
-    return new EditorModel({
+  public getEditorModel = (): IEditorModel => {
+    return {
       canUndo: super.getCommandStack().canUndo(),
       canRedo: super.getCommandStack().canRedo(),
       selectionCount: super.getSelection().getSize(),
@@ -331,7 +332,7 @@ export default class Editor extends draw2d.Canvas {
       oscilloscopeEnabled: this.oscilloscopeEnabled,
       zoomLevel: this.zoomService.getZoomPercentage(),
       circuitComplete: this.circuit.isComplete()
-    })
+    }
   }
 
   load = (data) => {

@@ -461,44 +461,6 @@ describe('Editor', () => {
     })
   })
 
-  describe.skip('addNode()', () => {
-    const node = new Element('12345', {})
-    const x = 40
-    const y = 60
-    let addSpy, nodeSpy, stepSpy
-
-    beforeEach(() => {
-      addSpy = jest
-        .spyOn(Editor.prototype as draw2d.Canvas, 'add')
-        .mockImplementation(jest.fn())
-
-      nodeSpy = jest
-        .spyOn(editor.circuit, 'addNode')
-        .mockImplementation(jest.fn())
-
-      stepSpy = jest
-        .spyOn(editor, 'step')
-        .mockImplementation(jest.fn())
-
-      editor.addNode(node, x, y)
-    })
-
-    it('should add a node to the canvas', () => {
-      expect(addSpy).toHaveBeenCalledTimes(1)
-      expect(addSpy).toHaveBeenCalledWith(node, x, y)
-    })
-
-    it('should add the node to the circuit instance', () => {
-      expect(nodeSpy).toHaveBeenCalledTimes(1)
-      expect(nodeSpy).toHaveBeenCalledWith(node.node)
-    })
-
-    it('should step the circuit', () => {
-      expect(stepSpy).toHaveBeenCalledTimes(1)
-      expect(stepSpy).toHaveBeenCalledWith(true)
-    })
-  })
-
   describe('step()', () => {
     beforeEach(() => {
       jest.spyOn(editor, 'step')

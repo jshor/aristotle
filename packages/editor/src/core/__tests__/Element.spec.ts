@@ -74,9 +74,9 @@ describe('Element base class', () => {
           })
       })
 
-      xit('should select only the element when invoked, if not already selected', () => {
+      it('should select only the element when invoked, if not already selected', () => {
         jest
-          .spyOn(element, 'isSelected')
+          .spyOn(draw2d.Figure.prototype, 'isSelected')
           .mockReturnValue(false)
 
         element.onContextMenu()
@@ -86,9 +86,9 @@ describe('Element base class', () => {
         expect(element.canvas.setCurrentSelection).toHaveBeenLastCalledWith(element)
       })
 
-      xit('should not select the element when invoked if it is already selected', () => {
+      it('should not select the element when invoked if it is already selected', () => {
         jest
-          .spyOn(element, 'isSelected')
+          .spyOn(draw2d.Figure.prototype, 'isSelected')
           .mockReturnValue(true)
 
         element.onContextMenu()
@@ -181,19 +181,6 @@ describe('Element base class', () => {
       expect(serializedProperties).toHaveProperty('baz')
       expect(serializedProperties['foo']).toEqual('bar')
       expect(serializedProperties['baz']).toEqual('1')
-    })
-  })
-
-  describe('setValue()', () => {
-    xit('should set the circuit value of the current node', () => {
-      const value = LogicValue.TRUE
-
-      jest.spyOn(element.node, 'setValue')
-
-      element.setValue(value)
-
-      expect(element.node).toHaveBeenCalledTimes(1)
-      expect(element.node).toHaveBeenCalledWith(value)
     })
   })
 

@@ -1,11 +1,11 @@
 import IElementProperties from './interfaces/IElementProperties'
 
-export declare enum PortFlow {
+export declare const enum PortFlow {
   Input = 'input',
   Output = 'output'
 }
 
-export declare enum GateType {
+export declare const enum GateType {
   AND = 'AND',
   OR = 'OR',
   NAND = 'NAND',
@@ -13,6 +13,24 @@ export declare enum GateType {
   XOR = 'XOR',
   XNOR = 'XNOR',
   NOT = 'NOT'
+}
+
+export declare const enum MouseMode {
+  Panning = 'Panning',
+  Selection = 'Selection'
+}
+
+export declare const enum Command {
+  Redo = 'Redo',
+  ResetCircuit = 'ResetCircuit',
+  SetActivity = 'SetActivity',
+  SetDebugger = 'SetDebugger',
+  SetMouseMode = 'SetMouseMode',
+  SetZoomLevel = 'SetZoomLevel',
+  ToggleOscilloscope = 'ToggleOscilloscope',
+  TriggerCircuitStep = 'TriggerCircuitStep',
+  Undo = 'Undo',
+  UpdateElementProperties = 'UpdateElementProperties'
 }
 
 export declare type PortDefinition = {
