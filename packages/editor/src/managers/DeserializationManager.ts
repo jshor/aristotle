@@ -141,7 +141,7 @@ export default class DeserializationManager extends ManagerBase {
   /**
    * Updates properties on the selected element(s).
    */
-  updateSelectedElementProperties = (properties: ElementPropertyValues, elementId?: string) => {
+  updateElementProperties = (properties: ElementPropertyValues, elementId?: string) => {
     const elements: Element[] = this
       .canvas
       .getFigures()

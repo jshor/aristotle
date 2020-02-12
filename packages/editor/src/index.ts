@@ -7,15 +7,13 @@ export * from './types'
 
 /* interfaces */
 export { default as IElementProperties } from './interfaces/IElementProperties'
+export { default as IEditorModel } from './interfaces/IEditorModel'
+export { default as ICommand } from './interfaces/ICommand'
 
 /* core components */
 export { default as Editor } from './core/Editor'
 export { default as Connection } from './core/Connection'
 export { default as Element } from './core/Element'
-
-/* models */
-export { default as CommandModel } from './models/CommandModel'
-export { default as EditorModel } from './models/EditorModel'
 
 /* SVG renderers */
 export * from './svg'

@@ -45,8 +45,13 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import Properties from '@/components/Properties.vue'
-import { Editor, PortSchematic, PropertiesDialogPayload, ElementProperties } from '@aristotle/editor'
-import ICommand from '@/interfaces/ICommand'
+import {
+  Editor,
+  ICommand,
+  PortSchematic,
+  PropertiesDialogPayload,
+  ElementPropertyValues
+} from '@aristotle/editor'
 import Document from '@/components/Document.vue'
 import OscilloscopeContainer from './OscilloscopeContainer.vue'
 
@@ -137,9 +142,9 @@ export default class DocumentContainer extends Vue {
     this.waves = payload
   }
 
-  updateProperties (editor: Editor, payload: ElementProperties) {
+  updateProperties (editor: Editor, payload: ElementPropertyValues) {
     this.relayCommand({
-      command: 'UPDATE_ELEMENT', // TODO: rename to something better
+      type: 'UpdateElementProperties',
       payload,
       documentId: this.document.id
     })
@@ -162,7 +167,7 @@ export default class DocumentContainer extends Vue {
     const l = this.zoomLevel + (factor * increment)
 
     this.relayCommand({
-      command: 'SET_ZOOM',
+      type: 'SET_ZOOM',
       payload: factor,
       documentId: this.document.id
     })
@@ -175,7 +180,7 @@ export default class DocumentContainer extends Vue {
     const isFocused = this.isActive && document.hasFocus()
 
     this.relayCommand({
-      command: 'SET_ACTIVITY',
+      type: 'SET_ACTIVITY',
       payload: isFocused,
       documentId: this.document.id
     })

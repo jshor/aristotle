@@ -1,10 +1,6 @@
 <template>
   <div id="app" class="main" v-if="activeDocument">
-    <toolbar
-      :document="activeDocument"
-      @relayCommand="relayCommand"
-      @openDocument="openDocument"
-    />
+    <toolbar-container :document="activeDocument" />
 
     <split-pane :default-percent="20" split="vertical">
       <template v-slot:paneL>
@@ -38,9 +34,10 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 import Splash from '@/components/Splash'
-import Toolbar from '@/components/Toolbar'
+import Toolbar from '@/containers/ToolbarContainer'
 import DocumentContainer from '@/containers/DocumentContainer'
 import TabsContainer from '@/containers/TabsContainer'
+import ToolbarContainer from '@/containers/ToolbarContainer'
 import ToolboxContainer from '@/containers/ToolboxContainer'
 import DocumentModel from '@/models/DocumentModel'
 import data from '@/mocks/document.json'
@@ -52,8 +49,8 @@ export default {
     DocumentContainer,
     Splash,
     TabsContainer,
-    ToolboxContainer,
-    Toolbar
+    ToolbarContainer,
+    ToolboxContainer
   },
   data () {
     return { filters }
@@ -67,6 +64,7 @@ export default {
   },
   methods: {
     relayCommand (payload) {
+      console.log('will relay: ', payload)
       this.$store.commit('RELAY_COMMAND', payload)
     },
     openDocument () {
