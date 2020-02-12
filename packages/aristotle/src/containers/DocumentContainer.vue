@@ -11,7 +11,9 @@
 
       <properties
         v-if="isPropertiesDialogOpen"
-        :settings="elementSettings"
+        :properties="propertiesDialogPayload.properties"
+        :position="propertiesDialogPayload.position"
+        :element-id="propertiesDialogPayload.elementId"
         @change="updateProperties"
         @close="closePropertiesDialog"
       />
@@ -43,7 +45,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import Properties from '@/components/Properties.vue'
-import { Editor, PortSchematic } from '@aristotle/editor'
+import { Editor, PortSchematic, PropertiesDialogPayload, ElementProperties } from '@aristotle/editor'
 import ICommand from '@/interfaces/ICommand'
 import Document from '@/components/Document.vue'
 import OscilloscopeContainer from './OscilloscopeContainer.vue'
@@ -105,6 +107,8 @@ export default class DocumentContainer extends Vue {
 
   public relayCommand: (command: ICommand) => void
 
+  public propertiesDialogPayload: PropertiesDialogPayload = null
+
   get zoomLevel () {
     return this.document.editorModel.zoomLevel
   }
@@ -133,7 +137,7 @@ export default class DocumentContainer extends Vue {
     this.waves = payload
   }
 
-  updateProperties (editor: Editor, payload) {
+  updateProperties (editor: Editor, payload: ElementProperties) {
     this.relayCommand({
       command: 'UPDATE_ELEMENT', // TODO: rename to something better
       payload,
@@ -141,12 +145,13 @@ export default class DocumentContainer extends Vue {
     })
   }
 
-  openPropertiesDialog (editor: Editor, payload) {
-    this.elementSettings = payload
+  openPropertiesDialog (editor: Editor, payload: PropertiesDialogPayload) {
+    this.propertiesDialogPayload = payload
     this.isPropertiesDialogOpen = true
   }
 
   closePropertiesDialog () {
+    this.propertiesDialogPayload = null
     this.isPropertiesDialogOpen = false
   }
 
@@ -182,15 +187,14 @@ export default class DocumentContainer extends Vue {
    * @param {Editor} editor
    */
   subscribeToEditorEvents = (editor: Editor): void => {
-    //
     const events = {
       'select': 'updateEditorModel',
       'deselect': 'updateEditorModel',
-      'userOptionChanged': 'updateEditorModel',
+      'config:changed': 'updateEditorModel',
       'zoomed': 'updateEditorModel',
-      'circuitChanged': 'updateEditorModel',
-      'toolbox.open': 'openPropertiesDialog',
-      'toolbox.close': 'closePropertiesDialog',
+      'circuit:changed': 'updateEditorModel',
+      'properties:open': 'openPropertiesDialog',
+      'properties:close': 'closePropertiesDialog',
       'oscillate': 'onOscillation'
     }
 

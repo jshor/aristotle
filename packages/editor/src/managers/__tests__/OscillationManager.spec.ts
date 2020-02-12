@@ -1,15 +1,15 @@
-import OscillationService from './OscillationService'
-import Editor from '../core/Editor'
-import ToggleService from './ToggleService'
-import WaveService from './WaveService'
+import OscillationManager from '../OscillationManager'
+import Editor from '../../core/Editor'
+import ToggleService from '../../services/ToggleService'
+import WaveService from '../../services/WaveService'
 
-jest.mock('../core/Editor', () => {
+jest.mock('../../core/Editor', () => {
   return class {
     oscillate = jest.fn()
   }
 })
 
-jest.mock('./IntervalWorkerService', () => {
+jest.mock('../../services/IntervalWorkerService', () => {
   return class {
     onTick = jest.fn()
     start = jest.fn()
@@ -17,31 +17,31 @@ jest.mock('./IntervalWorkerService', () => {
   }
 })
 
-describe('Oscillation Service', () => {
-  let service
+describe('Oscillation Manager', () => {
+  let manager
   const editor = new Editor('testId')
 
   beforeEach(() => {
-    service = new OscillationService(editor)
+    manager = new OscillationManager(editor)
   })
 
   afterEach(() => jest.resetAllMocks())
 
   describe('start()', () => {
-    it('should start the interval service', () => {
-      jest.spyOn(service.interval, 'start')
-      service.start()
+    it('should start the interval manager', () => {
+      jest.spyOn(manager.interval, 'start')
+      manager.start()
 
-      expect(service.interval.start).toHaveBeenCalledTimes(1)
+      expect(manager.interval.start).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('stop()', () => {
-    it('should stop the interval service', () => {
-      jest.spyOn(service.interval, 'stop')
-      service.stop()
+    it('should stop the interval manager', () => {
+      jest.spyOn(manager.interval, 'stop')
+      manager.stop()
 
-      expect(service.interval.stop).toHaveBeenCalledTimes(1)
+      expect(manager.interval.stop).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -50,39 +50,39 @@ describe('Oscillation Service', () => {
       beforeEach(() => {
         const now = Date.now()
 
-        service.lastUpdate = now
-        Date.now = jest.fn(() => now + service.refreshRate)
+        manager.lastUpdate = now
+        Date.now = jest.fn(() => now + manager.refreshRate)
       })
 
       it('should call update() with the incremented `ticks` counter value', () => {
         const ticks = 11
 
-        jest.spyOn(service, 'update')
+        jest.spyOn(manager, 'update')
 
-        service.ticks = ticks
-        service.tick()
+        manager.ticks = ticks
+        manager.tick()
 
-        expect(service.update).toHaveBeenCalledTimes(1)
-        expect(service.update).toHaveBeenCalledWith(ticks + 1)
+        expect(manager.update).toHaveBeenCalledTimes(1)
+        expect(manager.update).toHaveBeenCalledWith(ticks + 1)
       })
 
       describe('when the seconds elapsed is divisble by 10', () => {
         beforeEach(() => {
-          service.lastSignalTime = 10
-          service.secondsElapsed = 20
-          service.editor = {
+          manager.lastSignalTime = 10
+          manager.secondsElapsed = 20
+          manager.editor = {
             oscillate: jest.fn()
           }
-          service.tick()
+          manager.tick()
         })
 
         it('should update the `lastSignalTime` to the seconds elapsed', () => {
-          expect(service.lastSignalTime).toEqual(service.secondsElapsed)
+          expect(manager.lastSignalTime).toEqual(manager.secondsElapsed)
         })
 
         it('should tell the editor that an oscillation has elapsed', () => {
-          expect(service.editor.oscillate).toHaveBeenCalledTimes(1)
-          expect(service.editor.oscillate).toHaveBeenCalledWith(service.computeWaveGeometry(), service.secondsElapsed)
+          expect(manager.editor.oscillate).toHaveBeenCalledTimes(1)
+          expect(manager.editor.oscillate).toHaveBeenCalledWith(manager.computeWaveGeometry(), manager.secondsElapsed)
         })
       })
     })
@@ -96,9 +96,9 @@ describe('Oscillation Service', () => {
       foo.segments = [{ x: 0, y: 0 }, { x: 10, y: 20 }]
       foo.width = 40
 
-      service.waves = { foo, bar }
+      manager.waves = { foo, bar }
 
-      const geometries = service.computeWaveGeometry()
+      const geometries = manager.computeWaveGeometry()
 
       expect(geometries).toEqual(expect.objectContaining({
         foo: {
@@ -116,8 +116,8 @@ describe('Oscillation Service', () => {
       const wave2 = { update: jest.fn() }
       const ticks = 7
 
-      service.waves = { a: wave1, b: wave2 }
-      service.update(ticks)
+      manager.waves = { a: wave1, b: wave2 }
+      manager.update(ticks)
 
       expect(wave1.update).toHaveBeenCalledTimes(1)
       expect(wave1.update).toHaveBeenCalledWith(ticks)
@@ -134,10 +134,10 @@ describe('Oscillation Service', () => {
         interval
       }
 
-      service.add(wave)
+      manager.add(wave)
 
-      expect(service.waves).toHaveProperty(wave.id)
-      expect(service.waves[wave.id]).toEqual(wave)
+      expect(manager.waves).toHaveProperty(wave.id)
+      expect(manager.waves[wave.id]).toEqual(wave)
     })
 
     it('should not add the given wave if one with its id is already registered', () => {
@@ -146,14 +146,14 @@ describe('Oscillation Service', () => {
         interval: 500
       }
 
-      service.waves = {
+      manager.waves = {
         abc: {
           interval: 400
         }
       }
-      service.add(wave)
+      manager.add(wave)
 
-      expect(service.waves.abc).not.toEqual(wave)
+      expect(manager.waves.abc).not.toEqual(wave)
     })
   })
 
@@ -161,10 +161,10 @@ describe('Oscillation Service', () => {
     it('should remove the wave having the given id', () => {
       const wave = { id: '123' }
 
-      service.waves = { [wave.id]: wave }
-      service.remove(wave)
+      manager.waves = { [wave.id]: wave }
+      manager.remove(wave)
 
-      expect(service.waves).not.toHaveProperty(wave.id)
+      expect(manager.waves).not.toHaveProperty(wave.id)
     })
   })
 })

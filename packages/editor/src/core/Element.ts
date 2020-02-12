@@ -1,4 +1,3 @@
-
 import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
 import CommandSetProperty from '../commands/CommandSetProperty'
@@ -7,7 +6,8 @@ import getPortLocator from '../utils/getPortLocator'
 import ToolboxButton from '../interactivity/ToolboxButton'
 import SVGBase from 'svg/lib/SVGBase'
 import addTouchEvents from '../utils/addTouchEvents'
-import { Point } from '../types'
+import { Point, ElementPropertyValues } from '../types'
+import IElementProperties from '../interfaces/IElementProperties'
 
 export default class Element extends draw2d.shape.basic.Image {
   node = null
@@ -18,15 +18,15 @@ export default class Element extends draw2d.shape.basic.Image {
 
   svgRenderer: SVGBase
 
-  settings: any
+  public properties: IElementProperties = {}
 
   id: string
 
-  constructor (id, { settings } = { settings: null }) {
+  constructor (id: string, properties: ElementPropertyValues) {
     super({ resizeable: false })
 
     super.setId(id)
-    this.applySettings(settings)
+    this.applyProperties(properties)
   }
 
   /**
@@ -39,16 +39,6 @@ export default class Element extends draw2d.shape.basic.Image {
       this.canvas.setCurrentSelection(null)
       this.canvas.setCurrentSelection(this)
     }
-  }
-
-  /**
-   * Returns the value of the given setting key.
-   *
-   * @param {String} key
-   * @returns {String} setting value
-   */
-  getSetting = (key) => {
-    return this.settings[key].value
   }
 
   /**
@@ -111,33 +101,69 @@ export default class Element extends draw2d.shape.basic.Image {
     this.render()
   }
 
-  applySettings = (settings) => {
-    for (let propertyName in settings) {
-      this.settings[propertyName].value = settings[propertyName]
+  /**
+   * Applies the given map of property values to their respective properties.
+   *
+   * @param {ElementPropertyValues} properties - key-value pair of property names to values
+   */
+  public applyProperties = (properties: ElementPropertyValues = {}): void => {
+    for (let propertyName in properties) {
+      if (this.properties.hasOwnProperty(propertyName)) {
+        this.properties[propertyName].value = properties[propertyName]
+      }
     }
   }
 
-  getSettings = () => {
-    const settings = {}
-
-    // for (let propertyName in this.settings) {
-    //   settings[propertyName] = this.settings[propertyName].value
-    // }
-
-    return settings
+  /**
+   * Returns the value of the given property. Returns null if not defined.
+   *
+   * @param {string} propertyName
+   * @returns {string|number} property value
+   */
+  public getPropertyValue = (propertyName: string): string | number => {
+    if (this.properties.hasOwnProperty(propertyName)) {
+      return this.properties[propertyName].value
+    }
+    return null
   }
 
-  public updateSettings = (settings: any) => {
-    for (let propertyName in settings) {
-      const command: any = new CommandSetProperty(this) // TODO
+  /**
+   * Returns a key-value pair of element property names to their respective values.
+   *
+   * @returns {ElementPropertyValues}
+   */
+  public serializeProperties = (): ElementPropertyValues => {
+    return Object
+      .keys(this.properties)
+      .reduce((properties, propertyName): ElementPropertyValues => ({
+        ...properties,
+        [propertyName]: this.properties[propertyName].value
+      }), {})
+  }
+
+  /**
+   * Updates property values using the given map of property values.
+   *
+   * @emits `properties:open` (via @link`persistToolbox()`)
+   * @param {ElementPropertyValues} properties
+   */
+  public updateProperties = (properties: ElementPropertyValues) => {
+    for (let propertyName in properties) {
+      const command: any = new CommandSetProperty(this)
 
       command.propertyName = propertyName
-      command.newValue = settings[propertyName]
-      command.callback = this.settings[propertyName].onUpdate
+      command.newValue = properties[propertyName]
+      command.callback = this.properties[propertyName].onUpdate
 
       this.canvas.commandStack.execute(command)
     }
     this.persistToolbox()
+  }
+
+  public hasProperties = (): boolean => {
+    return Object
+      .keys(this.properties)
+      .length > 0
   }
 
   /**
@@ -160,10 +186,10 @@ export default class Element extends draw2d.shape.basic.Image {
   }
 
   /**
-   * Defines the toolbox button if one is not already present and settings are defined.
+   * Defines the toolbox button if one is not already present and properties are defined.
    */
   createToolboxButton = () => {
-    if (!this.toolboxButton && this.settings) {
+    if (!this.toolboxButton && this.hasProperties()) {
       const locator = new draw2d.layout.locator.XYAbsPortLocator(0, 0)
       const figure: draw2d.Figure = this.attachClickableArea(20, 20, {
         x: super.getWidth() + 10,
@@ -207,7 +233,7 @@ export default class Element extends draw2d.shape.basic.Image {
       y: super.getY(),
       type: this.constructor.name,
       name: uuid(),
-      settings: this.getSettings()
+      properties: this.serializeProperties()
     }
   }
 

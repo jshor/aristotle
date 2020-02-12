@@ -1,17 +1,22 @@
-import IntervalWorkerService from './IntervalWorkerService'
+import IntervalWorkerService from '../services/IntervalWorkerService'
 import Editor from '../core/Editor'
 import IPulse from '../interfaces/IPulse'
+import ManagerBase from './ManagerBase'
 
 const BASE_REFRESH_RATE = 100
 
-export default class OscillationService {
+/**
+ * @class OscillationManager
+ * @description Manages all oscillating services, including binary waves and clock pulses.
+ * This manager uses system time (as opposed to the error-prone setInterval() or setTimeout())
+ * to determine when a period (defined in `BASE_REFRESH_RATE`) has passed.
+ */
+export default class OscillationManager extends ManagerBase {
   private interval: IntervalWorkerService = new IntervalWorkerService()
 
   private waves: { [id: string]: IPulse } = {}
 
   private refreshRate: number = BASE_REFRESH_RATE
-
-  private editor: Editor
 
   private lastUpdateTime: number
 
@@ -22,11 +27,11 @@ export default class OscillationService {
   private ticks: number = 0
 
   constructor (editor: Editor) {
+    super(editor)
+
     this.editor = editor
     this.lastUpdateTime = Date.now()
     this.interval.onTick(this.tick.bind(this))
-
-    // setTimeout(this.interval.stop.bind(this), 20000) // temporary, for dev purposes
   }
 
   /**

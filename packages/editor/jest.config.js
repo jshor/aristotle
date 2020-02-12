@@ -1,6 +1,6 @@
 module.exports = {
   collectCoverage: true,
-  coverageDirectory: '<rootDir>/.coverage',
+  coverageDirectory: '<rootDir>/test/.coverage',
   moduleFileExtensions: ['js', 'ts'],
   preset: 'ts-jest/presets/js-with-babel',
   transform: {
@@ -11,5 +11,8 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   },
+  testMatch: [
+    '<rootDir>/src/**/*.spec.(js|ts)'
+  ],
   setupFiles: ['<rootDir>/test/setup.js']
 }

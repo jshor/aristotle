@@ -4,46 +4,49 @@
 	"elements": [{
 		"id": "aqLvQGuk27",
 		"type": "Switch",
-		"name": "R",
+    "properties": {
+      "name": "R"
+    },
 		"x": 0,
 		"y": 350
 	}, {
 		"id": "VEFvl5BKys",
 		"type": "Switch",
-		"name": "S",
+    "properties": {
+      "name": "S"
+    },
 		"x": 0,
 		"y": 450
 	}, {
 		"id": "QzoKcbmstv",
 		"type": "LogicGate",
-		"name": "NOR_1",
-		"subtype": "NOR",
+    "properties": {
+      "gateType": "NOR"
+    },
 		"x": 200,
 		"y": 350
 	}, {
 		"id": "3OLPFz0Rzk",
 		"type": "LogicGate",
-		"name": "NOR_2",
-		"subtype": "NOR",
+    "properties": {
+      "gateType": "NOR"
+    },
 		"x": 200,
 		"y": 450
 	}, {
-		"id": "beG6WAra0l",
-		"type": "LogicGate",
-		"name": "NOR_3",
-		"subtype": "NOR",
-		"x": 400,
-		"y": 350
-	}, {
 		"id": "c5XCJ9eill",
 		"type": "Lightbulb",
-		"name": "OUT_1",
+    "properties": {
+      "name": "OUT_1"
+    },
 		"x": 400,
 		"y": 450
 	}, {
 		"id": "XNTLeHX6dZ",
 		"type": "Lightbulb",
-		"name": "OUT_2",
+    "properties": {
+      "name": "OUT_2"
+    },
 		"x": 400,
 		"y": 500
 	}],

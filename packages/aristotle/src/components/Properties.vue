@@ -12,7 +12,7 @@
       </div>
     </div>
     <div
-      v-for="(data, key, index) in settings.settings"
+      v-for="(data, key, index) in properties"
       :key="index"
       class="properties__field">
       <label
@@ -47,64 +47,99 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'properties',
-  computed: {
-    style () {
-      return {
-        left: `${this.settings.position.x - this.offsetX}px`,
-        top: `${this.settings.position.y - this.offsetY}px`
-      }
-    }
-  },
+<script lang="ts">
+import Vue from 'vue'
+import Component from 'vue-class-component'
+import Emit from '../../../../node_modules/vue-class-component/lib'
+
+import {
+  IElementProperties,
+  ElementPropertyValues,
+  Point
+} from '@aristotle/editor'
+
+@Component({
+  name: 'Properties',
   props: {
-    settings: {
-      type: Object,
+    properties: {
+      type: Object as () => IElementProperties,
       required: true
-    }
-  },
-  data () {
-    const { settings } = this.settings
-    const values = {}
-
-    for (let key in settings) {
-      values[key] = settings[key].value
-    }
-
-    return {
-      values,
-      offsetX: 0,
-      offsetY: 0
-    }
-  },
-  mounted () {
-    this.adjustToFitViewport()
-  },
-  methods: {
-    change (key) {
-      this.$emit('change', {
-        elementId: this.settings.elementId,
-        data: {
-          [key]: this.values[key]
-        }
+    },
+    elementId: {
+      type: String,
+      required: true
+    },
+    position: {
+      type: Object as () => Point,
+      default: () => ({
+        x: 0,
+        y: 0
       })
-    },
-    close () {
-      this.$emit('close')
-    },
-    adjustToFitViewport () {
-      const container = this.$refs.properties
-      const containerRect = container.getBoundingClientRect()
-      const parentRect = container.parentNode.getBoundingClientRect()
+    }
+  }
+})
+export default class Properties extends Vue {
+  public elementId: string
 
-      if (containerRect.right > parentRect.right) {
-        this.offsetX = containerRect.right - parentRect.right
-      }
+  public properties: IElementProperties
 
-      if (containerRect.bottom > parentRect.bottom) {
-        this.offsetY = containerRect.bottom - parentRect.bottom
-      }
+  public position: Point
+
+  public offsetX: number = 0
+
+  public offsetY: number = 0
+
+  public values: ElementPropertyValues = {}
+
+  public _events = {} // WTF. TODO.
+
+  get style (): { left: string, top: string} {
+    return {
+      left: `${this.position.x - this.offsetX}px`,
+      top: `${this.position.y - this.offsetY}px`
+    }
+  }
+
+  mounted () {
+    this.values = this.getElementPropertyValues()
+    this.adjustToFitViewport()
+    // this._events = {}
+  }
+
+  getElementPropertyValues = (): ElementPropertyValues => {
+    return Object
+      .keys(this.properties)
+      .reduce((properties: ElementPropertyValues, key: string): ElementPropertyValues => ({
+        ...properties,
+        [key]: this.properties[key].value
+      }), {})
+  }
+
+  change = (key: string): void => {
+    this.$emit('change', {
+      elementId: this.elementId,
+      properties: this.values,
+      position: this.position
+    })
+  }
+
+  close = (): void => {
+    this.$emit('close')
+  }
+
+  adjustToFitViewport = (): void => {
+    const container = this.$refs.properties as HTMLElement
+    const parent = container.parentNode as HTMLElement
+
+    const containerRect = container.getBoundingClientRect()
+    const parentRect = parent.getBoundingClientRect()
+
+    if (containerRect.right > parentRect.right) {
+      this.offsetX = containerRect.right - parentRect.right
+    }
+
+    if (containerRect.bottom > parentRect.bottom) {
+      this.offsetY = containerRect.bottom - parentRect.bottom
     }
   }
 }

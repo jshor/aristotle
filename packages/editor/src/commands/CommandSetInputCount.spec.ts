@@ -23,9 +23,7 @@ describe('CommandSetInputCount', () => {
   }
 
   beforeEach(() => {
-    editor = new Element('testEditor', {
-      settings: {}
-    })
+    editor = new Element('testEditor', {})
 
     // configure elements
     inputElements = [

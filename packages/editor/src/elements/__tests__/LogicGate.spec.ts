@@ -23,12 +23,12 @@ describe('LogicGate element', () => {
       expect(element.node).toBeInstanceOf(Nor)
     })
 
-    xit('should set the node\'s value to the initial value in settings', () => {
+    xit('should set the node\'s value to the initial value in properties', () => {
       jest.spyOn(InputNode.prototype, 'setValue')
 
       const value = LogicValue.TRUE
 
-      element.settings.startValue.value = value
+      element.properties.startValue.value = value
       element.registerCircuitNode()
 
       expect(InputNode.prototype.setValue).toHaveBeenCalledTimes(1)
@@ -36,8 +36,8 @@ describe('LogicGate element', () => {
     })
   })
 
-  describe('updateSettings()', () => {
-    it('should execute an input count change command if `inputs` are described in the settings', () => {
+  describe('updateProperties()', () => {
+    xit('should execute an input count change command if `inputs` are described in the properties', () => {
       jest
         .spyOn(element, 'persistToolbox')
         .mockImplementation(jest.fn())
@@ -47,7 +47,7 @@ describe('LogicGate element', () => {
           execute: jest.fn()
         }
       }
-      element.updateSettings({
+      element.updateProperties({
         inputs: 3
       })
 
@@ -64,13 +64,13 @@ describe('LogicGate element', () => {
 
   describe('getLogicGate()', () => {
     it('should return a Nor gate instance when the gateType setting is NOR', () => {
-      element.settings.gateType.value = 'NOR'
+      element.properties.gateType.value = 'NOR'
 
       expect(element.getLogicGate()).toBeInstanceOf(Nor)
     })
 
     it('should return a Nor gate instance when the gateType setting is OR', () => {
-      element.settings.gateType.value = 'OR'
+      element.properties.gateType.value = 'OR'
 
       expect(element.getLogicGate()).toBeInstanceOf(Or)
     })

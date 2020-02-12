@@ -3,24 +3,17 @@ import Element from '../core/Element'
 import getPortIndex from '../utils/getPortIndex'
 import { DigitSVG } from '../svg'
 import draw2d from 'draw2d'
-import { SvgData } from '../types'
+import { ElementPropertyValues, SvgData } from '../types'
 
 export default class Lightbulb extends Element {
   protected nodes: OutputNode[] = []
 
-  constructor (id, params) {
-    super(id, params)
+  constructor (id: string, properties: ElementPropertyValues) {
+    super(id, properties)
 
     this.registerSvgRenderer()
     this.registerCircuitNode()
     this.render()
-  }
-
-  settings = {
-    name: {
-      type: 'text',
-      value: ''
-    }
   }
 
   registerSvgRenderer = (): void => {

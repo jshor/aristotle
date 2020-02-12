@@ -1,114 +1,130 @@
-
 {
   "id": "abd83476badc73629abdc",
   "type": "IntegratedCircuit",
   "name": "OUT_3",
   "x": 200,
   "y": 400,
-  "ports": {
-    "top": [],
-    "bottom": [],
-    "left": [
-      {
-        "label": "R",
-        "type": "input"
+  "properties": {
+    "name": "OUT_3",
+    "ports": {
+      "top": [],
+      "bottom": [],
+      "left": [
+        {
+          "label": "R",
+          "type": "input"
+        },
+        {
+          "label": "S",
+          "type": "input"
+        }
+      ],
+      "right": [
+        {
+          "label": "OUT_1",
+          "type": "output"
+        },
+        {
+          "label": "OUT_2",
+          "type": "output"
+        }
+      ]
+    },
+    "elements": [{
+      "id": "aqLvQGuk27",
+      "type": "Switch",
+      "nodeType": "input",
+      "portIndex": 0,
+      "properties": {
+        "name": "R"
       },
-      {
-        "label": "S",
-        "type": "input"
-      }
-    ],
-    "right": [
-      {
-        "label": "OUT_1",
-        "type": "output"
+      "x": 0,
+      "y": 350
+    }, {
+      "id": "VEFvl5BKys",
+      "type": "Switch",
+      "nodeType": "input",
+      "portIndex": 1,
+      "properties": {
+        "name": "S"
       },
-      {
-        "label": "OUT_2",
-        "type": "output"
-      }
-    ]
-  },
-  "elements": [{
-    "id": "aqLvQGuk27",
-    "type": "Switch",
-    "nodeType": "input",
-    "portIndex": 0,
-    "name": "R",
-    "x": 0,
-    "y": 350
-  }, {
-    "id": "VEFvl5BKys",
-    "type": "Switch",
-    "nodeType": "input",
-    "portIndex": 1,
-    "name": "S",
-    "x": 0,
-    "y": 450
-  }, {
-    "id": "QzoKcbmstv",
-    "type": "LogicGate",
-    "subtype": "NOR",
-    "x": 200,
-    "y": 350
-  }, {
-    "id": "3OLPFz0Rzk",
-    "type": "LogicGate",
-    "subtype": "NOR",
-    "x": 200,
-    "y": 450
-  }, {
-    "id": "beG6WAra0l",
-    "type": "LogicGate",
-    "subtype": "NOR",
-    "x": 400,
-    "y": 350
-  }, {
-    "id": "c5XCJ9eill",
-    "type": "Lightbulb",
-    "nodeType": "output",
-    "portIndex": 0,
-    "name": "OUT_1",
-    "x": 400,
-    "y": 450
-  }, {
-    "id": "XNTLeHX6dZ",
-    "type": "Lightbulb",
-    "nodeType": "output",
-    "portIndex": 1,
-    "name": "OUT_2",
-    "x": 400,
-    "y": 500
-  }],
-  "connections": [{
-    "inputId": "QzoKcbmstv",
-    "outputId": "3OLPFz0Rzk",
-    "sourceIndex": 0,
-    "targetIndex": 1
-  }, {
-    "inputId": "VEFvl5BKys",
-    "outputId": "3OLPFz0Rzk",
-    "sourceIndex": 0,
-    "targetIndex": 0
-  }, {
-    "inputId": "3OLPFz0Rzk",
-    "outputId": "QzoKcbmstv",
-    "sourceIndex": 0,
-    "targetIndex": 1
-  }, {
-    "inputId": "aqLvQGuk27",
-    "outputId": "QzoKcbmstv",
-    "sourceIndex": 0,
-    "targetIndex": 0
-  }, {
-    "inputId": "QzoKcbmstv",
-    "outputId": "c5XCJ9eill",
-    "sourceIndex": 0,
-    "targetIndex": 0
-  }, {
-    "inputId": "3OLPFz0Rzk",
-    "outputId": "XNTLeHX6dZ",
-    "sourceIndex": 0,
-    "targetIndex": 0
-  }]
+      "x": 0,
+      "y": 450
+    }, {
+      "id": "QzoKcbmstv",
+      "type": "LogicGate",
+      "properties": {
+        "gateType": "NOR"
+      },
+      "x": 200,
+      "y": 350
+    }, {
+      "id": "3OLPFz0Rzk",
+      "type": "LogicGate",
+      "properties": {
+        "gateType": "NOR"
+      },
+      "x": 200,
+      "y": 450
+    }, {
+      "id": "beG6WAra0l",
+      "type": "LogicGate",
+      "properties": {
+        "gateType": "NOR"
+      },
+      "x": 400,
+      "y": 350
+    }, {
+      "id": "c5XCJ9eill",
+      "type": "Lightbulb",
+      "nodeType": "output",
+      "portIndex": 0,
+      "properties": {
+        "name": "OUT_1"
+      },
+      "x": 400,
+      "y": 450
+    }, {
+      "id": "XNTLeHX6dZ",
+      "type": "Lightbulb",
+      "nodeType": "output",
+      "portIndex": 1,
+      "properties": {
+        "name": "OUT_2"
+      },
+      "x": 400,
+      "y": 500
+    }],
+    "connections": [{
+      "inputId": "QzoKcbmstv",
+      "outputId": "3OLPFz0Rzk",
+      "sourceIndex": 0,
+      "targetIndex": 1
+    }, {
+      "inputId": "VEFvl5BKys",
+      "outputId": "3OLPFz0Rzk",
+      "sourceIndex": 0,
+      "targetIndex": 0
+    }, {
+      "inputId": "3OLPFz0Rzk",
+      "outputId": "QzoKcbmstv",
+      "sourceIndex": 0,
+      "targetIndex": 1
+    }, {
+      "inputId": "aqLvQGuk27",
+      "outputId": "QzoKcbmstv",
+      "sourceIndex": 0,
+      "targetIndex": 0
+    }, {
+      "inputId": "QzoKcbmstv",
+      "outputId": "c5XCJ9eill",
+      "sourceIndex": 0,
+      "targetIndex": 0
+    }, {
+      "inputId": "3OLPFz0Rzk",
+      "outputId": "XNTLeHX6dZ",
+      "sourceIndex": 0,
+      "targetIndex": 0
+    }]
+  }
 }

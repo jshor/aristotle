@@ -22,14 +22,14 @@ export default class CommandSetProperty extends draw2d.command.Command {
   }
 
   undo = () => {
-    this.figure.settings[this.propertyName].value = this.oldValue
+    this.figure.properties[this.propertyName].value = this.oldValue
 
     this.invokeEvent()
   }
 
   redo = () => {
-    this.oldValue = this.figure.settings[this.propertyName].value
-    this.figure.settings[this.propertyName].value = this.newValue
+    this.oldValue = this.figure.properties[this.propertyName].value
+    this.figure.properties[this.propertyName].value = this.newValue
 
     this.invokeEvent()
   }

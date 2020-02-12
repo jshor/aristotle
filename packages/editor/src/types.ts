@@ -1,3 +1,5 @@
+import IElementProperties from './interfaces/IElementProperties'
+
 export declare enum PortFlow {
   Input = 'input',
   Output = 'output'
@@ -36,7 +38,8 @@ export declare type CircuitElement = {
   type: string
   nodeType?: string // TODO: rename
   portIndex?: number
-  name: string
+  name?: string // TODO: name should be removed -- it is an element property
+  properties: ElementPropertyValues
   x: number
   y: number
 }
@@ -72,6 +75,18 @@ export declare type Point = {
   y: number
 }
 
+export declare type PropertiesDialogPayload = {
+  elementId: string,
+  properties: IElementProperties,
+  position: Point
+}
+
 export declare type IdMap = {
   [key: string]: string
 }
+
+export declare type KeyValuePair = {
+  [key: string]: string
+}
+
+export declare type ElementPropertyValues = CircuitDefinition | KeyValuePair

@@ -1,33 +1,30 @@
-import { command, Port, Canvas } from 'draw2d'
-import ElementInitializerService from './ElementInitializerService'
+import { command, Port } from 'draw2d'
 import getIdMapping from '../utils/getIdMapping'
-import Editor from '../core/Editor'
-import Connection from 'core/Connection'
+import Connection from '../core/Connection'
+
+import Element from '../core/Element'
+import Switch from '../elements/Switch'
+import Clock from '../elements/Clock'
+import LogicGate from '../elements/LogicGate'
+import Lightbulb from '../elements/Lightbulb'
+import Digit from '../elements/Digit'
+import IntegratedCircuit from '../elements/IntegratedCircuit'
+
 import {
   CircuitConnection,
   CircuitDefinition,
   CircuitElement,
+  ElementPropertyValues,
   IdMap
 } from '../types'
+import ManagerBase from './ManagerBase'
 
 /**
- * @class DeserializerService
+ * @class DeserializationManager
  * @description Deserializes data onto the editor. See data params in documentation
  *  for construction of the serialized object.
- * @example ```
- *  const deserializer = new DeserializerService(editor)
- *
- *  deserializer.deserialize(data)
- * ```
  */
-export default class DeserializerService {
-  /**
-   * Editor instance.
-   *
-   * @type {Editor}
-   */
-  private editor: Editor
-
+export default class DeserializationManager extends ManagerBase {
   /**
    * List of queued `CommandAdd` commands to invoke.
    *
@@ -50,22 +47,11 @@ export default class DeserializerService {
   private idMap: IdMap
 
   /**
-   * Constructor.
-   *
-   * @param {Editor} editor
-   */
-  constructor (editor: Editor) {
-    this.editor = editor
-  }
-
-  /**
    * Deserializes the given circuit data into elements and connections onto the editor.
    *
    * @param {CircuitDefinition} circuitData
    */
   public deserialize = (circuitData: CircuitDefinition): void => {
-    const editor: Canvas = this.editor as Canvas
-
     this.commandCollection = new command.CommandCollection()
     this.idMap = getIdMapping(circuitData.elements)
     this.elements = []
@@ -73,7 +59,20 @@ export default class DeserializerService {
     circuitData.elements.forEach(this.createElement)
     circuitData.connections.forEach(this.createConnection)
 
-    editor.getCommandStack().execute(this.commandCollection)
+    this.executeAllCommands()
+  }
+
+  /**
+   * Executes all queued commands in the CommandCollection.
+   */
+  public executeAllCommands = (): void => {
+    this
+      .canvas
+      .commandStack
+      .execute(this.commandCollection)
+
+    // reset the command collection
+    this.commandCollection = new command.CommandCollection()
   }
 
   /**
@@ -81,9 +80,9 @@ export default class DeserializerService {
    *
    * @param {CircuitElement} element
    */
-  createElement = (element: CircuitElement): void => {
-    const { x, y, id } = element
-    const node = ElementInitializerService.getInitializedElement(this.idMap[id], element)
+  public createElement = (element: CircuitElement): void => {
+    const { x, y, id, type, properties } = element
+    const node = this.getInitializedElement(this.idMap[id] || id, type, properties)
 
     this.elements.push(node)
     this.commandCollection.add(new command.CommandAdd(this.editor, node, x, y))
@@ -94,7 +93,7 @@ export default class DeserializerService {
    *
    * @param {CircuitConnection} circuitConnection
    */
-  private createConnection = (connection: CircuitConnection): void => {
+  public createConnection = (connection: CircuitConnection): void => {
     const { inputId, outputId, sourceIndex, targetIndex } = connection
     const sourceElement = this.getElementById(this.idMap[inputId]) as Port
     const targetElement = this.getElementById(this.idMap[outputId]) as Port
@@ -114,6 +113,46 @@ export default class DeserializerService {
   }
 
   /**
+   * Initializes the element based on its type.
+   *
+   * @param {string} id - element id
+   * @param {ElementPropertyValues} properties - configurable element properties
+   * @returns {Element}
+   */
+  public getInitializedElement = (id: string, type: string, properties: ElementPropertyValues): any => {
+    switch (type) {
+      case 'IntegratedCircuit':
+        return new IntegratedCircuit(id, properties as CircuitDefinition)
+      case 'Clock':
+        return new Clock(id, properties)
+      case 'Switch':
+        return new Switch(id, properties)
+      case 'LogicGate':
+        return new LogicGate(id, properties)
+      case 'Lightbulb':
+        return new Lightbulb(id, properties)
+      case 'Digit':
+        return new Digit(id, properties)
+      default:
+        return new Element(id, properties)
+    }
+  }
+
+  /**
+   * Updates properties on the selected element(s).
+   */
+  updateSelectedElementProperties = (properties: ElementPropertyValues, elementId?: string) => {
+    const elements: Element[] = this
+      .canvas
+      .getFigures()
+      .asArray()
+
+    // elements
+    //   .filter(({ id }) => elementId === id)[0]
+    //   .updateSettings(data)
+  }
+
+  /**
    * Connects two elements together in the Editor and its circuit instance.
    *
    * @param {Editor} editor
@@ -122,7 +161,7 @@ export default class DeserializerService {
    * @returns {draw2d.Connection}
    */
   private getConnection = (source: Port, target: Port): Connection => {
-    const connection = this.editor.createConnection()
+    const connection = new Connection(this.editor.circuit)
 
     connection.setSource(source)
     connection.setTarget(target)

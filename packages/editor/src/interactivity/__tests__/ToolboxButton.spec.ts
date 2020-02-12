@@ -110,9 +110,9 @@ describe('Toolbox Button', () => {
 
       toolboxButton.fireToolboxEvent()
 
-      expect(spy).toHaveBeenCalledWith('toolbox.open', {
+      expect(spy).toHaveBeenCalledWith('properties:open', {
         elementId: toolboxButton.element.id,
-        settings: toolboxButton.element.settings,
+        properties: toolboxButton.element.properties,
         position
       })
     })

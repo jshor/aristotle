@@ -8,7 +8,7 @@ describe('Connection', () => {
 
   const sourceNode = { type: 'input' }
   const targetNode = { type: 'output' }
-  const canvas = new Element('foo')
+  const canvas = new Element('foo', {})
 
   const circuit = {
     addConnection: jest.fn(),

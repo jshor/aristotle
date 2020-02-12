@@ -3,6 +3,7 @@ import { LogicValue, Nor } from '@aristotle/logic-circuit'
 import Element from '../Element'
 import CommandSetProperty from '../../commands/CommandSetProperty'
 import draw2d from 'draw2d'
+import { ElementPropertyValues } from '../../types'
 
 jest.mock('../../interactivity/ToolboxButton')
 
@@ -13,7 +14,7 @@ describe('Element base class', () => {
   let element
 
   beforeEach(() => {
-    element = new Element(id)
+    element = new Element(id, {})
     element.getSvg = () => jest.fn()
     element.node = new Nor(id)
   })
@@ -122,9 +123,28 @@ describe('Element base class', () => {
     })
   })
 
-  describe('getSetting()', () => {
-    it('should return the value given setting', () => {
-      element.settings = {
+  describe('applyProperties()', () => {
+    it('should update the value of the given property if it exists on the element', () => {
+      element.properties.foo = {
+        type: 'text',
+        value: 'bar'
+      }
+      element.applyProperties({ foo: 'baz' })
+
+      expect(element.getPropertyValue('foo')).toEqual('baz')
+    })
+
+    it('should not set the property value of a non-existent property', () => {
+      element.properties = {}
+      element.applyProperties({ foo: 'baz' })
+
+      expect(element.properties).not.toHaveProperty('foo')
+    })
+  })
+
+  describe('getPropertyValue()', () => {
+    it('should return the value for the given property name', () => {
+      element.properties = {
         foo: {
           value: 'bar'
         },
@@ -133,8 +153,34 @@ describe('Element base class', () => {
         }
       }
 
-      expect(element.getSetting('foo')).toEqual('bar')
-      expect(element.getSetting('baz')).toEqual('1')
+      expect(element.getPropertyValue('foo')).toEqual('bar')
+      expect(element.getPropertyValue('baz')).toEqual('1')
+    })
+
+    it('should return null if the property doesn\'t exist', () => {
+      element.properties = {}
+
+      expect(element.getPropertyValue('foo')).toBeNull()
+    })
+  })
+
+  describe('serializeProperties()', () => {
+    it('should return a key-value pair of element property names to their respective values', () => {
+      element.properties = {
+        foo: {
+          value: 'bar'
+        },
+        baz: {
+          value: '1'
+        }
+      }
+
+      const serializedProperties: ElementPropertyValues = element.serializeProperties()
+
+      expect(serializedProperties).toHaveProperty('foo')
+      expect(serializedProperties).toHaveProperty('baz')
+      expect(serializedProperties['foo']).toEqual('bar')
+      expect(serializedProperties['baz']).toEqual('1')
     })
   })
 
@@ -239,9 +285,9 @@ describe('Element base class', () => {
     })
   })
 
-  describe('updateSettings()', () => {
+  describe('updateProperties()', () => {
     beforeEach(() => {
-      element.settings = {
+      element.properties = {
         foo: {
           onUpdate: jest.fn()
         }
@@ -256,7 +302,7 @@ describe('Element base class', () => {
     it('should execute a CommandSetProperty for each setting present', () => {
       const newValue = 'baz'
 
-      element.updateSettings({ foo: newValue })
+      element.updateProperties({ foo: newValue })
 
       expect(element.canvas.commandStack.execute).toHaveBeenCalledTimes(1)
       expect(element.canvas.commandStack.execute).toHaveBeenCalledWith(expect.any(CommandSetProperty))
@@ -264,7 +310,7 @@ describe('Element base class', () => {
 
     it('should persist the toolbox', () => {
       jest.spyOn(element, 'persistToolbox')
-      element.updateSettings({ foo: 'baz' })
+      element.updateProperties({ foo: 'baz' })
 
       expect(element.persistToolbox).toHaveBeenCalledTimes(1)
     })
@@ -304,10 +350,10 @@ describe('Element base class', () => {
         .mockImplementation(jest.fn())
     })
 
-    describe('when the `settings` property is defined and no toolbox button exists on the element', () => {
+    describe('when the `properties` property is defined and no toolbox button exists on the element', () => {
       it('should define the toolbox button', () => {
         element.toolboxButton = null
-        element.settings = {}
+        element.properties = {}
 
         element.createToolboxButton()
 
@@ -323,8 +369,8 @@ describe('Element base class', () => {
       expect(element.add).not.toHaveBeenCalled()
     })
 
-    it('should not add the toolbox button if no settings defined on the element', () => {
-      element.settings = null
+    it('should not add the toolbox button if no properties defined on the element', () => {
+      element.properties = {}
       element.createToolboxButton()
 
       expect(element.add).not.toHaveBeenCalled()

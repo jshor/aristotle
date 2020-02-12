@@ -1,27 +1,25 @@
 import draw2d from 'draw2d'
 import $ from 'jquery'
 import { Circuit } from '@aristotle/logic-circuit'
-import Connection from './Connection'
-import Element from './Element'
 import EditorModel from '../models/EditorModel'
-import DeserializerService from '../services/DeserializerService'
-import SerializerService from '../services/SerializerService'
-import OscillationService from '../services/OscillationService'
-import CommandRouterService from '../services/CommandRouterService'
-import ElementInitializerService from '../services/ElementInitializerService'
+import DeserializationManager from '../managers/DeserializationManager'
+import SerializationManager from '../managers/SerializationManager'
+import OscillationManager from '../managers/OscillationManager'
+import CommandManager from '../managers/CommandManager'
 import ZoomService from '../services/ZoomService'
+import { CircuitElement } from '../types'
 import uuid from '../utils/uuid'
 
 export default class Editor extends draw2d.Canvas {
   public circuit: Circuit = new Circuit()
 
-  public deserializer: DeserializerService = new DeserializerService(this)
+  public deserializer: DeserializationManager = new DeserializationManager(this)
 
-  public serializer: SerializerService = new SerializerService(this)
+  public serializer: SerializationManager = new SerializationManager(this)
 
-  public oscillation: OscillationService = new OscillationService(this)
+  public oscillation: OscillationManager = new OscillationManager(this)
 
-  public commandRouter: CommandRouterService = new CommandRouterService(this)
+  public commandRouter: CommandManager = new CommandManager(this)
 
   public zoomService: ZoomService = new ZoomService(this)
 
@@ -84,20 +82,20 @@ export default class Editor extends draw2d.Canvas {
   registerEventListeners = () => {
     document.addEventListener('mousemove', this.onBoundlessMouseMove)
     document.addEventListener('mouseup', this.onBoundlessMouseUp)
-    super.getCommandStack().addEventListener(() => this.fireEvent('commandStackChanged'))
+    super.getCommandStack().addEventListener(this.fireEvent.bind(this, 'commandStack:changed'))
     super.on('unselect', this.onDeselect)
   }
 
   /**
-   * Fires `toolbox.close` when the canvas is clicked and no elements are actively selected.
+   * Fires `properties:close` when the canvas is clicked and no elements are actively selected.
    * Fires `deselect` when one or more elements are deselected.
    *
    * @emits `deselect`
-   * @emits `toolbox.close`
+   * @emits `properties:close`
    */
   onDeselect = () => {
     if (super.getSelection().getSize() === 0) {
-      this.fireEvent('toolbox.close')
+      this.fireEvent('properties:close')
     } else {
       this.fireEvent('deselect')
     }
@@ -187,11 +185,18 @@ export default class Editor extends draw2d.Canvas {
     if (isInViewport) {
       const { x, y } = this.getDraggedCoordinates()
       const data = el.data()
-
-      this.createElement({
+      const properties = JSON.parse(atob(data.params))
+      const element: CircuitElement = {
+        id: uuid(),
         type: data.type,
-        ...JSON.parse(atob(data.params))
-      }, x, y)
+        name: '',
+        properties,
+        x,
+        y
+      }
+
+      this.deserializer.createElement(element)
+      this.deserializer.executeAllCommands()
     }
   }
 
@@ -230,52 +235,6 @@ export default class Editor extends draw2d.Canvas {
     this.fireEvent('oscillate', { waves, secondsElapsed })
   }
 
-  /**
-   * Adds an Element to the Editor and its circuit instance.
-   * TODO: rename to addElement
-   * @param {Element} element - element node to add
-   * @param {Number} x - x-axis screen coordinates to add the element at
-   * @param {Number} y - y-axis screen coordinates to add the element at
-   */
-  addNode = (element, x, y) => {
-    super.add(element, x, y)
-    this.circuit.addNode(element.node)
-    this.step(true)
-  }
-
-
-  createElement = (params, x, y) => {
-    const element = ElementInitializerService
-      .getInitializedElement(uuid(), params)
-
-    this.addNode(element, x, y)// TODO: should be command
-  }
-
-  /**
-   * Connects two elements together in the Editor and its circuit instance.
-   *
-   * @param {Element} source - source node
-   * @param {Element} target - target node
-   * @param {Number} index - input index at the target to connect to
-   */
-  addConnection = (source, target, index) => {
-    const connection = new Connection(this.circuit)
-
-    connection.setSource(source.getOutputPort(0))
-    connection.setTarget(target.getInputPort(index))
-
-    super.add(connection)
-    this.step(true)
-  }
-
-  /**
-   * Returns a new instance of a Connection.
-   *
-   * @returns {Connection}
-   */
-  createConnection = () => {
-    return new Connection(this.circuit)
-  }
 
   /**
    * Runs the circuit evaluation.
@@ -292,7 +251,7 @@ export default class Editor extends draw2d.Canvas {
         setTimeout(() => this.step())
       }
     }
-    this.fireEvent('circuitChanged')
+    this.fireEvent('circuit:changed')
   }
 
   /**
@@ -358,7 +317,7 @@ export default class Editor extends draw2d.Canvas {
 
     super.installEditPolicy(grid)
     super.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({
-      createConnection: this.createConnection
+      createConnection: this.deserializer.createConnection
     }))
   }
 
@@ -373,16 +332,6 @@ export default class Editor extends draw2d.Canvas {
       zoomLevel: this.zoomService.getZoomPercentage(),
       circuitComplete: this.circuit.isComplete()
     })
-  }
-
-  updateElement = ({ elementId, data }) => {
-    const elements: Element[] = super
-      .getFigures()
-      .asArray()
-
-    elements
-      .filter(({ id }) => elementId === id)[0]
-      .updateSettings(data)
   }
 
   load = (data) => {
@@ -419,15 +368,15 @@ export default class Editor extends draw2d.Canvas {
     this.commandRouter.applyCommand(command)
   }
 
-  setOscilloscopeActivity (focused) {
-    if (!this.debugMode) {
-      if (!focused) {
-        this.oscillation.stop()
-      } else {
-        this.oscillation.start()
-      }
-    }
-  }
+  // setOscilloscopeActivity (focused) {
+  //   if (!this.debugMode) {
+  //     if (!focused) {
+  //       this.oscillation.stop()
+  //     } else {
+  //       this.oscillation.start()
+  //     }
+  //   }
+  // }
 
   on = super.on
 }

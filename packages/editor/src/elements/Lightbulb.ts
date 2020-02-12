@@ -1,22 +1,17 @@
 import { OutputNode, LogicValue } from '@aristotle/logic-circuit'
 import { TemplateSVG } from '../svg'
-import Element from '../core/Element'
+import IOElement from './IOElement'
+import IElementProperties from '../interfaces/IElementProperties'
+import { ElementPropertyValues } from '../types'
 
-export default class Lightbulb extends Element {
-  constructor (id, params) {
-    super(id, params)
+export default class Lightbulb extends IOElement {
+  constructor (id: string, properties: ElementPropertyValues) {
+    super(id, properties)
 
     this.node = new OutputNode(id)
     this.node.on('change', this.render)
     this.registerSvgRenderer()
     this.render()
-  }
-
-  settings = {
-    name: {
-      type: 'text',
-      value: ''
-    }
   }
 
   registerSvgRenderer = () => {

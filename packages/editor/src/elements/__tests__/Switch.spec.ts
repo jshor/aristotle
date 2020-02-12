@@ -23,12 +23,12 @@ describe('Switch element', () => {
       expect(element.node).toBeInstanceOf(InputNode)
     })
 
-    xit('should set the node\'s value to the initial value in settings', () => {
+    xit('should set the node\'s value to the initial value in properties', () => {
       jest.spyOn(InputNode.prototype, 'setValue')
 
       const value = LogicValue.TRUE
 
-      element.settings.startValue.value = value
+      element.properties.startValue.value = value
       element.registerCircuitNode()
 
       expect(InputNode.prototype.setValue).toHaveBeenCalledTimes(1)

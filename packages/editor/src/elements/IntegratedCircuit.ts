@@ -36,14 +36,11 @@ export default class IntegratedCircuit extends Element {
   /**
    * Constructor.
    *
-   * @param {String} id
-   * @param {Object} circuit
-   * @param {Object} circuit.ports - list of port definitions
-   * @param {Object} circuit.elements - list of node definitions
-   * @param {Object} circuit.connections - list of connection entries
+   * @param {string} id
+   * @param {CircuitDefinition} circuit
    */
   constructor (id, { ports, elements, connections, name }: CircuitDefinition) {
-    super(id)
+    super(id, {})
 
     this.connectionEntries = connections
     this.elementEntries = elements
