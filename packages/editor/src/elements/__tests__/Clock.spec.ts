@@ -20,7 +20,7 @@ describe('Clock Element', () => {
       .spyOn(clock, 'resetInterval')
       .mockImplementation(jest.fn())
 
-    clock.settings.interval.onUpdate()
+    clock.properties.interval.onUpdate()
 
     expect(clock.resetInterval).toHaveBeenCalledTimes(1)
   })
@@ -31,12 +31,12 @@ describe('Clock Element', () => {
       expect(clock.node).toBeInstanceOf(InputNode)
     })
 
-    xit('should set the node\'s value to the initial value in settings', () => {
+    xit('should set the node\'s value to the initial value in properties', () => {
       jest.spyOn(InputNode.prototype, 'setValue')
 
       const value = LogicValue.TRUE
 
-      clock.settings.startValue.value = value
+      clock.properties.startValue.value = value
       clock.registerCircuitNode()
 
       expect(InputNode.prototype.setValue).toHaveBeenCalledTimes(1)
@@ -78,7 +78,7 @@ describe('Clock Element', () => {
       clock.resetInterval()
 
       expect(clock.clock.setInterval).toHaveBeenCalledTimes(1)
-      expect(clock.clock.setInterval).toHaveBeenCalledWith(clock.settings.interval.value)
+      expect(clock.clock.setInterval).toHaveBeenCalledWith(clock.properties.interval.value)
     })
   })
 

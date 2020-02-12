@@ -1,15 +1,15 @@
 import Editor from '../core/Editor'
 
 /**
- * @class CommandService
+ * @class CommandManager
  * @description Command manager for all requested UI commands.
  * @example ```
- *  const commandService = new CommandService(editor)
+ *  const commandManager = new CommandManager(editor)
  *
- *  commandService.applyCommand(command)
+ *  commandManager.applyCommand(command)
  * ```
  */
-export default class CommandRouterService {
+export default class CommandManager {
   public editor: Editor
 
   /**
@@ -26,13 +26,13 @@ export default class CommandRouterService {
       case 'SET_MOUSE_MODE':
       case 'TOGGLE_DEBUG':
       case 'TOGGLE_OSCILLATOR':
-        return 'userOptionChanged'
+        return 'config:changed'
       case 'UNDO':
       case 'REDO':
-        return 'commandStackChanged'
+        return 'commandStack:changed'
       case 'RESET':
       case 'STEP':
-        return 'circuitUpdated'
+        return 'circuit:changed'
     }
     return null
   }
@@ -58,7 +58,9 @@ export default class CommandRouterService {
         this.editor.setMouseMode(command.payload)
         break
       case 'UPDATE_ELEMENT':
-        this.editor.updateElement(command.payload)
+        this.editor
+          .deserializer
+          .updateSelectedElementProperties(command.payload)
         break
       case 'TOGGLE_OSCILLATOR':
         this.editor.toggleOscilloscope()

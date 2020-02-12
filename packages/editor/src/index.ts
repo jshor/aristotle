@@ -5,6 +5,9 @@ import 'jquery-ui-touch-punch'
 /* export types */
 export * from './types'
 
+/* interfaces */
+export { default as IElementProperties } from './interfaces/IElementProperties'
+
 /* core components */
 export { default as Editor } from './core/Editor'
 export { default as Connection } from './core/Connection'

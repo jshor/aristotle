@@ -2,15 +2,17 @@ import draw2d from 'draw2d'
 import { InputNode, LogicValue } from '@aristotle/logic-circuit'
 import IOElement from './IOElement'
 import WaveService from '../services/WaveService'
+import IElementProperties from '../interfaces/IElementProperties'
 import { TemplateSVG } from '../svg'
+import { ElementPropertyValues } from '../types'
 
 export default class Clock extends IOElement {
   private clock: WaveService
 
   public clickableArea: draw2d.shape.basic.Rectangle
 
-  constructor (id, params) {
-    super(id, params)
+  constructor (id: string, properties: ElementPropertyValues) {
+    super(id, properties)
 
     this.registerSvgRenderer()
     this.registerCircuitNode()
@@ -26,8 +28,8 @@ export default class Clock extends IOElement {
     this.render()
   }
 
-  settings = {
-    ...this.settings,
+  public properties: IElementProperties = {
+    ...this.properties,
     interval: {
       type: 'number',
       step: 100,
@@ -47,12 +49,12 @@ export default class Clock extends IOElement {
 
   registerCircuitNode = () => {
     this.node = new InputNode(this.getId())
-    this.node.setValue(this.settings.startValue.value)
+    this.node.setValue(this.getPropertyValue('startValue'))
     this.node.on('change', this.updateVisualValue)
   }
 
   registerClock = () => {
-    this.clock = new WaveService(`${this.getId()}_wave`, this.settings.interval.value)
+    this.clock = new WaveService(`${this.getId()}_wave`, this.getPropertyValue('interval'))
     this.clock.onUpdate(this.invertValue)
 
     if (this.canvas) {
@@ -65,7 +67,7 @@ export default class Clock extends IOElement {
   }
 
   resetInterval = () => {
-    this.clock.setInterval(this.settings.interval.value)
+    this.clock.setInterval(this.getPropertyValue('interval'))
   }
 
   getSvg = () => {

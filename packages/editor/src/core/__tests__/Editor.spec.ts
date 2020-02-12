@@ -2,12 +2,10 @@ import draw2d from 'draw2d'
 import Editor from '../Editor'
 import Connection from '../Connection'
 import Element from '../Element'
-import EditorModel from '../../models/EditorModel'
 
 jest.mock('draw2d')
 jest.mock('../Connection')
-jest.mock('../../services/ElementInitializerService')
-jest.mock('../../services/OscillationService', () => {
+jest.mock('../../managers/OscillationManager', () => {
   return class {
     start = jest.fn()
     stop = jest.fn()
@@ -96,7 +94,7 @@ describe('Editor', () => {
       expect(document.addEventListener).toHaveBeenCalledWith('mouseup', editor.onBoundlessMouseUp)
     })
 
-    it('should fire `commandStackChanged` when the command stack changes', () => {
+    it('should fire `commandStack:changed` when the command stack changes', () => {
       jest.spyOn(editor, 'fireEvent')
       jest
         .spyOn(commandStack, 'addEventListener')
@@ -105,7 +103,7 @@ describe('Editor', () => {
       editor.registerEventListeners()
 
       expect(editor.fireEvent).toHaveBeenCalledTimes(1)
-      expect(editor.fireEvent).toHaveBeenCalledWith('commandStackChanged')
+      expect(editor.fireEvent).toHaveBeenCalledWith('commandStack:changed')
     })
   })
 
@@ -114,7 +112,7 @@ describe('Editor', () => {
       jest.spyOn(editor, 'fireEvent')
     })
 
-    it('should fire `toolbox.close` when the selection is empty', () => {
+    it('should fire `properties:close` when the selection is empty', () => {
       jest
         .spyOn(Editor.prototype as draw2d.Canvas, 'getSelection')
         .mockReturnValue({
@@ -123,7 +121,7 @@ describe('Editor', () => {
       editor.onDeselect()
 
       expect(editor.fireEvent).toHaveBeenCalledTimes(1)
-      expect(editor.fireEvent).toHaveBeenCalledWith('toolbox.close')
+      expect(editor.fireEvent).toHaveBeenCalledWith('properties:close')
     })
 
     it('should fire `deselect` when an item is present in the selection', () => {
@@ -275,12 +273,12 @@ describe('Editor', () => {
   })
 
   describe('onDrop()', () => {
-    const rawParams = {
+    const properties = {
       type: 'LogicGate',
       gateType: 'NOR'
     }
     const data = {
-      params: btoa(JSON.stringify(rawParams))
+      params: btoa(JSON.stringify(properties))
     }
     const el = {
       data: () => data
@@ -302,7 +300,11 @@ describe('Editor', () => {
 
     beforeEach(() => {
       jest
-        .spyOn(editor, 'createElement')
+        .spyOn(editor.deserializer, 'createElement')
+        .mockImplementation(jest.fn())
+
+      jest
+        .spyOn(editor.deserializer, 'executeAllCommands')
         .mockImplementation(jest.fn())
     })
 
@@ -312,7 +314,7 @@ describe('Editor', () => {
         mockMouse(0, 0)
         editor.onDrop(el)
 
-        expect(editor.createElement).not.toHaveBeenCalled()
+        expect(editor.deserializer.createElement).not.toHaveBeenCalled()
       })
 
       it('should not add the element if the mouse X is right of the canvas', () => {
@@ -320,7 +322,7 @@ describe('Editor', () => {
         mockMouse(40, 0)
         editor.onDrop(el)
 
-        expect(editor.createElement).not.toHaveBeenCalled()
+        expect(editor.deserializer.createElement).not.toHaveBeenCalled()
       })
 
       it('should not add the element if the mouse Y is above of the canvas', () => {
@@ -328,7 +330,7 @@ describe('Editor', () => {
         mockMouse(20, 0)
         editor.onDrop(el)
 
-        expect(editor.createElement).not.toHaveBeenCalled()
+        expect(editor.deserializer.createElement).not.toHaveBeenCalled()
       })
 
       it('should not add the element if the mouse Y is below of the canvas', () => {
@@ -336,15 +338,15 @@ describe('Editor', () => {
         mockMouse(20, 50)
         editor.onDrop(el)
 
-        expect(editor.createElement).not.toHaveBeenCalled()
+        expect(editor.deserializer.createElement).not.toHaveBeenCalled()
       })
     })
 
     describe('when the dragged element is within the canvas bounds', () => {
-      it('should call `createElement()` with the params and the translated document coordinates', () => {
-        const x = 20
-        const y = 30
+      const x = 20
+      const y = 30
 
+      beforeEach(() => {
         jest
           .spyOn(editor, 'getDraggedCoordinates')
           .mockReturnValue({ x, y })
@@ -353,9 +355,21 @@ describe('Editor', () => {
         mockMouse(20, 20)
 
         editor.onDrop(el)
+      })
 
-        expect(editor.createElement).toHaveBeenCalledTimes(1)
-        expect(editor.createElement).toHaveBeenCalledWith(rawParams, x, y)
+      it('should call `createElement()` with the params and the translated document coordinates', () => {
+        expect(editor.deserializer.createElement).toHaveBeenCalledTimes(1)
+        expect(editor.deserializer.createElement).toHaveBeenCalledWith({
+          id: expect.any(String),
+          name: '',
+          properties: properties,
+          x,
+          y
+        })
+      })
+
+      it('should execute the queued CommandAdd command', () => {
+        expect(editor.deserializer.executeAllCommands).toHaveBeenCalledTimes(1)
       })
     })
   })
@@ -447,8 +461,8 @@ describe('Editor', () => {
     })
   })
 
-  describe('addNode()', () => {
-    const node = new Element('12345')
+  describe.skip('addNode()', () => {
+    const node = new Element('12345', {})
     const x = 40
     const y = 60
     let addSpy, nodeSpy, stepSpy
@@ -482,56 +496,6 @@ describe('Editor', () => {
     it('should step the circuit', () => {
       expect(stepSpy).toHaveBeenCalledTimes(1)
       expect(stepSpy).toHaveBeenCalledWith(true)
-    })
-  })
-
-  describe('addConnection()', () => {
-    const source: any = new Element('12345')
-    const target: any = new Element('12346')
-    const outputPort = new draw2d.Port()
-    const inputPort = new draw2d.Port()
-    const index = 1
-
-    beforeEach(() => {
-      jest
-        .spyOn(Connection.prototype as draw2d.Connection, 'setSource')
-        .mockImplementation(jest.fn())
-
-      jest
-        .spyOn(Connection.prototype as draw2d.Connection, 'setTarget')
-        .mockImplementation(jest.fn())
-
-      source.getOutputPort = jest.fn(() => outputPort)
-      source.getInputPort = jest.fn(() => inputPort)
-    })
-
-    it('should set the output port to the 0th index of the source', () => {
-      editor.addConnection(source, target, index)
-
-      expect(source.getOutputPort).toHaveBeenCalledWith(0)
-    })
-
-    it('should set the input port to the index-th of the target', () => {
-      editor.addConnection(source, target, index)
-
-      expect(target.getInputPort).toHaveBeenCalledWith(index)
-    })
-
-    it('should add the connection to the editor instance', () => {
-      const spy = jest.spyOn(Editor.prototype as draw2d.Canvas, 'add')
-
-      editor.addConnection(source, target, index)
-
-      expect(spy).toHaveBeenCalledTimes(1)
-      expect(spy).toHaveBeenCalledWith(expect.any(Connection))
-    })
-
-    it('should step the circuit', () => {
-      const spy = jest.spyOn(editor, 'step')
-      editor.addConnection(source, target, index)
-
-      expect(spy).toHaveBeenCalledTimes(1)
-      expect(spy).toHaveBeenCalledWith(true)
     })
   })
 
@@ -621,12 +585,6 @@ describe('Editor', () => {
   //     expect(spy).toHaveBeenCalledWith(expect.any(draw2d.policy.editor.BoundingboxSelectionPolicy))
   //   })
   // })
-
-  describe('createConnection()', () => {
-    it('should return a new instance of `Connection`', () => {
-      expect(editor.createConnection()).toBeInstanceOf(Connection)
-    })
-  })
 
   describe('policy installation', () => {
     let spy

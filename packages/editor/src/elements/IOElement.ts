@@ -1,22 +1,24 @@
 import { LogicValue } from '@aristotle/logic-circuit'
 import ToggleService from '../services/ToggleService'
-import OscillationService from '../services/OscillationService'
+import OscillationManager from '../managers/OscillationManager'
 import Element from '../core/Element'
+import IElementProperties from '../interfaces/IElementProperties'
+import { ElementPropertyValues } from '../types'
 
 export default class IOElement extends Element {
   public wave: ToggleService
 
-  private oscillation: OscillationService
+  private oscillation: OscillationManager
 
-  constructor (id, params) {
-    super(id, params)
+  constructor (id: string, properties: ElementPropertyValues) {
+    super(id, properties)
 
     this.on('added', this.registerWave)
-    this.on('added', this.setInitialValue)
+    // this.on('added', this.setInitialValue) // TODO
     this.on('removed', this.unregisterWave)
   }
 
-  settings = {
+  public properties: IElementProperties = {
     name: {
       type: 'text',
       value: ''
@@ -41,11 +43,11 @@ export default class IOElement extends Element {
   }
 
   setInitialValue = () => {
-    this.setValue(this.settings.startValue.value)
+    this.setValue(this.properties.startValue.value)
   }
 
   resetWave = () => {
-    if (this.settings.oscilloscope.value === '0') {
+    if (this.properties.oscilloscope.value === '0') {
       this.unregisterWave()
     } else {
       this.registerWave()

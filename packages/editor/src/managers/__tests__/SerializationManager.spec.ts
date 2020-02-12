@@ -1,5 +1,5 @@
 import draw2d from 'draw2d'
-import SerializerService from '../SerializerService'
+import SerializationManager from '../SerializationManager'
 import Editor from '../../core/Editor'
 import Connection from '../../core/Connection'
 import { Circuit } from '@aristotle/logic-circuit'
@@ -9,8 +9,8 @@ import Lightbulb from '../../elements/Lightbulb'
 
 jest.mock('../../core/Editor')
 
-describe('Serializer Service', () => {
-  let service
+describe('Serialization Manager', () => {
+  let manager
   let editor
   let a, b, c, gate
 
@@ -25,7 +25,7 @@ describe('Serializer Service', () => {
 
   beforeEach(() => {
     editor = new Editor('testEditor')
-    service = new SerializerService(editor)
+    manager = new SerializationManager(editor)
 
     // set up the editor state
     a = new Switch('A', {}) as draw2d.Figure
@@ -65,7 +65,7 @@ describe('Serializer Service', () => {
         .spyOn(editor, 'getLines')
         .mockReturnValue(connections)
 
-      const serialized = service.serializeAll()
+      const serialized = manager.serializeAll()
 
       // assert proper connections
       expect(serialized).toHaveProperty('connections')
@@ -112,7 +112,7 @@ describe('Serializer Service', () => {
           getAll: () => selection
         })
 
-      const serialized = service.serializeSelection()
+      const serialized = manager.serializeSelection()
 
       // assert proper connections
       expect(serialized).toHaveProperty('connections')

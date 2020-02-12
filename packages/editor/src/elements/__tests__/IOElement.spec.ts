@@ -16,14 +16,14 @@ describe('Input/Output Element', () => {
         .spyOn(element, 'resetWave')
         .mockImplementation(jest.fn())
 
-      element.settings.oscilloscope.onUpdate()
+      element.properties.oscilloscope.onUpdate()
 
       expect(element.resetWave).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('setInitialValue()', () => {
-    it('should set the value of the element to the settings initial value', () => {
+    it('should set the value of the element to the properties initial value', () => {
       jest
         .spyOn(element, 'setValue')
         .mockImplementation(jest.fn())
@@ -31,7 +31,7 @@ describe('Input/Output Element', () => {
       element.setInitialValue()
 
       expect(element.setValue).toHaveBeenCalledTimes(1)
-      expect(element.setValue).toHaveBeenCalledWith(element.settings.startValue.value)
+      expect(element.setValue).toHaveBeenCalledWith(element.properties.startValue.value)
     })
   })
 
@@ -41,7 +41,7 @@ describe('Input/Output Element', () => {
         .spyOn(element, 'unregisterWave')
         .mockImplementation(jest.fn())
 
-      element.settings.oscilloscope.value = '0'
+      element.properties.oscilloscope.value = '0'
       element.resetWave()
 
       expect(element.unregisterWave).toHaveBeenCalledTimes(1)
@@ -52,7 +52,7 @@ describe('Input/Output Element', () => {
         .spyOn(element, 'registerWave')
         .mockImplementation(jest.fn())
 
-      element.settings.oscilloscope.value = '1'
+      element.properties.oscilloscope.value = '1'
       element.resetWave()
 
       expect(element.registerWave).toHaveBeenCalledTimes(1)

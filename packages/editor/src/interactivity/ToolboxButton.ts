@@ -72,9 +72,9 @@ export default class ToolboxButton extends draw2d.shape.icon.Gear2 {
     const y: number = this.element.y
     const position: Point = this.container.canvas.fromCanvasToDocumentCoordinate(x, y)
 
-    this.container.canvas.fireEvent('toolbox.open', {
+    this.container.canvas.fireEvent('properties:open', {
       elementId: this.element.id,
-      settings: this.element.settings,
+      properties: this.element.properties,
       position
     })
   }

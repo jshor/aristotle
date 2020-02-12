@@ -61,7 +61,7 @@ class CommandSetInputCount extends draw2d.command.CommandCollection {
     super()
 
     this.figure = element as draw2d.Figure
-    this.oldPortCount = this.figure.settings.inputs.value
+    this.oldPortCount = this.figure.properties.inputs.value
     this.newPortCount = newPortCount
     this.canvas = this.figure.getCanvas()
     this.connections = this.figure.getConnections()
@@ -108,7 +108,7 @@ class CommandSetInputCount extends draw2d.command.CommandCollection {
    * Resets the figure to have its original port count.
    */
   reset = (inputCount: number): void => {
-    this.figure.settings.inputs.value = parseInt(inputCount.toString(), 10)
+    this.figure.properties.inputs.value = parseInt(inputCount.toString(), 10)
     this.figure.resetPorts()
     this.figure.svgRenderer.setInputCount(inputCount)
     this.repaint()
@@ -174,7 +174,7 @@ class CommandSetInputCount extends draw2d.command.CommandCollection {
       .asArray()
       .filter((connection: draw2d.Connection, index: number): boolean => {
         const isInput = connection.getTarget().parent === this.figure
-        const hasPortAvailable = this.figure.settings.inputs.value > index
+        const hasPortAvailable = this.figure.properties.inputs.value > index
 
         return isInput && hasPortAvailable
       })

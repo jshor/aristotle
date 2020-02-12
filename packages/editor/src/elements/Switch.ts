@@ -31,7 +31,7 @@ export default class Switch extends IOElement {
 
   registerCircuitNode = () => {
     this.node = new InputNode(this.getId())
-    this.node.setValue(this.settings.startValue.value)
+    this.node.setValue(this.properties.startValue.value)
     this.node.on('change', this.updateVisualValue)
   }
 
