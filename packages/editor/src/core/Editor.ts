@@ -9,6 +9,7 @@ import ViewportManager from '../managers/ViewportManager'
 import { CircuitElement, MouseMode } from '../types'
 import uuid from '../utils/uuid'
 import IEditorModel from '../interfaces/IEditorModel'
+import PanningSelectionPolicy from '../policies/PanningSelectionPolicy'
 
 export default class Editor extends draw2d.Canvas {
   public circuit: Circuit = new Circuit()
@@ -295,7 +296,7 @@ export default class Editor extends draw2d.Canvas {
   setMouseMode = (mode: MouseMode): void => {
     switch (mode) {
       case MouseMode.Panning:
-        super.installEditPolicy(new draw2d.policy.canvas.PanningSelectionPolicy())
+        super.installEditPolicy(new PanningSelectionPolicy())
         break
       case MouseMode.Selection:
       default:
