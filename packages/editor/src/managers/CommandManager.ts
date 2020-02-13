@@ -42,7 +42,7 @@ export default class CommandManager extends ManagerBase {
         this.editor.reset()
         break
       case Command.SetZoomLevel:
-        this.editor.zoomService.setZoomLevel(payload)
+        this.editor.viewportManager.setZoomLevel(payload)
         break
     }
 
@@ -59,6 +59,7 @@ export default class CommandManager extends ManagerBase {
     switch (commandType) {
       case Command.SetMouseMode:
       case Command.SetDebugger:
+      case Command.ToggleOscilloscope:
       case Command.SetActivity:
         return 'config:changed'
       case Command.Undo:

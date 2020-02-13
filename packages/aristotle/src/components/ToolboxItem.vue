@@ -94,9 +94,14 @@ export default {
   }
 
   &__caption {
-    padding: 0 1rem 1rem;
+    padding-top: 0.5rem;
     text-align: center;
     color: $color-primary;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style>

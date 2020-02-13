@@ -93,6 +93,11 @@ export declare type Point = {
   y: number
 }
 
+export declare type ScreenPoint = {
+  top: number
+  left: number
+}
+
 export declare type PropertiesDialogPayload = {
   elementId: string,
   properties: IElementProperties,

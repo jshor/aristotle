@@ -20,7 +20,7 @@ describe('CommandManager', () => {
       editor.deserializer = {
         updateElementProperties: jest.fn()
       }
-      editor.zoomService = {
+      editor.viewportManager = {
         setZoomLevel: jest.fn()
       }
       editor.undo = jest.fn()
@@ -109,7 +109,7 @@ describe('CommandManager', () => {
     })
 
     it('should call `setZoomLevel()` with the given zoom level for the command type `SetZoomLevel`', () => {
-      const spy = jest.spyOn(editor.zoomService, 'setZoomLevel')
+      const spy = jest.spyOn(editor.viewportManager, 'setZoomLevel')
       const zoomLevel = 1.5
 
       manager.applyCommand({
