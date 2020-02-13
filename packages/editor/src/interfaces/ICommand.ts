@@ -1,7 +1,7 @@
 import { Command } from '../types'
 
 export default interface ICommand {
-  type: Command
+  type: any // Command | string // TODO
   payload: any
   documentId?: string
 }

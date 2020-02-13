@@ -18,20 +18,25 @@
         @close="closePropertiesDialog"
       />
 
-      <div class="zoom">
-        <button
-          class="zoom__out"
-          :disabled="false"
-          @click="setZoom(1)">
-          <i class="fas fa-search-minus" />
-        </button>
-        <div class="zoom__level">{{ zoomLevel }}</div>
-        <button
-          class="zoom__out"
-          @click="setZoom(-1)">
-          <i class="fas fa-search-plus" />
-        </button>
-      </div>
+      <zoom
+        :level="zoomLevel"
+        @change="changeZoom"
+      />
+<!--
+  <div class="zoom">
+    <button
+      class="zoom__out"
+      :disabled="false"
+      @click="setZoom(1)">
+      <i class="fas fa-search-minus" />
+    </button>
+    <div class="zoom__level">{{ zoomLevel }}</div>
+    <button
+      class="zoom__out"
+      @click="setZoom(-1)">
+      <i class="fas fa-search-plus" />
+    </button>
+  </div> -->
     </template>
 
     <template v-slot:oscilloscope>
@@ -53,6 +58,7 @@ import {
   ElementPropertyValues
 } from '@aristotle/editor'
 import Document from '@/components/Document.vue'
+import Zoom from '@/components/Zoom.vue'
 import OscilloscopeContainer from './OscilloscopeContainer.vue'
 
 @Component({
@@ -60,7 +66,8 @@ import OscilloscopeContainer from './OscilloscopeContainer.vue'
   components: {
     Document,
     OscilloscopeContainer,
-    Properties
+    Properties,
+    Zoom
   },
   data () {
     return {
@@ -133,7 +140,9 @@ export default class DocumentContainer extends Vue {
   }
 
   applyCommand (command: ICommand) {
+    console.log('comm: ', command)
     if (this.isActive) {
+      console.log('apply: ', command)
       this.editor.applyCommand(command)
     }
   }
@@ -160,15 +169,10 @@ export default class DocumentContainer extends Vue {
     this.isPropertiesDialogOpen = false
   }
 
-  setZoom (factor) {
-    const minZoom = 0.5
-    const maxZoom = 5
-    const increment = 0.25
-    const l = this.zoomLevel + (factor * increment)
-
+  changeZoom (payload) {
     this.relayCommand({
-      type: 'SET_ZOOM',
-      payload: factor,
+      type: 'SetZoomLevel',
+      payload,
       documentId: this.document.id
     })
   }
@@ -180,7 +184,7 @@ export default class DocumentContainer extends Vue {
     const isFocused = this.isActive && document.hasFocus()
 
     this.relayCommand({
-      type: 'SET_ACTIVITY',
+      type: 'SetActivity',
       payload: isFocused,
       documentId: this.document.id
     })

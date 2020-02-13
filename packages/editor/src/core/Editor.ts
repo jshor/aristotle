@@ -5,7 +5,7 @@ import DeserializationManager from '../managers/DeserializationManager'
 import SerializationManager from '../managers/SerializationManager'
 import OscillationManager from '../managers/OscillationManager'
 import CommandManager from '../managers/CommandManager'
-import ZoomService from '../services/ZoomService'
+import ViewportManager from '../managers/ViewportManager'
 import { CircuitElement, MouseMode } from '../types'
 import uuid from '../utils/uuid'
 import IEditorModel from '../interfaces/IEditorModel'
@@ -21,7 +21,7 @@ export default class Editor extends draw2d.Canvas {
 
   public commandRouter: CommandManager = new CommandManager(this)
 
-  public zoomService: ZoomService = new ZoomService(this)
+  public viewportManager: ViewportManager = new ViewportManager(this)
 
   public debugMode: boolean = false
 
@@ -330,15 +330,15 @@ export default class Editor extends draw2d.Canvas {
       mouseMode: this.mouseMode,
       debugMode: this.debugMode,
       oscilloscopeEnabled: this.oscilloscopeEnabled,
-      zoomLevel: this.zoomService.getZoomPercentage(),
+      zoomLevel: this.viewportManager.getZoomPercentage(),
       circuitComplete: this.circuit.isComplete()
     }
   }
 
   load = (data) => {
     this.deserializer.deserialize(data)
-    this.zoomService.centerAllFigures()
-    this.zoomService.panToCenter()
+    this.viewportManager.centerAllFigures()
+    this.viewportManager.panToCenter()
   }
 
   /**
