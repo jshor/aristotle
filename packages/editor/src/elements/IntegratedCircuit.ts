@@ -1,3 +1,4 @@
+import { flatten } from 'lodash'
 import draw2d from 'draw2d'
 import Element from '../core/Element'
 import { Buffer, Nor, CircuitNode, LogicValue } from '@aristotle/logic-circuit'
@@ -7,6 +8,7 @@ import {
   CircuitConnection,
   CircuitDefinition,
   CircuitElement,
+  PortLabel,
   PortSchematic,
   SvgData
 } from '../types'
@@ -36,7 +38,7 @@ export default class IntegratedCircuit extends Element {
   /**
    * Constructor.
    *
-   * @param {string} id
+   * @param {String} id
    * @param {CircuitDefinition} circuit
    */
   constructor (id, { ports, elements, connections, name }: CircuitDefinition) {
@@ -65,9 +67,8 @@ export default class IntegratedCircuit extends Element {
 
   initializeCircuitNode = (): void => {
     this.nodes = this.elementEntries.map(this.getInitializedNode)
-    this.inputIds = this.getNodeListByType(this.elementEntries, 'input')
-    this.outputIds = this.getNodeListByType(this.elementEntries, 'output')
-
+    this.inputIds = this.getNodeListByType('input')
+    this.outputIds = this.getNodeListByType('output')
   }
 
   /**
@@ -116,15 +117,15 @@ export default class IntegratedCircuit extends Element {
   /**
    * Maps the ids of all nodes having the given type into an array.
    *
-   * @param {Object[]} nodes - list of nodes to map ids from
    * @param {String} type - `input` or `output`
    * @returns {String[]} list of ids
    */
-  getNodeListByType = (nodes: CircuitElement[], type: string): string[] => {
-    return nodes
-      .filter(({ nodeType }) => nodeType === type)
-      .sort((a, b) => a.portIndex - b.portIndex)
-      .map(({ id }) => id)
+  getNodeListByType = (t: string): string[] => {
+    const ports = flatten(Object.values(this.ports)) as PortLabel[]
+
+    return ports
+      .filter(({ type }) => type === t)
+      .map(({ elementId }) => elementId)
   }
 
   getInitializedNode = ({ id, nodeType, portIndex }: CircuitElement): CircuitNode => { // TODO: need to remap ids here too
@@ -133,12 +134,13 @@ export default class IntegratedCircuit extends Element {
       const node = new Buffer(id)
 
       if (nodeType === 'output') {
-        // if the node is an output, propagate the color change
+        // if the node is an output, propagate the color change when the value changes
         node.on('change', (value: LogicValue) => {
           this.setOutputConnectionColor(value, portIndex)
         })
       }
 
+      // always automatically evaluate the internal nodes of an IC, even if in debugger mode
       node.forceContinue = true
 
       return node

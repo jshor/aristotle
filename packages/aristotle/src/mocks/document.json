@@ -3,7 +3,8 @@
   "name": "Test Document",
 	"elements": [{
 		"id": "aqLvQGuk27",
-		"type": "Switch",
+    "type": "Switch",
+    "nodeType": "input",
     "properties": {
       "name": "R"
     },
@@ -12,6 +13,7 @@
 	}, {
 		"id": "VEFvl5BKys",
 		"type": "Switch",
+    "nodeType": "input",
     "properties": {
       "name": "S"
     },
@@ -36,6 +38,7 @@
 	}, {
 		"id": "c5XCJ9eill",
 		"type": "Lightbulb",
+    "nodeType": "output",
     "properties": {
       "name": "OUT_1"
     },
@@ -44,6 +47,7 @@
 	}, {
 		"id": "XNTLeHX6dZ",
 		"type": "Lightbulb",
+    "nodeType": "output",
     "properties": {
       "name": "OUT_2"
     },

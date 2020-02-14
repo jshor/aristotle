@@ -11,7 +11,12 @@ import IRootState from '../../interfaces/IRootState'
 const state: IRootState = {
   activeDocumentId: '',
   relayedCommand: null,
-  documents: []
+  documents: [],
+  dialog: {
+    open: false,
+    type: 'NONE',
+    data: {}
+  }
 }
 
 const getters: GetterTree<IRootState, IRootState> = {
@@ -34,10 +39,21 @@ const actions: ActionTree<IRootState, IRootState> = {
   relayCommand ({ commit }: ActionContext<IRootState, IRootState>, command: ICommand): void {
     console.log('relay', command)
     commit('RELAY_COMMAND', command)
+  },
+
+  openIntegratedCircuitBuilder ({ commit }, integratedCircuit) {
+    commit('SET_DIALOG', {
+      open: true,
+      type: 'INTEGRATED_CIRCUIT',
+      data: integratedCircuit
+    })
   }
 }
 
 const mutations: MutationTree<IRootState> = {
+  SET_DIALOG (state, dialogState) {
+    state.dialog = dialogState
+  },
   OPEN_DOCUMENT (state: IRootState, document) {
     state.activeDocumentId = document.id
     state.documents.push(document)

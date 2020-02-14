@@ -152,7 +152,7 @@ export default class Properties extends Vue {
   border: 1px solid #000;
   width: 200px;
   padding: 0.5em;
-  z-index: 1000;
+  z-index: 800;
 }
 
 .properties__field {

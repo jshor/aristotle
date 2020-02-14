@@ -8,7 +8,7 @@ describe('Integrated Circuit', () => {
   let ic
 
   beforeEach(() => {
-    ic = new IntegratedCircuit(fixture.id, fixture.properties)
+    ic = new IntegratedCircuit(fixture.id, fixture)
     jest
       .spyOn(Connection.prototype as any, 'on')
       .mockImplementation(jest.fn())

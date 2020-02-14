@@ -87,7 +87,10 @@ import OscilloscopeContainer from './OscilloscopeContainer.vue'
     ])
   },
   methods: {
-    ...mapActions(['relayCommand'])
+    ...mapActions([
+      'relayCommand',
+      'openIntegratedCircuitBuilder'
+    ])
   },
   watch: {
     activeDocumentId: {
@@ -190,6 +193,10 @@ export default class DocumentContainer extends Vue {
     })
   }
 
+  createCircuit (editor, data) {
+    this.$store.dispatch('openIntegratedCircuitBuilder', data)
+  }
+
   /**
    * Maps of all Editor events to DocumentContainer methods.
    *
@@ -202,9 +209,11 @@ export default class DocumentContainer extends Vue {
       'config:changed': 'updateEditorModel',
       'zoomed': 'updateEditorModel',
       'circuit:changed': 'updateEditorModel',
+      'commandStack:changed': 'updateEditorModel',
       'properties:open': 'openPropertiesDialog',
       'properties:close': 'closePropertiesDialog',
-      'oscillate': 'onOscillation'
+      'oscillate': 'onOscillation',
+      'circuit:export': 'createCircuit'
     }
 
     Object

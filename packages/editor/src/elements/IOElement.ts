@@ -1,11 +1,15 @@
+import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
 import ToggleService from '../services/ToggleService'
 import OscillationManager from '../managers/OscillationManager'
 import Element from '../core/Element'
 import IElementProperties from '../interfaces/IElementProperties'
 import { ElementPropertyValues } from '../types'
+import uuid from '../utils/uuid'
 
 export default class IOElement extends Element {
+  public nodeType: string = 'input'
+
   public wave: ToggleService
 
   private oscillation: OscillationManager
@@ -89,5 +93,19 @@ export default class IOElement extends Element {
       : LogicValue.TRUE
 
     this.setValue(newValue)
+  }
+
+  public serialize = () => {
+    const figure: draw2d.Figure = this as draw2d.Figure
+
+    return {
+      id: figure.getId(),
+      x: figure.getX(),
+      y: figure.getY(),
+      type: this.constructor.name,
+      nodeType: this.nodeType,
+      name: uuid(),
+      properties: this.serializeProperties()
+    }
   }
 }

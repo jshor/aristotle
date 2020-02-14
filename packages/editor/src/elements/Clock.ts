@@ -7,6 +7,8 @@ import { TemplateSVG } from '../svg'
 import { ElementPropertyValues } from '../types'
 
 export default class Clock extends IOElement {
+  public nodeType: string = 'input'
+
   private clock: WaveService
 
   public clickableArea: draw2d.shape.basic.Rectangle
