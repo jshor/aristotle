@@ -93,7 +93,7 @@ export default class DeserializationManager extends ManagerBase {
    *
    * @param {CircuitConnection} circuitConnection
    */
-  public createConnection = (connection: CircuitConnection): void => {
+  public createConnection = (connection: any): void => {
     const { inputId, outputId, sourceIndex, targetIndex } = connection
     const sourceElement = this.getElementById(this.idMap[inputId]) as Port
     const targetElement = this.getElementById(this.idMap[outputId]) as Port

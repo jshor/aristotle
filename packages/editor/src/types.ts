@@ -41,7 +41,8 @@ export declare type PortDefinition = {
 
 export declare type PortLabel = {
   label: string,
-  type: string
+  type: string,
+  elementId?: string
 }
 
 export declare type PortSchematic = {

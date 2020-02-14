@@ -67,7 +67,6 @@
 
       <!-- integrated circuit builder -->
       <toolbar-button
-        :disabled="true"
         @click="applyEditorCommand('CreateIntegratedCircuit')"
         icon="microchip"
       />

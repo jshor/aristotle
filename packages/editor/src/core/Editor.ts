@@ -4,12 +4,14 @@ import { Circuit } from '@aristotle/logic-circuit'
 import DeserializationManager from '../managers/DeserializationManager'
 import SerializationManager from '../managers/SerializationManager'
 import OscillationManager from '../managers/OscillationManager'
+import CircuitExportManager from '../managers/CircuitExportManager'
 import CommandManager from '../managers/CommandManager'
 import ViewportManager from '../managers/ViewportManager'
 import { CircuitElement, MouseMode } from '../types'
 import uuid from '../utils/uuid'
 import IEditorModel from '../interfaces/IEditorModel'
 import PanningSelectionPolicy from '../policies/PanningSelectionPolicy'
+import Connection from './Connection'
 
 export default class Editor extends draw2d.Canvas {
   public circuit: Circuit = new Circuit()
@@ -23,6 +25,8 @@ export default class Editor extends draw2d.Canvas {
   public commandRouter: CommandManager = new CommandManager(this)
 
   public viewportManager: ViewportManager = new ViewportManager(this)
+
+  public circuitExportManager: CircuitExportManager = new CircuitExportManager(this)
 
   public debugMode: boolean = false
 
@@ -319,7 +323,7 @@ export default class Editor extends draw2d.Canvas {
 
     super.installEditPolicy(grid)
     super.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({
-      createConnection: this.deserializer.createConnection
+      createConnection: () => new Connection(this.circuit)
     }))
   }
 

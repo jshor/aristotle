@@ -1,9 +1,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { ICommand } from '@aristotle/editor'
 import Vuex from 'vuex'
-import Vue from 'vue'
 import DocumentContainer from '../DocumentContainer.vue'
 import data from '../../mocks/document.json'
-import ICommand from 'interfaces/ICommand'
 
 const localVue = createLocalVue()
 
@@ -57,7 +56,7 @@ describe('Document Container', () => {
 
   describe('applyCommand()', () => {
     const command: ICommand = {
-      command: 'TEST_COMMAND',
+      type: 'TestCommand',
       payload: null
     }
 
@@ -124,7 +123,7 @@ describe('Document Container', () => {
     })
 
     describe('when the document is inactive', () => {
-      it('should pass the SET_ACTIVITY command with false', () => {
+      it('should pass the SetActivity command with false', () => {
         state.activeDocumentId = 'unknown-id'
 
         jest
@@ -137,7 +136,7 @@ describe('Document Container', () => {
 
         expect(wrapper.vm.relayCommand).toHaveBeenCalledTimes(1)
         expect(wrapper.vm.relayCommand).toHaveBeenCalledWith({
-          command: 'SET_ACTIVITY',
+          type: 'SetActivity',
           payload: false,
           documentId: wrapper.vm.document.id
         })

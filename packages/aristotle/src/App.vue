@@ -1,26 +1,30 @@
 <template>
   <div id="app" class="main" v-if="activeDocument">
-    <toolbar-container :document="activeDocument" />
+    <circuit-export-container v-if="dialog.type === 'INTEGRATED_CIRCUIT'" />
 
-    <split-pane :default-percent="20" split="vertical">
-      <template v-slot:paneL>
-        <toolbox-container class="dropbox" />
-      </template>
-      <template v-slot:paneR>
-        <div class="miracle">
-          <tabs-container />
+    <div class="content" :class="{ 'content--glass': dialog.open }">
+      <toolbar-container :document="activeDocument" />
 
-          <DocumentContainer
-            v-show="document.id === activeDocumentId"
-            v-for="document in documents"
-            :document="document"
-            :key="document.id"
-            class="document"
-          />
+      <split-pane :default-percent="20" split="vertical">
+        <template v-slot:paneL>
+          <toolbox-container class="dropbox" />
+        </template>
+        <template v-slot:paneR>
+          <div class="miracle">
+            <tabs-container />
 
-        </div>
-      </template>
-    </split-pane>
+            <DocumentContainer
+              v-show="document.id === activeDocumentId"
+              v-for="document in documents"
+              :document="document"
+              :key="document.id"
+              class="document"
+            />
+
+          </div>
+        </template>
+      </split-pane>
+    </div>
   </div>
 
   <div class="app--no-doc" v-else>
@@ -35,6 +39,7 @@
 import { mapState, mapGetters } from 'vuex'
 import Splash from '@/components/Splash'
 import Toolbar from '@/containers/ToolbarContainer'
+import CircuitExportContainer from '@/containers/CircuitExportContainer'
 import DocumentContainer from '@/containers/DocumentContainer'
 import TabsContainer from '@/containers/TabsContainer'
 import ToolbarContainer from '@/containers/ToolbarContainer'
@@ -46,6 +51,7 @@ import filters from '@/assets/filters.svg'
 export default {
   name: 'App',
   components: {
+    CircuitExportContainer,
     DocumentContainer,
     Splash,
     TabsContainer,
@@ -56,10 +62,7 @@ export default {
     return { filters }
   },
   computed: {
-    ...mapState({
-      documents: (state) => state.documents,
-      activeDocumentId: (state) => state.activeDocumentId
-    }),
+    ...mapState(['documents', 'activeDocumentId', 'dialog']),
     ...mapGetters(['activeDocument'])
   },
   methods: {
@@ -120,6 +123,18 @@ body {
   overflow: hidden;
   // opacity: 0.5;
   // filter: blur(10px); // thanks CSS, very cool!
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  filter: blur(0);
+  transition: 0.5s filter;
+}
+.content--glass {
+  // opacity: 0.5;
+  filter: blur(3px);
 }
 
 .miracle {

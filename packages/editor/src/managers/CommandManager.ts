@@ -44,6 +44,9 @@ export default class CommandManager extends ManagerBase {
       case Command.SetZoomLevel:
         this.editor.viewportManager.setZoomLevel(payload)
         break
+      case 'CreateIntegratedCircuit':
+        this.editor.circuitExportManager.createIntegratedCircuit()
+        break
     }
 
     this.fireApplicableEvent(type)

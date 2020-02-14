@@ -5,6 +5,8 @@ import IOElement from './IOElement'
 import { TemplateSVG } from '../svg'
 
 export default class Switch extends IOElement {
+  public nodeType: string = 'input'
+
   public clickableArea: draw2d.shape.basic.Rectangle
 
   constructor (id, params) {

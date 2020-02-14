@@ -5,6 +5,8 @@ import IElementProperties from '../interfaces/IElementProperties'
 import { ElementPropertyValues } from '../types'
 
 export default class Lightbulb extends IOElement {
+  public nodeType: string = 'output'
+
   constructor (id: string, properties: ElementPropertyValues) {
     super(id, properties)
 

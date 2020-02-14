@@ -227,7 +227,7 @@ export default class Element extends draw2d.shape.basic.Image {
     }
   }
 
-  serialize = () => {
+  public serialize = () => {
     return {
       id: super.getId(),
       x: super.getX(),
