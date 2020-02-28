@@ -74,6 +74,16 @@ class CircuitNode {
   }
 
   /**
+   * Updates the node's value to be static having the given value.
+   *
+   * @param {LogicValue} value
+   */
+  public setValue = (value: number): void => {
+    this.newValue = value
+    this.eval = () => value
+  }
+
+  /**
    * Invokes the registered events having the given `eventType`.
    *
    * @param {String} eventType - 'change' or 'reset'
