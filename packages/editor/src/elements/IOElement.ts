@@ -18,7 +18,7 @@ export default class IOElement extends Element {
     super(id, properties)
 
     this.on('added', this.registerWave)
-    // this.on('added', this.setInitialValue) // TODO
+    this.on('added', this.setInitialValue) // TODO
     this.on('removed', this.unregisterWave)
   }
 
@@ -82,7 +82,7 @@ export default class IOElement extends Element {
       this.canvas.step(true)
     } else {
       // if the editor is in debug mode, tell the user the circuit evaluation is incomplete
-      this.canvas.fireEvent('circuitUpdated')
+      this.canvas.fireEvent('circuit:updated')
     }
     this.render()
   }

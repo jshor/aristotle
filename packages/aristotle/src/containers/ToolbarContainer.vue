@@ -75,6 +75,7 @@
     <template v-slot:right>
       <!-- debugger tools -->
       <toolbar-button
+        :active="editor.debugMode"
         @click="applyEditorCommand('SetDebugger')"
         icon="bug"
       />
