@@ -1,40 +1,37 @@
-const webpack = require('webpack')
 const path = require('path')
+const ManifestPlugin = require('webpack-manifest-plugin')
+
+const filename = process.env.NODE_ENV !== 'production'
+  ? 'index'
+  : 'index-[hash]'
 
 module.exports = {
   outputDir: path.join(__dirname, '../../build/app'),
   publicPath: '/app',
-  configureWebpack: {
-    // module: {
-    //   rules: [
-    //     {
-    //       test: /\.(svg)(\?.*)?$/,
-    //       use: [
-    //         {
-    //           loader: 'svg-inline-loader',
-    //           options: {
-    //             limit: 10000,
-    //             name: 'assets/img/[name].[hash:7].[ext]'
-    //           }
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // }
+  productionSourceMap: false,
+  devServer: {
+    stats: 'errors-only',
+    disableHostCheck: true,
+    hot: true,
+    progress: false,
+    watchOptions: {
+      aggregateTimeout: 300,
+      poll: true
+    }
   },
-  chainWebpack: (config) => {
-    config.resolve.symlinks(false)
+  chainWebpack: config => {
+    config.plugins.delete('progress')
   },
-  // chainWebpack: config => {
-  //   config.module
-  //     .rule('svg')
-  //     .test(() => false)
-  //     .use('file-loader')
-  // },
+  configureWebpack: config => {
+    config.entry = './src/index.ts'
+    config.output.filename = `${filename}.js`
+
+    config.plugins.push(new ManifestPlugin())
+  },
   css: {
     loaderOptions: {
       sass: {
-        data: `
+        prependData: `
           @import "@/styles/_variables.scss";
           @import "@/styles/_overrides.scss";
           @import '~@fortawesome/fontawesome-free/scss/fontawesome';

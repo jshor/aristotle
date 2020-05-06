@@ -126,11 +126,6 @@ import ToolbarSeparator from '@/components/Toolbar/ToolbarSeparator.vue'
       required: true
     }
   },
-  computed: {
-    editor () {
-      return this.document.editorModel
-    }
-  },
   methods: {
     ...mapActions(['relayCommand'])
   }
@@ -139,6 +134,10 @@ export default class ToolbarContainer extends Vue {
   public document: any
 
   public relayCommand: (command: ICommand) => void
+
+  get editor () {
+    return this.document.editorModel
+  }
 
   public applyEditorCommand = (type: string, payload?: any) => {
     this.relayCommand({

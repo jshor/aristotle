@@ -1,4 +1,9 @@
+// module.exports = {
+//   "presets": ["@babel/preset-env"],
+//   "plugins": ["@babel/plugin-proposal-class-properties"]
+// }
+
 module.exports = {
-  "presets": ["@babel/preset-env"],
-  "plugins": ["@babel/plugin-proposal-class-properties"]
-}
+  presets: ['@vue/app'],
+    "plugins": ["@babel/plugin-proposal-class-properties"]
+};

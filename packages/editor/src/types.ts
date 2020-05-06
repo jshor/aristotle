@@ -1,4 +1,5 @@
 import IElementProperties from './interfaces/IElementProperties'
+import IPulse from './interfaces/IPulse'
 
 export declare const enum PortFlow {
   Input = 'input',
@@ -110,7 +111,11 @@ export declare type IdMap = {
 }
 
 export declare type KeyValuePair = {
-  [key: string]: string
+  [key: string]: string | number
+}
+
+export declare type WaveList = {
+  [key: string]: IPulse
 }
 
 export declare type ElementPropertyValues = CircuitDefinition | KeyValuePair

@@ -50,7 +50,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import Emit from '../../../../node_modules/vue-class-component/lib'
 
 import {
   IElementProperties,
@@ -103,7 +102,6 @@ export default class Properties extends Vue {
   mounted () {
     this.values = this.getElementPropertyValues()
     this.adjustToFitViewport()
-    // this._events = {}
   }
 
   getElementPropertyValues = (): ElementPropertyValues => {

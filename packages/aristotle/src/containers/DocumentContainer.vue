@@ -22,21 +22,6 @@
         :level="zoomLevel"
         @change="changeZoom"
       />
-<!--
-  <div class="zoom">
-    <button
-      class="zoom__out"
-      :disabled="false"
-      @click="setZoom(1)">
-      <i class="fas fa-search-minus" />
-    </button>
-    <div class="zoom__level">{{ zoomLevel }}</div>
-    <button
-      class="zoom__out"
-      @click="setZoom(-1)">
-      <i class="fas fa-search-plus" />
-    </button>
-  </div> -->
     </template>
 
     <template v-slot:oscilloscope>
@@ -47,7 +32,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import Component from 'vue-class-component'
+// import Component from 'vue-class-component'
+import { Component, Watch } from 'vue-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import Properties from '@/components/Properties.vue'
 import {
@@ -91,20 +77,6 @@ import OscilloscopeContainer from './OscilloscopeContainer.vue'
       'relayCommand',
       'openIntegratedCircuitBuilder'
     ])
-  },
-  watch: {
-    activeDocumentId: {
-      handler () {
-        this.setActivity()
-      },
-      immediate: true
-    },
-    relayedCommand: {
-      handler (payload) {
-        this.applyCommand(payload)
-      },
-      deep: true
-    }
   }
 })
 export default class DocumentContainer extends Vue {
@@ -122,17 +94,21 @@ export default class DocumentContainer extends Vue {
 
   public relayCommand: (command: ICommand) => void
 
-  public propertiesDialogPayload: PropertiesDialogPayload = null
+  public propertiesDialogPayload: PropertiesDialogPayload
 
   get zoomLevel () {
     return this.document.editorModel.zoomLevel
   }
 
   get isActive () {
-    return this.document.id === this.activeDocumentId
+    return this.document.id === this.activeDocumentId || true // TODO: activeDocumentId is undefined, why?
   }
 
   mounted () {
+    this.loadDocument()
+  }
+
+  loadDocument = (): void => {
     this.editor = new Editor(this.document.id)
     this.editor.load(this.document.data)
     this.subscribeToEditorEvents(this.editor)
@@ -140,14 +116,6 @@ export default class DocumentContainer extends Vue {
 
   updateEditorModel (editor: Editor) {
     this.$store.commit('SET_EDITOR_MODEL', editor.getEditorModel())
-  }
-
-  applyCommand (command: ICommand) {
-    console.log('comm: ', command)
-    if (this.isActive) {
-      console.log('apply: ', command)
-      this.editor.applyCommand(command)
-    }
   }
 
   onOscillation (editor: Editor, payload) {
@@ -168,7 +136,6 @@ export default class DocumentContainer extends Vue {
   }
 
   closePropertiesDialog () {
-    this.propertiesDialogPayload = null
     this.isPropertiesDialogOpen = false
   }
 
@@ -183,7 +150,8 @@ export default class DocumentContainer extends Vue {
   /**
    * Updates the active status of the Editor.
    */
-  setActivity () {
+  @Watch('activeDocumentId', { immediate: true })
+  onActiveDocumentIdChanged = () => {
     const isFocused = this.isActive && document.hasFocus()
 
     this.relayCommand({
@@ -191,6 +159,13 @@ export default class DocumentContainer extends Vue {
       payload: isFocused,
       documentId: this.document.id
     })
+  }
+
+  @Watch('relayedCommand', { deep: true })
+  onRelayedCommandChanged = (command: ICommand) => {
+    if (this.isActive) {
+      this.editor.applyCommand(command)
+    }
   }
 
   createCircuit (editor, data) {

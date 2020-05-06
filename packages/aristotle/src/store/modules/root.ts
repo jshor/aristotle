@@ -37,7 +37,6 @@ const actions: ActionTree<IRootState, IRootState> = {
    * @returns {Promise<void>}
    */
   relayCommand ({ commit }: ActionContext<IRootState, IRootState>, command: ICommand): void {
-    console.log('relay', command)
     commit('RELAY_COMMAND', command)
   },
 

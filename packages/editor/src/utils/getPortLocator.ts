@@ -1,13 +1,13 @@
 import { layout } from 'draw2d'
+import XYLocator from '../layout/XYLocator'
 
-const getPortLocator = ({ x, y, type }) => {
+export default function getPortLocator ({ x, y, type }) {
   if (isNaN(x) || isNaN(y)) {
     if (type === 'output') {
       return new layout.locator.RightLocator()
     }
     return new layout.locator.LeftLocator()
   }
-  return new layout.locator.XYAbsPortLocator(x, y)
+  
+  return new XYLocator(x, y)
 }
-
-export default getPortLocator

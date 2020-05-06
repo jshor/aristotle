@@ -8,6 +8,7 @@ import SVGBase from 'svg/lib/SVGBase'
 import addTouchEvents from '../utils/addTouchEvents'
 import { Point, ElementPropertyValues } from '../types'
 import IElementProperties from '../interfaces/IElementProperties'
+import XYLocator from '../layout/XYLocator'
 
 export default class Element extends draw2d.shape.basic.Image {
   node = null
@@ -183,6 +184,7 @@ export default class Element extends draw2d.shape.basic.Image {
       // }
       */
       port.setId(params.id)
+      // port.setPosition(params.x, params.y)
     })
   }
 
@@ -191,7 +193,7 @@ export default class Element extends draw2d.shape.basic.Image {
    */
   createToolboxButton = () => {
     if (!this.toolboxButton && this.hasProperties()) {
-      const locator = new draw2d.layout.locator.XYAbsPortLocator(0, 0)
+      const locator = new XYLocator(0, 0)
       const figure: draw2d.Figure = this.attachClickableArea(20, 20, {
         x: super.getWidth() + 10,
         y: 0
@@ -204,7 +206,7 @@ export default class Element extends draw2d.shape.basic.Image {
 
   attachClickableArea = (width: number, height: number, point: Point) => {
     const figure: draw2d.Figure = this as draw2d.Figure
-    const locator = new draw2d.layout.locator.XYAbsPortLocator(point.x, point.y)
+    const locator = new XYLocator(point.x, point.y)
     const clickableArea = new draw2d.shape.basic.Rectangle({
       opacity: 0,
       width,

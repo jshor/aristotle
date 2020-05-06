@@ -22,7 +22,7 @@ export default class Editor extends draw2d.Canvas {
 
   public oscillation: OscillationManager = new OscillationManager(this)
 
-  public commandRouter: CommandManager = new CommandManager(this)
+  public commandManager: CommandManager = new CommandManager(this)
 
   public viewportManager: ViewportManager = new ViewportManager(this)
 
@@ -317,11 +317,6 @@ export default class Editor extends draw2d.Canvas {
    * @private
    */
   installEditPolicies = () => {
-    const grid = new draw2d.policy.canvas.ShowGridEditPolicy()
-
-    grid.setGridColor('#333641')
-
-    super.installEditPolicy(grid)
     super.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({
       createConnection: () => new Connection(this.circuit)
     }))
@@ -371,7 +366,8 @@ export default class Editor extends draw2d.Canvas {
   }
 
   applyCommand = (command) => {
-    this.commandRouter.applyCommand(command)
+    console.log('EDITOR: RECIV COMMD', command)
+    this.commandManager.applyCommand(command)
   }
 
   // setOscilloscopeActivity (focused) {
