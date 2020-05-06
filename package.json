@@ -1,19 +1,16 @@
 {
   "private": true,
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ],
-    "nohoist": [
-      "**/editor",
-      "**/logic-circuit"
-    ]
-  },
   "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "start": "npm run serve --prefix ./packages/aristotle",
-    "dev": "lerna run dev --parallel --stream --concurrency",
+    "dev": "multiview [npm run dev:aristotle] [npm run dev:logic-circuit] [npm run dev:editor] -e",
+    "dev:aristotle": "yarn workspace @aristotle/aristotle dev",
+    "dev:editor": "yarn workspace @aristotle/editor dev",
+    "dev:logic-circuit": "yarn workspace @aristotle/logic-circuit dev",
     "docs:dev": "vuepress dev docs --temp .temp",
     "docs:build": "vuepress build docs",
     "build": "yarn docs:build && lerna run build",
@@ -22,6 +19,7 @@
   "devDependencies": {
     "deploy-aws-s3-cloudfront": "^1.0.0",
     "lerna": "^2.11.0",
+    "multiview": "^3.0.0",
     "vuepress": "1.0.0-alpha.44",
     "vuepress-theme-vue": "1.0.3"
   },

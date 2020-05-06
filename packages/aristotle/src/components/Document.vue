@@ -75,12 +75,11 @@ export default {
 
   &__editor {
     overflow: hidden;
-    background-color: #333641;
+    background-color: #1D1E25;
     box-sizing: border-box;
     height: 100%;
 
     svg {
-      background-color: #1D1E25;
       position: relative !important;
     }
   }
