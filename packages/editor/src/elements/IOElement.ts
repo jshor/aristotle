@@ -82,7 +82,7 @@ export default class IOElement extends Element {
       this.canvas.step(true)
     } else {
       // if the editor is in debug mode, tell the user the circuit evaluation is incomplete
-      this.canvas.fireEvent('circuit:updated')
+      this.canvas.fireEvent('circuit:changed')
     }
     this.render()
   }

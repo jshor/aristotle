@@ -31,6 +31,19 @@ let webConfig = {
     clientLogLevel: 'silent',
     port: 8080
   },
+  watchOptions: {
+    ignored: (files) => {
+      console.log('files: ', files)
+
+      return !files.includes('aristotle/packages')
+      // return files.filter(f => !f.includes('editor/dist'))
+    }
+    // ignored: [
+    //   /node_modules([\\]+|\/)+(?!@aristotle\/editor)/,
+    //   /[a-z-_A-Z]+([\\]+|\/)+(?!@aristotle\/editor)/,
+    //   /\@aristotle\/editor([\\]+|\/)node_modules/
+    // ]
+  },
   module: {
     rules: [
       {
@@ -127,15 +140,26 @@ let webConfig = {
       'process.env.IS_WEB': 'true'
     }),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
+      new webpack.ProvidePlugin({
+        '$': 'jquery',
+        'jquery': 'jquery',
+        'window.jQuery': 'jquery',
+        'jQuery': 'jquery'
+      })
   ],
   resolve: {
     alias: {
+      // '@aristotle/editor': path.join(__dirname, '../editor/dist/editor.js'),
       '@': path.join(__dirname, './src'),
       'vue$': 'vue/dist/vue.esm.js'
     },
+    // modules: ['../packages/editor', 'node_modules'],
     extensions: ['.js', '.ts', '.vue', '.json', '.css']
   },
+  // resolveLoader: {
+  //   modules: ['../packages/editor', 'node_modules'],
+  // },
   target: 'web'
 }
 

@@ -22,21 +22,6 @@
         :level="zoomLevel"
         @change="changeZoom"
       />
-<!--
-  <div class="zoom">
-    <button
-      class="zoom__out"
-      :disabled="false"
-      @click="setZoom(1)">
-      <i class="fas fa-search-minus" />
-    </button>
-    <div class="zoom__level">{{ zoomLevel }}</div>
-    <button
-      class="zoom__out"
-      @click="setZoom(-1)">
-      <i class="fas fa-search-plus" />
-    </button>
-  </div> -->
     </template>
 
     <template v-slot:oscilloscope>
@@ -60,6 +45,20 @@ import {
 import Document from '@/components/Document.vue'
 import Zoom from '@/components/Zoom.vue'
 import OscilloscopeContainer from './OscilloscopeContainer.vue'
+import { EventBus } from '@/utils/bus'
+
+const accept = () => {
+  module.hot.accept('../../../editor', () => {
+    console.log('received module.hot.accept in DocumentContainer.vue')
+    EventBus.$emit('hot-reload')
+    accept()
+  })
+}
+
+if (module.hot) {
+  console.log('hot reload enabled in DocumentContainer.vue')
+  accept()
+}
 
 @Component({
   name: 'DocumentContainer',
@@ -91,6 +90,12 @@ import OscilloscopeContainer from './OscilloscopeContainer.vue'
       'relayCommand',
       'openIntegratedCircuitBuilder'
     ])
+  },
+  mounted () {
+    EventBus.$on('hot-reload', () => {
+      console.log('FORCE UPDATING')
+      this.$forceUpdate()
+    })
   },
   watch: {
     activeDocumentId: {
@@ -133,6 +138,14 @@ export default class DocumentContainer extends Vue {
   }
 
   mounted () {
+    EventBus.$on('hot-reload', () => {
+      console.log('received hot-reload request via BUS')
+      this.loadDocument()
+    })
+    // this.loadDocument()
+  }
+
+  loadDocument = (): void => {
     this.editor = new Editor(this.document.id)
     this.editor.load(this.document.data)
     this.subscribeToEditorEvents(this.editor)
@@ -143,9 +156,7 @@ export default class DocumentContainer extends Vue {
   }
 
   applyCommand (command: ICommand) {
-    console.log('comm: ', command)
     if (this.isActive) {
-      console.log('apply: ', command)
       this.editor.applyCommand(command)
     }
   }

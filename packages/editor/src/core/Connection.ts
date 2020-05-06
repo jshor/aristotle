@@ -73,7 +73,11 @@ class Connection extends draw2d.Connection {
     const targetIndex = getPortIndex(this.targetPort, 'input')
 
     this.circuit.addConnection(sourceNode, targetNode, targetIndex)
-    this.canvas.step(true)
+
+    if (!this.canvas.debugMode) {
+      console.log('test2')
+      // this.canvas.step()
+    }
   }
 
   /**
