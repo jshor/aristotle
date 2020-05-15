@@ -1,9 +1,13 @@
 import IntervalWorkerService from '../services/IntervalWorkerService'
 import Editor from '../core/Editor'
 import IPulse from '../interfaces/IPulse'
+import { WaveList } from '../types'
 import ManagerBase from './ManagerBase'
+import ToggleService from '../services/ToggleService'
 
 const BASE_REFRESH_RATE = 100
+
+const MAX_HISTORY_SECONDS = 5
 
 /**
  * @class OscillationManager
@@ -23,6 +27,8 @@ export default class OscillationManager extends ManagerBase {
   private lastSignalTime: number = 0
 
   private secondsElapsed: number = 0
+
+  private secondsOffset: number = 0
 
   private ticks: number = 0
 
@@ -56,22 +62,40 @@ export default class OscillationManager extends ManagerBase {
     this.secondsElapsed = Math.round(r * (s + r / oneSecond)) / r
   }
 
-  computeWaveGeometry = () => {
+  computeWaveGeometry = (waves: WaveList) => {
     const displays = {}
     const getPoints = (segments) => segments
         .map(({ x, y }) => `${x},${y}`)
         .join(' ')
 
-    for (let name in this.waves) {
-      if (this.waves[name].hasGeometry) {
+    for (let name in waves) {
+      if (waves[name].hasGeometry) {
         displays[name] = {
-          points: getPoints(this.waves[name].segments),
-          width: this.waves[name].width
+          points: getPoints(waves[name].segments),
+          width: waves[name].width
         }
       }
     }
 
     return displays
+  }
+
+  broadcast = () => {
+    const MAX_HISTORY_COUNT = 40
+
+    if (this.secondsElapsed - this.secondsOffset >= MAX_HISTORY_COUNT) {
+      this.secondsOffset += MAX_HISTORY_COUNT / 2
+
+      Object
+        .values(this.waves)
+        .forEach((wave: IPulse) => {
+          if (wave instanceof ToggleService) {
+            wave.truncateSegments(MAX_HISTORY_COUNT / 2)
+          }
+        })
+    }
+
+    this.editor.oscillate(this.computeWaveGeometry(this.waves), this.secondsElapsed, this.secondsOffset)
   }
 
   /**
@@ -88,8 +112,7 @@ export default class OscillationManager extends ManagerBase {
 
     if (this.secondsElapsed % 1 === 0 && this.lastSignalTime !== this.secondsElapsed) {
       this.lastSignalTime = this.secondsElapsed
-
-      this.editor.oscillate(this.computeWaveGeometry(), this.secondsElapsed)
+      this.broadcast()
     }
   }
 

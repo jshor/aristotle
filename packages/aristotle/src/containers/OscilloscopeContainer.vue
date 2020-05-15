@@ -33,11 +33,11 @@
         :style="{ width }"
         class="timeline">
         <div
-          v-for="second in waves.secondsElapsed"
+          v-for="second in (waves.secondsElapsed - waves.secondsOffset)"
           :style="{ width: '40px', minWidth: '40px' }"
           :key="second"
           class="timeline__second">
-          {{ second }}
+          {{ waves.secondsOffset + second }}
         </div>
       </div>
     </div>
@@ -60,7 +60,7 @@ export default {
   },
   computed: {
     width () {
-      return `${40 * this.waves.secondsElapsed}px`
+      return `${40 * (this.waves.secondsElapsed - this.waves.secondsOffset)}px`
     },
     oscillations () {
       return this.waves.waves
