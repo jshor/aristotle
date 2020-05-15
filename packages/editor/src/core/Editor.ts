@@ -7,7 +7,7 @@ import OscillationManager from '../managers/OscillationManager'
 import CircuitExportManager from '../managers/CircuitExportManager'
 import CommandManager from '../managers/CommandManager'
 import ViewportManager from '../managers/ViewportManager'
-import { CircuitElement, MouseMode } from '../types'
+import { CircuitElement, MouseMode, WaveList } from '../types'
 import uuid from '../utils/uuid'
 import IEditorModel from '../interfaces/IEditorModel'
 import PanningSelectionPolicy from '../policies/PanningSelectionPolicy'
@@ -236,8 +236,8 @@ export default class Editor extends draw2d.Canvas {
     super.fireEvent(eventName, payload)
   }
 
-  public oscillate = (waves, secondsElapsed) => {
-    this.fireEvent('oscillate', { waves, secondsElapsed })
+  public oscillate = (waves: WaveList, secondsElapsed: number, secondsOffset: number) => {
+    this.fireEvent('oscillate', { waves, secondsElapsed, secondsOffset })
   }
 
 

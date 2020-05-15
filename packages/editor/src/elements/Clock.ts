@@ -35,7 +35,7 @@ export default class Clock extends IOElement {
     interval: {
       type: 'number',
       step: 100,
-      value: 1000,
+      value: 500,
       min: 100,
       onUpdate: () => this.resetInterval()
     }
