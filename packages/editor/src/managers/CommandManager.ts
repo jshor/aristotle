@@ -14,6 +14,7 @@ export default class CommandManager extends ManagerBase {
    * @param {ICommand} command - user-defined command
    */
   applyCommand = ({ type, payload }: ICommand): void => {
+    console.log('received command: ', type)
     switch (type) {
       case Command.Undo:
         this.editor.undo()

@@ -2,7 +2,8 @@ import { LogicValue } from '@aristotle/logic-circuit'
 import IPulse from '../interfaces/IPulse'
 import { Point } from '../types'
 
-const BASE_INTERVAL = 1000
+const BASE_REFRESH_RATE = 100
+
 const SIGNAL_HEIGHT = 2
 const SEGMENT_WIDTH = 4 // px per refresh rate
 
@@ -21,8 +22,9 @@ export default class ToggleService implements IPulse {
   }
 
   public update = (ticks: number): void => {
-    this.drawPulseConstant()
     this.width += this.segmentWidth
+
+    this.drawPulseConstant()
   }
 
   getLastSegment = () => {
@@ -53,5 +55,31 @@ export default class ToggleService implements IPulse {
       x: pos.x + this.segmentWidth,
       y: pos.y
     })
+  }
+
+  truncateSegments = (seconds) => {
+    const widthToKeep = seconds * 40
+    const widthToTruncate = this.width - widthToKeep
+    let foundLastSegment = false
+
+    if (widthToTruncate > this.width) {
+      return
+    }
+
+    this.segments = this.segments
+      .reverse()
+      .map(({ x, y }) => {
+        x -= widthToTruncate
+
+        if (x <= 0 && !foundLastSegment) {
+          foundLastSegment = true
+          x = 0
+        }
+
+        return { x, y }
+      })
+      .reverse()
+
+    this.width = widthToKeep
   }
 }

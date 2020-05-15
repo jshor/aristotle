@@ -22,7 +22,7 @@ export default class IntervalWorkerService {
             clear()
             interval = setInterval(function(e) {
               self.postMessage(++i);
-            })
+            }, 100)
             break
           case 'STOP':
           default:
