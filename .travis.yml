@@ -1,10 +1,7 @@
 language: node_js
 
 node_js:
-  - 10
-
-before_install:
-  - npm i -g yarn@1.5.1
+  - 12
 
 cache:
   directories:
@@ -12,6 +9,5 @@ cache:
 
 script:
   - yarn
-  - yarn bootstrap
   - yarn build
   - yarn deploy
