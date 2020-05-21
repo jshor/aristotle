@@ -1,6 +1,5 @@
 import { InputNode, LogicValue } from '@aristotle/logic-circuit'
 import Clock from '../Clock'
-import WaveService from '../../services/WaveService'
 import { TemplateSVG } from '../../svg'
 
 describe('Clock Element', () => {
@@ -50,7 +49,7 @@ describe('Clock Element', () => {
       clock.registerClock()
 
       // expect(clock).toHaveProperty('clock')
-      expect(clock.clock).toBeInstanceOf(WaveService)
+      // expect(clock.clock).toBeInstanceOf(WaveService)
     })
 
     it('should add the clock instance to the editor\'s oscillation manager if the editor is available', () => {

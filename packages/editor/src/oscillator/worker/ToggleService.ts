@@ -1,6 +1,6 @@
 import { LogicValue } from '@aristotle/logic-circuit'
-import IPulse from '../interfaces/IPulse'
-import { Point } from '../types'
+import IPulse from '../../interfaces/IPulse'
+import { Point } from '../../types'
 
 const BASE_REFRESH_RATE = 100
 
@@ -25,6 +25,11 @@ export default class ToggleService implements IPulse {
     this.width += this.segmentWidth
 
     this.drawPulseConstant()
+  }
+
+  reset = () => {
+    this.width = 0
+    this.segments = [this.segments.pop()]
   }
 
   getLastSegment = () => {

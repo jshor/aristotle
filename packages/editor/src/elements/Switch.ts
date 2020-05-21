@@ -1,6 +1,5 @@
 import draw2d from 'draw2d'
 import { InputNode, LogicValue } from '@aristotle/logic-circuit'
-import ToggleService from '../services/ToggleService'
 import IOElement from './IOElement'
 import { TemplateSVG } from '../svg'
 

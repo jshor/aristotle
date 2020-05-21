@@ -3,7 +3,7 @@ import $ from 'jquery'
 import { Circuit } from '@aristotle/logic-circuit'
 import DeserializationManager from '../managers/DeserializationManager'
 import SerializationManager from '../managers/SerializationManager'
-import OscillationManager from '../managers/OscillationManager'
+import Oscillator from '../oscillator/Oscillator'
 import CircuitExportManager from '../managers/CircuitExportManager'
 import CommandManager from '../managers/CommandManager'
 import ViewportManager from '../managers/ViewportManager'
@@ -20,7 +20,7 @@ export default class Editor extends draw2d.Canvas {
 
   public serializer: SerializationManager = new SerializationManager(this)
 
-  public oscillation: OscillationManager = new OscillationManager(this)
+  public oscillation: Oscillator = new Oscillator(this)
 
   public commandManager: CommandManager = new CommandManager(this)
 

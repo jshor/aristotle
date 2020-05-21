@@ -1,4 +1,4 @@
-import IPulse from '../interfaces/IPulse'
+import IPulse from '../../interfaces/IPulse'
 
 const BASE_REFRESH_RATE = 100
 

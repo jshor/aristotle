@@ -1,7 +1,5 @@
 import draw2d from 'draw2d'
 import { LogicValue } from '@aristotle/logic-circuit'
-import ToggleService from '../services/ToggleService'
-import OscillationManager from '../managers/OscillationManager'
 import Element from '../core/Element'
 import IElementProperties from '../interfaces/IElementProperties'
 import { ElementPropertyValues } from '../types'
@@ -10,14 +8,12 @@ import uuid from '../utils/uuid'
 export default class IOElement extends Element {
   public nodeType: string = 'input'
 
-  public wave: ToggleService
-
-  private oscillation: OscillationManager
+  // public wave: ToggleService
 
   constructor (id: string, properties: ElementPropertyValues) {
     super(id, properties)
 
-    this.on('added', this.registerWave)
+    this.on('added', this.resetWave)
     this.on('added', this.setInitialValue) // TODO
     this.on('removed', this.unregisterWave)
   }
@@ -59,21 +55,24 @@ export default class IOElement extends Element {
   }
 
   unregisterWave = () => {
-    this.oscillation.remove(this.wave)
+    // this.oscillation.remove(this.wave)
+    this.canvas.oscillation.unregisterWave(this.getId())
   }
 
   registerWave = () => {
-    this.wave = new ToggleService(this.getId())
+    // this.wave = new ToggleService(this.getId())
 
-    if (this.canvas) {
-      this.oscillation = this.canvas.oscillation
-      this.canvas.oscillation.add(this.wave)
-    }
+    // if (this.canvas) {
+    //   this.oscillation = this.canvas.oscillation
+    //   this.canvas.oscillation.add(this.wave)
+    // }
+    this.canvas.oscillation.registerWave(this.getId())
   }
 
   setValue = (newValue) => {
     this.node.setValue(newValue)
-    this.wave.drawPulseChange(newValue)
+    // this.wave.drawPulseChange(newValue)
+    this.canvas.oscillation.drawPulseChange(this.getId(), newValue)
 
     // input nodes changes require triggering the head of the circuit queue
     this.canvas.circuit.queue.push(this.node)
@@ -88,6 +87,7 @@ export default class IOElement extends Element {
   }
 
   invertValue = () => {
+    console.log('INVERTING VALUE')
     const newValue = this.node.getProjectedValue() === LogicValue.TRUE
       ? LogicValue.FALSE
       : LogicValue.TRUE

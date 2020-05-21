@@ -27,6 +27,11 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.worker\.ts$/,
+        loader: 'worker-loader',
+        options: { inline: true, fallback: false }
+      },
+      {
         test: /\.ts$/,
         exclude: /node_modules/,
         loader: 'ts-loader'

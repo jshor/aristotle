@@ -1,7 +1,6 @@
 import draw2d from 'draw2d'
 import { InputNode, LogicValue } from '@aristotle/logic-circuit'
 import IOElement from './IOElement'
-import WaveService from '../services/WaveService'
 import IElementProperties from '../interfaces/IElementProperties'
 import { TemplateSVG } from '../svg'
 import { ElementPropertyValues } from '../types'
@@ -9,7 +8,7 @@ import { ElementPropertyValues } from '../types'
 export default class Clock extends IOElement {
   public nodeType: string = 'input'
 
-  private clock: WaveService
+  // private clock: WaveService
 
   public clickableArea: draw2d.shape.basic.Rectangle
 
@@ -56,20 +55,24 @@ export default class Clock extends IOElement {
   }
 
   registerClock = () => {
-    this.clock = new WaveService(`${this.getId()}_wave`, this.getPropertyValue('interval'))
-    this.clock.onUpdate(this.invertValue)
+    this.canvas.oscillation.registerClock(`${this.getId()}_wave`, this.getPropertyValue('interval'), this.invertValue)
+    // this.clock = new WaveService(`${this.getId()}_wave`, this.getPropertyValue('interval'))
+    // this.clock.onUpdate(this.invertValue)
 
-    if (this.canvas) {
-      this.canvas.oscillation.add(this.clock)
-    }
+    // if (this.canvas) {
+    //   this.canvas.oscillation.add(this.clock)
+    // }
   }
 
   unregisterClock = () => {
-    this.canvas.oscillation.remove(this.clock)
+    // this.canvas.oscillation.remove(this.clock)
+    this.canvas.oscillation.unregisterWave(`${this.getId()}_wave`)
+    this.canvas.oscillation.unregisterWave(this.getId())
   }
 
   resetInterval = () => {
-    this.clock.setInterval(this.getPropertyValue('interval'))
+    // this.clock.setInterval(this.getPropertyValue('interval'))
+    this.canvas.oscillation.resetClockInterval(this.getPropertyValue('interval'))
   }
 
   getSvg = () => {
