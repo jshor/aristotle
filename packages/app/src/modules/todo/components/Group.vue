@@ -5,11 +5,11 @@
       height: `${rect.height}px`,
       left: `${rect.x}px`,
       top: `${rect.y}px`,
-      transform: `rotate(${(items.length > 1 ? rotation : 0) * 90}deg)`
+      transform: `rotate(${parentRotation * 90}deg)`
     }">
       <div class="group__container" />
       <item v-for="item in items" :id="item.id" :key="item.id" :ports="item.ports" @portDrag="groupDrag" @portDragStart="portDragStart" @portDragEnd="portDragEnd" :activePortType="activePortType"
-      :position="items.length === 1 ? DEFAULT_POSITION : item.position" :rotation="item.rotation" :offset="rect" :parent-rotation="rotation" :properties="item.properties"
+      :position="items.length === 1 ? DEFAULT_POSITION : item.position" :rotation="item.rotation" :offset="rect" :parent-rotation="parentRotation" :properties="item.properties"
       @updateProperties="updateProperties">
       </item>
     <slot />
@@ -55,7 +55,11 @@ export default class Group extends Vue {
   @Prop()
   public rotation: number
 
-  public childrenShouldRotate: boolean = false
+  get parentRotation () {
+    return this.items.length > 1
+      ? this.rotation
+      : 0
+  }
 
   groupDrag (data) {
     this.$emit('groupDrag', data)
@@ -206,14 +210,25 @@ export default class Group extends Vue {
       .filter((child: any) => child instanceof Item)
   }
 
-  getAllDescendants (component: any, ports: any[] = []) {
+  // getAllDescendants (component: any, ports: any[] = []) {
+  //   return [
+  //     ...ports,
+  //     ...component.$children,//.filter((child: any) => child instanceof Port),
+  //     ...component.$children.reduce((children: any[], child: any) => [
+  //       ...children,
+  //       ...this.getAllDescendants(child, children)
+  //     ], [])
+  //   ]
+  // }
+
+
+  getAllDescendants (component: any, descendants: any[] = []) {
     return [
-      ...ports,
-      ...component.$children,//.filter((child: any) => child instanceof Port),
-      ...component.$children.reduce((children: any[], child: any) => [
-        ...children,
-        ...this.getAllDescendants(child, children)
-      ], [])
+      ...descendants,
+      ...component.$children, // .filter((child: any) => child instanceof Item),
+      ...component.$children.reduce((children: any[], child: any) => {
+        return this.getAllDescendants(child, children)
+      }, [])
     ]
   }
 

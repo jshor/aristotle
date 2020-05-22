@@ -27,7 +27,7 @@
     <path fill="none" stroke="#868686"
     :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
     :d="wire.path" class="draw2d_Connection" stroke-linecap="round" stroke-linejoin="round" stroke-width="8" stroke-dasharray="none" opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); stroke-linecap: round; stroke-linejoin: round; opacity: 1;"
-     filter="url(#inset)"
+
     ></path>
   </svg>
 </template>
