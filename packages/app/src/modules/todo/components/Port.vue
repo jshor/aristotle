@@ -3,13 +3,13 @@
     transform: `rotate(-${rotation * 90}deg)`
   }">
     <div class="port__handle" :class="{
-    'port__handle--active': active
-  }">
-      <draggable class="port snappable" @drag="onDrag" @dragStart="dragStart" @dragEnd="dragEnd" :position="draggablePosition" :data-id="id" snap="port--input">
-        <div class="port__handle dr" />
+      'port__handle--active': active
+    }" />
+      <draggable class="port" @drag="onDrag" @dragStart="dragStart" @dragEnd="dragEnd" :position="draggablePosition" :data-id="id" :class="{ snappable }">
+        <div class="port__handle" @mousedown="mousedown" @mouseup="mouseup" :class="{ 'port__handle--active': snappable }"  />
       </draggable>
       <slot />
-    </div>
+    <!-- </div> -->
   </div>
 </template>
 
@@ -34,11 +34,39 @@ export default class Port extends Vue {
   @Prop({ default: false })
   public active: boolean
 
+  @Prop()
+  public type: number
+
+  @Prop()
+  public orientation: number
+
   public cloneId: string = 'DRAGGED_PORT'
 
   public draggablePosition: any = {
     x: 0,
     y: 0
+  }
+
+  get snappable () {
+    const { activePort } = this.$store.state.documents
+
+    return activePort !== null && activePort.type !== this.type
+  }
+
+  mousedown () {
+    this.setActivePort({
+      id: this.cloneId,
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: this.type,
+      orientation: this.orientation
+    })
+  }
+
+  mouseup () {
+    this.$store.dispatch('setActivePort', null)
   }
 
   dragStart ({ position }) {
@@ -47,14 +75,14 @@ export default class Port extends Vue {
     this.draggablePosition = {}
     this.onDrag(position)
 
-    this.$emit('dragStart', {
+    this.$store.dispatch('connect', {
       source: this.id,
       target: this.cloneId
     })
   }
 
   onDrag ({ position }) {
-    this.$emit('drag', {
+    this.$store.dispatch('updatePortPositions', {
       [this.cloneId]: {
         position,
         id: this.cloneId
@@ -68,16 +96,27 @@ export default class Port extends Vue {
       y: 0
     }
 
-    this.$emit('dragEnd', {
+    this.$store.dispatch('disconnect', {
       source: this.id,
-      oldTarget: this.cloneId,
-      newTarget: snappedId
+      target: this.cloneId
     })
+    this.$store.dispatch('connect', {
+      source: this.id,
+      target: snappedId
+    })
+    this.$store.dispatch('setActivePort', null)
+  }
+
+  setActivePort (port) {
+    this.$store.dispatch('setActivePort', port)
   }
 }
 </script>
 
 <style lang="scss">
+.dr {
+  background:blue;
+}
 .port {
   width: 0;
   height: 0;
@@ -100,7 +139,7 @@ export default class Port extends Vue {
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.25s;
-  z-index: 1001;
+    z-index: 1001;
 
     &--active {
       width: 32px;
