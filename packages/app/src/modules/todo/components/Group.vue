@@ -8,9 +8,8 @@
       transform: `rotate(${parentRotation * 90}deg)`
     }">
       <div class="group__container" />
-      <item v-for="item in items" :id="item.id" :key="item.id" :ports="item.ports" @portDrag="groupDrag" @portDragStart="portDragStart" @portDragEnd="portDragEnd" :activePortType="activePortType"
-      :position="items.length === 1 ? DEFAULT_POSITION : item.position" :rotation="item.rotation" :offset="rect" :parent-rotation="parentRotation" :properties="item.properties"
-      @updateProperties="updateProperties">
+      <item v-for="item in items" :id="item.id" :key="item.id" :ports="item.ports"
+      :position="items.length === 1 ? DEFAULT_POSITION : item.position" :rotation="item.rotation" :offset="rect" :parent-rotation="parentRotation" :properties="item.properties">
       </item>
     <slot />
     </div>
@@ -59,19 +58,6 @@ export default class Group extends Vue {
     return this.items.length > 1
       ? this.rotation
       : 0
-  }
-
-  groupDrag (data) {
-    this.$emit('groupDrag', data)
-  }
-  portDragStart (data) {
-    this.$emit('portDragStart', data)
-  }
-  portDragEnd (data) {
-    this.$emit('portDragEnd', data)
-  }
-  updateProperties(data) {
-    this.$emit('updateProperties', data)
   }
 
   @Watch('rotation')
@@ -249,6 +235,7 @@ export default class Group extends Vue {
   }
 
   dragEnd ({ position }) {
+    this.onElemDrag({ position })
     this.$emit('dragEnd', { id: this.id, position })
   }
 }

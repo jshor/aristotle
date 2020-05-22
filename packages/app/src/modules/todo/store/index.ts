@@ -1,17 +1,6 @@
 import Vue from 'vue'
 
 const state = {
-  ports: {
-    ...['a', 'b', 'c', 'd'].reduce((l, k) => ({
-      ...l,
-      [k]: {
-        position: {
-          x: 0,
-          y: 0
-        }
-      }
-    }), {})
-  },
   selection: {
     rotation: 0,
     position: {
@@ -21,10 +10,47 @@ const state = {
     destroyed: true,
     items: []
   },
-  connections: [{
-    source: 'c',
-    target: 'a'
-  }] as any,
+  activePort: null,
+  connections: [
+    {
+      source: 'c',
+      target: 'a'
+    }
+  ],
+  ports: {
+    a: {
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: 1, // 0 = output, 1 = input
+      orientation: 0 // [0, 1, 2, 3] = [left, top, right, bottom]
+    },
+    b: {
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: 0,
+      orientation: 2
+    },
+    c: {
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: 0,
+      orientation: 2
+    },
+    d: {
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: 0,
+      orientation: 2
+    }
+  },
   elements: {
     abc: {
       portIds: ['a', 'b'],
@@ -103,6 +129,10 @@ const getters = {
 }
 
 const actions = {
+  setActivePort ({ commit }, port) {
+    commit('SET_ACTIVE_PORT', port)
+  },
+
   rotateSelection ({ commit, state }, rotation) {
     const { items } = state.selection
 
@@ -163,6 +193,10 @@ const actions = {
 }
 
 const mutations = {
+  'SET_ACTIVE_PORT' (state, port) {
+    state.activePort = port
+  },
+
   'ROTATE_SELECTION' (state, rotation) {
     state.selection.rotation += rotation
   },
@@ -190,8 +224,6 @@ const mutations = {
       .keys(state.elements)
       .filter((id: string) => ids.includes(id))
       .map((id: string) => state.elements[id])
-
-      console.log('grouping: ', itemsToGroup)
 
     const position: any = itemsToGroup
       .reduce((data: any, item: any) => ({

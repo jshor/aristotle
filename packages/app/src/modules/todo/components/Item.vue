@@ -1,16 +1,20 @@
 <template>
   <div class="item" :style="style">
     <slot />
-    <Port
-      v-for="port in ports"
-      :id="port.id"
-      :key="port.id"
-      :rotation="rotation + parentRotation"
-      :active="!!activePortType"
-      @drag="portDrag"
-      @dragStart="portDragStart"
-      @dragEnd="portDragEnd"
-    />
+    <div
+      v-for="(ports, orientation) in portList"
+      :key="orientation"
+      :class="`item__ports--${orientation}`"
+      class="item__ports">
+      <Port
+        v-for="port in ports"
+        :id="port.id"
+        :key="port.id"
+        :type="port.type"
+        :orientation="port.orientation"
+        :rotation="rotation + parentRotation"
+      />
+    </div>
   </div>
 </template>
 
@@ -40,6 +44,20 @@ export default class List extends Vue {
   })
   public offset: any
 
+  @Prop({ default: 0 })
+  public rotation: any
+
+  @Prop({ default: 0 })
+  public parentRotation: any
+
+  @Prop({ default: () => [] })
+  public ports: any[]
+
+  @Prop({
+    default: () => ({})
+  })
+  public properties: any
+
   get truePosition () {
     return {
       x: this.position.x - this.offset.x,
@@ -47,25 +65,23 @@ export default class List extends Vue {
     }
   }
 
-  @Prop({ default: 0 })
-  public rotation: any
+  get portList () {
+    const locations = ['left', 'top', 'right', 'bottom']
 
-  @Prop({ default: 0 })
-  public parentRotation: any
-
-  @Prop({ default: false })
-  public should: boolean
-
-  @Prop({ default: () => [] })
-  public ports: any[]
-
-  @Prop({ default: null })
-  public activePortType: any
-
-  @Prop({
-    default: () => ({})
-  })
-  public properties: any
+    return this
+      .ports
+      .reduce((map, port) => {
+        return {
+          ...map,
+          [locations[port.orientation]]: [
+            ...map[locations[port.orientation]],
+            port
+          ]
+        }
+      }, locations.reduce((m, type) => ({
+        ...m, [type]: []
+      }), {}))
+  }
 
   @Prop()
   public id: string
@@ -77,18 +93,6 @@ export default class List extends Vue {
       transform: `rotate(${90 * this.rotation}deg)`
     }
   }
-
-  portDragStart (data) {
-    this.$emit('portDragStart', data)
-  }
-
-  portDrag (data) {
-    this.$emit('portDrag', data)
-  }
-
-  portDragEnd (data) {
-    this.$emit('portDragEnd', data)
-  }
 }
 </script>
 
@@ -97,9 +101,48 @@ export default class List extends Vue {
   width: 100px;
   height: 185px;
   display: flex;
-  background-color: green;
+  background-color: rgba(0, 255, 122, 0.2);
+  border: 1px solid black;
   position: absolute;
-  flex-direction: column;
+
+  &__ports {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    &--left {
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 50%;
+    }
+
+    &--right {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 50%;
+      justify-content: flex-end;
+    }
+
+    &--top {
+      flex: 1;
+      left: 0;
+      top: 0;
+      right: 0;
+      height: 50%;
+      background: violet;
+    }
+
+    &--bottom {
+      flex: 1;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 50%;
+      background: blue;
+    }
+  }
 }
 
 .inp {

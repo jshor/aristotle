@@ -69,7 +69,6 @@ export default class Draggable extends Vue {
           .filter(id => id)
           .pop()
 
-        console.log('snapped to:', snappedId)
         const offset = el[0].getBoundingClientRect()
         const x = round(offset.left)
         const y = round(offset.top)
