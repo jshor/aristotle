@@ -1,5 +1,6 @@
 <template>
   <div :style="style" class="grid">
+    <selector @selectionStart="selectionStart" @selectionEnd="selectionEnd" />
 
     <wire
       v-for="(connection, key) in connections"
@@ -8,7 +9,7 @@
       :target="connection.target"
     />
 
-    <group v-if="selectedItems.length" :items="selectedItems" :id="'SELECTION'" @drag="updatePortPositions" @dragEnd="updateItemPosition" :position="selection.position" :rotation="selection.rotation" @ungroup="ungroupItems"
+    <group v-if="selectedItems.length" :items="selectedItems" :id="'SELECTION'" @drag="updatePortPositions" @dragEnd="updateItemPosition" :position="selection.position" :rotation="selection.rotation" @ungroup="deselectAll"
       @portDrag="updatePortPositions" @portDragStart="portDragStart" @portDragEnd="updateItemPosition" @updateProperties="updateProperties" :destroyed="selection.destroyed">
     </group>
 
@@ -18,13 +19,13 @@
       </item> -->
     </group>
 
-    <input type="checkbox" v-model="snapToGrid.enabled" value="1" /> Snap to grid<br />
-    Grid size: <input type="number" v-model.number="snapToGrid.size" />
+    <div class="toolbar">
+      <input type="checkbox" v-model="snapToGrid.enabled" value="1" /> Snap to grid<br />
+      Grid size: <input type="number" v-model.number="snapToGrid.size" /><br />
 
-    Rotation: <input type="number" size="1" v-model.number="settings.rotation" @change="rotAway" />
-
-    <button @click="groupItems">Group</button>
-    <button @click="destroyGroup">Ungroup</button>
+      <button @click="rotateSelection(-1)">Rotate 90 CCW</button>
+      <button @click="rotateSelection(1)">Rotate 90 CW</button>
+    </div>
 
     <pre>{{ JSON.stringify(selection, null, 2) }}</pre>
     <!-- <pre>{{ JSON.stringify(groups, null, 2) }}</pre> -->
@@ -40,6 +41,7 @@ import Port from './Port.vue'
 import Wire from './Wire.vue'
 import Group from './Group.vue'
 import Item from './Item.vue'
+import Selector from './Selector.vue'
 import { mapActions } from 'vuex'
 import { Getter, Action } from '../store/decorators'
 
@@ -49,17 +51,16 @@ import { Getter, Action } from '../store/decorators'
     Port,
     Wire,
     Group,
-    Item
+    Item,
+    Selector
   },
   methods: mapActions([
-    'groupItems',
-    'ungroupItems',
-    'destroyGroup',
+    'deselectAll',
     'updateGroupItemPositions',
     'updateItemPosition',
     'updatePortPositions',
     'updateProperties',
-    'rotate'
+    'rotateSelection'
   ])
 })
 export default class List extends Vue {
@@ -68,12 +69,47 @@ export default class List extends Vue {
     size: 20
   }
 
-  settings = {
-    rotation: 0
+  selectionStart () {
+    this.$store.dispatch('destroySelection')
   }
 
-  rotAway () {
-    this.$store.dispatch('rotate', this.settings.rotation)
+  selectionEnd (selection) {
+    const { left, top, right, bottom } = selection
+
+    const items = this
+      .getAllItems(this)
+      .filter((item) => {
+        const bbox = item.$el.getBoundingClientRect()
+
+        if (selection.left >= bbox.right || bbox.left >= selection.right) {
+          // one rect is on left side of other
+          return false
+        }
+
+        if (selection.top >= bbox.bottom || bbox.top >= selection.bottom) {
+          // one rect is above other
+          return false
+        }
+
+        return true
+      })
+      .map(({ $options }) => {
+        const { id } = $options?.propsData || {}
+        return id
+      })
+
+    this.$store.dispatch('selectItems', items)
+  }
+
+
+  getAllItems (component: any, items: any[] = []) {
+    return [
+      ...items,
+      ...component.$children.filter((child: any) => child instanceof Item),
+      ...component.$children.reduce((children: any[], child: any) => {
+        return this.getAllItems(child, children)
+      }, [])
+    ]
   }
 
   @Getter('documents', 'connections')
@@ -90,9 +126,6 @@ export default class List extends Vue {
 
   @Action('documents', 'connect')
   public connect: Function
-
-  @Action('documents', 'rotate')
-  public rotate: Function
 
   @Action('documents', 'disconnect')
   public disconnect: Function
@@ -137,13 +170,24 @@ body {
   padding: 0;
   margin: 0;
   overflow: hidden;
+  user-select: none;
 }
 
 .grid {
+  position: relative;
   width: 100vw;
   height: 100vh;
   background-image:
     linear-gradient(to right, #e8e8e8 1px, transparent 1px),
     linear-gradient(to bottom, #e8e8e8 1px, transparent 1px);
+}
+
+.toolbar {
+  position: relative;
+  right: 0;
+  z-index: 1000;
+  background-color: rgba(0,0,0,0.1);
+  width: 300px;
+  padding: 1em;
 }
 </style>

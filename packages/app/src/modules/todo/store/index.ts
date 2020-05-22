@@ -103,8 +103,19 @@ const getters = {
 }
 
 const actions = {
-  rotate ({ commit }, rotation) {
-    commit('ROTATE', rotation)
+  rotateSelection ({ commit, state }, rotation) {
+    const { items } = state.selection
+
+    if (items.length >= 1) {
+      if (items.length === 1) {
+        commit('ROTATE_ITEM', {
+          id: items[0].id,
+          rotation
+        })
+      } else {
+        commit('ROTATE_SELECTION', rotation)
+      }
+    }
   },
 
   connect ({ commit }, { source, target }) {
@@ -115,20 +126,20 @@ const actions = {
     commit('DISCONNECT', { source, target })
   },
 
-  groupItems ({ commit, state }) {
+  selectItems ({ commit, state }, ids) {
     if (!state.selection.destroyed) {
-      // if an active selection is present, destroy it first
+      // if an active selection is present, it must be destroyed first
       commit('DESTROY_GROUP')
+    } else {
+      commit('GROUP_ITEMS', ids)
     }
-
-    commit('GROUP_ITEMS')
   },
 
-  destroyGroup ({ commit }) {
+  destroySelection ({ commit }) {
     commit('DESTROY_GROUP')
   },
 
-  ungroupItems ({ commit }, positions) {
+  deselectAll ({ commit }, positions) {
     commit('UNGROUP', positions)
   },
 
@@ -152,8 +163,12 @@ const actions = {
 }
 
 const mutations = {
-  'ROTATE' (state, rotation) {
-    state.selection.rotation = rotation
+  'ROTATE_SELECTION' (state, rotation) {
+    state.selection.rotation += rotation
+  },
+
+  'ROTATE_ITEM' (state, { id, rotation }) {
+    state.elements[id].rotation += rotation
   },
 
   'CONNECT' (state, { source, target }) {
@@ -170,8 +185,14 @@ const mutations = {
     }
   },
 
-  'GROUP_ITEMS' (state) {
-    const itemsToGroup = Object.values(state.elements)
+  'GROUP_ITEMS' (state, ids) {
+    const itemsToGroup = Object
+      .keys(state.elements)
+      .filter((id: string) => ids.includes(id))
+      .map((id: string) => state.elements[id])
+
+      console.log('grouping: ', itemsToGroup)
+
     const position: any = itemsToGroup
       .reduce((data: any, item: any) => ({
         x: Math.min(data.x, item.position.x),
