@@ -1,37 +1,252 @@
-import defaultState, { initialStateResolver, State } from './state';
-import mutations from './mutations';
-import actions from './actions';
-import getters from './getters';
-import * as Store from '@/types/store';
+import Vue from 'vue'
 
-export * from './state';
-
-export const module = (initialState?: unknown) => {
-  const state = initialState
-    ? initialStateResolver(initialState)
-    : defaultState();
-
-  return {
-    todoModule: {
-      namespaced: true,
-      state,
-      mutations,
-      actions,
-      getters,
+const state = {
+  ports: {
+    ...['a', 'b', 'c', 'd'].reduce((l, k) => ({
+      ...l,
+      [k]: {
+        position: {
+          x: 0,
+          y: 0
+        }
+      }
+    }), {})
+  },
+  selection: {
+    rotation: 0,
+    position: {
+      x: 0,
+      y: 0
     },
-  };
-};
+    destroyed: true,
+    items: []
+  },
+  connections: [{
+    source: 'c',
+    target: 'a'
+  }] as any,
+  elements: {
+    abc: {
+      portIds: ['a', 'b'],
+      position: { x: 300, y: 300 },
+      rotation: 0,
+      isSelected: false,
+      properties: {
+        inputCount: 1
+      }
+    },
+    def: {
+      portIds: ['d'],
+      position: { x: 100, y: 100 },
+      rotation: 0,
+      isSelected: false,
+      properties: {
+        inputCount: 1
+      }
+    },
+    ghi: {
+      portIds: ['c'],
+      position: { x: 500, y: 500 },
+      rotation: 0,
+      isSelected: false,
+      properties: {
+        inputCount: 1
+      }
+    }
+  }
+}
 
-export type StateTree = {
-  todoModule: State;
-};
+const getters = {
+  selection (state) {
+    return state.selection
+  },
 
-export type RootState = Pick<StateTree, 'todoModule'>;
+  elements (state) {
+    return Object
+      .keys(state.elements)
+      .map((elementId: string) => ({
+        ...state.elements[elementId],
+        id: elementId,
+        ports: state
+          .elements[elementId]
+          .portIds
+          .map((portId: string) => ({
+            id: portId,
+            ...state.ports[portId]
+          }))
+      }))
+  },
 
-export type GetterTree = {
-  todoModule: Store.GetterReturnType<typeof getters>;
-};
+  selectedItems (state, getters) {
+    return getters
+      .elements
+      .filter(({ isSelected }) => isSelected)
+  },
 
-export type ActionTree = {
-  todoModule: Store.DispatchArgs<typeof actions>;
-};
+  unselectedItems (state, getters) {
+    return getters
+      .elements
+      .filter(({ isSelected }) => !isSelected)
+  },
+
+  connections (state) {
+    const { ports } = state
+
+    return state
+      .connections
+      .map(({ source, target }) => ({
+        source: ports[source],
+        target: ports[target]
+      }))
+      .filter(({ source, target }) => source && target)
+  }
+}
+
+const actions = {
+  rotate ({ commit }, rotation) {
+    commit('ROTATE', rotation)
+  },
+
+  connect ({ commit }, { source, target }) {
+    commit('CONNECT', { source, target })
+  },
+
+  disconnect ({ commit }, { source, target }) {
+    commit('DISCONNECT', { source, target })
+  },
+
+  groupItems ({ commit, state }) {
+    if (!state.selection.destroyed) {
+      // if an active selection is present, destroy it first
+      commit('DESTROY_GROUP')
+    }
+
+    commit('GROUP_ITEMS')
+  },
+
+  destroyGroup ({ commit }) {
+    commit('DESTROY_GROUP')
+  },
+
+  ungroupItems ({ commit }, positions) {
+    commit('UNGROUP', positions)
+  },
+
+  updatePortPositions ({ commit }, portPositions) { // points = port positions
+    commit('UPDATE_PORT_POSITIONS', portPositions)
+  },
+
+  updateGroupItemPositions ({ commit }, elements) {
+    elements.forEach((element) => {
+      commit('UPDATE_POSITION', element)
+    })
+  },
+
+  updateItemPosition ({ commit }, { id, position }) {
+    commit('UPDATE_POSITION', { id, position })
+  },
+
+  updateProperties ({ commit }, { id, properties }) {
+    commit('UPDATE_PROPERTIES', { id, properties })
+  }
+}
+
+const mutations = {
+  'ROTATE' (state, rotation) {
+    state.selection.rotation = rotation
+  },
+
+  'CONNECT' (state, { source, target }) {
+    state.connections.push({ source, target })
+  },
+
+  'DISCONNECT' (state, { source, target }) {
+    const connection = state.connections.findIndex((c: any) => {
+      return c.source === source && c.target === target
+    })
+
+    if (connection >= 0) {
+      state.connections.splice(connection, 1)
+    }
+  },
+
+  'GROUP_ITEMS' (state) {
+    const itemsToGroup = Object.values(state.elements)
+    const position: any = itemsToGroup
+      .reduce((data: any, item: any) => ({
+        x: Math.min(data.x, item.position.x),
+        y: Math.min(data.y, item.position.y)
+      }), {
+        x: Infinity,
+        y: Infinity
+      })
+
+    itemsToGroup.forEach((el: any) => {
+      el.isSelected = true
+      el.position.x -= position.x
+      el.position.y -= position.y
+    })
+
+    state.selection.position = position
+    state.selection.items = itemsToGroup
+    state.selection.destroyed = false
+  },
+
+  'DESTROY_GROUP' (state) {
+    state.selection.destroyed = true
+  },
+
+  'UNGROUP' (state, positions) {
+    positions.forEach(({ id, position }) => {
+      const el = (state.elements[id] as any)
+
+      el.isSelected = false
+      el.rotation += state.selection.rotation
+      el.position.x = position.x
+      el.position.y = position.y
+    })
+
+    state.selection.items = []
+    state.selection.rotation = 0
+  },
+
+  'UPDATE_PORT_POSITIONS' (state, portPositions) {
+    Object
+      .keys(portPositions)
+      .forEach((portId: string) => {
+        state.ports = {
+          ...state.ports,
+          [portId]: {
+            ...state.ports[portId],
+            ...portPositions[portId]
+          }
+        }
+      })
+  },
+
+  'UPDATE_POSITION' (state, { id, position }) {
+    if (id === 'SELECTION') {
+      state.selection.position = position
+    }
+
+    if (state.elements[id]) {
+      state.elements[id].position = position
+    }
+  },
+
+  'UPDATE_PROPERTIES' (state, { id, properties }) {
+    if (state.elements[id]) {
+      state.elements[id].properties = {
+        ...state.elements[id].properties,
+        ...properties
+      }
+    }
+  }
+}
+
+export default {
+  state,
+  getters,
+  actions,
+  mutations
+}

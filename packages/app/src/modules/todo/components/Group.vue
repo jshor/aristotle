@@ -8,13 +8,9 @@
       transform: `rotate(${(items.length > 1 ? rotation : 0) * 90}deg)`
     }">
       <div class="group__container" />
-      <!-- <item v-for="item in items" :key="item.id" :ports="item.ports" @portDrag="groupDrag" @portDragStart="portDragStart" @portDragEnd="portDragEnd" :activePortType="activePortType"
-        :position="items.length === 1 ? null : item.position">
-      </item> -->
       <item v-for="item in items" :id="item.id" :key="item.id" :ports="item.ports" @portDrag="groupDrag" @portDragStart="portDragStart" @portDragEnd="portDragEnd" :activePortType="activePortType"
       :position="items.length === 1 ? DEFAULT_POSITION : item.position" :rotation="item.rotation" :offset="rect" :parent-rotation="rotation" :properties="item.properties"
-      @resize="onItemResize" @updateProperties="updateProperties">
-      {{ item.properties}}
+      @updateProperties="updateProperties">
       </item>
     <slot />
     </div>
@@ -47,6 +43,9 @@ export default class Group extends Vue {
   @Prop()
   public id: string
 
+  @Prop({ default: false })
+  public destroyed: boolean
+
   @Prop()
   public activePortType: string
 
@@ -71,16 +70,6 @@ export default class Group extends Vue {
     this.$emit('updateProperties', data)
   }
 
-  onItemResize () {
-
-    Vue.nextTick(() => {
-      this.rect = this.computeRect()
-      this.onElemDrag({
-        position: this.position
-      })
-    })
-  }
-
   @Watch('rotation')
   onRotate () {
     Vue.nextTick(() => {
@@ -92,14 +81,23 @@ export default class Group extends Vue {
         position: this.position
       })
     })
-    console.log('ROTATION: ')
   }
 
-  updateItemPositions () {
+  @Watch('destroyed', { immediate: true })
+  onDestroyed (destroyed) {
+    if (destroyed) {
+      // to ungroup items, the absolute item positions must be computed prior to destruction
+      // using beforeDestroy() won't work in this case since the children would be moved out of
+      // the group by the store first -- thus the group must first be told to destroy itself, then
+      // told to compute/update the children positions in the store; then it can finally be destroyed
+      this.ungroup()
+    }
+  }
+
+  ungroup () {
     const positions = this
       .getItems(this)
       .reduce((p: any, item: any) => {
-        console.log(item.$el)
         const { offsetWidth, offsetHeight } = item.$el
         const { x, y, width, height } = item.$el.getBoundingClientRect()
         const centerX = x + width / 2
@@ -115,7 +113,7 @@ export default class Group extends Vue {
         }]
       }, [])
 
-    this.$emit('updateGroupItemPositions', positions)
+    this.$emit('ungroup', positions)
   }
 
   relativePostion (position) {
@@ -140,6 +138,9 @@ export default class Group extends Vue {
     this.portPositions = this.getPortPositions(ports)
 
     this.rect = this.computeRect()
+      this.onElemDrag({
+        position: this.position
+      })
   }
 
   computeRect () {
