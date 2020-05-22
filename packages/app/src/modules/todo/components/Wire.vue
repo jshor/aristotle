@@ -2,7 +2,8 @@
   <svg class="wire" :width="wire.width" :height="wire.height" :style="{
     top: `${topLeft.y + wire.minY}px`,
     left: `${topLeft.x + wire.minX}px`
-  }">
+  }"
+  @click="addPoint">
   <defs>
     <filter id='inset' x='-50%' y='-50%' width='200%' height='200%'>
       <!--outside-stroke-->
@@ -48,6 +49,12 @@ export default class Wire extends Vue {
 
   @Prop()
   public target: any;
+
+  points: any[] = []
+
+  addPoint ({ offsetX, offsetY }) {
+    this.points.push({ x: offsetX, y: offsetY })
+  }
 
   get a () {
     return this.source.position
@@ -148,6 +155,6 @@ export default class Wire extends Vue {
   position: absolute;
   top: 0;
   left: 0;
-  pointer-events: none;
+  // pointer-events: none;
 }
 </style>
