@@ -27,8 +27,7 @@
       <button @click="rotateSelection(1)">Rotate 90 CW</button>
     </div>
 
-    <pre>{{ JSON.stringify(selection, null, 2) }}</pre>
-    <!-- <pre>{{ JSON.stringify(groups, null, 2) }}</pre> -->
+    <pre>{{ JSON.stringify(connections, null, 2) }}</pre>
     <strong>NON_GROUPS:</strong>
     <!-- <pre>{{ JSON.stringify(fileData.ports, null, 2) }}</pre> -->
   </div>
@@ -93,10 +92,7 @@ export default class List extends Vue {
 
         return true
       })
-      .map(({ $options }) => {
-        const { id } = $options?.propsData || {}
-        return id
-      })
+      .map(({ $options }) => $options?.propsData?.id)
 
     this.$store.dispatch('selectItems', items)
   }

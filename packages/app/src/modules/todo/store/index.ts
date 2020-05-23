@@ -11,19 +11,14 @@ const state = {
     items: []
   },
   activePort: null,
-  connections: [
-    {
-      source: 'c',
-      target: 'a'
-    }
-  ],
+  connections: [],
   ports: {
     a: {
       position: {
         x: 0,
         y: 0
       },
-      type: 1, // 0 = output, 1 = input
+      type: 1, // 0 = output, 1 = input, 2 = freeport
       orientation: 0 // [0, 1, 2, 3] = [left, top, right, bottom]
     },
     b: {
@@ -40,19 +35,20 @@ const state = {
         y: 0
       },
       type: 0,
-      orientation: 2
+      orientation: 1
     },
     d: {
       position: {
         x: 0,
         y: 0
       },
-      type: 0,
-      orientation: 2
+      type: 1,
+      orientation: 3
     }
   },
   elements: {
     abc: {
+      type: 'Element',
       portIds: ['a', 'b'],
       position: { x: 300, y: 300 },
       rotation: 0,
@@ -62,6 +58,7 @@ const state = {
       }
     },
     def: {
+      type: 'Element',
       portIds: ['d'],
       position: { x: 100, y: 100 },
       rotation: 0,
@@ -71,6 +68,7 @@ const state = {
       }
     },
     ghi: {
+      type: 'Element',
       portIds: ['c'],
       position: { x: 500, y: 500 },
       rotation: 0,
@@ -121,14 +119,40 @@ const getters = {
     return state
       .connections
       .map(({ source, target }) => ({
-        source: ports[source],
-        target: ports[target]
+        source: {
+          id: source,
+          ...ports[source]
+        },
+        target: {
+          id: target,
+          ...ports[target]
+        }
       }))
       .filter(({ source, target }) => source && target)
   }
 }
 
 const actions = {
+  createFreeport ({ commit }, data) {
+    commit('CREATE_FREEPORT_ELEMENT', {
+      itemId: data.itemId,
+      portId: data.portId,
+      position: data.position
+    })
+    commit('DISCONNECT', {
+      source: data.sourceId,
+      target: data.targetId
+    })
+    commit('CONNECT', {
+      source: data.sourceId,
+      target: data.portId
+    })
+    commit('CONNECT', {
+      source: data.portId,
+      target: data.targetId
+    })
+  },
+
   setActivePort ({ commit }, port) {
     commit('SET_ACTIVE_PORT', port)
   },
@@ -173,7 +197,7 @@ const actions = {
     commit('UNGROUP', positions)
   },
 
-  updatePortPositions ({ commit }, portPositions) { // points = port positions
+  updatePortPositions ({ commit }, portPositions) {
     commit('UPDATE_PORT_POSITIONS', portPositions)
   },
 
@@ -206,7 +230,9 @@ const mutations = {
   },
 
   'CONNECT' (state, { source, target }) {
-    state.connections.push({ source, target })
+    if (source && target) {
+      state.connections.push({ source, target })
+    }
   },
 
   'DISCONNECT' (state, { source, target }) {
@@ -261,6 +287,24 @@ const mutations = {
 
     state.selection.items = []
     state.selection.rotation = 0
+  },
+
+  'CREATE_FREEPORT_ELEMENT' (state, { itemId, portId, position }) {
+    Vue.set(state.elements, itemId, {
+      type: 'Freeport',
+      portIds: [portId],
+      position,
+      rotation: 0,
+      isSelected: false
+    })
+    Vue.set(state.ports, portId, {
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: 2,
+      orientation: 0
+    })
   },
 
   'UPDATE_PORT_POSITIONS' (state, portPositions) {

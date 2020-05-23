@@ -13,6 +13,7 @@
         :type="port.type"
         :orientation="port.orientation"
         :rotation="rotation + parentRotation"
+        :draggable="port.type !== 2"
       />
     </div>
   </div>
@@ -46,6 +47,9 @@ export default class List extends Vue {
 
   @Prop({ default: 0 })
   public rotation: any
+
+  @Prop()
+  public type: any
 
   @Prop({ default: 0 })
   public parentRotation: any
@@ -87,10 +91,23 @@ export default class List extends Vue {
   public id: string
 
   get style () {
-    return {
+    const style = {
       left: `${this.truePosition.x}px`,
       top: `${this.truePosition.y}px`,
       transform: `rotate(${90 * this.rotation}deg)`
+    }
+
+    if (this.type === 'Freeport') {
+      return {
+        ...style,
+        width: 0,
+        height: 0
+      }
+    }
+    return {
+        ...style,
+      width: '100px',
+      height: '185px'
     }
   }
 }
@@ -98,8 +115,6 @@ export default class List extends Vue {
 
 <style lang="scss">
 .item {
-  width: 100px;
-  height: 185px;
   display: flex;
   background-color: rgba(0, 255, 122, 0.2);
   border: 1px solid black;
@@ -132,15 +147,19 @@ export default class List extends Vue {
       right: 0;
       height: 50%;
       background: violet;
+      align-items: flex-start;
     }
 
     &--bottom {
       flex: 1;
+      top: 50%;
       left: 0;
       right: 0;
       bottom: 0;
       height: 50%;
-      background: blue;
+      justify-content: center;
+      align-items: flex-end;
+  position: absolute;
     }
   }
 }

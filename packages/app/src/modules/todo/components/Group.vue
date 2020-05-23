@@ -8,7 +8,7 @@
       transform: `rotate(${parentRotation * 90}deg)`
     }">
       <div class="group__container" />
-      <item v-for="item in items" :id="item.id" :key="item.id" :ports="item.ports"
+      <item v-for="item in items" :id="item.id" :key="item.id" :ports="item.ports" :type="item.type"
       :position="items.length === 1 ? DEFAULT_POSITION : item.position" :rotation="item.rotation" :offset="rect" :parent-rotation="parentRotation" :properties="item.properties">
       </item>
     <slot />
