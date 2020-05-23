@@ -3,7 +3,7 @@
     top: `${topLeft.y + wire.minY}px`,
     left: `${topLeft.x + wire.minX}px`
   }"
-  @click="addPoint">
+  @mousedown="mousedown">
   <defs>
     <filter id='inset' x='-50%' y='-50%' width='200%' height='200%'>
       <!--outside-stroke-->
@@ -23,10 +23,14 @@
         <feMergeNode in="fill-area"/>
       </feMerge>
     </filter>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#05a"/>
+      <stop offset="100%" stop-color="#0a5"/>
+    </linearGradient>
   </defs>
     <path fill="none" stroke="#868686"
     :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
-    :d="wire.path" class="draw2d_Connection" stroke-linecap="round" stroke-linejoin="round" stroke-width="8" stroke-dasharray="none" opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); stroke-linecap: round; stroke-linejoin: round; opacity: 1;"
+    :d="wire.path" class="draw2d_Connection" stroke-linecap="round" stroke-linejoin="round" opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); stroke-linecap: round; stroke-linejoin: round; opacity: 1;"
 
     ></path>
   </svg>
@@ -50,10 +54,67 @@ export default class Wire extends Vue {
   @Prop()
   public target: any;
 
-  points: any[] = []
+  isMouseDown: boolean = false
 
-  addPoint ({ offsetX, offsetY }) {
-    this.points.push({ x: offsetX, y: offsetY })
+  portCreated: boolean = false
+
+  newFreeportPortId: string
+
+  newFreeportItemId: string
+
+  mouseCoords: any = {
+    x: 0,
+    y: 0
+  }
+
+  mousedown ({ x, y }) {
+    const rand = () => 'X' + Math.random().toString().slice(-4)
+
+    this.isMouseDown = true
+    this.portCreated = false
+    this.newFreeportPortId = rand()
+    this.newFreeportItemId = rand()
+    this.mouseCoords = { x, y }
+  }
+
+  mousemove ({ x, y }) {
+    if (!this.isMouseDown) return
+
+    const position = { x, y }
+
+    if ((this.mouseCoords.x !== x || this.mouseCoords.y !== y) && !this.portCreated) {
+      this.$store.dispatch('createFreeport', {
+        position,
+        itemId: this.newFreeportItemId,
+        portId: this.newFreeportPortId,
+        sourceId: this.source.id,
+        targetId: this.target.id
+      })
+      this.portCreated = true
+    } else if (this.portCreated) {
+      this.$store.dispatch('updatePortPositions', {
+        [this.newFreeportPortId]: { position }
+      })
+      this.$store.dispatch('updateItemPosition', {
+        id: this.newFreeportItemId,
+        position
+      })
+    }
+  }
+
+  mouseup () {
+    this.isMouseDown = false
+    this.portCreated = false
+  }
+
+  mounted () {
+    window.addEventListener('mousemove', this.mousemove)
+    window.addEventListener('mouseup', this.mouseup)
+  }
+
+  destroy () {
+    window.removeEventListener('mousemove', this.mousemove)
+    window.removeEventListener('mouseup', this.mouseup)
   }
 
   get a () {
@@ -92,6 +153,28 @@ export default class Wire extends Vue {
     let start = { x: 0, y: 0 }
     let end = this.subtract(a, b)
 
+    let fromDir = 1
+    let toDir = 3
+
+    const dir = n => {
+      switch (n) {
+        case 0:
+          return 3
+        case 1:
+          return 0
+        case 2:
+          return 1
+        case 3:
+          return 2
+        default:
+          return 6
+      }
+    }
+
+    fromDir = dir(this.source.orientation)
+    toDir = dir(this.target.orientation)
+
+
     if (a.x <= b.x) {
       if (a.y <= b.y) {
         // top left (a) to bottom right (b)
@@ -111,10 +194,35 @@ export default class Wire extends Vue {
       start.x = 0
       end = this.subtract(a, b)
       end.y = 0
+
+      let x = fromDir
+      fromDir = toDir
+      toDir = x
+    } else {
+      let x = fromDir
+      fromDir = toDir
+      toDir = x
     }
 
-    const fromDir = 1
-    const toDir = 3
+    if (this.target.type === 2) {
+      if (a.x > b.x) {
+        fromDir = 1
+      }
+    }
+
+    if (this.source.type === 2) {
+      if (a.x < b.x) {
+        fromDir = 1
+      }
+    }
+
+    if (this.target.id === 'DRAGGED_PORT') {
+      if (a.x < b.x) {
+        toDir = 3
+      } else {
+        fromDir = 1
+      }
+    }
 
     const x1 = start.x
     const y1 = start.y
@@ -137,12 +245,12 @@ export default class Wire extends Vue {
 
     const toNumArr = (...n) => n.map(k => parseInt(k, 10))
 
-    const minX = Math.min(...toNumArr(x1, x2, x3, x4))
-    const maxX = Math.max(...toNumArr(x1, x2, x3, x4))
+    const minX = Math.min(...toNumArr(x1, x2, x3, x4)) - WIRE_PADDING / 2
+    const maxX = Math.max(...toNumArr(x1, x2, x3, x4)) + WIRE_PADDING / 2
     const minY = Math.min(...toNumArr(y1, y2, y3, y4)) - WIRE_PADDING / 2
     const maxY = Math.max(...toNumArr(y1, y2, y3, y4)) + WIRE_PADDING / 2
 
-    const width = maxX - minX
+    const width = maxX - minX + WIRE_PADDING
     const height = maxY - minY + WIRE_PADDING
 
     return { width, height, path, minX, minY }
@@ -155,6 +263,22 @@ export default class Wire extends Vue {
   position: absolute;
   top: 0;
   left: 0;
-  // pointer-events: none;
+  pointer-events: none;
+
+  path {
+    stroke-width: 6;
+    pointer-events: all;
+  // stroke-dasharray: 8;
+  // animation: animate1 30s infinite linear;
+  stroke-linejoin: bevel;
+  stroke-linecap: square !important;
+  }
+}
+
+
+@keyframes animate1 {
+ to {
+    stroke-dashoffset: -1000;
+ }
 }
 </style>

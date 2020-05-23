@@ -2,10 +2,10 @@
   <div class="port" :title="rotation" :style="{
     transform: `rotate(-${rotation * 90}deg)`
   }">
-    <div class="port__handle" :class="{
-      'port__handle--active': active
-    }" />
-      <draggable class="port" @drag="onDrag" @dragStart="dragStart" @dragEnd="dragEnd" :position="draggablePosition" :data-id="id" :class="{ snappable }">
+    <div class="port__helper port__helper--vertical snappable" />
+    <div class="port__helper port__helper--horizontal snappable" />
+    <div class="port__handle"  />
+      <draggable class="port" @drag="onDrag" @dragStart="dragStart" @dragEnd="dragEnd" :position="draggablePosition" :data-id="id" :class="{ snappable }" v-if="draggable">
         <div class="port__handle" @mousedown="mousedown" @mouseup="mouseup" :class="{ 'port__handle--active': snappable }"  />
       </draggable>
       <slot />
@@ -31,8 +31,8 @@ export default class Port extends Vue {
   @Prop({ default: 0 })
   public rotation: any
 
-  @Prop({ default: false })
-  public active: boolean
+  @Prop({ default: true })
+  public draggable: boolean
 
   @Prop()
   public type: number
@@ -50,7 +50,7 @@ export default class Port extends Vue {
   get snappable () {
     const { activePort } = this.$store.state.documents
 
-    return activePort !== null && activePort.type !== this.type
+    return activePort !== null // && activePort.type !== this.type
   }
 
   mousedown () {
@@ -85,7 +85,9 @@ export default class Port extends Vue {
     this.$store.dispatch('updatePortPositions', {
       [this.cloneId]: {
         position,
-        id: this.cloneId
+        id: this.cloneId,
+        type: this.type,
+        orientation: this.orientation
       }
     })
   }
@@ -122,6 +124,27 @@ export default class Port extends Vue {
   height: 0;
   position: relative;
 
+  &__helper {
+    content: ' ';
+    display: block;
+    position: absolute;
+    // background-color: rgba(255,0,0,1);
+
+    &--vertical {
+      width: 1px;
+      left: -1px;
+      top: -100vh;
+      height: 200vh;
+    }
+
+    &--horizontal {
+      height: 1px;
+      left: -100vh;
+      width: 200vh;
+    }
+  }
+
+
   &--rotated {
     transform: rotate(-90deg);
   }
@@ -131,6 +154,8 @@ export default class Port extends Vue {
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 1px solid black;
+    box-sizing: border-box;
     top: -8px;
     left: -8px;
     width: 16px;
