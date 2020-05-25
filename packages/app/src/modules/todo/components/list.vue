@@ -1,35 +1,42 @@
 <template>
-  <div :style="style" class="grid">
-    <selector @selectionStart="selectionStart" @selectionEnd="selectionEnd" />
+  <div class="everything">
+    <div class="spacer">
 
-    <wire
-      v-for="(connection, key) in connections"
-      :key="key"
-      :source="connection.source"
-      :target="connection.target"
-    />
-
-    <group v-if="selectedItems.length" :items="selectedItems" :id="'SELECTION'" @drag="updatePortPositions" @dragEnd="updateItemPosition" :position="selection.position" :rotation="selection.rotation" @ungroup="deselectAll"
-      @portDrag="updatePortPositions" @portDragStart="portDragStart" @portDragEnd="updateItemPosition" @updateProperties="updateProperties" :destroyed="selection.destroyed">
-    </group>
-
-    <group v-for="item in unselectedItems" :items="[item]" :key="item.id" :id="item.id" @drag="updatePortPositions" @dragEnd="updateItemPosition" :position="item.position" :rotation="item.rotation"
-      @portDrag="updatePortPositions" @portDragStart="portDragStart" @portDragEnd="updateItemPosition" @updateProperties="updateProperties">
-      <!-- <item :ports="item.ports" @portDrag="groupDrag" @portDragStart="portDragStart" @portDragEnd="portDragEnd" :activePortType="activePortType">
-      </item> -->
-    </group>
-
-    <div class="toolbar">
-      <input type="checkbox" v-model="snapToGrid.enabled" value="1" /> Snap to grid<br />
-      Grid size: <input type="number" v-model.number="snapToGrid.size" /><br />
-
-      <button @click="rotateSelection(-1)">Rotate 90 CCW</button>
-      <button @click="rotateSelection(1)">Rotate 90 CW</button>
+        <pre>{{ JSON.stringify(elements, null, 2) }}</pre>
     </div>
+    <div class="container" @contextmenu="contextMenu($event)" @mousewheel="mousewheel" @mousedown.right="startPanning">
+      <div :style="style" ref="canvas" class="grid">
+        <selector @selectionStart="selectionStart" @selectionEnd="selectionEnd" />
 
-    <pre>{{ JSON.stringify(connections, null, 2) }}</pre>
-    <strong>NON_GROUPS:</strong>
-    <!-- <pre>{{ JSON.stringify(fileData.ports, null, 2) }}</pre> -->
+        <wire
+          v-for="(connection, key) in connections"
+          :key="key"
+          :source="connection.source"
+          :target="connection.target"
+        />
+
+        <group v-if="selectedItems.length" :items="selectedItems" :id="'SELECTION'" @drag="updatePortPositions" @dragEnd="updateItemPosition" :position="selection.position" :rotation="selection.rotation"
+          @portDrag="updatePortPositions" @portDragStart="portDragStart" @portDragEnd="updateItemPosition" @updateProperties="updateProperties">
+        </group>
+
+        <group v-for="item in unselectedItems" :items="[item]" :key="item.id" :id="item.id" @drag="updatePortPositions" @dragEnd="updateItemPosition" :position="item.position" :rotation="item.rotation"
+          @portDrag="updatePortPositions" @portDragStart="portDragStart" @portDragEnd="updateItemPosition" @updateProperties="updateProperties">
+          <!-- <item :ports="item.ports" @portDrag="groupDrag" @portDragStart="portDragStart" @portDragEnd="portDragEnd" :activePortType="activePortType">
+          </item> -->
+        </group>
+
+        <!-- <strong>NON_GROUPS:</strong> -->
+      </div>
+
+      <div class="toolbar">
+        <input type="checkbox" v-model="snapToGrid.enabled" value="1" /> Snap to grid<br />
+        Grid size: <input type="number" v-model.number="snapToGrid.size" /><br />
+
+        <button @click="rotateSelection(-1)">Rotate 90&deg; CCW</button>
+        <button @click="rotateSelection(1)">Rotate 90&deg; CW</button><br />
+        <button @click="selectAll">Select All</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -54,6 +61,7 @@ import { Getter, Action } from '../store/decorators'
     Selector
   },
   methods: mapActions([
+    'selectAll',
     'deselectAll',
     'updateGroupItemPositions',
     'updateItemPosition',
@@ -68,8 +76,84 @@ export default class List extends Vue {
     size: 20
   }
 
+  offset = {
+    left: 0,
+    top: 0
+  }
+
+  panning: boolean = false
+
+  panStartPosition = {
+    x: 0,
+    y: 0
+  }
+
+  startPanning ({ x, y }) {
+    this.panning = true
+    this.panStartPosition = {
+      x: x - this.offset.left ,
+      y: y - this.offset.top
+    }
+  }
+
+  mousemove ({ x, y }) {
+    if (this.panning) {
+      this.offset = {
+        left: Math.min(x - this.panStartPosition.x, 0),
+        top: Math.min(y - this.panStartPosition.y, 0)
+      }
+    }
+  }
+
+  mounted () {
+    window.addEventListener('mousemove', this.mousemove)
+    window.addEventListener('mouseup', this.mouseup)
+  }
+
+  destroy () {
+    window.removeEventListener('mousemove', this.mousemove)
+    window.removeEventListener('mouseup', this.mouseup)
+  }
+
+  mouseup () {
+    this.panning = false
+    this.panStartPosition = { x: 0, y: 0 }
+  }
+
+  contextMenu (e) {
+    e.preventDefault()
+  }
+
+  fromDocumentToEditorCoordinates (point) {
+    const viewer = (this.$refs.canvas as any).getBoundingClientRect()
+
+    return {
+      x: (point.x - viewer.x) / this.zoom,
+      y: (point.y - viewer.y) / this.zoom
+    }
+  }
+
+  mousewheel (args) {
+    const newZoom = this.zoom + (args.deltaY / 1000)
+    const point = this.fromDocumentToEditorCoordinates({
+      x: args.x,
+      y: args.y
+    })
+    const scaledPoint = {
+      x: point.x * newZoom,
+      y: point.y * newZoom
+    }
+
+    this.offset = {
+      left: Math.min(point.x - scaledPoint.x, 0),
+      top: Math.min(point.y - scaledPoint.y, 0)
+    }
+
+    this.$store.dispatch('setZoom', newZoom)
+  }
+
   selectionStart () {
-    this.$store.dispatch('destroySelection')
+    this.$store.dispatch('deselectAll')
   }
 
   selectionEnd (selection) {
@@ -108,8 +192,14 @@ export default class List extends Vue {
     ]
   }
 
+  @Getter('documents', 'zoom')
+  public zoom: number
+
   @Getter('documents', 'connections')
   public connections?: any[]
+
+  @Getter('documents', 'elements')
+  public elements?: any
 
   @Getter('documents', 'selection')
   public selection?: any
@@ -131,7 +221,10 @@ export default class List extends Vue {
   get style () {
     if (!this.snapToGrid.enabled) return
     return {
-      backgroundSize: `${this.snapToGrid.size}px ${this.snapToGrid.size}px`
+      backgroundSize: `${this.snapToGrid.size}px ${this.snapToGrid.size}px`,
+      transform: `scale(${this.zoom || 1})`,
+      left: `${this.offset.left}px`,
+      top: `${this.offset.top}px`
     }
   }
 
@@ -165,24 +258,60 @@ export default class List extends Vue {
 body {
   padding: 0;
   margin: 0;
-  overflow: hidden;
   user-select: none;
+  font-family: system-ui;
+}
+
+.everything {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.spacer {
+  width: 300px;
+  height: 100%;
+  overflow-y: scroll;
+  background-color: #c0c0c0;
 }
 
 .grid {
   position: relative;
-  width: 100vw;
-  height: 100vh;
+  // border: 1px solid red;
+  box-sizing: border-box;
+  width: 300vw;
+  height: 300vh;
   background-image:
-    linear-gradient(to right, #e8e8e8 1px, transparent 1px),
-    linear-gradient(to bottom, #e8e8e8 1px, transparent 1px);
+    linear-gradient(to right, #c0c0c0 1px, transparent 1px),
+    linear-gradient(to bottom, #c0c0c0 1px, transparent 1px);
+  background-color: #e8e8e8;
+
+    transform-origin: top left;
+}
+
+.testDiv {
+  background-color: red;
+  z-index: 1000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.container {
+  overflow: hidden;
+  flex: 1;
+  height: 100%;
 }
 
 .toolbar {
-  position: relative;
+  position: absolute;
   right: 0;
+  top: 0;
   z-index: 1000;
-  background-color: rgba(0,0,0,0.1);
+  background-color: rgba(0,0,0,0.8);
+  color: #fff;
   width: 300px;
   padding: 1em;
 }

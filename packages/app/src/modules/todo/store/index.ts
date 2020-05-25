@@ -7,11 +7,11 @@ const state = {
       x: 0,
       y: 0
     },
-    destroyed: true,
     items: []
   },
   activePort: null,
   connections: [],
+  zoomLevel: 1,
   ports: {
     a: {
       position: {
@@ -19,6 +19,7 @@ const state = {
         y: 0
       },
       type: 1, // 0 = output, 1 = input, 2 = freeport
+      rotation: 0,
       orientation: 0 // [0, 1, 2, 3] = [left, top, right, bottom]
     },
     b: {
@@ -27,6 +28,7 @@ const state = {
         y: 0
       },
       type: 0,
+      rotation: 0,
       orientation: 2
     },
     c: {
@@ -35,6 +37,7 @@ const state = {
         y: 0
       },
       type: 0,
+      rotation: 0,
       orientation: 1
     },
     d: {
@@ -43,6 +46,7 @@ const state = {
         y: 0
       },
       type: 1,
+      rotation: 0,
       orientation: 3
     }
   },
@@ -60,7 +64,7 @@ const state = {
     def: {
       type: 'Element',
       portIds: ['d'],
-      position: { x: 100, y: 100 },
+      position: { x: 600, y: 600 },
       rotation: 0,
       isSelected: false,
       properties: {
@@ -81,6 +85,10 @@ const state = {
 }
 
 const getters = {
+  zoom (state) {
+    return state.zoomLevel
+  },
+
   selection (state) {
     return state.selection
   },
@@ -133,6 +141,10 @@ const getters = {
 }
 
 const actions = {
+  setZoom ({ commit }, zoom) {
+    commit('SET_ZOOM', zoom)
+  },
+
   createFreeport ({ commit }, data) {
     commit('CREATE_FREEPORT_ELEMENT', {
       itemId: data.itemId,
@@ -180,21 +192,20 @@ const actions = {
     commit('DISCONNECT', { source, target })
   },
 
-  selectItems ({ commit, state }, ids) {
-    if (!state.selection.destroyed) {
-      // if an active selection is present, it must be destroyed first
-      commit('DESTROY_GROUP')
-    } else {
-      commit('GROUP_ITEMS', ids)
-    }
+  selectItems ({ commit }, ids) {
+    commit('GROUP_ITEMS', ids)
   },
 
-  destroySelection ({ commit }) {
-    commit('DESTROY_GROUP')
+  selectAll ({ commit, state }) {
+    commit('GROUP_ITEMS', Object.keys(state.elements))
   },
 
-  deselectAll ({ commit }, positions) {
-    commit('UNGROUP', positions)
+  deselectAll ({ commit }) {
+    commit('UNGROUP')
+  },
+
+  updateRotatedPositions ({ commit }, positions) {
+    commit('UPDATE_ROTATED_POSITIONS', positions)
   },
 
   updatePortPositions ({ commit }, portPositions) {
@@ -217,16 +228,12 @@ const actions = {
 }
 
 const mutations = {
+  'SET_ZOOM' (state, zoom) {
+    state.zoomLevel = zoom
+  },
+
   'SET_ACTIVE_PORT' (state, port) {
     state.activePort = port
-  },
-
-  'ROTATE_SELECTION' (state, rotation) {
-    state.selection.rotation += rotation
-  },
-
-  'ROTATE_ITEM' (state, { id, rotation }) {
-    state.elements[id].rotation += rotation
   },
 
   'CONNECT' (state, { source, target }) {
@@ -246,10 +253,7 @@ const mutations = {
   },
 
   'GROUP_ITEMS' (state, ids) {
-    const itemsToGroup = Object
-      .keys(state.elements)
-      .filter((id: string) => ids.includes(id))
-      .map((id: string) => state.elements[id])
+    const itemsToGroup = ids.map((id: string) => state.elements[id])
 
     const position: any = itemsToGroup
       .reduce((data: any, item: any) => ({
@@ -260,7 +264,8 @@ const mutations = {
         y: Infinity
       })
 
-    itemsToGroup.forEach((el: any) => {
+    itemsToGroup.forEach((el: any, index: number) => {
+      el.id = ids[index]
       el.isSelected = true
       el.position.x -= position.x
       el.position.y -= position.y
@@ -271,18 +276,15 @@ const mutations = {
     state.selection.destroyed = false
   },
 
-  'DESTROY_GROUP' (state) {
-    state.selection.destroyed = true
-  },
+  'UNGROUP' (state) {
+    const { position, items } = state.selection
 
-  'UNGROUP' (state, positions) {
-    positions.forEach(({ id, position }) => {
+    items.forEach(({ id }) => {
       const el = (state.elements[id] as any)
 
       el.isSelected = false
-      el.rotation += state.selection.rotation
-      el.position.x = position.x
-      el.position.y = position.y
+      el.position.x += position.x
+      el.position.y += position.y
     })
 
     state.selection.items = []
@@ -303,8 +305,37 @@ const mutations = {
         y: 0
       },
       type: 2,
+      rotation: 0,
       orientation: 0
     })
+  },
+
+  'ROTATE_SELECTION' (state, rotation) {
+    state.selection.rotation += rotation
+  },
+
+  'ROTATE_ITEM' (state, { id, rotation }) {
+    state.elements[id].rotation += rotation
+  },
+
+  'UPDATE_ROTATED_POSITIONS' (state, positions) {
+    positions.forEach(({ id, position }) => {
+      const el = (state.elements[id] as any)
+
+      el.position.x = position.x - state.selection.position.x
+      el.position.y = position.y - state.selection.position.y
+
+      if (el.type === 'Freeport') return // don't rotate freeports
+
+      el.rotation += state.selection.rotation
+
+      // update the rotation of each port to match the item's rotation
+      el.portIds.forEach((portId) => {
+        state.ports[portId].rotation = el.rotation
+      })
+    })
+
+    state.selection.rotation = 0
   },
 
   'UPDATE_PORT_POSITIONS' (state, portPositions) {
