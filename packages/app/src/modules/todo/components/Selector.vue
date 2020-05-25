@@ -1,5 +1,5 @@
 <template>
-  <div class="selector" @mousedown.self="mousedown">
+  <div class="selector" @mousedown.left.self="mousedown">
     <div v-if="selection" ref="selection" class="selector__selection" :style="style" />
   </div>
 </template>
@@ -36,6 +36,9 @@ import { Getter, Action } from '../store/decorators'
 export default class List extends Vue {
   selection: boolean = false
 
+  @Getter('documents', 'zoom')
+  public zoom: number
+
   start: any = {
     x: 0,
     y: 0
@@ -65,24 +68,31 @@ export default class List extends Vue {
     window.removeEventListener('mouseup', this.mouseup)
   }
 
-  mousedown ({ x, y }) {
+  getPosition (event) {
+    const { top, left } = (this.$el as any).getBoundingClientRect()
+    const x = (event.x - left) / this.zoom
+    const y = (event.y - top) / this.zoom
+
+    return { x, y }
+  }
+
+  mousedown (event) {
+    const position = this.getPosition(event)
+
     this.selection = true
-    this.start.x = x
-    this.start.y = y
-    this.end.x = x
-    this.end.y = y
+    this.start = position
+    this.end = position
 
     this.$emit('selectionStart')
   }
 
-  mousemove ({ x, y }) {
+  mousemove (event) {
     if (this.selection) {
-      this.end.x = x
-      this.end.y = y
+      this.end = this.getPosition(event)
     }
   }
 
-  mouseup ({ x, y }) {
+  mouseup (event) {
     if (this.selection) {
       this.createSelection()
 

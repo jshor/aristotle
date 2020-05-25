@@ -11,8 +11,9 @@
         :id="port.id"
         :key="port.id"
         :type="port.type"
+        :position="position"
         :orientation="port.orientation"
-        :rotation="rotation + parentRotation"
+        :rotation="rotation"
         :draggable="port.type !== 2"
       />
     </div>
@@ -118,6 +119,7 @@ export default class List extends Vue {
   display: flex;
   background-color: rgba(0, 255, 122, 0.2);
   border: 1px solid black;
+  box-sizing: border-box;
   position: absolute;
 
   &__ports {

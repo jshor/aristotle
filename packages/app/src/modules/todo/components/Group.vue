@@ -1,5 +1,5 @@
 <template>
-  <draggable class="group" @drag="onElemDrag" @dragEnd="dragEnd" :position="position">
+  <draggable class="group" @drag="onElemDrag" @dragEnd="dragEnd" :position="position" :zoom="zoom">
     <div class="group__rect" :style="{
       width: `${rect.width}px`,
       height: `${rect.height}px`,
@@ -21,6 +21,7 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import Draggable from './Draggable.vue'
 import Port from './Port.vue'
 import Item from './Item.vue'
+import { Getter } from '../store/decorators'
 
 @Component({
   components: {
@@ -38,6 +39,9 @@ export default class Group extends Vue {
   public position: any
 
   public DEFAULT_POSITION: any = { x: 0, y: 0 }
+
+  @Getter('documents', 'zoom')
+  public zoom: number
 
   @Prop()
   public id: string
@@ -61,15 +65,21 @@ export default class Group extends Vue {
   }
 
   @Watch('rotation')
-  onRotate () {
+  onRotate (newValue) {
+
+    if (newValue === 0) return
+
     Vue.nextTick(() => {
-      const ports = this.getPorts(this)
+      this.$store.dispatch('updateRotatedPositions', this.getItemPositions())
 
-      this.portPositions = this.getPortPositions(ports)
-
-      this.onElemDrag({
-        position: this.position
-      })
+      // Vue.nextTick(() => {
+          const ports = this.getPorts(this)
+          this.portPositions = this.getPortPositions(ports)
+          this.onElemDrag({
+            position: this.position
+          })
+        this.rect = this.computeRect()
+      // })
     })
   }
 
@@ -84,17 +94,22 @@ export default class Group extends Vue {
     }
   }
 
-  ungroup () {
-    const positions = this
+  getItemPositions () {
+    const { top, left } = (this.$parent.$refs.canvas as any).getBoundingClientRect()
+
+    return this
       .getItems(this)
       .reduce((p: any, item: any) => {
         const { offsetWidth, offsetHeight } = item.$el
         const { x, y, width, height } = item.$el.getBoundingClientRect()
-        const centerX = x + width / 2
-        const centerY = y + height / 2
+        const scaledCenterX = x + (width / 2)
+        const scaledCenterY = y + (height / 2)
+        const centerX = scaledCenterX / this.zoom
+        const centerY = scaledCenterY / this.zoom
+
         const position = {
-          x: centerX - offsetWidth / 2,
-          y: centerY - offsetHeight / 2
+          x: (centerX - (offsetWidth / 2)) - (left / this.zoom),
+          y: (centerY - (offsetHeight / 2)) - (top / this.zoom)
         }
 
         return [...p, {
@@ -102,15 +117,13 @@ export default class Group extends Vue {
           position
         }]
       }, [])
-
-    this.$emit('ungroup', positions)
   }
 
-  relativePostion (position) {
-    return {
-      x: position.x - this.position.x,
-      y: position.y - this.position.y
-    }
+  ungroup () {
+        this.getItemPositions().forEach((item) => {
+          console.log('UNGROUP: ', item.position.x, item.position.y)
+        })
+    this.$emit('ungroup', this.getItemPositions())
   }
 
   portPositions: any[] = []
@@ -161,15 +174,15 @@ export default class Group extends Vue {
     let y = 0
 
     if (this.items.length > 1) {
-      x = rect.left - groupBBox.left
-      y = rect.top - groupBBox.top
+      x = (rect.left - groupBBox.left) / this.zoom
+      y = (rect.top - groupBBox.top) / this.zoom
     }
 
     return {
       x,
       y,
-      width: rect.right - rect.left,
-      height: rect.bottom - rect.top
+      width: (rect.right - rect.left) / this.zoom,
+      height: (rect.bottom - rect.top) / this.zoom
     }
   }
 
@@ -179,8 +192,8 @@ export default class Group extends Vue {
     return ports.map((port: any) => {
       const { id } = port.$options?.propsData || {}
       const { left, top } = port.$el.getBoundingClientRect()
-      const x = left - bbox.left
-      const y = top - bbox.top
+      const x = (left - bbox.left) / this.zoom
+      const y = (top - bbox.top) / this.zoom
 
       return { x, y, id }
     })
@@ -196,22 +209,10 @@ export default class Group extends Vue {
       .filter((child: any) => child instanceof Item)
   }
 
-  // getAllDescendants (component: any, ports: any[] = []) {
-  //   return [
-  //     ...ports,
-  //     ...component.$children,//.filter((child: any) => child instanceof Port),
-  //     ...component.$children.reduce((children: any[], child: any) => [
-  //       ...children,
-  //       ...this.getAllDescendants(child, children)
-  //     ], [])
-  //   ]
-  // }
-
-
   getAllDescendants (component: any, descendants: any[] = []) {
     return [
       ...descendants,
-      ...component.$children, // .filter((child: any) => child instanceof Item),
+      ...component.$children,
       ...component.$children.reduce((children: any[], child: any) => {
         return this.getAllDescendants(child, children)
       }, [])

@@ -2,8 +2,8 @@
   <div class="port" :title="rotation" :style="{
     transform: `rotate(-${rotation * 90}deg)`
   }">
-    <div class="port__helper port__helper--vertical snappable" />
-    <div class="port__helper port__helper--horizontal snappable" />
+    <!-- <div class="port__helper port__helper--vertical snappable" />
+    <div class="port__helper port__helper--horizontal snappable" /> -->
     <div class="port__handle"  />
       <draggable class="port" @drag="onDrag" @dragStart="dragStart" @dragEnd="dragEnd" :position="draggablePosition" :data-id="id" :class="{ snappable }" v-if="draggable">
         <div class="port__handle" @mousedown="mousedown" @mouseup="mouseup" :class="{ 'port__handle--active': snappable }"  />
@@ -17,6 +17,7 @@
 import Vue from 'vue'
 import { Component, Prop } from 'vue-property-decorator'
 import Draggable from './Draggable.vue'
+import { Getter } from '../store/decorators'
 
 @Component({
   components: {
@@ -25,11 +26,20 @@ import Draggable from './Draggable.vue'
 })
 export default class Port extends Vue {
 
+  @Getter('documents', 'zoom')
+  public zoom: number
+
+
   @Prop()
   public id!: string
 
   @Prop({ default: 0 })
   public rotation: any
+
+  @Prop({ default: () => ({
+    x: 0, y: 0
+  }) })
+  public position: any
 
   @Prop({ default: true })
   public draggable: boolean
@@ -47,13 +57,29 @@ export default class Port extends Vue {
     y: 0
   }
 
+  public absolutePosition: any = {
+    x: 0,
+    y: 0
+  }
+
   get snappable () {
     const { activePort } = this.$store.state.documents
 
     return activePort !== null // && activePort.type !== this.type
   }
 
+  setAbsolutePosition () {
+    const parent = (this.$parent.$parent.$parent.$parent.$refs.canvas as any).getBoundingClientRect()
+    const { x, y } = this.$el.getBoundingClientRect()
+
+    this.absolutePosition = {
+      x: x - (parent.x * this.zoom),
+      y: y - (parent.y * this.zoom)
+    }
+  }
+
   mousedown () {
+    this.setAbsolutePosition()
     this.setActivePort({
       id: this.cloneId,
       position: {
@@ -70,8 +96,6 @@ export default class Port extends Vue {
   }
 
   dragStart ({ position }) {
-    const { x, y } = this.$el.getBoundingClientRect()
-
     this.draggablePosition = {}
     this.onDrag(position)
 
@@ -82,12 +106,17 @@ export default class Port extends Vue {
   }
 
   onDrag ({ position }) {
+    if (!position) return
     this.$store.dispatch('updatePortPositions', {
       [this.cloneId]: {
-        position,
+        position: {
+          x: position.x + this.absolutePosition.x,
+          y: position.y + this.absolutePosition.y
+        },
         id: this.cloneId,
         type: this.type,
-        orientation: this.orientation
+        orientation: this.orientation,
+        rotation: 0
       }
     })
   }
@@ -162,15 +191,19 @@ export default class Port extends Vue {
     height: 16px;
     background-color: red;
     border-radius: 50%;
-    cursor: pointer;
+    cursor: grab;
     transition: all 0.25s;
     z-index: 1001;
 
+    &:active {
+      cursor: grabbing;
+    }
+
     &--active {
-      width: 32px;
-      height: 32px;
-      top: -16px;
-      left: -16px;
+      width: 24px;
+      height: 24px;
+      top: -12px;
+      left: -12px;
     }
   }
 }

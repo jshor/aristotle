@@ -41,6 +41,7 @@ const WIRE_PADDING = 15
 
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import Draggable from './Draggable.vue'
+import { Getter } from '../store/decorators'
 
 @Component({
   components: {
@@ -67,8 +68,20 @@ export default class Wire extends Vue {
     y: 0
   }
 
-  mousedown ({ x, y }) {
+  @Getter('documents', 'zoom')
+  public zoom: number
+
+  getPosition (event) {
+    const { top, left } = (this.$parent.$refs.canvas as any).getBoundingClientRect()
+    const x = (event.x - left) / this.zoom
+    const y = (event.y - top) / this.zoom
+
+    return { x, y }
+  }
+
+  mousedown (event) {
     const rand = () => 'X' + Math.random().toString().slice(-4)
+    const { x, y } = this.getPosition(event)
 
     this.isMouseDown = true
     this.portCreated = false
@@ -77,10 +90,11 @@ export default class Wire extends Vue {
     this.mouseCoords = { x, y }
   }
 
-  mousemove ({ x, y }) {
+  mousemove (event) {
     if (!this.isMouseDown) return
 
-    const position = { x, y }
+    const position = this.getPosition(event)
+    const { x, y } = position
 
     if ((this.mouseCoords.x !== x || this.mouseCoords.y !== y) && !this.portCreated) {
       this.$store.dispatch('createFreeport', {
@@ -157,23 +171,14 @@ export default class Wire extends Vue {
     let toDir = 3
 
     const dir = n => {
-      switch (n) {
-        case 0:
-          return 3
-        case 1:
-          return 0
-        case 2:
-          return 1
-        case 3:
-          return 2
-        default:
-          return 6
-      }
+      const divisor = n - 1
+      const remainder = divisor % 4
+
+      return remainder < 0 ? remainder + 4 : remainder
     }
 
-    fromDir = dir(this.source.orientation)
-    toDir = dir(this.target.orientation)
-
+    fromDir = dir(this.source.orientation + this.source.rotation)
+    toDir = dir(this.target.orientation + this.target.rotation)
 
     if (a.x <= b.x) {
       if (a.y <= b.y) {
