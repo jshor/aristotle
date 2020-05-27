@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import documents from './modules/todo/store'
+import documents from './modules/documents/store'
 
 Vue.use(Vuex);
 

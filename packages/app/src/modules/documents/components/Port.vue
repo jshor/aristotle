@@ -29,9 +29,8 @@ export default class Port extends Vue {
   @Getter('documents', 'zoom')
   public zoom: number
 
-
   @Prop()
-  public id!: string
+  public id: string
 
   @Prop({ default: 0 })
   public rotation: any
@@ -44,10 +43,10 @@ export default class Port extends Vue {
   @Prop({ default: true })
   public draggable: boolean
 
-  @Prop()
+  @Prop({ default: 0 })
   public type: number
 
-  @Prop()
+  @Prop({ default: 0 })
   public orientation: number
 
   public cloneId: string = 'DRAGGED_PORT'
