@@ -1,11 +1,10 @@
 <template>
-  <div class="everything">
-    <div class="spacer">
-
+  <div class="documents">
+    <div class="documents__debug-info">
         <pre>{{ JSON.stringify(elements, null, 2) }}</pre>
     </div>
-    <div class="container" @contextmenu="contextMenu($event)" @mousewheel="mousewheel" @mousedown.right="startPanning">
-      <div :style="style" ref="canvas" class="grid">
+    <div class="documents__container" @contextmenu="contextMenu($event)" @mousewheel="mousewheel" @mousedown.right="startPanning">
+      <div :style="style" ref="canvas" class="documents__grid">
         <selector @selectionStart="selectionStart" @selectionEnd="selectionEnd" />
 
         <wire
@@ -28,7 +27,7 @@
         <!-- <strong>NON_GROUPS:</strong> -->
       </div>
 
-      <div class="toolbar">
+      <div class="documents__toolbar">
         <input type="checkbox" v-model="snapToGrid.enabled" value="1" /> Snap to grid<br />
         Grid size: <input type="number" v-model.number="snapToGrid.size" /><br />
 
@@ -41,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Vue, Prop } from 'vue-property-decorator'
 import Draggable from './Draggable.vue'
 import Port from './Port.vue'
 import Wire from './Wire.vue'
@@ -70,7 +69,7 @@ import { Getter, Action } from '../store/decorators'
     'rotateSelection'
   ])
 })
-export default class List extends Vue {
+export default class Documents extends Vue {
   snapToGrid = {
     enabled: true,
     size: 20
@@ -254,65 +253,45 @@ export default class List extends Vue {
 </script>
 
 <style lang="scss">
-
-body {
-  padding: 0;
-  margin: 0;
-  user-select: none;
-  font-family: system-ui;
-}
-
-.everything {
-  width: 100vw;
-  height: 100vh;
+.documents {
+  width: 100%;
+  height: 100%;
   display: flex;
-}
 
-.spacer {
-  width: 300px;
-  height: 100%;
-  overflow-y: scroll;
-  background-color: #c0c0c0;
-}
+  &__debug-info {
+    width: 300px;
+    height: 100%;
+    overflow-y: scroll;
+    background-color: #c0c0c0;
+  }
 
-.grid {
-  position: relative;
-  // border: 1px solid red;
-  box-sizing: border-box;
-  width: 300vw;
-  height: 300vh;
-  background-image:
-    linear-gradient(to right, #c0c0c0 1px, transparent 1px),
-    linear-gradient(to bottom, #c0c0c0 1px, transparent 1px);
-  background-color: #e8e8e8;
-
+  &__grid {
+    position: relative;
+    box-sizing: border-box;
+    width: 300vw;
+    height: 300vh;
+    background-image:
+      linear-gradient(to right, #c0c0c0 1px, transparent 1px),
+      linear-gradient(to bottom, #c0c0c0 1px, transparent 1px);
+    background-color: #e8e8e8;
     transform-origin: top left;
-}
+  }
 
-.testDiv {
-  background-color: red;
-  z-index: 1000;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 20px;
-  height: 20px;
-}
+  &__container {
+    overflow: hidden;
+    flex: 1;
+    height: 100%;
+  }
 
-.container {
-  overflow: hidden;
-  flex: 1;
-  height: 100%;
-}
-
-.toolbar {
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 1000;
-  background-color: rgba(0,0,0,0.8);
-  color: #fff;
-  width: 300px;
-  padding: 1em;
+  &__toolbar {
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 1000;
+    background-color: rgba(0,0,0,0.8);
+    color: #fff;
+    width: 300px;
+    padding: 1em;
+  }
 }
 </style>

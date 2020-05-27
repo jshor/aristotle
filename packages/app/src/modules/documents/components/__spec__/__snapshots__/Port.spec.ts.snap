@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Document Container should match the snapshot 1`] = `
+"<div title=\\"0\\" class=\\"port\\" style=\\"transform: rotate(-0deg);\\" document=\\"[object Object]\\">
+  <div class=\\"port__handle\\"></div>
+  <draggable-stub position=\\"[object Object]\\" snap=\\".snappable\\" class=\\"port\\">
+    <div class=\\"port__handle\\"></div>
+  </draggable-stub>
+</div>"
+`;
