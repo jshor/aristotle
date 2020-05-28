@@ -1,7 +1,8 @@
 <template>
   <div class="documents">
     <div class="documents__debug-info">
-        <pre>{{ JSON.stringify(elements, null, 2) }}</pre>
+        <pre>{{ JSON.stringify(ports, null, 2) }}</pre>
+        <!-- <pre>{{ JSON.stringify(elements, null, 2) }}</pre> -->
     </div>
     <div class="documents__container" @contextmenu="contextMenu($event)" @mousewheel="mousewheel" @mousedown.right="startPanning">
       <div :style="style" ref="canvas" class="documents__grid">
@@ -214,6 +215,9 @@ export default class Documents extends Vue {
 
   @Action('documents', 'disconnect')
   public disconnect: Function
+
+  @Getter('documents', 'ports')
+  public ports: any[]
 
   activePortType: any = null
 

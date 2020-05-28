@@ -1,10 +1,8 @@
 module.exports = {
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest',
-    '^.+\\.vue$': 'vue-jest'
-  },
-  testMatch: [
-    '<rootDir>/src/**/*.spec.(js|jsx|ts|tsx)'
+  collectCoverage: true,
+  coverageDirectory: '<rootDir>/test/.coverage',
+  coveragePathIgnorePatterns: [
+    '<rootDir>/src/.*/__spec__/.*'
   ],
   moduleFileExtensions: [
     'ts',
@@ -14,5 +12,12 @@ module.exports = {
     'jsx',
     'json',
     'node'
-  ]
+  ],
+  testMatch: [
+    '<rootDir>/src/**/*.spec.(js|jsx|ts|tsx)'
+  ],
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.vue$': 'vue-jest'
+  }
 }
