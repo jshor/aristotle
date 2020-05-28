@@ -1,6 +1,9 @@
 <template>
   <div ref="draggable" class="draggable" :style="style">
-    <slot />
+    <div class="draggable__inner" :style="{
+    }">
+      <slot />
+    </div>
   </div>
 </template>
 
@@ -40,6 +43,14 @@ export default class Draggable extends Vue {
     }
   }
 
+  getCanvas (parent) {
+    if (parent.$refs.canvas) {
+      return parent
+    }
+    return this.getCanvas(parent.$parent)
+  }
+
+
   mounted () {
     const el = ($(this.$refs.draggable) as any)
     const snapSize = 1
@@ -48,22 +59,53 @@ export default class Draggable extends Vue {
       x: 0,
       y: 0
     };
+    const canvas = this.getCanvas(this)
 
     el.draggable({
-      snap: this.snap,
+      snap: ['.snappable', this.snap].join(', '),
+      snapMode: 'inner',
       cancel: '.non-draggable',
       grid: [ snapSize, snapSize ],
       drag: (event, ui) => {
-        const offset = el[0].getBoundingClientRect()
-        const x = round(offset.left)
-        const y = round(offset.top)
+        const snappedId = $(el)
+          .data('uiDraggable')
+          .snapElements
+          .filter(({ snapping }) => snapping)
+          .pop()
 
-        var original = ui.originalPosition;
+        const original = ui.originalPosition
 
         ui.position = {
-            left: (event.clientX - click.x + original.left) / this.zoom,
-            top:  (event.clientY - click.y + original.top ) / this.zoom
-        };
+          left: (event.clientX - click.x + original.left) / this.zoom,
+          top:  (event.clientY - click.y + original.top ) / this.zoom
+        }
+
+
+        if (snappedId) {
+          const parentRect = this.$parent.$el.getBoundingClientRect()
+          const parent = canvas.fromDocumentToEditorCoordinates(parentRect)
+          const coords = canvas.fromDocumentToEditorCoordinates(snappedId.item.getBoundingClientRect())
+          const left = coords.x - parent.x
+          const top = coords.y - parent.y
+
+          /* when the dragging element is positioned relative to the canvas */
+          if (Math.abs(coords.x - ui.position.left) < 30) {
+            ui.position.left = coords.x
+          }
+
+          if (Math.abs(coords.y - ui.position.top) < 30) {
+            ui.position.top = coords.y
+          }
+
+          /* when the dragging element is positioned relative to its parent */
+          if (Math.abs(left - ui.position.left) < 30) {
+            ui.position.left = left
+          }
+
+          if (Math.abs(top - ui.position.top) < 30) {
+            ui.position.top = top
+          }
+        }
 
         this.$emit('drag', {
           position: {
@@ -110,15 +152,15 @@ export default class Draggable extends Vue {
 
         var original = ui.originalPosition;
 
-        ui.position = {
-            left: (event.clientX - click.x + original.left) / this.zoom,
-            top:  (event.clientY - click.y + original.top ) / this.zoom
-        };
+        // ui.position = {
+        //     left: (event.clientX - click.x + original.left) / this.zoom,
+        //     top:  (event.clientY - click.y + original.top ) / this.zoom
+        // };
 
         this.$emit('dragEnd', {
           position: {
-            x: ui.position.left,
-            y: ui.position.top
+            x: (event.clientX - click.x + original.left) / this.zoom,
+            y: (event.clientY - click.y + original.top ) / this.zoom
           },
           snappedId
         })
@@ -133,5 +175,9 @@ export default class Draggable extends Vue {
   width: 1px;
   height: 1px;
   position: relative;
+
+  &__inner {
+    position: absolute;
+  }
 }
 </style>

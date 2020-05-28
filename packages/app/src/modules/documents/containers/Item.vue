@@ -15,6 +15,7 @@
         :orientation="port.orientation"
         :rotation="rotation"
         :draggable="port.type !== 2"
+        :show-helper="port.showHelper"
       />
     </div>
   </div>

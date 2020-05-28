@@ -90,6 +90,16 @@ export default class Wire extends Vue {
     this.mouseCoords = { x, y }
   }
 
+  originalA: any = {
+    x: 0,
+    y: 0
+  }
+
+  originalB: any = {
+    x: 0,
+    y: 0
+  }
+
   mousemove (event) {
     if (!this.isMouseDown) return
 
@@ -104,8 +114,25 @@ export default class Wire extends Vue {
         sourceId: this.source.id,
         targetId: this.target.id
       })
+      this.originalA = {...this.a}
+      this.originalB = {...this.b}
       this.portCreated = true
     } else if (this.portCreated) {
+      // const port = this.target && this.target.id === this.newFreeportPortId
+
+      [this.originalA, this.originalB].forEach((wirePort) => {
+        const diffX = Math.abs(position.x - wirePort.x)
+        const diffY = Math.abs(position.y - wirePort.y)
+
+        if (diffX < 10) {
+          position.x += (wirePort.x - position.x)
+        }
+        if (diffY < 10) {
+          position.y += (wirePort.y - position.y)
+        }
+      })
+
+
       this.$store.dispatch('updatePortPositions', {
         [this.newFreeportPortId]: { position }
       })
@@ -210,14 +237,39 @@ export default class Wire extends Vue {
     }
 
     if (this.target.type === 2) {
+
       if (a.x > b.x) {
-        fromDir = 1
+        if (a.y > b.y) {
+          fromDir = 2
+        } else {
+          fromDir = 1
+        }
+      } else {
+        if (a.y > b.y) {
+          toDir = 3
+        } else {
+          toDir = 0
+        }
       }
     }
 
     if (this.source.type === 2) {
+      // if (a.x < b.x) {
+      //   fromDir = 1
+      // }
+
       if (a.x < b.x) {
-        fromDir = 1
+        if (a.y < b.y) {
+          fromDir = 1
+        } else {
+          fromDir = 0
+        }
+      } else {
+        if (a.y < b.y) {
+          toDir = 2
+        } else {
+          toDir = 3
+        }
       }
     }
 

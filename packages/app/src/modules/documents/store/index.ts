@@ -10,6 +10,7 @@ const state = {
     items: []
   },
   activePort: null,
+  portSnapHelperIds: [],
   connections: [],
   zoomLevel: 1,
   ports: {
@@ -20,7 +21,8 @@ const state = {
       },
       type: 1, // 0 = output, 1 = input, 2 = freeport
       rotation: 0,
-      orientation: 0 // [0, 1, 2, 3] = [left, top, right, bottom]
+      orientation: 0, // [0, 1, 2, 3] = [left, top, right, bottom]
+      showHelper: false
     },
     b: {
       position: {
@@ -29,7 +31,8 @@ const state = {
       },
       type: 0,
       rotation: 0,
-      orientation: 2
+      orientation: 2,
+      showHelper: false
     },
     c: {
       position: {
@@ -38,7 +41,8 @@ const state = {
       },
       type: 0,
       rotation: 0,
-      orientation: 1
+      orientation: 1,
+      showHelper: false
     },
     d: {
       position: {
@@ -47,7 +51,8 @@ const state = {
       },
       type: 1,
       rotation: 0,
-      orientation: 3
+      orientation: 3,
+      showHelper: false
     }
   },
   elements: {
@@ -91,6 +96,10 @@ const getters = {
 
   selection (state) {
     return state.selection
+  },
+
+  ports (state) {
+    return state.ports
   },
 
   elements (state) {
@@ -169,6 +178,21 @@ const actions = {
     commit('SET_ACTIVE_PORT', port)
   },
 
+  showPortSnapHelpers ({ commit, getters }, portId) {
+    const portIds = getters
+      .connections
+      .filter(({ source, target }) => {
+        return source.id === portId || target.id === portId
+      })
+      .map(({ source, target }) => {
+        return source.id === portId
+          ? target.id
+          : source.id
+      })
+
+    commit('SHOW_PORT_SNAP_HELPERS', portIds)
+  },
+
   rotateSelection ({ commit, state }, rotation) {
     const { items } = state.selection
 
@@ -228,6 +252,14 @@ const actions = {
 }
 
 const mutations = {
+  'SHOW_PORT_SNAP_HELPERS' (state, portIds) {
+    Object
+      .keys(state.ports)
+      .forEach((portId: string) => {
+        state.ports[portId].showHelper = portIds.includes(portId)
+      })
+  },
+
   'SET_ZOOM' (state, zoom) {
     state.zoomLevel = zoom
   },
