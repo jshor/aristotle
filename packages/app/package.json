@@ -7,18 +7,7 @@
     "build": "vue-cli-service build --mode production",
     "build:dev": "vue-cli-service build --mode development",
     "lint": "eslint --ext .ts,.tsx,.js,.vue --format codeframe --color",
-    "lint-staged": "lint-staged",
     "test": "jest"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "yarn lint --fix"
-    ]
   },
   "dependencies": {
     "jquery": "^3.5.1",

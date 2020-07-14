@@ -40,7 +40,7 @@ import PortPivot from '../components/PortPivot.vue'
 import { Getter } from '../store/decorators'
 import IPoint from '../../../interfaces/IPoint'
 import getAncestor from '../../../utils/getAncestor'
-import Documents from './Documents.vue'
+import Canvas from './Documents.vue'
 
 @Component({
   components: {
@@ -66,6 +66,14 @@ export default class Port extends Vue {
    */
   @Prop()
   public id: string
+
+  /**
+   * List of sibling ports (all ports on the parent element).
+   *
+   * @type {IPort[]}
+   */
+  @Prop({ default: () => ({}) })
+  public siblings: any[]
 
   /**
    * Unit circle rotation value (0, 1, 2, 3).
@@ -163,12 +171,20 @@ export default class Port extends Vue {
     return activePort !== null // && activePort.type !== this.type
   }
 
+  mounted () {
+    window.addEventListener('mouseup', this.mouseup)
+  }
+
+  destroy () {
+    window.removeEventListener('mouseup', this.mouseup)
+  }
+
   /**
    * Sets the absolute position of the static (i.e., not dragged) port.
    */
   setAbsolutePosition () {
     const { x, y } = this.$el.getBoundingClientRect()
-    const editor = getAncestor(this, Documents) as Documents
+    const editor = getAncestor(this, Canvas) as Canvas
 
     this.absolutePosition = editor.fromDocumentToEditorCoordinates({ x, y })
   }
@@ -178,7 +194,14 @@ export default class Port extends Vue {
    */
   mousedown () {
     if (this.type === 2) {
-      this.$store.dispatch('showPortSnapHelpers', this.id)
+      const siblingIds = Object
+        .values(this.siblings)
+        .reduce((ids, s) => [
+          ...ids,
+          ...s.map(({ id }) => id)
+        ], [])
+
+      this.$store.dispatch('showPortSnapHelpers', siblingIds)
     }
   }
 
@@ -187,7 +210,7 @@ export default class Port extends Vue {
    */
   mouseup () {
     this.$store.dispatch('setActivePort', null)
-    this.$store.dispatch('showPortSnapHelpers', null)
+    this.$store.dispatch('hidePortSnapHelpers')
   }
 
   /**
@@ -252,7 +275,6 @@ export default class Port extends Vue {
       x: 0,
       y: 0
     }
-
     this.$store.dispatch('disconnect', {
       source: this.id,
       target: this.cloneId

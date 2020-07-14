@@ -220,7 +220,6 @@ export default class Group extends Vue {
   }
 
   onElemDrag ({ position }) {
-    console.log('updating ports')
     const portPositions = this
       .portPositions
       .reduce((positions: any, port: any) => ({

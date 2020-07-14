@@ -1,6 +1,7 @@
 <template>
   <div class="item" :style="style">
-    <slot />
+    <div class="item__freeport" v-if="type === 'Freeport'" />
+    <logic-gate v-else />
     <div
       v-for="(ports, orientation) in portList"
       :key="orientation"
@@ -11,10 +12,11 @@
         :id="port.id"
         :key="port.id"
         :type="port.type"
+        :siblings="portList"
         :position="position"
         :orientation="port.orientation"
         :rotation="rotation"
-        :draggable="port.type !== 2"
+        :draggable="type !== 'Freeport'"
         :show-helper="port.showHelper"
       />
     </div>
@@ -24,13 +26,15 @@
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import Port from './Port.vue'
+import LogicGate from '../components/LogicGate.vue'
 
 @Component({
   components: {
+    LogicGate,
     Port
   }
 })
-export default class List extends Vue {
+export default class Item extends Vue {
   @Prop({
     default: () => ({
       x: 0,
@@ -93,23 +97,10 @@ export default class List extends Vue {
   public id: string
 
   get style () {
-    const style = {
+    return {
       left: `${this.truePosition.x}px`,
       top: `${this.truePosition.y}px`,
       transform: `rotate(${90 * this.rotation}deg)`
-    }
-
-    if (this.type === 'Freeport') {
-      return {
-        ...style,
-        width: 0,
-        height: 0
-      }
-    }
-    return {
-        ...style,
-      width: '100px',
-      height: '185px'
     }
   }
 }
@@ -117,59 +108,57 @@ export default class List extends Vue {
 
 <style lang="scss">
 .item {
-  display: flex;
-  background-color: rgba(0, 255, 122, 0.2);
-  border: 1px solid black;
   box-sizing: border-box;
   position: absolute;
+
+  &__freeport {
+    width: 1px;
+    height: 1px;
+    background: blue;
+  }
 
   &__ports {
     position: relative;
     display: flex;
     align-items: center;
+    position: absolute;
 
-    &--left {
+    &--left, &--right {
       left: 0;
       top: 0;
       bottom: 0;
+      right: 0;
       width: 50%;
+    }
+
+    &--left {
+      justify-content: flex-start;
     }
 
     &--right {
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 50%;
+      left: 50%;
       justify-content: flex-end;
     }
 
-    &--top {
+    &--bottom, &--top {
       flex: 1;
-      left: 0;
       top: 0;
+      left: 0;
+      bottom: 0;
       right: 0;
       height: 50%;
-      background: violet;
-      align-items: flex-start;
+      justify-content: center;
     }
 
     &--bottom {
-      flex: 1;
       top: 50%;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 50%;
-      justify-content: center;
       align-items: flex-end;
-  position: absolute;
+    }
+
+    &--top {
+      bottom: 50%;
+      align-items: flex-start;
     }
   }
-}
-
-.inp {
-  width: 50px;
-  height: 30px;
-  z-index: 2000;
 }
 </style>

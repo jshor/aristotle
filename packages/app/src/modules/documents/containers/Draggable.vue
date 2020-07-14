@@ -1,7 +1,9 @@
 <template>
-  <div ref="draggable" class="draggable" :style="style">
-    <div class="draggable__inner" :style="{
-    }">
+  <div
+    ref="draggable"
+    class="draggable"
+    :style="style">
+    <div class="draggable__inner">
       <slot />
     </div>
   </div>
@@ -10,8 +12,17 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Prop } from 'vue-property-decorator'
-import $ from 'jquery'
 import { Getter } from '../store/decorators'
+import IPoint from '../../../interfaces/IPoint'
+import IScreenPoint from '../../../interfaces/IScreenPoint'
+import DragService from '../../../services/DragService'
+import getAncestor from '../../../utils/getAncestor'
+import Canvas from './Documents.vue'
+import {
+  getSnappedId,
+  getSnappedPosition,
+  screenToPoint
+} from '../layout/dragging'
 
 @Component({})
 export default class Draggable extends Vue {
@@ -21,20 +32,13 @@ export default class Draggable extends Vue {
       y: 0
     })
   })
-  public position: any
+  public position: IPoint
 
-  // @Prop({ default: 1 })
   @Getter('documents', 'zoom')
   public zoom: number
 
   @Prop({ default: '.snappable' })
   public snap: string
-
-  @Prop({ default: false })
-  public revert: boolean
-
-  @Prop({ default: false })
-  public aug: boolean
 
   get style () {
     return {
@@ -43,128 +47,90 @@ export default class Draggable extends Vue {
     }
   }
 
-  getCanvas (parent) {
-    if (parent.$refs.canvas) {
-      return parent
-    }
-    return this.getCanvas(parent.$parent)
+  dragService: DragService
+
+  getCanvas (): Vue {
+    return getAncestor(this, Canvas) as Canvas
   }
 
+  mouse: IPoint = {
+    x: 0,
+    y: 0
+  }
+
+  updatePosition (event: MouseEvent, ui: { originalPosition: IScreenPoint, position: IScreenPoint }) {
+    const original = ui.originalPosition
+
+    ui.position = {
+      left: (event.clientX - this.mouse.x + original.left) / this.zoom,
+      top:  (event.clientY - this.mouse.y + original.top ) / this.zoom
+    }
+  }
+
+  /**
+   * Handles the start of the dragging user interaction. Updates the local position and emits it.
+   *
+   * @param {MouseEvent} event
+   * @param {object<{ originalPosition: IScreenPoint, position: IScreenPoint }>} ui - jQuery UI draggable object
+   * @param {IScreenPoint} position
+   * @emits `dragStart` - in the format: object<{ position: IScreenPoint }>
+   */
+  onDragStart (event: MouseEvent, ui: { originalPosition: IScreenPoint, position: IScreenPoint }) {
+    this.mouse.x = event.clientX
+    this.mouse.y = event.clientY
+
+    this.updatePosition(event, ui)
+
+    this.$emit('dragStart', {
+      position: screenToPoint(ui.position)
+    })
+  }
+
+  /**
+   * Handles the dragging user interaction. Updates the local position (including snap operations) and emits it.
+   *
+   * @param {MouseEvent} event
+   * @param {object<{ originalPosition: IScreenPoint, position: IScreenPoint }>} ui - jQuery UI draggable object
+   * @emits `drag` - in the format: object<{ position: IScreenPoint }>
+   */
+  onDrag (event: MouseEvent, ui: { originalPosition: IScreenPoint, position: IScreenPoint }) {
+    const canvas = this.getCanvas()
+
+    this.updatePosition(event, ui)
+
+    ui.position = getSnappedPosition(this.dragService, canvas, ui.position, 30)
+
+    this.$emit('drag', {
+      position: screenToPoint(ui.position)
+    })
+  }
+
+  /**
+   * Handles the end of the dragging user interaction. Emits its final position and the ID of the element it snapped to (if any).
+   *
+   * @param {MouseEvent} event
+   * @param {object<{ originalPosition: IScreenPoint, position: IScreenPoint }>} ui - jQuery UI draggable object
+   * @emits `dragEnd` - in the format: object<{ position: IScreenPoint, snappedId: string }>
+   */
+  onDragEnd (event: MouseEvent, ui: { originalPosition: IScreenPoint, position: IScreenPoint }) {
+    this.$emit('dragEnd', {
+      position: screenToPoint(ui.position),
+      snappedId: getSnappedId(this.dragService)
+    })
+  }
 
   mounted () {
-    const el = ($(this.$refs.draggable) as any)
     const snapSize = 1
-    const round = n => n //  snapSize * Math.ceil(n / snapSize)
-    var click = {
-      x: 0,
-      y: 0
-    };
-    const canvas = this.getCanvas(this)
 
-    el.draggable({
+    this.dragService = new DragService(this)
+    this.dragService.createDrag({
       snap: ['.snappable', this.snap].join(', '),
       snapMode: 'inner',
       cancel: '.non-draggable',
       grid: [ snapSize, snapSize ],
-      drag: (event, ui) => {
-        const snappedId = $(el)
-          .data('uiDraggable')
-          .snapElements
-          .filter(({ snapping }) => snapping)
-          .pop()
-
-        const original = ui.originalPosition
-
-        ui.position = {
-          left: (event.clientX - click.x + original.left) / this.zoom,
-          top:  (event.clientY - click.y + original.top ) / this.zoom
-        }
-
-
-        if (snappedId) {
-          const parentRect = this.$parent.$el.getBoundingClientRect()
-          const parent = canvas.fromDocumentToEditorCoordinates(parentRect)
-          const coords = canvas.fromDocumentToEditorCoordinates(snappedId.item.getBoundingClientRect())
-          const left = coords.x - parent.x
-          const top = coords.y - parent.y
-
-          /* when the dragging element is positioned relative to the canvas */
-          if (Math.abs(coords.x - ui.position.left) < 30) {
-            ui.position.left = coords.x
-          }
-
-          if (Math.abs(coords.y - ui.position.top) < 30) {
-            ui.position.top = coords.y
-          }
-
-          /* when the dragging element is positioned relative to its parent */
-          if (Math.abs(left - ui.position.left) < 30) {
-            ui.position.left = left
-          }
-
-          if (Math.abs(top - ui.position.top) < 30) {
-            ui.position.top = top
-          }
-        }
-
-        this.$emit('drag', {
-          position: {
-            x: ui.position.left,
-            y: ui.position.top
-          }
-        })
-      },
-      start: (event, ui) => {
-        click.x = event.clientX;
-        click.y = event.clientY;
-
-        const offset = el[0].getBoundingClientRect()
-        const x = round(offset.left)
-        const y = round(offset.top)
-
-        var original = ui.originalPosition;
-
-        ui.position = {
-            left: (event.clientX - click.x + original.left) / this.zoom,
-            top:  (event.clientY - click.y + original.top ) / this.zoom
-        };
-
-        this.$emit('dragStart', {
-          position: {
-            x: ui.position.left,
-            y: ui.position.top
-          }
-        })
-      },
-      stop: (event, ui) => {
-        const snappedId = $(el)
-          .data('uiDraggable')
-          .snapElements
-          .filter(({ snapping }) => snapping)
-          .map((e) => e.item.dataset.id)
-          .filter(id => id)
-          .pop()
-        // const snappedId = undefined
-
-        const offset = el[0].getBoundingClientRect()
-        const x = round(offset.left)
-        const y = round(offset.top)
-
-        var original = ui.originalPosition;
-
-        // ui.position = {
-        //     left: (event.clientX - click.x + original.left) / this.zoom,
-        //     top:  (event.clientY - click.y + original.top ) / this.zoom
-        // };
-
-        this.$emit('dragEnd', {
-          position: {
-            x: (event.clientX - click.x + original.left) / this.zoom,
-            y: (event.clientY - click.y + original.top ) / this.zoom
-          },
-          snappedId
-        })
-      }
+      start: this.onDragStart,
+      drag: this.onDrag,
+      stop: this.onDragEnd
     })
   }
 }
