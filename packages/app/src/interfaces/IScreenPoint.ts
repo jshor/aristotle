@@ -1,18 +1,18 @@
 /**
- * Represents a point in 2D Cartesian space (x, y).
+ * Represents a point in screen coordinates (left, top)
  */
-export default interface IPoint {
+export default interface IScreenPoint {
   /**
    * X-axis coordinate.
    *
    * @type {number}
    */
-  x: number
+  left: number
 
   /**
    * Y-axis coordinate.
    *
    * @type {number}
    */
-  y: number
+  top: number
 }

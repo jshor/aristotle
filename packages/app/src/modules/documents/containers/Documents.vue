@@ -11,8 +11,8 @@
         <wire
           v-for="(connection, key) in connections"
           :key="key"
-          :source="connection.source"
-          :target="connection.target"
+          :target="connection.source"
+          :source="connection.target"
         />
 
         <group v-if="selectedItems.length" :items="selectedItems" :id="'SELECTION'" @drag="updatePortPositions" @dragEnd="updateItemPosition" :position="selection.position" :rotation="selection.rotation"
@@ -70,7 +70,7 @@ import { Getter, Action } from '../store/decorators'
     'rotateSelection'
   ])
 })
-export default class Documents extends Vue {
+export default class Canvas extends Vue {
   snapToGrid = {
     enabled: true,
     size: 20
@@ -115,13 +115,21 @@ export default class Documents extends Vue {
     window.removeEventListener('mouseup', this.mouseup)
   }
 
-  mouseup () {
+  preventContextMenu: boolean = false
+
+  mouseup (e) {
+    if (e.button === 2 && (this.panStartPosition.x !== e.x || this.panStartPosition.y!== e.y)) {
+      this.preventContextMenu = true
+    }
     this.panning = false
     this.panStartPosition = { x: 0, y: 0 }
   }
 
   contextMenu (e) {
-    e.preventDefault()
+    if (this.preventContextMenu) {
+      this.preventContextMenu = false
+      e.preventDefault()
+    }
   }
 
   fromDocumentToEditorCoordinates (point) {

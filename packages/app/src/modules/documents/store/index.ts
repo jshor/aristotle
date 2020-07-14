@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import rotate from '../layout/rotate'
 
 const state = {
   selection: {
@@ -11,7 +12,10 @@ const state = {
   },
   activePort: null,
   portSnapHelperIds: [],
-  connections: [],
+  connections: [
+    { source: 'b', target: 'fp1' },
+    { source: 'fp2', target: 'c' }
+  ],
   zoomLevel: 1,
   ports: {
     a: {
@@ -53,6 +57,26 @@ const state = {
       rotation: 0,
       orientation: 3,
       showHelper: false
+    },
+    fp1: {
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: 2,
+      rotation: 0,
+      orientation: 0,
+      showHelper: false
+    },
+    fp2: {
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: 2,
+      rotation: 0,
+      orientation: 2,
+      showHelper: false
     }
   },
   elements: {
@@ -69,7 +93,7 @@ const state = {
     def: {
       type: 'Element',
       portIds: ['d'],
-      position: { x: 600, y: 600 },
+      position: { x: 900, y: 900 },
       rotation: 0,
       isSelected: false,
       properties: {
@@ -79,12 +103,19 @@ const state = {
     ghi: {
       type: 'Element',
       portIds: ['c'],
-      position: { x: 500, y: 500 },
+      position: { x: 650, y: 650 },
       rotation: 0,
       isSelected: false,
       properties: {
         inputCount: 1
       }
+    },
+    freeport1: {
+      type: 'Freeport',
+      portIds: ['fp1', 'fp2'],
+      position: { x: 500, y: 500 },
+      rotation: 0,
+      isSelected: false,
     }
   }
 }
@@ -157,7 +188,8 @@ const actions = {
   createFreeport ({ commit }, data) {
     commit('CREATE_FREEPORT_ELEMENT', {
       itemId: data.itemId,
-      portId: data.portId,
+      inputPortId: data.inputPortId,
+      outputPortId: data.outputPortId,
       position: data.position
     })
     commit('DISCONNECT', {
@@ -166,10 +198,10 @@ const actions = {
     })
     commit('CONNECT', {
       source: data.sourceId,
-      target: data.portId
+      target: data.outputPortId
     })
     commit('CONNECT', {
-      source: data.portId,
+      source: data.inputPortId,
       target: data.targetId
     })
   },
@@ -178,19 +210,23 @@ const actions = {
     commit('SET_ACTIVE_PORT', port)
   },
 
-  showPortSnapHelpers ({ commit, getters }, portId) {
+  showPortSnapHelpers ({ commit, getters }, movingPortIds) {
     const portIds = getters
       .connections
       .filter(({ source, target }) => {
-        return source.id === portId || target.id === portId
+        return movingPortIds.includes(source.id) || movingPortIds.includes(target.id)
       })
       .map(({ source, target }) => {
-        return source.id === portId
+        return movingPortIds.includes(source.id)
           ? target.id
           : source.id
       })
 
     commit('SHOW_PORT_SNAP_HELPERS', portIds)
+  },
+
+  hidePortSnapHelpers ({ commit }) {
+    commit('SHOW_PORT_SNAP_HELPERS', [])
   },
 
   rotateSelection ({ commit, state }, rotation) {
@@ -323,31 +359,34 @@ const mutations = {
     state.selection.rotation = 0
   },
 
-  'CREATE_FREEPORT_ELEMENT' (state, { itemId, portId, position }) {
-    Vue.set(state.elements, itemId, {
-      type: 'Freeport',
-      portIds: [portId],
-      position,
-      rotation: 0,
-      isSelected: false
-    })
-    Vue.set(state.ports, portId, {
+  'CREATE_FREEPORT_ELEMENT' (state, { itemId, inputPortId, outputPortId, position }) {
+    const createPort = (type, orientation) => ({
       position: {
         x: 0,
         y: 0
       },
       type: 2,
       rotation: 0,
-      orientation: 0
+      orientation
     })
+
+    Vue.set(state.elements, itemId, {
+      type: 'Freeport',
+      portIds: [inputPortId, outputPortId],
+      position,
+      rotation: 0,
+      isSelected: false
+    })
+    Vue.set(state.ports, outputPortId, createPort(0, 0))
+    Vue.set(state.ports, inputPortId, createPort(1, 2))
   },
 
   'ROTATE_SELECTION' (state, rotation) {
-    state.selection.rotation += rotation
+    state.selection.rotation = rotate(state.selection.rotation, rotation)
   },
 
   'ROTATE_ITEM' (state, { id, rotation }) {
-    state.elements[id].rotation += rotation
+    state.elements[id].rotation = rotate(state.elements[id].rotation, rotation)
   },
 
   'UPDATE_ROTATED_POSITIONS' (state, positions) {
@@ -357,9 +396,7 @@ const mutations = {
       el.position.x = position.x - state.selection.position.x
       el.position.y = position.y - state.selection.position.y
 
-      if (el.type === 'Freeport') return // don't rotate freeports
-
-      el.rotation += state.selection.rotation
+      el.rotation = rotate(state.selection.rotation, el.rotation)
 
       // update the rotation of each port to match the item's rotation
       el.portIds.forEach((portId) => {

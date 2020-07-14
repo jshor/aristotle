@@ -30,6 +30,12 @@ describe('Document Container', () => {
         document: {
           id: 'testPort'
         },
+        siblings: {
+          left: [],
+          top: [],
+          bottom: [],
+          right: []
+        },
         ...propsData
       },
       localVue,
@@ -42,6 +48,7 @@ describe('Document Container', () => {
           connect: jest.fn(),
           disconnect: jest.fn(),
           setActivePort: jest.fn(),
+          hidePortSnapHelpers: jest.fn(),
           showPortSnapHelpers: jest.fn(),
           updatePortPositions: jest.fn()
         }
@@ -85,11 +92,17 @@ describe('Document Container', () => {
 
   describe('mousedown()', () => {
     describe('when the port is a Freeport', () => {
-      it('should dispatch showPortSnapHelpers with the id of the port', () => {
+      it('should dispatch showPortSnapHelpers with the ids of its sibling ports', () => {
         const id = 'test-1234'
 
         wrapper = createWrapper({
           id,
+          siblings: {
+            left: [],
+            top: [{ id }],
+            bottom: [],
+            right: []
+          },
           type: 2
         })
 
@@ -98,7 +111,7 @@ describe('Document Container', () => {
         wrapper.vm.mousedown()
 
         expect(spy).toHaveBeenCalledTimes(1)
-        expect(spy).toHaveBeenCalledWith('showPortSnapHelpers', id)
+        expect(spy).toHaveBeenCalledWith('showPortSnapHelpers', [id])
       })
     })
 
@@ -130,7 +143,7 @@ describe('Document Container', () => {
     })
 
     it('should tell the store to disable the port helpers', () => {
-      expect(spy).toHaveBeenCalledWith('showPortSnapHelpers', null)
+      expect(spy).toHaveBeenCalledWith('hidePortSnapHelpers')
     })
   })
 
