@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "jquery": "^3.5.1",
-    "jquery-ui": "^1.12.1",
+    "jquery-ui": "^1.13.0",
     "jquery-ui-touch-punch": "^0.2.3",
     "vue": "2.6.11",
     "vue-property-decorator": "8.4.2",
