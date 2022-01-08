@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Port Container should match the snapshot 1`] = `
+<div class="port-pivot" style="transform: rotate(-0deg);">
+  <!--v-if-->
+  <div class="port-handle port-handle--active"></div>
+</div>
+`;

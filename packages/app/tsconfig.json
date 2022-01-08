@@ -4,23 +4,17 @@
     "module": "esnext",
     "strict": true,
     "jsx": "preserve",
-    "jsxFactory": "h",
     "importHelpers": true,
     "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false,
-    "noImplicitAny": false,
+    "skipLibCheck": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
-      "node",
+      "webpack-env",
       "jest"
-    ],
-    "typeRoots": [
-      "./node_modules/@types",
-      "../../node_modules/@types"
     ],
     "paths": {
       "@/*": [
@@ -28,12 +22,11 @@
       ]
     },
     "lib": [
-      "es2015",
+      "esnext",
       "dom",
       "dom.iterable",
       "scripthost"
-    ],
-    "skipLibCheck": true
+    ]
   },
   "include": [
     "src/**/*.ts",

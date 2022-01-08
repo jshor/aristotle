@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import { VueConstructor } from 'vue/types/umd'
+import { ComponentPublicInstance } from "vue"
 
 /**
  * Returns an ancestral component of the given type.
@@ -8,8 +7,8 @@ import { VueConstructor } from 'vue/types/umd'
  * @param {VueConstructor<Vue>} type - type of ancestor component to find
  * @returns {Vue}
  */
-export default function getAncestor (parent: Vue, type: VueConstructor<Vue>): Vue {
-  if (parent instanceof type) {
+export default function getAncestor (parent: any, type: string): any {
+  if (parent.isCanvas) {
     return parent
   }
   return getAncestor(parent.$parent, type)
