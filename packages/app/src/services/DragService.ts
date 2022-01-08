@@ -1,12 +1,11 @@
 import $ from 'jquery'
-import { Vue } from 'vue-property-decorator'
 
 export default class DragService {
-  component: Vue
+  component: any
 
   el: any
 
-  constructor (component: Vue) {
+  constructor (component: any) {
     this.component = component
   }
 
@@ -18,6 +17,8 @@ export default class DragService {
   }
 
   createDrag (config) {
+    if (!this.component.$refs.draggable) return
+
     this.el = $(this.component.$refs.draggable) as any
 
     const snapSize = 1

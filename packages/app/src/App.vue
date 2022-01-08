@@ -1,20 +1,17 @@
 <template>
-  <div class="app">
-    <Documents />
-  </div>
+  <Document />
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import Documents from './modules/documents/containers/Documents.vue'
+import { defineComponent } from 'vue'
+import Document from './containers/Document.vue'
 
-@Component({
+export default defineComponent({
+  name: 'App',
   components: {
-    Documents
-  },
+    Document
+  }
 })
-export default class App extends Vue {
-}
 </script>
 
 <style lang="scss">

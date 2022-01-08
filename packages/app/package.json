@@ -3,53 +3,86 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vue-cli-service serve --port 3100 src/index.ts",
+    "dev": "vue-cli-service serve --port 3100",
     "build": "vue-cli-service build --mode production",
     "build:dev": "vue-cli-service build --mode development",
-    "lint": "eslint --ext .ts,.tsx,.js,.vue --format codeframe --color",
-    "test": "jest"
+    "lint": "vue-cli-service lint",
+    "test": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "jquery": "^3.5.1",
-    "jquery-ui": "^1.12.1",
+    "core-js": "^3.6.5",
+    "jquery": "^3.6.0",
+    "jquery-ui": "^1.13.0",
     "jquery-ui-touch-punch": "^0.2.3",
-    "vue": "2.6.11",
-    "vue-property-decorator": "8.4.2",
-    "vuex": "3.4.0",
-    "vuex-type-helper": "1.2.2"
+    "vue": "^3.0.0",
+    "vuex": "^4.0.0-0"
   },
   "devDependencies": {
-    "@nuxtjs/eslint-config-typescript": "1.0.2",
-    "@types/jest": "^25.2.3",
-    "@types/jquery": "^3.3.38",
-    "@types/lodash": "4.14.151",
-    "@typescript-eslint/eslint-plugin": "2.32.0",
-    "@typescript-eslint/parser": "2.32.0",
-    "@vue/cli-plugin-babel": "4.3.1",
-    "@vue/cli-plugin-typescript": "4.3.1",
-    "@vue/cli-service": "4.3.1",
-    "@vue/test-utils": "^1.0.3",
-    "babel-core": "^7.0.0-bridge.0",
-    "eslint": "6.8.0",
-    "eslint-config-prettier": "6.11.0",
-    "eslint-plugin-babel": "5.3.0",
-    "eslint-plugin-prettier": "3.1.3",
-    "husky": "4.2.5",
-    "javascript-typescript-langserver": "2.11.3",
-    "jest": "^26.0.1",
-    "lint-staged": "10.2.2",
-    "node-sass": "4.14.1",
-    "sass-loader": "8.0.2",
-    "ts-jest": "^26.0.0",
-    "typescript": "3.8.3",
-    "vue-jest": "^3.0.5",
-    "vue-template-compiler": "2.6.11",
-    "vue-tsx-support": "2.3.3",
-    "webpack-manifest-plugin": "2.2.0"
+    "@types/jest": "^24.0.19",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-plugin-unit-jest": "~4.5.0",
+    "@vue/cli-plugin-vuex": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
+    "@vue/eslint-config-airbnb": "^5.0.2",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "@vue/test-utils": "^2.0.0-0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-vue": "^7.0.0",
+    "node-sass": "^5",
+    "sass-loader": "^10",
+    "typescript": "~4.1.5",
+    "vue-jest": "^5.0.0-0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "@vue/airbnb",
+      "@vue/typescript/recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2020
+    },
+    "rules": {},
+    "overrides": [
+      {
+        "files": [
+          "**/__tests__/*.{j,t}s?(x)",
+          "**/tests/unit/**/*.spec.{j,t}s?(x)"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
-    "not ie <= 8"
-  ]
+    "not dead"
+  ],
+  "jest": {
+    "collectCoverage": true,
+    "coverageDirectory": "<rootDir>/test/.coverage",
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/src/.*/__spec__/.*"
+    ],
+    "preset": "@vue/cli-plugin-unit-jest/presets/typescript-and-babel",
+    "testMatch": [
+      "<rootDir>/src/**/*.spec.(js|jsx|ts|tsx)"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest",
+      "^.+\\.vue$": "vue-jest"
+    }
+  }
 }
