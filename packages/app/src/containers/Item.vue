@@ -1,5 +1,11 @@
 <template>
-  <div class="item" :style="style">
+  <div
+    class="item"
+    :style="style"
+    :class="{
+      'item--selected': isSelected
+    }"
+  >
     <div class="item__freeport" v-if="type === 'Freeport'" />
     <logic-gate v-else />
     <div
@@ -58,6 +64,10 @@ export default defineComponent({
     parentRotation: {
       type: Number,
       default: 0
+    },
+    isSelected: {
+      type: Boolean,
+      default: false
     },
     type: String,
     ports: {
@@ -158,6 +168,10 @@ export default defineComponent({
       bottom: 50%;
       align-items: flex-start;
     }
+  }
+
+  &--selected {
+    background-color: pink;
   }
 }
 </style>
