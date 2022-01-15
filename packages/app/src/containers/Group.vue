@@ -1,18 +1,43 @@
 <template>
-  <draggable class="group" @drag="onElemDrag" @dragEnd="dragEnd" :position="position" :zoom="zoom">
-    <div class="group__rect" :style="{
-      width: `${rect.width}px`,
-      height: `${rect.height}px`,
-      left: `${rect.x}px`,
-      top: `${rect.y}px`,
-      transform: `rotate(${parentRotation * 90}deg)`
-    }">
+  <draggable
+    :position="position"
+    :zoom="zoom"
+    :class="{
+      'group--selection': isSelection && items.length > 1
+    }"
+    class="group"
+    @contextmenu="onContextMenu"
+    @drag="onDrag"
+  >
+    <div
+      :style="{
+        width: `${rect.width}px`,
+        height: `${rect.height}px`,
+        left: `${rect.x}px`,
+        top: `${rect.y}px`,
+        transform: `rotate(${parentRotation * 90}deg)`
+      }"
+      class="group__rect"
+    >
       <div class="group__container" />
-      <item v-for="item in items" :id="item.id" :key="item.id" :ref="item.id" :ports="item.ports" :type="item.type"
-      :position="items.length === 1 ? DEFAULT_POSITION : item.position" :rotation="item.rotation" :offset="rect" :parent-rotation="parentRotation" :properties="item.properties">
-      </item>
+      <item
+        v-for="item in items"
+        :id="item.id"
+        :key="item.id"
+        :ref="item.id"
+        :ports="item.ports"
+        :type="item.type"
+        :position="items.length === 1 ? DEFAULT_POSITION : item.position"
+        :rotation="item.rotation"
+        :offset="rect"
+        :parent-rotation="parentRotation"
+        :properties="item.properties"
+        :is-selected="isSelection"
+        @click="selectItem(item.id)"
+        @contextmenu="selectItem(item.id)"
+      />
     <slot />
-    </div>
+  </div>
   </draggable>
 </template>
 
@@ -94,6 +119,9 @@ export default defineComponent({
       return this.items.length > 1
         ? this.rotation
         : 0
+    },
+    isSelection () {
+      return this.id === 'SELECTION'
     }
   },
   watch: {
@@ -101,13 +129,7 @@ export default defineComponent({
       handler (newValue) {
         nextTick(() => {
           this.updateRotatedPositions(this.getItemPositions())
-
-          const ports = this.getPorts()
-          this.portPositions = this.getPortPositions(ports)
-          this.onElemDrag({
-            position: this.position
-          })
-          this.rect = this.computeRect()
+          this.setPositions()
         })
       }
     }
@@ -121,6 +143,8 @@ export default defineComponent({
   },
   methods: {
     ...mapActions([
+      'deselectAll',
+      'selectItems',
       'updateRotatedPositions',
       'updatePortPositions',
       'updateItemPosition'
@@ -131,9 +155,7 @@ export default defineComponent({
 
       this.portPositions = this.getPortPositions(ports)
       this.rect = this.computeRect()
-      this.onElemDrag({
-        position: this.position
-      })
+      this.onDrag({ position: this.position })
     },
 
     getItemPositions () {
@@ -159,13 +181,6 @@ export default defineComponent({
             position
           }]
         }, [])
-    },
-
-    ungroup () {
-      this.getItemPositions().forEach((item) => {
-        console.log('UNGROUP: ', item.position.x, item.position.y)
-      })
-      this.$emit('ungroup', this.getItemPositions())
     },
 
     computeRect (): Rect {
@@ -235,7 +250,7 @@ export default defineComponent({
       return Object.values(this.$refs).map((ref: any) => ref[0])
     },
 
-    onElemDrag ({ position }) {
+    onDrag ({ position }) {
       const portPositions = this
         .portPositions
         .reduce((positions: any, port: any) => ({
@@ -252,8 +267,18 @@ export default defineComponent({
       this.updateItemPosition({ id: this.id, position })
     },
 
-    dragEnd ({ position }) {
-      this.onElemDrag({ position })
+    onContextMenu ($event: MouseEvent) {
+      if (this.isSelection) {
+        console.log('clicked context menu')
+        $event.preventDefault()
+      }
+    },
+
+    selectItem (itemId) {
+      if (!this.isSelection) {
+        this.deselectAll()
+        this.selectItems([itemId])
+      }
     }
   }
 })
@@ -271,7 +296,6 @@ export default defineComponent({
     left: 0;
     bottom: 0;
     right: 0;
-    border: 1px dashed red;
   }
 
   &__rect {
@@ -284,6 +308,10 @@ export default defineComponent({
     position: relative;
     top: 0;
     left: 0;
+  }
+
+  &--selection .group__container {
+    border: 3px dashed red;
   }
 }
 </style>

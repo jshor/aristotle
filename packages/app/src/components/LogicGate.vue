@@ -13,7 +13,7 @@ export default defineComponent({
 
 <style lang="scss">
 .logic-gate {
-  background-color: rgba(0, 255, 122, 0.2);
+  background-color: rgba(0, 255, 122, 1);
   border: 1px solid black;
   width: 100px;
   height: 185px;

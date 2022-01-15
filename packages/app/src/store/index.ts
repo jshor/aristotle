@@ -9,13 +9,14 @@ const state = {
       x: 0,
       y: 0
     },
-    items: []
+    items: [],
+    connections: []
   },
   activePort: null,
   portSnapHelperIds: [],
   connections: [
-    { source: 'b', target: 'fp1' },
-    { source: 'fp2', target: 'c' }
+    { source: 'b', target: 'fp1', isSelected: false },
+    { source: 'fp2', target: 'c', isSelected: false }
   ],
   zoomLevel: 1,
   ports: {
@@ -116,7 +117,7 @@ const state = {
       portIds: ['fp1', 'fp2'],
       position: { x: 500, y: 500 },
       rotation: 0,
-      isSelected: false,
+      isSelected: false
     }
   }
 }
@@ -134,7 +135,7 @@ const getters = {
     return state.ports
   },
 
-  elements (state) {
+  elements (state) { // TODO: possibly not needed
     return Object
       .keys(state.elements)
       .map((elementId: string) => ({
@@ -167,7 +168,7 @@ const getters = {
 
     return state
       .connections
-      .map(({ source, target }) => ({
+      .map(({ source, target, isSelected }) => ({
         source: {
           id: source,
           ...ports[source]
@@ -175,7 +176,8 @@ const getters = {
         target: {
           id: target,
           ...ports[target]
-        }
+        },
+        isSelected
       }))
       .filter(({ source, target }) => source && target)
   }
@@ -246,6 +248,7 @@ const actions = {
   },
 
   connect ({ commit }, { source, target }) {
+    console.log('connect: ', source, target)
     commit('CONNECT', { source, target })
   },
 
@@ -253,16 +256,37 @@ const actions = {
     commit('DISCONNECT', { source, target })
   },
 
-  selectItems ({ commit }, ids) {
+  selectItems ({ commit, dispatch }, ids: string[]) {
     commit('GROUP_ITEMS', ids)
+    dispatch('selectConnections', ids)
   },
 
-  selectAll ({ commit, state }) {
-    commit('GROUP_ITEMS', Object.keys(state.elements))
+  selectConnection ({ commit }, index) {
+    commit('DESELECT_ALL')
+    commit('SELECT_CONNECTION', index)
+  },
+
+  selectConnections ({ commit, state }, itemIds: string[]) {
+    const portIds = itemIds.reduce((portIds: string[], itemId: string) => {
+      return portIds.concat(state.elements[itemId].portIds)
+    }, [])
+
+    state
+      .connections
+      .forEach((c: any, index: number) => {
+        if (portIds.includes(c.source) && portIds.includes(c.target)) {
+          commit('SELECT_CONNECTION', index)
+        }
+      })
+  },
+
+  selectAll ({ dispatch, state }) {
+    dispatch('selectItems', Object.keys(state.elements))
+    dispatch('selectConnections', Object.keys(state.elements))
   },
 
   deselectAll ({ commit }) {
-    commit('UNGROUP')
+    commit('DESELECT_ALL')
   },
 
   updateRotatedPositions ({ commit }, positions) {
@@ -321,6 +345,10 @@ const mutations = {
     }
   },
 
+  'SELECT_CONNECTION' (state, index: number) {
+    state.connections[index].isSelected = true
+  },
+
   'GROUP_ITEMS' (state, ids) {
     const itemsToGroup = ids.map((id: string) => state.elements[id])
 
@@ -345,7 +373,7 @@ const mutations = {
     state.selection.destroyed = false
   },
 
-  'UNGROUP' (state) {
+  'DESELECT_ALL' (state) {
     const { position, items } = state.selection
 
     items.forEach(({ id }) => {
@@ -355,6 +383,12 @@ const mutations = {
       el.position.x += position.x
       el.position.y += position.y
     })
+
+    state
+      .connections
+      .forEach((connection, index) => {
+        state.connections[index].isSelected = false
+      })
 
     state.selection.items = []
     state.selection.rotation = 0
@@ -380,8 +414,6 @@ const mutations = {
     }
     state.ports[outputPortId] = createPort(0, 0)
     state.ports[inputPortId] = createPort(1, 2)
-    // Vue.set(state.ports, outputPortId, createPort(0, 0))
-    // Vue.set(state.ports, inputPortId, createPort(1, 2))
   },
 
   'ROTATE_SELECTION' (state, rotation) {

@@ -1,10 +1,11 @@
 <template>
-  <svg class="wire" :width="wire.width" :height="wire.height" :style="{
+  <svg class="wire"
+    :class="{
+      'wire--selected': isSelected
+    }"
+  :width="wire.width" :height="wire.height" :style="{
     top: `${topLeft.y + wire.minY}px`,
     left: `${topLeft.x + wire.minX}px`
-  }"
-  :class="{
-    'wire--forward': wire.flowDirection === 1
   }"
   @mousedown="mousedown">
   <defs>
@@ -31,11 +32,21 @@
       <stop offset="100%" stop-color="#0a5"/>
     </linearGradient>
   </defs>
-    <path fill="none" stroke="#868686"
+    <path
+      class="wire__display"
+      :class="{
+        'wire__display--forward': wire.flowDirection === 1
+      }"
+     fill="none" stroke="#868686"
     :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
-    :d="wire.path" class="draw2d_Connection" stroke-linecap="round" stroke-linejoin="round" opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); stroke-linecap: round; stroke-linejoin: round; opacity: 1; cursor: pointer"
+    :d="wire.path" stroke-linecap="round" stroke-linejoin="round" opacity="1"
 
     ></path>
+  <path class="wire__clickable" fill="none"
+    :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
+    :d="wire.path" stroke-linecap="round" stroke-linejoin="round" opacity="1"
+
+  ></path>
   </svg>
 </template>
 
@@ -70,6 +81,10 @@ export default defineComponent({
     canvas: {
       type: Object as PropType<HTMLElement>,
       default: null
+    },
+    isSelected: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -132,6 +147,8 @@ export default defineComponent({
   methods: {
     ...mapActions([
       'createFreeport',
+      'deselectAll',
+      'selectConnection',
       'updateItemPosition',
       'updatePortPositions'
     ]),
@@ -217,19 +234,28 @@ export default defineComponent({
   left: 0;
   pointer-events: none;
 
-  path {
+  &__clickable {
+    animation: none;
+    stroke-width: 16;
+    pointer-events: all;
+    cursor: pointer;
+  }
+
+  &__display {
     stroke-width: 6;
     pointer-events: all;
     stroke-dasharray: 14;
     animation: animate1 30s infinite linear;
     stroke-linejoin: bevel;
     stroke-linecap: square !important;
-  }
 
-  &--forward {
-    path {
+    &--forward {
       animation: animate2 30s infinite linear;
     }
+  }
+
+  &--selected {
+    opacity: 0.5;
   }
 }
 

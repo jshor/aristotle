@@ -14,6 +14,8 @@
           :canvas="$refs.canvas"
           :target="connection.source"
           :source="connection.target"
+          :is-selected="connection.isSelected"
+          @click="selectConnection(key)"
         />
 
         <group
@@ -22,7 +24,7 @@
           :canvas="$refs.canvas"
           :id="'SELECTION'"
           :position="selection.position"
-          :rotation="selection.rotation"
+          :rotation="selectedItems.length === 1 ? selectedItems[0].rotation : selection.rotation"
         />
 
         <group
@@ -52,7 +54,7 @@
 
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex'
-import { defineComponent } from 'vue'
+import { defineComponent, nextTick } from 'vue'
 import Draggable from './Draggable.vue'
 import Port from './Port.vue'
 import Wire from './Wire.vue'
@@ -192,8 +194,6 @@ export default defineComponent({
     },
 
     selectionEnd (selection) {
-      const { left, top, right, bottom } = selection
-
       const items = this
         .getAllItems()
         .filter((item) => {
@@ -213,6 +213,8 @@ export default defineComponent({
           return true
         })
         .map(({ $props }) => $props.id)
+
+        console.log('items: ', items)
 
       this.selectItems(items)
     },
@@ -242,6 +244,7 @@ export default defineComponent({
       'selectAll',
       'setZoom',
       'selectItems',
+      'selectConnection',
       'rotateSelection'
     ])
   }
