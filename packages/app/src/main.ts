@@ -1,7 +1,3 @@
-import 'jquery-ui/ui/widgets/draggable'
-import 'jquery-ui/ui/widgets/droppable'
-import 'jquery-ui-touch-punch'
-
 import { createApp } from 'vue'
 import App from './App.vue'
 import store from './store'

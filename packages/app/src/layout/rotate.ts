@@ -1,5 +1,3 @@
-import { add } from 'lodash';
-
 /**
  * Normalizes the given rotation with respect to any additional rotation to augment by.
  *

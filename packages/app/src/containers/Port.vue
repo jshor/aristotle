@@ -38,7 +38,6 @@ import Draggable from './Draggable.vue'
 import PortHandle from '../components/PortHandle.vue'
 import PortHelper from '../components/PortHelper.vue'
 import PortPivot from '../components/PortPivot.vue'
-import getAncestor from '../utils/getAncestor'
 
 export default defineComponent({
   components: {
@@ -164,23 +163,13 @@ export default defineComponent({
   },
   methods: {
     ...mapActions([
-      'updatePortPositions',
+      'createFreeport',
       'setActivePort',
       'connect',
       'disconnect',
       'showPortSnapHelpers',
       'hidePortSnapHelpers'
     ]),
-
-    /**
-     * Sets the absolute position of the static (i.e., not dragged) port.
-     */
-    setAbsolutePosition () {
-      const { x, y } = this.$el.getBoundingClientRect()
-      const editor = getAncestor(this, 'canvas')
-
-      this.absolutePosition = editor.fromDocumentToEditorCoordinates({ x, y })
-    },
 
     /**
      * Tells the store to show the snap helpers of ports adjacent to this one.
@@ -209,48 +198,25 @@ export default defineComponent({
     /**
      * Initializes the draggable connection.
      */
-    dragStart ({ position }) {
-      this.setAbsolutePosition()
-      this.setActivePort({
-        id: this.cloneId,
-        position: {
-          x: 0,
-          y: 0
-        },
-        type: this.type,
-        orientation: this.orientation
-      })
+    dragStart () {
+      const rand = () => `id_${(Math.floor(Math.random() * 1000000) + 5)}` // TODO: use uuid
 
-      this.draggablePosition = {
-        x: NaN,
-        y: NaN
-      }
-      this.onDrag(position)
-
-      this.connect({
-        source: this.id,
-        target: this.cloneId
-      })
+      // this.newFreeport = {
+      //   itemId: rand(),
+      //   inputPortId: rand(),
+      //   outputPortId: rand(),
+      //   sourceId: this.target.id,
+      //   targetId: this.source.id,
+      //   position: this.position
+      // }
     },
 
     /**
      * Updates the store position with the absolute position of the port.
      */
-    onDrag ({ position }) {
-      if (!position) return
-      this.updatePortPositions({
-        [this.cloneId]: {
-          position: {
-            // port coordinates are stored absolutely (relative to its existing position)
-            x: position.x + this.absolutePosition.x,
-            y: position.y + this.absolutePosition.y
-          },
-          id: this.cloneId,
-          type: this.type,
-          orientation: this.orientation,
-          rotation: 0
-        }
-      })
+    onDrag ({ delta }) {
+
+      // this.createFreeport(this.newFreeport)
     },
 
     /**

@@ -55,13 +55,9 @@ export default defineComponent({
   height: 16px;
   background-color: red;
   border-radius: 50%;
-  cursor: grab;
+  cursor: move;
   transition: all 0.25s;
   z-index: 1001;
-
-  &:active {
-    cursor: grabbing;
-  }
 
   &--active {
     width: 24px;

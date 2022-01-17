@@ -5,12 +5,17 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex'
 import { defineComponent } from 'vue'
 import IPoint from '../interfaces/IPoint'
 
 export default defineComponent({
   name: 'Selector',
+  props: {
+    zoom: {
+      type: Number,
+      default: 1
+    }
+  },
   data () {
     return {
       selection: false,
@@ -25,9 +30,6 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters([
-      'zoom'
-    ]),
     style () {
       const left = Math.min(this.start.x, this.end.x)
       const top = Math.min(this.start.y, this.end.y)
@@ -65,7 +67,7 @@ export default defineComponent({
       this.start = position
       this.end = position
 
-      this.$emit('selectionStart')
+      this.$emit('selectionStart', event)
     },
 
     mousemove (event) {

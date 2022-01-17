@@ -1,26 +1,15 @@
 <template>
   <div
-    ref="draggable"
-    class="draggable"
-    :style="style">
-    <div class="draggable__inner">
-      <slot />
-    </div>
+    :style="style"
+    @mousedown="mousedown"
+  >
+    <slot />
   </div>
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex'
 import { defineComponent, PropType } from 'vue'
 import IPoint from '../interfaces/IPoint'
-import IScreenPoint from '../interfaces/IScreenPoint'
-import DragService from '../services/DragService'
-import getAncestor from '../utils/getAncestor'
-import {
-  getSnappedId,
-  getSnappedPosition,
-  screenToPoint
-} from '../layout/dragging'
 
 export default defineComponent({
   name: 'Draggable',
@@ -32,118 +21,198 @@ export default defineComponent({
         y: 0
       })
     },
-    snap: {
-      type: String,
-      default: '.snappable'
+    zoom: {
+      type: Number,
+      default: 1
+    },
+    snapBoundaries: {
+      type: Array,
+      default: () => []
+    },
+    boundingBox: {
+      type: Object,
+      default: () => ({
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
+      })
+    },
+    isDraggable: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
     return {
-      dragService: new DragService(this),
-      mouse: {
+      mousePosition: {
         x: 0,
         y: 0
+      } as IPoint,
+      apparentPosition: {
+        x: 0,
+        y: 0
+      } as IPoint,
+      truePosition: {
+        x: 0,
+        y: 0
+      } as IPoint,
+      realPositionFromStore: {
+        x: 0,
+        y: 0
+      } as IPoint,
+      box: {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
       },
-      canvas: null
+      isDragging: false
+    }
+  },
+  watch: {
+    position: {
+      handler (position) {
+        this.realPositionFromStore = position
+
+        if (!this.isDragging) {
+          this.truePosition = position
+        }
+      },
+      immediate: true
+    },
+    boundingBox: {
+      handler () {
+        if (!this.isDragging) {
+          this.apparentPosition = this.truePosition
+        }
+      }
     }
   },
   computed: {
-    ...mapGetters([
-      'zoom'
-    ]),
     style () {
       return {
-        left: `${this.position.x}px`,
-        top: `${this.position.y}px`
+        left: `${this.apparentPosition.x || this.truePosition.x}px`,
+        top: `${this.apparentPosition.y || this.truePosition.y}px`
       }
     }
   },
   mounted () {
-    const snapSize = 1
-
-    this.dragService = new DragService(this)
-    this.dragService.createDrag({
-      snap: ['.snappable', this.snap].join(', '),
-      snapMode: 'inner',
-      cancel: '.non-draggable',
-      grid: [ snapSize, snapSize ],
-      start: this.onDragStart,
-      drag: this.onDrag,
-      stop: this.onDragEnd
-    })
+    document.addEventListener('mousemove', this.mousemove)
+    document.addEventListener('mouseup', this.mouseup)
+  },
+  beforeUnmount () {
+    document.removeEventListener('mousemove', this.mousemove)
+    document.removeEventListener('mouseup', this.mouseup)
   },
   methods: {
-    updatePosition (event: MouseEvent, ui: { originalPosition: IScreenPoint, position: IScreenPoint }) {
-      const original = ui.originalPosition
-
-      ui.position = {
-        left: (event.clientX - this.mouse.x + original.left) / this.zoom,
-        top:  (event.clientY - this.mouse.y + original.top ) / this.zoom
+    getScaledDelta ($event: MouseEvent) {
+      return {
+        x: ($event.x - this.mousePosition.x) / this.zoom,
+        y: ($event.y - this.mousePosition.y) / this.zoom
       }
     },
 
-    /**
-     * Handles the start of the dragging user interaction. Updates the local position and emits it.
-     *
-     * @param {MouseEvent} event
-     * @param {object<{ originalPosition: IScreenPoint, position: IScreenPoint }>} ui - jQuery UI draggable object
-     * @param {IScreenPoint} position
-     * @emits `dragStart` - in the format: object<{ position: IScreenPoint }>
-     */
-    onDragStart (event: MouseEvent, ui: { originalPosition: IScreenPoint, position: IScreenPoint }) {
-      this.mouse.x = event.clientX
-      this.mouse.y = event.clientY
-      this.canvas = getAncestor(this, 'canvas')
+    mousedown ($event: MouseEvent) {
+      if (!this.isDraggable) return
 
-      this.updatePosition(event, ui)
+      this.mousePosition = {
+        x: $event.clientX,
+        y: $event.clientY
+      }
+      this.isDragging = true
 
-      this.$emit('dragStart', {
-        position: screenToPoint(ui.position)
-      })
+      this.box = {
+        left: this.boundingBox.left,
+        top: this.boundingBox.top,
+        right: this.boundingBox.right,
+        bottom: this.boundingBox.bottom
+      }
+      this.apparentPosition = {
+        x: this.truePosition.x,
+        y: this.truePosition.y
+      }
+
+      this.$emit('dragStart')
     },
 
-    /**
-     * Handles the dragging user interaction. Updates the local position (including snap operations) and emits it.
-     *
-     * @param {MouseEvent} event
-     * @param {object<{ originalPosition: IScreenPoint, position: IScreenPoint }>} ui - jQuery UI draggable object
-     * @emits `drag` - in the format: object<{ position: IScreenPoint }>
-     */
-    onDrag (event: MouseEvent, ui: { originalPosition: IScreenPoint, position: IScreenPoint }) {
-      this.updatePosition(event, ui)
+    mousemove ($event: MouseEvent) {
+      if (!this.isDragging || !this.isDraggable) return
 
-      ui.position = getSnappedPosition(this.dragService, this.canvas, ui.position, 30)
+      const delta = this.getScaledDelta($event)
 
-      this.$emit('drag', {
-        position: screenToPoint(ui.position)
-      })
+      const d = 15
+      this.box = {
+        left: this.box.left + delta.x,
+        top: this.box.top + delta.y,
+        right: this.box.right + delta.x,
+        bottom: this.box.bottom + delta.y
+      }
+      const box = this.box
+      const offset = {
+        x: 0,
+        y: 0
+      }
+
+      this
+        .snapBoundaries
+        .forEach((xob: any) => {
+          const ts = Math.abs(xob.top - box.bottom) <= d
+          const bs = Math.abs(xob.bottom - box.top) <= d
+          const ls = Math.abs(xob.left - box.right) <= d
+          const rs = Math.abs(xob.right - box.left) <= d
+
+          if (
+            (box.left <= xob.right && box.left >= xob.left) ||
+            (box.right >= xob.left && box.right <= xob.right) ||
+            (box.left <= xob.left && box.right >= xob.right)
+          ) {
+            // box is within the x-axis boundaries
+            if (ts) offset.y = xob.top - box.bottom
+            if (bs) offset.y = xob.bottom - box.top
+          }
+
+          if (
+            (box.top <= xob.bottom && box.top >= xob.top) ||
+            (box.bottom >= xob.top && box.bottom <= xob.bottom) ||
+            (box.top <= xob.top && box.bottom >= xob.bottom)
+          ) {
+            // box is within the x-axis boundaries
+            if (ls) offset.x = xob.left - box.right
+            if (rs) offset.x = xob.right - box.left
+          }
+        })
+
+      this.mousePosition = {
+        x: $event.clientX,
+        y: $event.clientY
+      }
+      this.apparentPosition = {
+        x: this.truePosition.x + delta.x + offset.x,
+        y: this.truePosition.y + delta.y + offset.y,
+      }
+      this.truePosition = {
+        x: this.truePosition.x + delta.x,
+        y: this.truePosition.y + delta.y
+      }
+
+      const theBigDelta = {
+        x: this.apparentPosition.x - this.realPositionFromStore.x,
+        y: this.apparentPosition.y - this.realPositionFromStore.y
+      }
+
+      this.$emit('drag', theBigDelta)
     },
 
-    /**
-     * Handles the end of the dragging user interaction. Emits its final position and the ID of the element it snapped to (if any).
-     *
-     * @param {MouseEvent} event
-     * @param {object<{ originalPosition: IScreenPoint, position: IScreenPoint }>} ui - jQuery UI draggable object
-     * @emits `dragEnd` - in the format: object<{ position: IScreenPoint, snappedId: string }>
-     */
-    onDragEnd (event: MouseEvent, ui: { originalPosition: IScreenPoint, position: IScreenPoint }) {
+    mouseup ($event: MouseEvent) {
+      if (!this.isDraggable) return
+
+      this.isDragging = false
+      this.truePosition = this.realPositionFromStore
       this.$emit('dragEnd', {
-        position: screenToPoint(ui.position),
-        snappedId: getSnappedId(this.dragService)
+        delta: this.getScaledDelta($event)
       })
     }
   }
 })
 </script>
-
-<style lang="scss">
-.draggable {
-  width: 1px;
-  height: 1px;
-  position: relative;
-
-  &__inner {
-    position: absolute;
-  }
-}
-</style>

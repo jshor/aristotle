@@ -3,12 +3,6 @@ import { createStore } from 'vuex'
 import Port from '../Port.vue'
 import PortHelper from '../../components/PortHelper.vue'
 
-jest.mock('../../utils/getAncestor', () => () => ({
-  fromDocumentToEditorCoordinates () {
-    return { x: 10, y: 20 }
-  }
-}))
-
 describe('Port Container', () => {
   let wrapper, state
 

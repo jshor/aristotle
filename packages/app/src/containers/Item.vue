@@ -1,13 +1,21 @@
 <template>
-  <div
+  <draggable
+    :position="position"
+    :zoom="zoom"
+    :style="{
+      transform: `rotate(${90 * rotation}deg)`
+    }"
     class="item"
-    :style="style"
     :class="{
       'item--selected': isSelected
     }"
+    :snap-boundaries="snapBoundaries"
+    :bounding-box="boundingBox"
+    @drag-start="setSnapBoundaries(id)"
+    @drag="delta => moveElementPosition({ id, delta })"
+    @mousedown="mousedown"
+    @contextmenu="contextmenu"
   >
-    <div class="item__freeport" v-if="type === 'Freeport'" />
-    <logic-gate v-else />
     <div
       v-for="(ports, orientation) in portList"
       :key="orientation"
@@ -21,26 +29,33 @@
         :type="port.type"
         :siblings="portList"
         :position="position"
-        :orientation="port.orientation"
+        :orientation="port.orientation + rotation"
         :rotation="rotation"
         :draggable="type !== 'Freeport'"
         :show-helper="port.showHelper"
       />
     </div>
-  </div>
+    <div class="item__freeport" v-if="type === 'Freeport'" />
+    <logic-gate v-else />
+  </draggable>
 </template>
 
 <script lang="ts">
+import ResizeObserver from 'resize-observer-polyfill'
+import { mapActions, mapGetters } from 'vuex'
 import { defineComponent, PropType } from 'vue'
 import LogicGate from '../components/LogicGate.vue'
 import Port from './Port.vue'
 import IPoint from '../interfaces/IPoint'
+import Draggable from './Draggable.vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   name: 'Item',
   components: {
     LogicGate,
-    Port
+    Port,
+    Draggable
   },
   props: {
     position: {
@@ -50,18 +65,16 @@ export default defineComponent({
         y: 0
       })
     },
-    offset: {
-      type: Object as PropType<IPoint>,
+    boundingBox: {
+      type: Object,
       default: () => ({
-        x: 0,
-        y: 0
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
       })
     },
     rotation: {
-      type: Number,
-      default: 0
-    },
-    parentRotation: {
       type: Number,
       default: 0
     },
@@ -69,7 +82,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    type: String,
+    type: {
+      type: String,
+      default: null
+    },
     ports: {
       type: Array,
       default: () => []
@@ -78,15 +94,27 @@ export default defineComponent({
       type: Object,
       default: () => ({})
     },
-    id: String
+    groupId: {
+      type: String,
+      default: null
+    },
+    id: {
+      type: String,
+      required: true
+    }
+  },
+  mounted () {
+    const observer = new ResizeObserver(this.onSizeChanged)
+
+    observer.observe(this.$el)
   },
   computed: {
-    truePosition () {
-      return {
-        x: this.position.x - this.offset.x,
-        y: this.position.y - this.offset.y
-      }
-    },
+    ...mapState([
+      'snapBoundaries'
+    ]),
+    ...mapGetters([
+      'zoom'
+    ]),
     portList () {
       const locations = ['left', 'top', 'right', 'bottom']
 
@@ -103,13 +131,45 @@ export default defineComponent({
         }, locations.reduce((m, type) => ({
           ...m, [type]: []
         }), {}))
-    },
-    style () {
-      return {
-        left: `${this.truePosition.x}px`,
-        top: `${this.truePosition.y}px`,
-        transform: `rotate(${90 * this.rotation}deg)`
+    }
+  },
+  methods: {
+    ...mapActions([
+      'setSnapBoundaries',
+      'updateItemPosition',
+      'setElementSize',
+      'moveElementPosition',
+      'setElementBoundingBox'
+    ]),
+
+    onSizeChanged (target) {
+      if (target[0]) {
+        this.setElementSize({ id: this.id, rect: target[0].contentRect })
       }
+    },
+
+    mousedown ($event: MouseEvent) {
+      this.$emit('select', { $event, id: this.id })
+    },
+
+    drag ({ delta, boundingBox, offset }) {
+      this.moveElementPosition({ id: this.id, delta, boundingBox, offset })
+    },
+
+    dragEnd ({ delta, offset }) {
+      // this.moveElementPosition({ id: this.id, delta, offset })
+      this.setElementBoundingBox(this.id)
+    },
+
+    contextmenu ($event: MouseEvent) {
+      if (this.groupId === null) {
+        // show a context menu for this item only if it is not part of a group
+        console.log('ELEMENT context menu', this.id)
+      } else {
+        console.log('PARENT GROUP context menu')
+      }
+
+      $event.preventDefault()
     }
   }
 })
@@ -171,7 +231,7 @@ export default defineComponent({
   }
 
   &--selected {
-    background-color: pink;
+    opacity: 0.5;
   }
 }
 </style>

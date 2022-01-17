@@ -71,43 +71,42 @@ export default defineComponent({
   name: 'Wire',
   props: {
     source: {
-      type: Object as PropType<Node>,
+      type: Object,
       required: true
     },
     target: {
-      type: Object as PropType<Node>,
+      type: Object,
       required: true
     },
-    canvas: {
-      type: Object as PropType<HTMLElement>,
+    groupId: {
+      type: String,
       default: null
     },
     isSelected: {
       type: Boolean,
       default: false
+    },
+    id: {
+      type: String,
+      required: true
     }
   },
   data () {
     return {
-      isMouseDown: false,
-      portCreated: false,
       newFreeport: {
         itemId: '',
         inputPortId: '',
-        outputPortId: ''
-      } as Port,
-      mouseCoords: {
+        outputPortId: '',
+        sourceId: '',
+        targetId: '',
+        position: {}
+      },
+      originalPosition: {
         x: 0,
         y: 0
       } as IPoint,
-      originalA: {
-        x: 0,
-        y: 0
-      } as IPoint,
-      originalB: {
-        x: 0,
-        y: 0
-      } as IPoint
+      portCreated: false,
+      isDragging: false
     }
   },
   computed: {
@@ -147,81 +146,74 @@ export default defineComponent({
   methods: {
     ...mapActions([
       'createFreeport',
-      'deselectAll',
-      'selectConnection',
-      'updateItemPosition',
-      'updatePortPositions'
+      'moveElementPosition'
     ]),
-    getPosition (event) {
-      const { top, left } = this.canvas.getBoundingClientRect()
-
-      const x = (event.x - left) / this.zoom
-      const y = (event.y - top) / this.zoom
-
-      return { x, y }
-    },
-
-    mousedown (event) {
-      const rand = () => 'X' + Math.random().toString().slice(-4)
-      const { x, y } = this.getPosition(event)
-
-      this.isMouseDown = true
-      this.portCreated = false
-      // this.newFreeportPortId = rand()
-      this.newFreeport = {
-        itemId: rand(),
-        inputPortId: rand(),
-        outputPortId: rand()
+    getScaledDelta ($event: MouseEvent) {
+      return {
+        x: ($event.x - this.originalPosition.x) / this.zoom,
+        y: ($event.y - this.originalPosition.y) / this.zoom
       }
-      this.mouseCoords = { x, y }
     },
 
-    mousemove (event) {
-      if (!this.isMouseDown) return
+    mousedown ($event: MouseEvent) {
+      if (this.groupId !== null) {
+        // this wire is part of a group, so do not allow the creation of a new freeport
+        this.$emit('select', { $event, id: this.id })
+        return
+      }
 
-      const position = this.getPosition(event)
-      const { x, y } = position
+      this.portCreated = false
+      this.isDragging = true
+      this.originalPosition = {
+        x: $event.clientX,
+        y: $event.clientY
+      }
+    },
 
-      if ((this.mouseCoords.x !== x || this.mouseCoords.y !== y) && !this.portCreated) {
-        this.createFreeport({
-          position,
-          ...this.newFreeport,
-          // portId: this.newFreeportPortId,
+    mousemove ($event: MouseEvent) {
+      if (this.originalPosition.x === $event.clientX && this.originalPosition.y === $event.clientY) return
+      if (!this.isDragging) return
+
+      const delta = this.getScaledDelta($event)
+
+      this.originalPosition = {
+        x: $event.clientX,
+        y: $event.clientY
+      }
+
+      if (!this.portCreated) {
+        const rand = () => `id_${(Math.floor(Math.random() * 1000000) + 5)}` // TODO: use uuid
+        const { top, left } = this.$el.getBoundingClientRect() as DOMRectReadOnly
+        const relativePosition: IPoint = {
+          x: $event.clientX - left,
+          y: $event.clientY - top
+        }
+        const absolutePosition: IPoint = {
+          x: this.topLeft.x + relativePosition.x,
+          y: this.topLeft.y + relativePosition.y
+        }
+
+        this.newFreeport = {
+          itemId: rand(),
+          inputPortId: rand(),
+          outputPortId: rand(),
           sourceId: this.target.id,
-          targetId: this.source.id
-        })
-        this.originalA = {...this.a}
-        this.originalB = {...this.b}
+          targetId: this.source.id,
+          position: absolutePosition
+        }
+
+        this.createFreeport(this.newFreeport)
         this.portCreated = true
-      } else if (this.portCreated) {
-        // const port = this.target && this.target.id === this.newFreeportPortId
-
-        [this.originalA, this.originalB].forEach((wirePort) => {
-          const diffX = Math.abs(position.x - wirePort.x)
-          const diffY = Math.abs(position.y - wirePort.y)
-
-          if (diffX < 10) {
-            position.x += (wirePort.x - position.x)
-          }
-          if (diffY < 10) {
-            position.y += (wirePort.y - position.y)
-          }
-        })
-
-        this.updatePortPositions({
-          [this.newFreeport.inputPortId]: { position },
-          [this.newFreeport.outputPortId]: { position }
-        })
-        this.updateItemPosition({
-          id: this.newFreeport.itemId,
-          position
-        })
       }
+
+      this.moveElementPosition({
+        id: this.newFreeport.itemId,
+        delta
+      })
     },
 
-    mouseup () {
-      this.isMouseDown = false
-      this.portCreated = false
+    mouseup ($event: MouseEvent) {
+      this.isDragging = false
     }
   }
 })
