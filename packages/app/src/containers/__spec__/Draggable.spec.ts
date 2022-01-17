@@ -1,15 +1,8 @@
 import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 import Draggable from '../Draggable.vue'
-import DragService from '../../services/DragService'
 
-jest.mock('../../services/DragService')
 jest.mock('../../layout/dragging')
-jest.mock('../../utils/getAncestor', () => () => ({
-  fromDocumentToEditorCoordinates () {
-    return { x: 10, y: 20 }
-  }
-}))
 
 describe('Document Container', () => {
   let wrapper
@@ -43,21 +36,6 @@ describe('Document Container', () => {
       }
     })
   }
-
-  it('should initialize a new dragging service instance with callback methods', () => {
-    const spy = jest
-      .spyOn(DragService.prototype, 'createDrag')
-      .mockImplementation(jest.fn())
-
-    wrapper = createWrapper()
-
-    expect(spy).toHaveBeenCalledTimes(1)
-    expect(spy).toHaveBeenCalledWith(expect.objectContaining({
-      start: wrapper.vm.onDragStart,
-      drag: wrapper.vm.onDrag,
-      stop: wrapper.vm.onDragEnd
-    }))
-  })
 
   describe('onDragStart()', () => {
     beforeEach(() => {

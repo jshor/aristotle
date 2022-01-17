@@ -6,37 +6,57 @@
     </div>
     <div class="documents__container" @contextmenu="contextMenu($event)" @mousewheel="mousewheel" @mousedown.right="startPanning">
       <div :style="style" ref="canvas" class="documents__grid">
-        <selector @selectionStart="selectionStart" @selectionEnd="selectionEnd" />
+        <selector
+          :zoom="zoom"
+          @selection-start="selectionStart"
+          @selection-end="selectionEnd"
+        />
+
+        <group
+          v-for="group in groups"
+          :key="group.id"
+          :id="group.id"
+          :bounding-box="group.boundingBox"
+          :is-selected="group.isSelected"
+          :z-index="group.zIndex"
+        />
 
         <wire
-          v-for="(connection, key) in connections"
-          :key="key"
-          :canvas="$refs.canvas"
+          v-for="connection in connections"
+          :id="connection.id"
+          :key="connection.id"
           :target="connection.source"
           :source="connection.target"
+          :group-id="connection.groupId"
           :is-selected="connection.isSelected"
-          @click="selectConnection(key)"
+          :z-index="connection.zIndex"
+          @click="$e => selectItem($e, connection.id)"
         />
 
-        <group
-          v-if="selectedItems.length"
-          :items="selectedItems"
-          :canvas="$refs.canvas"
-          :id="'SELECTION'"
-          :position="selection.position"
-          :rotation="selectedItems.length === 1 ? selectedItems[0].rotation : selection.rotation"
-        />
-
-        <group
-          v-for="item in unselectedItems"
-          :items="[item]"
-          :canvas="$refs.canvas"
-          :key="item.id"
-          :ref="item.id"
+        <item
+          v-for="item in elements"
           :id="item.id"
+          :key="item.id"
+          :ports="item.ports"
+          :type="item.type"
           :position="item.position"
           :rotation="item.rotation"
+          :group-id="item.groupId"
+          :bounding-box="item.boundingBox"
+          :properties="item.properties"
+          :is-selected="item.isSelected"
+          @select="$e => selectItem($e, item.id)"
         />
+
+        <bounding-box
+          v-for="item in elements"
+          :key="item.id"
+          :x="item.boundingBox?.left"
+          :y="item.boundingBox?.top"
+          :width="item.boundingBox?.right - item.boundingBox?.left"
+          :height="item.boundingBox?.bottom - item.boundingBox?.top"
+        />
+
         <!-- <strong>NON_GROUPS:</strong> -->
       </div>
 
@@ -44,9 +64,10 @@
         <input type="checkbox" v-model="snapToGrid.enabled" value="1" /> Snap to grid<br />
         Grid size: <input type="number" v-model.number="snapToGrid.size" /><br />
 
-        <button @click="rotateSelection(-1)">Rotate 90&deg; CCW</button>
-        <button @click="rotateSelection(1)">Rotate 90&deg; CW</button><br />
-        <button @click="selectAll">Select All</button>
+        <button @click="rotate(-1)">Rotate 90&deg; CCW</button>
+        <button @click="rotate(1)">Rotate 90&deg; CW</button><br />
+        <button @click="group">Group</button>
+        <button @click="ungroup">Ungroup</button>
       </div>
     </div>
   </div>
@@ -54,13 +75,15 @@
 
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex'
-import { defineComponent, nextTick } from 'vue'
+import { defineComponent } from 'vue'
 import Draggable from './Draggable.vue'
 import Port from './Port.vue'
 import Wire from './Wire.vue'
 import Group from './Group.vue'
 import Item from './Item.vue'
 import Selector from '../components/Selector.vue'
+import BoundingBox from '../components/BoundingBox.vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   name: 'Document',
@@ -70,26 +93,28 @@ export default defineComponent({
     Wire,
     Group,
     Item,
-    Selector
+    Selector,
+    BoundingBox
   },
   props: {
     msg: String
   },
   computed: {
+    ...mapState([
+      'groups',
+      'snapBoundaries'
+    ]),
     ...mapGetters([
+      'elements',
       'zoom',
       'connections',
-      'elements',
-      'selection',
-      'selectedItems',
-      'unselectedItems',
       'ports'
     ]),
     style () {
       if (!this.snapToGrid.enabled) return
       return {
         backgroundSize: `${this.snapToGrid.size}px ${this.snapToGrid.size}px`,
-        transform: `scale(${this.zoom || 1})`,
+        transform: `scale(${this.zoom})`,
         left: `${this.offset.left}px`,
         top: `${this.offset.top}px`
       }
@@ -171,6 +196,8 @@ export default defineComponent({
     },
 
     mousewheel (args) {
+      if (!args.shiftKey) return
+
       const newZoom = this.zoom + (args.deltaY / 1000)
       const point = this.fromDocumentToEditorCoordinates({
         x: args.x,
@@ -189,63 +216,46 @@ export default defineComponent({
       this.setZoom(newZoom)
     },
 
-    selectionStart () {
-      this.deselectAll()
-    },
-
-    selectionEnd (selection) {
-      const items = this
-        .getAllItems()
-        .filter((item) => {
-          if (!item) return false
-          const bbox = item.$el.getBoundingClientRect()
-
-          if (selection.left >= bbox.right || bbox.left >= selection.right) {
-            // one rect is on left side of other
-            return false
-          }
-
-          if (selection.top >= bbox.bottom || bbox.top >= selection.bottom) {
-            // one rect is above other
-            return false
-          }
-
-          return true
-        })
-        .map(({ $props }) => $props.id)
-
-        console.log('items: ', items)
-
-      this.selectItems(items)
-    },
-
-    getAllItems () {
-      return Object.values(this.$refs).map((ref: any) => ref[0])
-    },
-
-    portDragStart ({ source, target }) {
-      this.connect({ source, target })
-      // this.activePortType = 'output' // should be 'input' or 'output'
-    },
-
-    portDragEnd ({ source, oldTarget, newTarget }) {
-      this.disconnect({ source, target: oldTarget })
-
-      if (newTarget) {
-        this.connect({ source, target: newTarget })
+    selectionStart ($event) {
+      if (!$event.shiftKey) {
+        this.deselectAll()
       }
-      this.activePortType = null
+    },
+
+    selectionEnd (rect: DOMRect) {
+      const point = this.fromDocumentToEditorCoordinates({
+        x: rect.x,
+        y: rect.y
+      })
+
+      this.createSelection({
+        left: point.x,
+        top: point.y,
+        right: point.x + rect.width,
+        bottom: point.y + rect.height
+      })
+    },
+
+    selectItem ({ $event, id }: { $event: MouseEvent, id: string }) {
+      if (!$event.shiftKey) {
+        this.deselectAll()
+      }
+
+      this.toggleSelectionState({ id })
     },
 
     ...mapActions([
       'connect',
       'disconnect',
-      'deselectAll',
       'selectAll',
+      'deselectAll',
+      'toggleSelectionState',
+      'group',
+      'ungroup',
       'setZoom',
-      'selectItems',
+      'createSelection',
       'selectConnection',
-      'rotateSelection'
+      'rotate'
     ])
   }
 })
