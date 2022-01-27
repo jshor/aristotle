@@ -5,6 +5,7 @@ export default {
       id: 'conn_1',
       source: 'b',
       target: 'fp1',
+      trueTargetId: 'c',
       isSelected: false,
       groupId: null,
       zIndex: 5
@@ -13,6 +14,7 @@ export default {
       id: 'conn_2',
       source: 'fp2',
       target: 'c',
+      trueTargetId: 'c',
       isSelected: false,
       groupId: null,
       zIndex: 6
@@ -29,7 +31,7 @@ export default {
       type: 1, // 0 = output, 1 = input, 2 = freeport
       rotation: 0,
       orientation: 0, // [0, 1, 2, 3] = [left, top, right, bottom]
-      showHelper: false
+      isFreeport: false
     },
     b: {
       id: 'b',
@@ -40,7 +42,7 @@ export default {
       type: 0,
       rotation: 0,
       orientation: 2,
-      showHelper: false
+      isFreeport: false
     },
     c: {
       id: 'c',
@@ -48,10 +50,10 @@ export default {
         x: 0,
         y: 0
       },
-      type: 0,
+      type: 1,
       rotation: 1,
       orientation: 1,
-      showHelper: false
+      isFreeport: false
     },
     d: {
       id: 'd',
@@ -62,7 +64,7 @@ export default {
       type: 1,
       rotation: 0,
       orientation: 3,
-      showHelper: false
+      isFreeport: false
     },
     fp1: {
       id: 'fp1',
@@ -70,10 +72,10 @@ export default {
         x: 0,
         y: 0
       },
-      type: 2,
+      type: 1,
       rotation: 0,
       orientation: 0,
-      showHelper: false
+      isFreeport: true
     },
     fp2: {
       id: 'fp2',
@@ -81,10 +83,10 @@ export default {
         x: 0,
         y: 0
       },
-      type: 2,
+      type: 0,
       rotation: 0,
       orientation: 2,
-      showHelper: false
+      isFreeport: true
     }
   },
   groups: {},

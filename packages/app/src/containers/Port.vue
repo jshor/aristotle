@@ -1,31 +1,29 @@
 <template>
   <port-pivot :rotation="rotation">
-    <div v-if="showHelper">
-      <port-helper orientation="horizontal" />
-      <port-helper orientation="vertical" />
-    </div>
-
     <draggable
-      v-if="draggable"
-      :position="draggablePosition"
-      :data-id="id"
-      :class="{ snappable }"
-      snap=".port"
+      v-if="!isFreeport"
+      :position="{ x: 0, y: 0 }"
+      :snap-boundaries="snapBoundaries"
+      :bounding-box="{
+        left: position.x,
+        top: position.y,
+        right: position.x,
+        bottom: position.y
+      }"
+      snap-mode="radius"
+      @drag-start="dragStart"
       @drag="onDrag"
-      @dragStart="dragStart"
       @dragEnd="dragEnd"
       class="port">
       <port-handle
-        :active="snappable"
-        @mousedown="mousedown"
-        @mouseup="mouseup"
+        :type="type"
+        :active="connectablePortIds.includes(id)"
       />
     </draggable>
     <port-handle
       v-else
-      :active="snappable"
-      @mousedown="mousedown"
-      @mouseup="mouseup"
+      :type="type"
+      :active="connectablePortIds.includes(id)"
     />
   </port-pivot>
 </template>
@@ -36,14 +34,12 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import IPoint from '../interfaces/IPoint'
 import Draggable from './Draggable.vue'
 import PortHandle from '../components/PortHandle.vue'
-import PortHelper from '../components/PortHelper.vue'
 import PortPivot from '../components/PortPivot.vue'
 
 export default defineComponent({
   components: {
     Draggable,
     PortHandle,
-    PortHelper,
     PortPivot
   },
   props: {
@@ -51,14 +47,6 @@ export default defineComponent({
      * Port ID.
      */
     id: String,
-
-    /**
-     * List of sibling ports (all ports on the parent element).
-     */
-    siblings: {
-      type: Object,
-      default: () => ({})
-    },
 
     /**
      * Unit circle rotation value (0, 1, 2, 3).
@@ -82,16 +70,7 @@ export default defineComponent({
     /**
      * Whether or not the port is draggable.
      */
-    draggable: {
-      type: Boolean,
-      default: false
-    },
-
-    /**
-     * Whether or not the snap helpers should be enabled.
-     * Should be set to true when the port on the opposite end of a connection is being dragged.
-     */
-    showHelper: {
+    isFreeport: {
       type: Boolean,
       default: false
     },
@@ -118,25 +97,16 @@ export default defineComponent({
   data () {
     return {
       /**
-       * The temporary ID of the draggable port.
-       */
-      cloneId: 'DRAGGED_PORT',
-
-      /**
        * The relative dragged position of the dragged port.
        */
-      draggablePosition: {
+      dragPosition: {
         x: 0,
         y: 0
       } as IPoint,
 
-      /**
-       * The absolute position of the dragged port.
-       */
-      absolutePosition: {
-        x: 0,
-        y: 0
-      } as IPoint
+      newFreeport: {} as any,
+
+      isDragging: false
     }
   },
   computed: {
@@ -144,99 +114,107 @@ export default defineComponent({
       'zoom'
     ]),
     ...mapState([
-      'activePort'
-    ]),
-
-    /**
-     * Whether or not this port can accept an incoming dragged port.
-     * This will update the UI to make the port bigger when true.
-     */
-    snappable () {
-      return this.activePort !== null // && activePort.type !== this.type
-    }
-  },
-  mounted () {
-    window.addEventListener('mouseup', this.mouseup)
-  },
-  destroy () {
-    window.removeEventListener('mouseup', this.mouseup)
+      'connectablePortIds',
+      'snapBoundaries'
+    ])
   },
   methods: {
     ...mapActions([
       'createFreeport',
-      'setActivePort',
+      'connectFreeport',
+      'setConnectablePortIds',
+      'moveElementPosition',
+      'rotateFreeport',
       'connect',
-      'disconnect',
-      'showPortSnapHelpers',
-      'hidePortSnapHelpers'
+      'disconnect'
     ]),
 
     /**
-     * Tells the store to show the snap helpers of ports adjacent to this one.
-     */
-    mousedown () {
-      if (this.type === 2) {
-        const siblingIds = Object
-          .values(this.siblings)
-          .reduce((ids: string[], s: any) => [
-            ...ids,
-            ...s.map(({ id }) => id)
-          ], [])
-
-        this.showPortSnapHelpers(siblingIds)
-      }
-    },
-
-    /**
-     * Tells the store that the port's no longer active, and to hide the helpers.
-     */
-    mouseup () {
-      this.setActivePort(null)
-      this.hidePortSnapHelpers()
-    },
-
-    /**
-     * Initializes the draggable connection.
+     * Creates a new freeport that can be moved around using the mouse.
      */
     dragStart () {
+      this.isDragging = true
+      // $event.preventDefault()
+      // $event.stopPropagation()
+
       const rand = () => `id_${(Math.floor(Math.random() * 1000000) + 5)}` // TODO: use uuid
 
-      // this.newFreeport = {
-      //   itemId: rand(),
-      //   inputPortId: rand(),
-      //   outputPortId: rand(),
-      //   sourceId: this.target.id,
-      //   targetId: this.source.id,
-      //   position: this.position
-      // }
+      this.newFreeport = {
+        itemId: rand(),
+        position: this.position
+      }
+
+      if (this.type === 1) {
+        this.newFreeport.inputPortId = rand()
+        this.newFreeport.targetId = this.id
+        this.newFreeport.portType = 0
+      } else {
+        this.newFreeport.outputPortId = rand()
+        this.newFreeport.sourceId = this.id
+        this.newFreeport.portType = 1
+      }
+      this.dragPosition = {
+        x: 0,
+        y: 0
+      }
+
+      this.createFreeport(this.newFreeport)
+      this.setConnectablePortIds(this.id)
     },
 
     /**
      * Updates the store position with the absolute position of the port.
      */
-    onDrag ({ delta }) {
+    onDrag (position: IPoint) {
+      if (!this.isDragging) return
 
-      // this.createFreeport(this.newFreeport)
+      const delta: IPoint = {
+        x: position.x - this.dragPosition.x,
+        y: position.y - this.dragPosition.y
+      }
+
+      let rotation = (() => {
+        if (this.orientation > 1) {
+          if (position.x < 0) return 0
+          return 2
+        }
+
+        if (position.x < 0) return 0
+        if (position.y < 0) return 2
+        if (position.x >= 0) return 2
+        if (position.y >= 0) return 3
+        else return 1
+      })()
+
+      this.moveElementPosition({ id: this.newFreeport.itemId, delta })
+      this.rotateFreeport({ id: this.newFreeport.itemId, rotation })
+      this.dragPosition = position
     },
 
     /**
      * Handles terminating the temporary active port, and connects the port to the one at its dragged location.
      * This method handles all results of a user-driven port-dragging interaction.
      */
-    dragEnd ({ position, snappedId }) {
-      this.draggablePosition = {
+    dragEnd () {
+      if (!this.isDragging) return
+
+      this.isDragging = false
+      this.dragPosition = {
         x: 0,
         y: 0
       }
-      this.disconnect({
-        source: this.id,
-        target: this.cloneId
-      })
-      this.connect({
-        source: this.id,
-        target: snappedId
-      })
-      this.setActivePort(null)
+
+      if (this.type === 0) {
+        this.connectFreeport({
+          portId: this.newFreeport.outputPortId,
+          targetId: this.id
+        })
+      } else {
+        this.connectFreeport({
+          portId: this.newFreeport.inputPortId,
+          sourceId: this.id
+        })
+      }
     }
   }
 })

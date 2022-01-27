@@ -56,17 +56,6 @@ import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import IPoint from '../interfaces/IPoint'
 
-type Port = {
-  itemId: string,
-  inputPortId: string,
-  outputPortId: string
-}
-
-type Node = {
-  id: string
-  position: IPoint
-}
-
 export default defineComponent({
   name: 'Wire',
   props: {
@@ -106,7 +95,7 @@ export default defineComponent({
         y: 0
       } as IPoint,
       portCreated: false,
-      isDragging: false
+      isMouseDown: false
     }
   },
   computed: {
@@ -146,14 +135,9 @@ export default defineComponent({
   methods: {
     ...mapActions([
       'createFreeport',
-      'moveElementPosition'
+      'moveElementPosition',
+      'setSnapBoundaries'
     ]),
-    getScaledDelta ($event: MouseEvent) {
-      return {
-        x: ($event.x - this.originalPosition.x) / this.zoom,
-        y: ($event.y - this.originalPosition.y) / this.zoom
-      }
-    },
 
     mousedown ($event: MouseEvent) {
       if (this.groupId !== null) {
@@ -163,7 +147,7 @@ export default defineComponent({
       }
 
       this.portCreated = false
-      this.isDragging = true
+      this.isMouseDown = true
       this.originalPosition = {
         x: $event.clientX,
         y: $event.clientY
@@ -172,9 +156,7 @@ export default defineComponent({
 
     mousemove ($event: MouseEvent) {
       if (this.originalPosition.x === $event.clientX && this.originalPosition.y === $event.clientY) return
-      if (!this.isDragging) return
-
-      const delta = this.getScaledDelta($event)
+      if (!this.isMouseDown) return
 
       this.originalPosition = {
         x: $event.clientX,
@@ -203,17 +185,13 @@ export default defineComponent({
         }
 
         this.createFreeport(this.newFreeport)
+        this.setSnapBoundaries(this.newFreeport.itemId)
         this.portCreated = true
       }
-
-      this.moveElementPosition({
-        id: this.newFreeport.itemId,
-        delta
-      })
     },
 
-    mouseup ($event: MouseEvent) {
-      this.isDragging = false
+    mouseup () {
+      this.isMouseDown = false
     }
   }
 })

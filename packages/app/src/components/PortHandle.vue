@@ -2,7 +2,9 @@
   <div
     class="port-handle"
     :class="{
-      'port-handle--active': active
+      'port-handle--active': active,
+      'port-handle--input': type === 0,
+      'port-handle--output': type === 1
     }"
     @mousedown="mousedown"
     @mouseup="mouseup"
@@ -21,6 +23,10 @@ export default defineComponent({
     active: {
       type: Boolean,
       default: false
+    },
+    type: {
+      type: Number,
+      default: 0
     }
   },
   methods: {
@@ -64,6 +70,10 @@ export default defineComponent({
     height: 24px;
     top: -12px;
     left: -12px;
+  }
+
+  &--input {
+    background-color: blue;
   }
 }
 </style>

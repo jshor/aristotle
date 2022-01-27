@@ -11,11 +11,14 @@
     }"
     :snap-boundaries="snapBoundaries"
     :bounding-box="boundingBox"
+    :force-dragging="forceDragging"
     @drag-start="setSnapBoundaries(id)"
     @drag="delta => moveElementPosition({ id, delta })"
     @mousedown="mousedown"
     @contextmenu="contextmenu"
   >
+    <div class="item__freeport" v-if="type === 'Freeport'" />
+    <logic-gate v-else />
     <div
       v-for="(ports, orientation) in portList"
       :key="orientation"
@@ -27,16 +30,14 @@
         :ref="port.id"
         :key="port.id"
         :type="port.type"
+        :is-freeport="port.isFreeport"
         :siblings="portList"
-        :position="position"
+        :position="port.position"
         :orientation="port.orientation + rotation"
         :rotation="rotation"
-        :draggable="type !== 'Freeport'"
         :show-helper="port.showHelper"
       />
     </div>
-    <div class="item__freeport" v-if="type === 'Freeport'" />
-    <logic-gate v-else />
   </draggable>
 </template>
 
@@ -103,10 +104,21 @@ export default defineComponent({
       required: true
     }
   },
+  data () {
+    return {
+      forceDragging: false
+    }
+  },
   mounted () {
     const observer = new ResizeObserver(this.onSizeChanged)
 
     observer.observe(this.$el)
+
+    if (this.isSelected) {
+      // if the item is selected when it is created, then it is actively being drawn
+      // allow for it to be moved when the mouse moves on first creation
+      this.forceDragging = true
+    }
   },
   computed: {
     ...mapState([

@@ -68,6 +68,7 @@
         <button @click="rotate(1)">Rotate 90&deg; CW</button><br />
         <button @click="group">Group</button>
         <button @click="ungroup">Ungroup</button>
+        <button @click="addNewElement">Add element</button>
       </div>
     </div>
   </div>
@@ -157,7 +158,7 @@ export default defineComponent({
     startPanning ({ x, y }) {
       this.panning = true
       this.panStartPosition = {
-        x: x - this.offset.left ,
+        x: x - this.offset.left,
         y: y - this.offset.top
       }
     },
@@ -244,7 +245,53 @@ export default defineComponent({
       this.toggleSelectionState({ id })
     },
 
+    addNewElement () {
+      const rand = () => `id_${(Math.floor(Math.random() * 100) + 5)}` // TODO: use uuid
+
+      const outputPortId = rand()
+      const inputPortId = rand()
+      const element = {
+        id: rand(),
+        type: 'Element',
+        portIds: [outputPortId, inputPortId],
+        position: { x: 400, y: 400 },
+        rotation: 0,
+        isSelected: false,
+        properties: {
+          inputCount: 1
+        },
+        boundingBox: {
+          left: 400,
+          right: 500,
+          top: 400,
+          bottom: 550
+        },
+        groupId: null,
+        zIndex: 0,
+        width: 100,
+        height: 150
+      }
+      const createPort = (id, orientation, type) => ({
+        id,
+        orientation,
+        position: {
+          x: 0,
+          y: 0
+        },
+        type,
+        rotation: 0,
+        isFreeport: false
+      })
+      const ports = [
+        createPort(outputPortId, 0, 0),
+        createPort(inputPortId, 2, 1)
+      ]
+
+      this.addElement({ element, ports })
+    },
+
     ...mapActions([
+      'addElement',
       'connect',
       'disconnect',
       'selectAll',

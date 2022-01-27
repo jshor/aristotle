@@ -25,6 +25,10 @@ export default defineComponent({
       type: Number,
       default: 1
     },
+    snapMode: {
+      type: String,
+      default: 'outer'
+    },
     snapBoundaries: {
       type: Array,
       default: () => []
@@ -41,6 +45,10 @@ export default defineComponent({
     isDraggable: {
       type: Boolean,
       default: true
+    },
+    forceDragging: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -87,6 +95,15 @@ export default defineComponent({
           this.apparentPosition = this.truePosition
         }
       }
+    },
+    forceDragging: {
+      handler (forceDragging) {
+        if (forceDragging) {
+          const { top, left } = this.$el.getBoundingClientRect()
+
+          this.initDragging(left, top)
+        }
+      }
     }
   },
   computed: {
@@ -106,22 +123,10 @@ export default defineComponent({
     document.removeEventListener('mouseup', this.mouseup)
   },
   methods: {
-    getScaledDelta ($event: MouseEvent) {
-      return {
-        x: ($event.x - this.mousePosition.x) / this.zoom,
-        y: ($event.y - this.mousePosition.y) / this.zoom
-      }
-    },
-
-    mousedown ($event: MouseEvent) {
+    initDragging (x: number, y: number) {
       if (!this.isDraggable) return
 
-      this.mousePosition = {
-        x: $event.clientX,
-        y: $event.clientY
-      }
-      this.isDragging = true
-
+      this.mousePosition = { x, y }
       this.box = {
         left: this.boundingBox.left,
         top: this.boundingBox.top,
@@ -132,8 +137,22 @@ export default defineComponent({
         x: this.truePosition.x,
         y: this.truePosition.y
       }
-
+      this.isDragging = true
       this.$emit('dragStart')
+    },
+
+    getScaledDelta ($event: MouseEvent) {
+      return {
+        x: ($event.x - this.mousePosition.x) / this.zoom,
+        y: ($event.y - this.mousePosition.y) / this.zoom
+      }
+    },
+
+    mousedown ($event: MouseEvent) {
+      $event.preventDefault()
+      $event.stopPropagation()
+
+      this.initDragging($event.clientX, $event.clientY)
     },
 
     mousemove ($event: MouseEvent) {
@@ -157,6 +176,17 @@ export default defineComponent({
       this
         .snapBoundaries
         .forEach((xob: any) => {
+          if (this.snapMode === 'radius') {
+            const isWithin = Math.sqrt(Math.pow(xob.left - box.left, 2) + Math.pow(xob.top - box.top, 2)) <= d
+
+            if (isWithin) {
+              offset.x = xob.left - box.left
+              offset.y = xob.top - box.top
+
+              return
+            }
+          }
+
           const ts = Math.abs(xob.top - box.bottom) <= d
           const bs = Math.abs(xob.bottom - box.top) <= d
           const ls = Math.abs(xob.left - box.right) <= d
@@ -167,7 +197,7 @@ export default defineComponent({
             (box.right >= xob.left && box.right <= xob.right) ||
             (box.left <= xob.left && box.right >= xob.right)
           ) {
-            // box is within the x-axis boundaries
+            // box is within the y-axis boundaries
             if (ts) offset.y = xob.top - box.bottom
             if (bs) offset.y = xob.bottom - box.top
           }
@@ -195,13 +225,10 @@ export default defineComponent({
         x: this.truePosition.x + delta.x,
         y: this.truePosition.y + delta.y
       }
-
-      const theBigDelta = {
+      this.$emit('drag', {
         x: this.apparentPosition.x - this.realPositionFromStore.x,
         y: this.apparentPosition.y - this.realPositionFromStore.y
-      }
-
-      this.$emit('drag', theBigDelta)
+      })
     },
 
     mouseup ($event: MouseEvent) {
