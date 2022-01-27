@@ -71,7 +71,7 @@ export function getPortDirection (port, a: IPoint, b: IPoint) {
   // bezier index directions are one integer off (see computeBezier()) -- subtract by 1
   let direction = rotate(port.orientation + port.rotation - 1)
 
-  if (port.type === 2) {
+  if (port.isFreeport) {
     // inflect direction for FreePorts to give the "pinched" appearance when dragged out of range
     direction = inflectDirection(direction, a, b)
 

@@ -7,8 +7,8 @@ const rand = () => `id_${(Math.floor(Math.random() * 100) + 5)}` // TODO: use uu
 
 const state = {
   activePort: null,
-  portSnapHelperIds: [],
   snapBoundaries: [],
+  connectablePortIds: [],
   ...sample
 }
 
@@ -66,39 +66,66 @@ const actions = {
     commit('SET_ZOOM', zoom)
   },
 
-  setSnapBoundaries ({ commit, state }, id: string) {
-    const createPortSnapBoundaries = port => ([
-      {
-        left: port.position.x,
-        right: port.position.x,
-        top: -Infinity,
-        bottom: Infinity
-      },
-      {
-        left: -Infinity,
-        right: Infinity,
-        top: port.position.y,
-        bottom: port.position.y
-      }
-    ])
+  addElement ({ commit, dispatch }, { element, ports }: { element: any, ports: any[] }) {
+    commit('ADD_ELEMENT', { element, ports })
+    dispatch('setElementPortPositions', element.id)
+  },
 
+  removeElement ({ commit, state }, id: string) {
+    const element = state.elements[id]
+
+    if (!element) return
+
+    // remove all connections first
+    const connections: any[] = Object
+      .values(state.connections)
+      .filter((connection: any) => element.portIds.includes(connection.source) || element.portIds.includes(connection.target))
+
+    connections.forEach((connection: any) => {
+      commit('DISCONNECT', {
+        source: connection.source,
+        target: connection.target
+      })
+    })
+
+    if (element.type === 'Freeport' && connections.length === 2) {
+      // if this is a freeport, then reconnect the two disconnected wires
+      commit('CONNECT', {
+        source: connections[0].source,
+        target: connections[1].target
+      })
+    }
+
+    // remove the element
+    commit('REMOVE_ELEMENT', id)
+  },
+
+  setSnapBoundaries ({ commit, state }, id: string) {
     const snapBoundaries = (() => {
       const element = state.elements[id]
 
       if (element && element.groupId === null) {
         // the item with the given id is an element that does not belong to a group
         if (element.type === 'Freeport') {
-          if (element.portIds.length === 1) {
-            // if only one port exists on the freeport, then it is a port being dragged by the user
-            // find all available ports for which the end of this wire can be connected to
-            const freeport = state.ports[element.portIds[0]]
+          console.log('it is an freeport', id, element.portIds.length)
+          if (element.portIds.length > 1) {
+            // if only one port exists on the freeport, then it is a port being dragged by the user and does not apply
+            // find all connectable ports and set their boundaries
+            const createPortSnapBoundaries = port => ([
+              {
+                left: port.position.x,
+                right: port.position.x,
+                top: -Infinity,
+                bottom: Infinity
+              },
+              {
+                left: -Infinity,
+                right: Infinity,
+                top: port.position.y,
+                bottom: port.position.y
+              }
+            ])
 
-            return Object
-              .values(state.ports)
-               // filter to find all opposite ports (e.g., input port can connect to outputs only, and vice versa)
-              .filter((port: any) => port.type !== 2 && port.type !== freeport.type)
-              .reduce((ports: any, port: any) => ports.concat(createPortSnapBoundaries(port)), [])
-          } else {
             // freeports should snap to "straighten out" wires
             return Object
               .values(state.connections)
@@ -118,18 +145,22 @@ const actions = {
           // this an element that can snap to align with the outer edge of any non-freeport element
           return Object
             .values(state.elements)
-            .filter((e: any) => e.id !== id)
+            .filter((e: any) => e.id !== id && e.type !== 'Freeport')
             .map((e: any) => e.boundingBox)
         }
       }
       return []
     })()
 
+    console.log('SNAP TO: ', snapBoundaries)
+
     commit('SET_SNAP_BOUNDARIES', snapBoundaries)
   },
 
   setElementSize ({ commit, dispatch, state }, { rect, id }: { rect: DOMRectReadOnly, id: string }) {
     const element = state.elements[id]
+
+    if (!element) return
 
     // reposition w.r.t. the centroid
     const centerX = element.position.x + (element.width / 2)
@@ -411,7 +442,7 @@ const actions = {
     commit('SET_ALL_SELECTION_STATES', true)
   },
 
-  toggleSelectionState ({ commit, dispatch, state }, { id, forcedValue = null }: { id: string, forcedValue: boolean | null }) {
+  toggleSelectionState ({ commit, state }, { id, forcedValue = null }: { id: string, forcedValue: boolean | null }) {
     const item = state.elements[id] || state.connections[id] || state.groups[id]
     const isSelected = forcedValue === null
       ? !item.isSelected
@@ -434,55 +465,109 @@ const actions = {
     }
   },
 
+  createFreeport ({ commit, dispatch }, data) {
+    commit('CREATE_FREEPORT_ELEMENT', data)
+    dispatch('setElementBoundingBox', data.itemId)
 
-  createDraggedPort ({ commit, dispatch }, data) {
-    dispatch('createFreeport', data)
-  },
-
-  createFreeport ({ commit }, data) {
-    commit('CREATE_FREEPORT_ELEMENT', {
-      itemId: data.itemId,
-      inputPortId: data.inputPortId,
-      outputPortId: data.outputPortId,
-      position: data.position
-    })
-    commit('DISCONNECT', {
-      source: data.sourceId,
-      target: data.targetId
-    })
-    commit('CONNECT', {
-      source: data.sourceId,
-      target: data.outputPortId,
-      zIndex: getters.nextZIndex
-    })
-    commit('CONNECT', {
-      source: data.inputPortId,
-      target: data.targetId,
-      zIndex: getters.nextZIndex
-    })
-  },
-
-  setActivePort ({ commit }, port) {
-    commit('SET_ACTIVE_PORT', port)
-  },
-
-  showPortSnapHelpers ({ commit, getters }, movingPortIds) {
-    const portIds = getters
-      .connections
-      .filter(({ source, target }) => {
-        return movingPortIds.includes(source.id) || movingPortIds.includes(target.id)
+    if (data.sourceId && data.targetId) {
+      commit('DISCONNECT', {
+        source: data.sourceId,
+        target: data.targetId
       })
-      .map(({ source, target }) => {
-        return movingPortIds.includes(source.id)
-          ? target.id
-          : source.id
-      })
+    }
 
-    commit('SHOW_PORT_SNAP_HELPERS', portIds)
+    if (data.sourceId) {
+      commit('CONNECT', {
+        source: data.sourceId,
+        target: data.outputPortId,
+        zIndex: getters.nextZIndex
+      })
+    }
+
+    if (data.targetId) {
+      commit('CONNECT', {
+        source: data.inputPortId,
+        target: data.targetId,
+        zIndex: getters.nextZIndex
+      })
+    }
   },
 
-  hidePortSnapHelpers ({ commit }) {
-    commit('SHOW_PORT_SNAP_HELPERS', [])
+  setConnectablePortIds ({ commit, state }, portId: string) {
+    const port = state.ports[portId]
+
+    if (port.isFreeport) return // freeports cannot connect to anything
+
+    const connectedPortIds = Object
+      .values(state.connections)
+      .reduce((portIds: any[], connection: any) => {
+        if (state.ports[portId].isFreeport) {
+          return portIds
+        }
+        return portIds.concat([connection.source, connection.target])
+      }, [])
+
+    connectedPortIds.splice(-2) // remove the last two elements (the currently-dragged connection)
+
+    const filter = port.type === 0
+      ? (p: any) => p.type === 1 && !p.isFreeport && !connectedPortIds.includes(p.id)
+      : (p: any) => p.type === 0 && !p.isFreeport && !connectedPortIds.includes(port.id)
+
+    const portIds: string[] = []
+    const snapBoundaries: any[] = []
+
+    Object
+      .values(state.ports)
+      .filter(filter)
+      .forEach(({ id, position }: any) => {
+        snapBoundaries.push({
+          left: position.x,
+          top: position.y,
+          right: position.x,
+          bottom: position.y
+        })
+        portIds.push(id)
+      })
+
+    commit('SET_CONNECTABLE_PORT_IDS', portIds)
+    commit('SET_SNAP_BOUNDARIES', snapBoundaries)
+  },
+
+  rotateFreeport ({ commit }, { id, rotation }: { id: string, rotation: number }) {
+    commit('ROTATE_ELEMENT', { id, rotation })
+  },
+
+  connectFreeport ({ commit, dispatch, state }, { sourceId, targetId, portId }: { sourceId?: string, targetId?: string, portId: string }) {
+    const port = state.ports[portId]
+    const newPort: any = Object
+      .values(state.ports)
+      .find((p: any) => {
+        const distX = Math.pow(p.position.x - port.position.x, 2)
+        const distY = Math.pow(p.position.y - port.position.y, 2)
+
+        return Math.sqrt(distX + distY) <= 10 && p.id !== portId && state.connectablePortIds.includes(p.id)
+      })
+
+    if (newPort) {
+      const payload: any = {}
+
+      if (sourceId) {
+        payload.source = sourceId
+        payload.target = newPort.id
+      } else {
+        payload.source = newPort.id
+        payload.target = targetId
+      }
+
+      commit('CONNECT', payload)
+    }
+
+    const element: any = Object
+      .values(state.elements)
+      .find(({ portIds }: any) => portIds.includes(portId))
+
+    dispatch('removeElement', element.id)
+    commit('SET_CONNECTABLE_PORT_IDS', [])
   },
 
   rotate ({ commit, dispatch, state }, direction: number) {
@@ -584,6 +669,21 @@ const actions = {
 }
 
 const mutations = {
+  'ADD_ELEMENT' (state, { element, ports }: { element: any, ports: any[] }) {
+    state.elements[element.id] = element
+
+    ports.forEach(port => {
+      state.ports[port.id] = port
+    })
+  },
+
+  'REMOVE_ELEMENT' (state, id: string) {
+    state.elements[id].portIds.forEach(portId => {
+      delete state.ports[portId]
+    })
+    delete state.elements[id]
+  },
+
   'SET_ELEMENT_SIZE' (state, { rect, id }: { rect: DOMRectReadOnly, id: string }) {
     state.elements[id].width = rect.width
     state.elements[id].height = rect.height
@@ -591,14 +691,6 @@ const mutations = {
 
   'SET_SNAP_BOUNDARIES' (state, snapBoundaries) {
     state.snapBoundaries = snapBoundaries
-  },
-
-  'SHOW_PORT_SNAP_HELPERS' (state, portIds) {
-    Object
-      .keys(state.ports)
-      .forEach((portId: string) => {
-        state.ports[portId].showHelper = portIds.includes(portId)
-      })
   },
 
   'SET_PORT_POSITION' (state, { id, position }) {
@@ -671,8 +763,8 @@ const mutations = {
     state.zoomLevel = zoom
   },
 
-  'SET_ACTIVE_PORT' (state, port) {
-    state.activePort = port
+  'SET_CONNECTABLE_PORT_IDS' (state, connectablePortIds: string[]) {
+    state.connectablePortIds = connectablePortIds
   },
 
   'CONNECT' (state, { source, target, zIndex }) {
@@ -733,32 +825,42 @@ const mutations = {
     delete state.groups[groupId]
   },
 
-  'CREATE_FREEPORT_ELEMENT' (state, { itemId, inputPortId, outputPortId, position }) {
-    const createPort = (id, orientation) => ({
+  'CREATE_FREEPORT_ELEMENT' (state, { itemId, inputPortId, outputPortId, position }: { itemId: string, position: any, outputPortId?: string, inputPortId?: string }) {
+    const createPort = (id, type, orientation) => ({
       id,
+      type,
+      orientation,
+      isFreeport: true,
       position: {
         x: 0,
         y: 0
       },
-      type: 2, // 2 = Freeport type
-      rotation: 0,
-      orientation
+      rotation: 0
     })
+    const portIds: string[] = []
+
+    if (inputPortId) {
+      state.ports[inputPortId] = createPort(inputPortId, 1, 2) // TODO: pass orientation
+      portIds.push(inputPortId)
+    }
+
+    if (outputPortId) {
+      state.ports[outputPortId] = createPort(outputPortId, 0, 0)
+      portIds.push(outputPortId)
+    }
 
     state.elements[itemId] = {
       id: itemId,
       type: 'Freeport',
-      portIds: [inputPortId, outputPortId],
+      portIds,
       position,
       rotation: 0,
-      isSelected: false,
+      isSelected: true,
       groupId: null,
       zIndex: 3,
       width: 1,
       height: 1
     }
-    state.ports[outputPortId] = createPort(outputPortId, 0)
-    state.ports[inputPortId] = createPort(inputPortId, 2)
   },
 
   'ROTATE_ELEMENT' (state, { id, rotation }) {
