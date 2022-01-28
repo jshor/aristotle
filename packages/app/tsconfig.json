@@ -14,12 +14,13 @@
     "baseUrl": ".",
     "types": [
       "webpack-env",
-      "jest"
+      "jest",
     ],
     "paths": {
       "@/*": [
         "src/*"
-      ]
+      ],
+      "*": ["types/*.d.ts"]
     },
     "lib": [
       "esnext",

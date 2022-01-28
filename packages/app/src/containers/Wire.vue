@@ -135,14 +135,13 @@ export default defineComponent({
   methods: {
     ...mapActions([
       'createFreeport',
-      'moveElementPosition',
+      'moveItemPosition',
       'setSnapBoundaries'
     ]),
 
     mousedown ($event: MouseEvent) {
       if (this.groupId !== null) {
         // this wire is part of a group, so do not allow the creation of a new freeport
-        this.$emit('select', { $event, id: this.id })
         return
       }
 
@@ -190,8 +189,11 @@ export default defineComponent({
       }
     },
 
-    mouseup () {
+    mouseup ($event: MouseEvent) {
+      if (!this.isMouseDown) return
+
       this.isMouseDown = false
+      this.$emit('select', $event)
     }
   }
 })

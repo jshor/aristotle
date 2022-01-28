@@ -71,7 +71,7 @@ describe('Port Container', () => {
   })
 
   describe('setAbsolutePosition()', () => {
-    it('should define `absolutePosition` to be the editor coordinates of the element\'s location', () => {
+    it('should define `absolutePosition` to be the editor coordinates of the Item\'s location', () => {
       expect(wrapper.vm.absolutePosition).toEqual({ x: 0, y: 0 })
       wrapper.vm.setAbsolutePosition()
       expect(wrapper.vm.absolutePosition).toEqual({ x: 10, y: 20 })
@@ -152,7 +152,7 @@ describe('Port Container', () => {
       })
     })
 
-    it('should set the absolute position of the element', () => {
+    it('should set the absolute position of the Item', () => {
       const spy = jest.spyOn(wrapper.vm, 'setAbsolutePosition')
 
       wrapper.vm.dragStart({ position })

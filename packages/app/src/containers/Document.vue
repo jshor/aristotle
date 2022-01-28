@@ -2,7 +2,7 @@
   <div class="documents">
     <div class="documents__debug-info">
         <pre>{{ JSON.stringify(ports, null, 2) }}</pre>
-        <!-- <pre>{{ JSON.stringify(elements, null, 2) }}</pre> -->
+        <!-- <pre>{{ JSON.stringify(items, null, 2) }}</pre> -->
     </div>
     <div class="documents__container" @contextmenu="contextMenu($event)" @mousewheel="mousewheel" @mousedown.right="startPanning">
       <div :style="style" ref="canvas" class="documents__grid">
@@ -30,11 +30,11 @@
           :group-id="connection.groupId"
           :is-selected="connection.isSelected"
           :z-index="connection.zIndex"
-          @click="$e => selectItem($e, connection.id)"
+          @select="$e => selectItem($e, connection.id)"
         />
 
         <item
-          v-for="item in elements"
+          v-for="item in items"
           :id="item.id"
           :key="item.id"
           :ports="item.ports"
@@ -49,7 +49,7 @@
         />
 
         <bounding-box
-          v-for="item in elements"
+          v-for="item in items"
           :key="item.id"
           :x="item.boundingBox?.left"
           :y="item.boundingBox?.top"
@@ -68,7 +68,7 @@
         <button @click="rotate(1)">Rotate 90&deg; CW</button><br />
         <button @click="group">Group</button>
         <button @click="ungroup">Ungroup</button>
-        <button @click="addNewElement">Add element</button>
+        <button @click="addNewItem">Add item</button>
       </div>
     </div>
   </div>
@@ -78,7 +78,6 @@
 import { mapActions, mapGetters } from 'vuex'
 import { defineComponent } from 'vue'
 import Draggable from './Draggable.vue'
-import Port from './Port.vue'
 import Wire from './Wire.vue'
 import Group from './Group.vue'
 import Item from './Item.vue'
@@ -90,7 +89,6 @@ export default defineComponent({
   name: 'Document',
   components: {
     Draggable,
-    Port,
     Wire,
     Group,
     Item,
@@ -106,7 +104,7 @@ export default defineComponent({
       'snapBoundaries'
     ]),
     ...mapGetters([
-      'elements',
+      'items',
       'zoom',
       'connections',
       'ports'
@@ -237,7 +235,7 @@ export default defineComponent({
       })
     },
 
-    selectItem ({ $event, id }: { $event: MouseEvent, id: string }) {
+    selectItem ($event: MouseEvent, id: string) {
       if (!$event.shiftKey) {
         this.deselectAll()
       }
@@ -245,14 +243,14 @@ export default defineComponent({
       this.toggleSelectionState({ id })
     },
 
-    addNewElement () {
+    addNewItem () {
       const rand = () => `id_${(Math.floor(Math.random() * 100) + 5)}` // TODO: use uuid
 
       const outputPortId = rand()
       const inputPortId = rand()
-      const element = {
+      const item = {
         id: rand(),
-        type: 'Element',
+        type: 'Item',
         portIds: [outputPortId, inputPortId],
         position: { x: 400, y: 400 },
         rotation: 0,
@@ -287,11 +285,11 @@ export default defineComponent({
         createPort(inputPortId, 2, 1)
       ]
 
-      this.addElement({ element, ports })
+      this.addItem({ item, ports })
     },
 
     ...mapActions([
-      'addElement',
+      'addItem',
       'connect',
       'disconnect',
       'selectAll',

@@ -37,6 +37,7 @@ import PortHandle from '../components/PortHandle.vue'
 import PortPivot from '../components/PortPivot.vue'
 
 export default defineComponent({
+  name: 'PortItem',
   components: {
     Draggable,
     PortHandle,
@@ -123,7 +124,7 @@ export default defineComponent({
       'createFreeport',
       'connectFreeport',
       'setConnectablePortIds',
-      'moveElementPosition',
+      'moveItemPosition',
       'rotateFreeport',
       'connect',
       'disconnect'
@@ -186,7 +187,7 @@ export default defineComponent({
         else return 1
       })()
 
-      this.moveElementPosition({ id: this.newFreeport.itemId, delta })
+      this.moveItemPosition({ id: this.newFreeport.itemId, delta })
       this.rotateFreeport({ id: this.newFreeport.itemId, rotation })
       this.dragPosition = position
     },
