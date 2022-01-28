@@ -13,7 +13,7 @@
     :bounding-box="boundingBox"
     :force-dragging="forceDragging"
     @drag-start="setSnapBoundaries(id)"
-    @drag="delta => moveElementPosition({ id, delta })"
+    @drag="delta => moveItemPosition({ id, delta })"
     @mousedown="mousedown"
     @contextmenu="contextmenu"
   >
@@ -24,7 +24,7 @@
       :key="orientation"
       :class="`item__ports--${orientation}`"
       class="item__ports">
-      <Port
+      <port-item
         v-for="port in ports"
         :id="port.id"
         :ref="port.id"
@@ -42,12 +42,12 @@
 </template>
 
 <script lang="ts">
+/// <reference path="../types/index.d.ts" />
 import ResizeObserver from 'resize-observer-polyfill'
 import { mapActions, mapGetters } from 'vuex'
 import { defineComponent, PropType } from 'vue'
 import LogicGate from '../components/LogicGate.vue'
-import Port from './Port.vue'
-import IPoint from '../interfaces/IPoint'
+import PortItem from './PortItem.vue'
 import Draggable from './Draggable.vue'
 import { mapState } from 'vuex'
 
@@ -55,12 +55,12 @@ export default defineComponent({
   name: 'Item',
   components: {
     LogicGate,
-    Port,
+    PortItem,
     Draggable
   },
   props: {
     position: {
-      type: Object as PropType<IPoint>,
+      type: Object as PropType<Point>,
       default: () => ({
         x: 0,
         y: 0
@@ -129,54 +129,53 @@ export default defineComponent({
     ]),
     portList () {
       const locations = ['left', 'top', 'right', 'bottom']
+      const ports = this.ports as Port[]
 
-      return this
-        .ports
-        .reduce((map: any, port: any) => {
-          return {
-            ...map,
-            [locations[port.orientation]]: [
-              ...map[locations[port.orientation]],
-              port
-            ]
-          }
-        }, locations.reduce((m, type) => ({
-          ...m, [type]: []
-        }), {}))
+      return ports.reduce((map: { [l: string]: Port[] }, port: Port) => {
+        return {
+          ...map,
+          [locations[port.orientation]]: [
+            ...map[locations[port.orientation]],
+            port
+          ]
+        }
+      }, locations.reduce((m, type) => ({
+        ...m, [type]: []
+      }), {}))
     }
   },
   methods: {
     ...mapActions([
       'setSnapBoundaries',
       'updateItemPosition',
-      'setElementSize',
-      'moveElementPosition',
-      'setElementBoundingBox'
+      'setItemSize',
+      'moveItemPosition',
+      'setItemBoundingBox'
     ]),
 
-    onSizeChanged (target) {
-      if (target[0]) {
-        this.setElementSize({ id: this.id, rect: target[0].contentRect })
+    onSizeChanged ([ target ]: ResizeObserverEntry[]) {
+      if (target) {
+        this.setItemSize({ id: this.id, rect: target.contentRect })
       }
     },
 
     mousedown ($event: MouseEvent) {
-      this.$emit('select', { $event, id: this.id })
+      this.$emit('select', $event)
     },
 
     drag ({ delta, boundingBox, offset }) {
-      this.moveElementPosition({ id: this.id, delta, boundingBox, offset })
+      this.moveItemPosition({ id: this.id, delta, boundingBox, offset })
     },
 
     dragEnd ({ delta, offset }) {
-      // this.moveElementPosition({ id: this.id, delta, offset })
-      this.setElementBoundingBox(this.id)
+      // this.moveItemPosition({ id: this.id, delta, offset })
+      this.setItemBoundingBox(this.id)
     },
 
     contextmenu ($event: MouseEvent) {
       if (this.groupId === null) {
         // show a context menu for this item only if it is not part of a group
-        console.log('ELEMENT context menu', this.id)
+        console.log('Item context menu', this.id)
       } else {
         console.log('PARENT GROUP context menu')
       }

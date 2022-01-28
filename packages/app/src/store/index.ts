@@ -1,18 +1,43 @@
-import IPoint from '@/interfaces/IPoint'
-import { createStore } from 'vuex'
+import { ActionTree, createStore, GetterTree, MutationTree } from 'vuex'
 import rotate from '../layout/rotate'
 import sample from './sample'
+import Direction from '@/types/enums/Direction'
+import PortType from '@/types/enums/PortType'
+import BaseItem from '@/types/interfaces/BaseItem'
+import Connection from '@/types/interfaces/Connection'
+import Group from '@/types/interfaces/Group'
+import Item from '@/types/interfaces/Item'
+import Point from '@/types/interfaces/Point'
+import Port from '@/types/interfaces/Port'
+import BoundingBox from '@/types/types/BoundingBox'
 
 const rand = () => `id_${(Math.floor(Math.random() * 100) + 5)}` // TODO: use uuid
 
-const state = {
-  activePort: null,
+export interface DocumentState {
+  snapBoundaries: BoundingBox[]
+  connectablePortIds: string[]
+  ports: {
+    [id: string]: Port
+  }
+  items: {
+    [id: string]: Item
+  }
+  connections: {
+    [id: string]: Connection
+  }
+  groups: {
+    [id: string]: Group
+  }
+  zoomLevel: number
+}
+
+const state: DocumentState = {
   snapBoundaries: [],
   connectablePortIds: [],
   ...sample
 }
 
-const getters = {
+const getters: GetterTree<DocumentState, DocumentState> = {
   zoom (state) {
     return state.zoomLevel
   },
@@ -21,19 +46,16 @@ const getters = {
     return state.ports
   },
 
-  elements (state) {
+  items (state) {
     return Object
-      .keys(state.elements)
-      .map((elementId: string) => ({
-        ...state.elements[elementId],
-        id: elementId,
+      .keys(state.items)
+      .map((itemId: string) => ({
+        ...state.items[itemId],
+        id: itemId,
         ports: state
-          .elements[elementId]
+          .items[itemId]
           .portIds
-          .map((portId: string) => ({
-            id: portId,
-            ...state.ports[portId]
-          }))
+          .map((portId: string) => state.ports[portId])
       }))
   },
 
@@ -42,53 +64,47 @@ const getters = {
 
     return Object
       .values(state.connections)
-      .map((wire: any) => ({
+      .map(wire => ({
         ...wire,
-        source: {
-          id: wire.source,
-          ...ports[wire.source]
-        },
-        target: {
-          id: wire.target,
-          ...ports[wire.target]
-        }
+        source: ports[wire.source],
+        target: ports[wire.target]
       }))
       .filter(({ source, target }) => source && target)
   },
 
   nextZIndex (state) {
-    return Object.keys(state.elements).length + Object.keys(state.connections).length
+    return Object.keys(state.items).length + Object.keys(state.connections).length
   }
 }
 
-const actions = {
+const actions: ActionTree<DocumentState, DocumentState> = {
   setZoom ({ commit }, zoom) {
     commit('SET_ZOOM', zoom)
   },
 
-  addElement ({ commit, dispatch }, { element, ports }: { element: any, ports: any[] }) {
-    commit('ADD_ELEMENT', { element, ports })
-    dispatch('setElementPortPositions', element.id)
+  addItem ({ commit, dispatch }, { item, ports }: { item: Item, ports: Port[] }) {
+    commit('ADD_ELEMENT', { item, ports })
+    dispatch('setItemPortPositions', item.id)
   },
 
-  removeElement ({ commit, state }, id: string) {
-    const element = state.elements[id]
+  removeItem ({ commit, state }, id: string) {
+    const item = state.items[id]
 
-    if (!element) return
+    if (!item) return
 
     // remove all connections first
-    const connections: any[] = Object
+    const connections: Connection[] = Object
       .values(state.connections)
-      .filter((connection: any) => element.portIds.includes(connection.source) || element.portIds.includes(connection.target))
+      .filter(c => item.portIds.includes(c.source) || item.portIds.includes(c.target))
 
-    connections.forEach((connection: any) => {
+    connections.forEach(c => {
       commit('DISCONNECT', {
-        source: connection.source,
-        target: connection.target
+        source: c.source,
+        target: c.target
       })
     })
 
-    if (element.type === 'Freeport' && connections.length === 2) {
+    if (item.type === 'Freeport' && connections.length === 2) {
       // if this is a freeport, then reconnect the two disconnected wires
       commit('CONNECT', {
         source: connections[0].source,
@@ -96,22 +112,21 @@ const actions = {
       })
     }
 
-    // remove the element
+    // remove the item
     commit('REMOVE_ELEMENT', id)
   },
 
   setSnapBoundaries ({ commit, state }, id: string) {
-    const snapBoundaries = (() => {
-      const element = state.elements[id]
+    const snapBoundaries = ((): BoundingBox[] => {
+      const item = state.items[id]
 
-      if (element && element.groupId === null) {
-        // the item with the given id is an element that does not belong to a group
-        if (element.type === 'Freeport') {
-          console.log('it is an freeport', id, element.portIds.length)
-          if (element.portIds.length > 1) {
+      if (item && !item.groupId) {
+        // the item with the given id is an item that does not belong to a group
+        if (item.type === 'Freeport') {
+          if (item.portIds.length > 1) {
             // if only one port exists on the freeport, then it is a port being dragged by the user and does not apply
             // find all connectable ports and set their boundaries
-            const createPortSnapBoundaries = port => ([
+            const createPortSnapBoundaries = (port: Port): BoundingBox[] => ([
               {
                 left: port.position.x,
                 right: port.position.x,
@@ -129,42 +144,40 @@ const actions = {
             // freeports should snap to "straighten out" wires
             return Object
               .values(state.connections)
-              .reduce((ports: any[], connection: any) => {
-                if (element.portIds.includes(connection.source)) {
-                  return ports.concat(createPortSnapBoundaries(state.ports[connection.target]))
+              .reduce((boundingBoxes: BoundingBox[], connection: Connection) => {
+                if (item.portIds.includes(connection.source)) {
+                  return boundingBoxes.concat(createPortSnapBoundaries(state.ports[connection.target]))
                 }
 
-                if (element.portIds.includes(connection.target)) {
-                  return ports.concat(createPortSnapBoundaries(state.ports[connection.source]))
+                if (item.portIds.includes(connection.target)) {
+                  return boundingBoxes.concat(createPortSnapBoundaries(state.ports[connection.source]))
                 }
 
-                return ports
+                return boundingBoxes
               }, [])
           }
         } else {
-          // this an element that can snap to align with the outer edge of any non-freeport element
+          // this an item that can snap to align with the outer edge of any non-freeport item
           return Object
-            .values(state.elements)
-            .filter((e: any) => e.id !== id && e.type !== 'Freeport')
-            .map((e: any) => e.boundingBox)
+            .values(state.items)
+            .filter(e => e.id !== id && e.type !== 'Freeport')
+            .map(e => e.boundingBox)
         }
       }
       return []
     })()
 
-    console.log('SNAP TO: ', snapBoundaries)
-
     commit('SET_SNAP_BOUNDARIES', snapBoundaries)
   },
 
-  setElementSize ({ commit, dispatch, state }, { rect, id }: { rect: DOMRectReadOnly, id: string }) {
-    const element = state.elements[id]
+  setItemSize ({ commit, dispatch, state }, { rect, id }: { rect: DOMRectReadOnly, id: string }) {
+    const item = state.items[id]
 
-    if (!element) return
+    if (!item) return
 
     // reposition w.r.t. the centroid
-    const centerX = element.position.x + (element.width / 2)
-    const centerY = element.position.y + (element.height / 2)
+    const centerX = item.position.x + (item.width / 2)
+    const centerY = item.position.y + (item.height / 2)
     const newX = centerX - (rect.width / 2)
     const newY = centerY - (rect.height / 2)
 
@@ -177,101 +190,101 @@ const actions = {
     })
     commit('SET_ELEMENT_SIZE', { rect, id })
 
-    dispatch('setElementBoundingBox', id)
-    dispatch('setElementPortPositions', id)
+    dispatch('setItemBoundingBox', id)
+    dispatch('setItemPortPositions', id)
 
-    if (state.elements[id].groupId) {
-      dispatch('setGroupBoundingBox', state.elements[id].groupId)
+    if (state.items[id].groupId) {
+      dispatch('setGroupBoundingBox', state.items[id].groupId)
     }
   },
 
-  setElementPortPositions ({ commit, state }, id: string) {
-    const element = state.elements[id]
+  setItemPortPositions ({ commit, state }, id: string) {
+    const item = state.items[id]
 
-    if (!element) return
+    if (!item) return
 
-    const { left, top, bottom, right } = element.boundingBox
-    const portGroups = element
+    const { left, top, bottom, right } = item.boundingBox
+    const portGroups = item
       .portIds
-      .reduce((portGroups, portId) => {
+      .reduce((portGroups: Map<Direction, Port[]>, portId) => {
         const port = state.ports[portId]
 
         if (port) {
-          const index = rotate(port.orientation + element.rotation)
+          const index: Direction = rotate(port.orientation + item.rotation)
 
-          portGroups[index].push({ ...port, portId })
+          portGroups.get(index)?.push(port)
         }
 
         return portGroups
-      }, {
-        0: [],
-        1: [],
-        2: [],
-        3: []
-      })
+      }, new Map<Direction, Port[]>([
+        [Direction.Left, []],
+        [Direction.Top, []],
+        [Direction.Right, []],
+        [Direction.Bottom, []]
+      ]))
 
-    const setPortGroupPositions = (ports) => {
+    const setPortGroupPositions = (ports: Port[] = []) => {
       ports.forEach(port => {
-        const spacing = (port.orientation + element.rotation) % 2 === 0
+        const spacing = (port.orientation + item.rotation) % 2 === 0
           ? Math.floor((bottom - top) / (ports.length + 1))
           : Math.floor((right - left) / (ports.length + 1))
         const position = (() => {
-          switch (rotate(port.orientation + element.rotation)) {
-            case 0:
+          switch (rotate(port.orientation + item.rotation)) {
+            case Direction.Left:
               return { x: left, y: top + spacing }
-            case 1:
+            case Direction.Top:
               return { x: left + spacing, y: top }
-            case 2:
+            case Direction.Right:
               return { x: right, y: top + spacing }
-            case 3:
+            case Direction.Bottom:
               return { x: left + spacing, y: bottom }
           }
         })()
 
         commit('SET_PORT_POSITION', {
-          id: port.portId,
+          id: port.id,
           position
         })
       })
     }
 
-    setPortGroupPositions(portGroups[0])
-    setPortGroupPositions(portGroups[1])
-    setPortGroupPositions(portGroups[2])
-    setPortGroupPositions(portGroups[3])
+    setPortGroupPositions(portGroups.get(Direction.Left))
+    setPortGroupPositions(portGroups.get(Direction.Top))
+    setPortGroupPositions(portGroups.get(Direction.Right))
+    setPortGroupPositions(portGroups.get(Direction.Bottom))
   },
 
-  moveElementPosition ({ commit, dispatch, state }, { id, delta, isMovedByGroup = false }: { id: string, delta: IPoint, isMovedByGroup: boolean }) {
-    const element = state.elements[id]
+  moveItemPosition ({ commit, dispatch, state }, { id, delta, isMovedByGroup = false }: { id: string, delta: Point, isMovedByGroup: boolean }) {
+    const item = state.items[id]
 
-    if (!element) return
+    if (!item) return
 
-    if (element.groupId && !isMovedByGroup) {
-      // if the element is part of a group, move the entire group instead
-      return dispatch('moveGroupPosition', { id: element.groupId, delta })
+    if (item.groupId && !isMovedByGroup) {
+      // if the item is part of a group, move the entire group instead
+      return dispatch('moveGroupPosition', { id: item.groupId, delta })
     }
 
     commit('SET_ELEMENT_POSITION', {
       id,
       position: {
-        x: element.position.x + delta.x,
-        y: element.position.y + delta.y
+        x: item.position.x + delta.x,
+        y: item.position.y + delta.y
       }
     })
 
     commit('SET_ELEMENT_BOUNDING_BOX', {
       id,
       boundingBox: {
-        left: element.boundingBox.left + delta.x,
-        top: element.boundingBox.top + delta.y,
-        bottom: element.boundingBox.bottom + delta.y,
-        right: element.boundingBox.right + delta.x
+        left: item.boundingBox.left + delta.x,
+        top: item.boundingBox.top + delta.y,
+        bottom: item.boundingBox.bottom + delta.y,
+        right: item.boundingBox.right + delta.x
       }
     })
 
-    element
+    item
       .portIds
-      .forEach((portId) => {
+      .forEach(portId => {
         const port = state.ports[portId]
 
         if (!port) return
@@ -300,45 +313,45 @@ const actions = {
     })
 
     group
-      .elementIds
-      .forEach(elementId => {
-        const element = state.elements[elementId]
+      .itemIds
+      .forEach(itemId => {
+        const item = state.items[itemId]
 
-        dispatch('moveElementPosition', {
-          id: element.id,
+        dispatch('moveItemPosition', {
+          id: item.id,
           isMovedByGroup: true,
           delta
         })
       })
   },
 
-  setElementBoundingBox ({ commit, state }, id: string) {
-    const element = state.elements[id]
+  setItemBoundingBox ({ commit, state }, id: string) {
+    const item = state.items[id]
 
-    if (!element) return
-    if (element.rotation % 2 === 0) {
-      // element is right side up or upside down
+    if (!item) return
+    if (item.rotation % 2 === 0) {
+      // item is right side up or upside down
       commit('SET_ELEMENT_BOUNDING_BOX', {
         id,
         boundingBox: {
-          left: element.position.x,
-          top: element.position.y,
-          bottom: element.height + element.position.y,
-          right: element.width + element.position.x
+          left: item.position.x,
+          top: item.position.y,
+          bottom: item.height + item.position.y,
+          right: item.width + item.position.x
         }
       })
     } else {
-      // element is rotated at a 90 degree angle (CW or CCW)
-      const midX = element.position.x + (element.width / 2)
-      const midY = element.position.y + (element.height / 2)
+      // item is rotated at a 90 degree angle (CW or CCW)
+      const midX = item.position.x + (item.width / 2)
+      const midY = item.position.y + (item.height / 2)
 
       commit('SET_ELEMENT_BOUNDING_BOX', {
         id,
         boundingBox: {
-          left: midX - (element.height / 2),
-          top: midY - (element.width / 2),
-          right: midX + (element.height / 2),
-          bottom: midY + (element.width / 2)
+          left: midX - (item.height / 2),
+          top: midY - (item.width / 2),
+          right: midX + (item.height / 2),
+          bottom: midY + (item.width / 2)
         }
       })
     }
@@ -347,8 +360,8 @@ const actions = {
   setGroupBoundingBox ({ commit, state }, id: string) {
     if (!id) return
     const group = state.groups[id]
-    const rect = group.elementIds.reduce((rect, id) => {
-      const { boundingBox } = state.elements[id]
+    const rect = group.itemIds.reduce((rect, id) => {
+      const { boundingBox } = state.items[id]
 
       return {
         left: Math.min(rect.left, boundingBox.left),
@@ -368,14 +381,14 @@ const actions = {
 
   group ({ commit, dispatch, state }) {
     const id = rand()
-    const elementIds = Object
-      .keys(state.elements)
-      .filter(id => state.elements[id].isSelected)
+    const itemIds = Object
+      .keys(state.items)
+      .filter(id => state.items[id].isSelected)
     const connectionIds = Object
       .keys(state.connections)
       .filter(id => state.connections[id].isSelected)
 
-    commit('GROUP_ITEMS', { id, elementIds, connectionIds, isSelected: true })
+    commit('GROUP_ITEMS', { id, itemIds, connectionIds, isSelected: true })
     dispatch('setGroupBoundingBox', id)
   },
 
@@ -387,18 +400,18 @@ const actions = {
     }
   },
 
-  createSelection ({ commit, dispatch, state }, selection) {
-    const scaled = {
+  createSelection ({ commit, dispatch, state }, selection: BoundingBox) {
+    const scaled: BoundingBox = {
       left: selection.left / state.zoomLevel,
       top: selection.top / state.zoomLevel,
       bottom: selection.bottom / state.zoomLevel,
       right: selection.right / state.zoomLevel
     }
 
-    const elementIds = Object
-      .keys(state.elements)
+    const itemIds = Object
+      .keys(state.items)
       .filter(id => {
-        const { boundingBox } = state.elements[id]
+        const { boundingBox } = state.items[id]
 
         if (scaled.left >= boundingBox.right || boundingBox.left >= scaled.right) {
           // one rect is on left side of other
@@ -413,16 +426,16 @@ const actions = {
         return true
       })
 
-    elementIds.forEach(id => {
+    itemIds.forEach(id => {
       commit('SET_SELECTION_STATE', { id, isSelected: true })
     })
 
-    dispatch('selectConnections', elementIds)
+    dispatch('selectConnections', itemIds)
   },
 
-  selectConnections ({ commit, state }, elementIds: string[]) {
-    const portIds = elementIds.reduce((portIds: string[], elementId: string) => {
-      return portIds.concat(state.elements[elementId].portIds)
+  selectConnections ({ commit, state }, itemIds: string[]) {
+    const portIds = itemIds.reduce((portIds: string[], itemId: string) => {
+      return portIds.concat(state.items[itemId].portIds)
     }, [])
 
     for (let id in state.connections) {
@@ -443,16 +456,16 @@ const actions = {
   },
 
   toggleSelectionState ({ commit, state }, { id, forcedValue = null }: { id: string, forcedValue: boolean | null }) {
-    const item = state.elements[id] || state.connections[id] || state.groups[id]
+    const item = state.items[id] || state.connections[id] || state.groups[id]
     const isSelected = forcedValue === null
       ? !item.isSelected
       : forcedValue
 
-    if (item.groupId !== null) {
+    if (item.groupId) {
       // if item is part of a group, select all items in that group
-      const { elementIds, connectionIds } = state.groups[item.groupId]
+      const { itemIds, connectionIds } = state.groups[item.groupId]
 
-      elementIds
+      itemIds
         .concat(connectionIds)
         .forEach(id => {
           commit('SET_SELECTION_STATE', { id, isSelected })
@@ -466,8 +479,9 @@ const actions = {
   },
 
   createFreeport ({ commit, dispatch }, data) {
+    dispatch('deselectAll')
     commit('CREATE_FREEPORT_ELEMENT', data)
-    dispatch('setElementBoundingBox', data.itemId)
+    dispatch('setItemBoundingBox', data.itemId)
 
     if (data.sourceId && data.targetId) {
       commit('DISCONNECT', {
@@ -500,26 +514,26 @@ const actions = {
 
     const connectedPortIds = Object
       .values(state.connections)
-      .reduce((portIds: any[], connection: any) => {
+      .reduce((portIds: string[], connection: Connection) => {
         if (state.ports[portId].isFreeport) {
           return portIds
         }
         return portIds.concat([connection.source, connection.target])
       }, [])
 
-    connectedPortIds.splice(-2) // remove the last two elements (the currently-dragged connection)
+    connectedPortIds.splice(-2) // remove the last two items (the currently-dragged connection)
 
-    const filter = port.type === 0
-      ? (p: any) => p.type === 1 && !p.isFreeport && !connectedPortIds.includes(p.id)
-      : (p: any) => p.type === 0 && !p.isFreeport && !connectedPortIds.includes(port.id)
+    const filter = port.type === PortType.Output
+      ? (p: Port) => p.type === PortType.Input && !p.isFreeport && !connectedPortIds.includes(p.id)
+      : (p: Port) => p.type === PortType.Output && !p.isFreeport && !connectedPortIds.includes(port.id)
 
     const portIds: string[] = []
-    const snapBoundaries: any[] = []
+    const snapBoundaries: BoundingBox[] = []
 
     Object
       .values(state.ports)
       .filter(filter)
-      .forEach(({ id, position }: any) => {
+      .forEach(({ id, position }: Port) => {
         snapBoundaries.push({
           left: position.x,
           top: position.y,
@@ -539,9 +553,9 @@ const actions = {
 
   connectFreeport ({ commit, dispatch, state }, { sourceId, targetId, portId }: { sourceId?: string, targetId?: string, portId: string }) {
     const port = state.ports[portId]
-    const newPort: any = Object
+    const newPort = Object
       .values(state.ports)
-      .find((p: any) => {
+      .find((p: Port) => {
         const distX = Math.pow(p.position.x - port.position.x, 2)
         const distY = Math.pow(p.position.y - port.position.y, 2)
 
@@ -549,24 +563,24 @@ const actions = {
       })
 
     if (newPort) {
-      const payload: any = {}
-
       if (sourceId) {
-        payload.source = sourceId
-        payload.target = newPort.id
+        commit('CONNECT', {
+          source: sourceId,
+          target: newPort.id
+        })
       } else {
-        payload.source = newPort.id
-        payload.target = targetId
+        commit('CONNECT', {
+          source: newPort.id,
+          target: targetId
+        })
       }
-
-      commit('CONNECT', payload)
     }
 
-    const element: any = Object
-      .values(state.elements)
-      .find(({ portIds }: any) => portIds.includes(portId))
+    const item = Object
+      .values(state.items)
+      .find(({ portIds }) => portIds.includes(portId))
 
-    dispatch('removeElement', element.id)
+    dispatch('removeItem', item?.id)
     commit('SET_CONNECTABLE_PORT_IDS', [])
   },
 
@@ -581,96 +595,101 @@ const actions = {
         const mx = group.boundingBox.left + (w / 2)
         const my = group.boundingBox.top + (h / 2)
 
-        group.elementIds.forEach(elementId => {
-          const element = state.elements[elementId]
-          const cx = element.position.x
-          const cy = element.position.y
-          const ax = cx + (element.width / 2)
-          const ay = cy + (element.height / 2)
+        group.itemIds.forEach(itemId => {
+          const item = state.items[itemId]
+          const cx = item.position.x
+          const cy = item.position.y
+          const ax = cx + (item.width / 2)
+          const ay = cy + (item.height / 2)
           const L = Math.sqrt(Math.pow((mx - ax), 2) + Math.pow((my - ay), 2))
           const currentAngleRad = Math.atan2((ay - my), (ax - mx))
           const newAngle = (90 * direction * (Math.PI / 180)) + currentAngleRad
           const newAx = (L * Math.cos(newAngle)) + mx
           const newAy = (L * Math.sin(newAngle)) + my
 
-          const x = newAx - (element.width / 2)
-          const y = newAy - (element.height / 2)
+          const x = newAx - (item.width / 2)
+          const y = newAy - (item.height / 2)
 
           const delta = {
-            x: x - element.position.x,
-            y: y - element.position.y
+            x: x - item.position.x,
+            y: y - item.position.y
           }
 
           commit('ROTATE_ELEMENT', {
-            id: elementId,
-            rotation: rotate(element.rotation + direction)
+            id: itemId,
+            rotation: rotate(item.rotation + direction)
           })
-          dispatch('moveElementPosition', { id: elementId, delta, isMovedByGroup: true })
-          dispatch('setElementBoundingBox', elementId)
-          dispatch('setElementPortPositions', elementId)
+          dispatch('moveItemPosition', { id: itemId, delta, isMovedByGroup: true })
+          dispatch('setItemBoundingBox', itemId)
+          dispatch('setItemPortPositions', itemId)
         })
 
         dispatch('setGroupBoundingBox', id)
       }
     }
 
-    for (const id in state.elements) {
-      const element = state.elements[id]
+    for (const id in state.items) {
+      const item = state.items[id]
 
-      if (element.isSelected && element.groupId === null) {
+      if (item.isSelected && !item.groupId) {
         // rotate all selected, non-grouped items
         commit('ROTATE_ELEMENT', {
           id,
-          rotation: rotate(element.rotation + direction)
+          rotation: rotate(item.rotation + direction)
         })
-        dispatch('setElementBoundingBox', id)
-        dispatch('setElementPortPositions', id)
+        dispatch('setItemBoundingBox', id)
+        dispatch('setItemPortPositions', id)
       }
     }
   },
 
-  connect ({ commit, getters }, { source, target }) {
+  connect ({ commit, getters }, { source, target }: { source: string, target: string }) {
     commit('CONNECT', { source, target, zIndex: getters.nextZIndex })
   },
 
-  disconnect ({ commit }, { source, target }) {
+  disconnect ({ commit }, { source, target }: { source: string, target: string }) {
     commit('DISCONNECT', { source, target })
   },
 
-  selectItems ({ commit }, ids: string[]) {
+  selectBaseItems ({ commit }, ids: string[]) {
     commit('GROUP_ITEMS', ids)
   },
 
-  changeSelectionZIndex ({ commit, state }, fn: (i: any) => number) {
-    state
-      .selection
-      .elements
-      .concat(state.selection.connections)
+  changeSelectionZIndex ({ commit, state }, fn: (i: BaseItem) => number) {
+    const items: BaseItem[] = Object
+      .values(state.items)
+      .filter(({ isSelected }) => isSelected)
+    const connections: BaseItem[] = Object
+      .values(state.items)
+      .filter(({ isSelected }) => isSelected)
+
+    items
+      .concat(connections)
       .forEach(item => {
         commit('SET_Z_INDEX', { item, zIndex: fn(item) })
       })
   },
 
   sendBackward ({ dispatch }) {
-    dispatch('changeSelectionZIndex', (i: any) => i.zIndex - 1)
+    dispatch('changeSelectionZIndex', (i: BaseItem) => i.zIndex - 1)
   },
 
   bringForward ({ dispatch }) {
-    dispatch('changeSelectionZIndex', (i: any) => i.zIndex + 1)
+    dispatch('changeSelectionZIndex', (i: BaseItem) => i.zIndex + 1)
   },
 
   sendToBack ({ dispatch, getters }) {
-    dispatch('changeSelectionZIndex', (i: any) => getters.zIndex)
+    dispatch('changeSelectionZIndex', (i: BaseItem) => getters.zIndex)
   },
 
   bringToFront ({ dispatch }) {
-    dispatch('changeSelectionZIndex', (i: any) => 0)
+    dispatch('changeSelectionZIndex', (i: BaseItem) => 0)
   }
 }
 
-const mutations = {
-  'ADD_ELEMENT' (state, { element, ports }: { element: any, ports: any[] }) {
-    state.elements[element.id] = element
+const mutations: MutationTree<DocumentState> = {
+  'ADD_ELEMENT' (state, { item, ports }: { item: Item, ports: Port[] }) {
+    state.items[item.id] = item
 
     ports.forEach(port => {
       state.ports[port.id] = port
@@ -678,44 +697,44 @@ const mutations = {
   },
 
   'REMOVE_ELEMENT' (state, id: string) {
-    state.elements[id].portIds.forEach(portId => {
+    state.items[id].portIds.forEach(portId => {
       delete state.ports[portId]
     })
-    delete state.elements[id]
+    delete state.items[id]
   },
 
   'SET_ELEMENT_SIZE' (state, { rect, id }: { rect: DOMRectReadOnly, id: string }) {
-    state.elements[id].width = rect.width
-    state.elements[id].height = rect.height
+    state.items[id].width = rect.width
+    state.items[id].height = rect.height
   },
 
-  'SET_SNAP_BOUNDARIES' (state, snapBoundaries) {
+  'SET_SNAP_BOUNDARIES' (state, snapBoundaries: BoundingBox[]) {
     state.snapBoundaries = snapBoundaries
   },
 
-  'SET_PORT_POSITION' (state, { id, position }) {
+  'SET_PORT_POSITION' (state, { id, position }: { id: string, position: Point }) {
     state.ports[id].position = position
   },
 
-  'SET_ELEMENT_POSITION' (state, { id, position }) {
-    state.elements[id].position = position
+  'SET_ELEMENT_POSITION' (state, { id, position }: { id: string, position: Point }) {
+    state.items[id].position = position
   },
 
-  'SET_ELEMENT_BOUNDING_BOX' (state, { boundingBox, id }: { boundingBox: any, id: string }) {
-    state.elements[id].boundingBox = boundingBox
+  'SET_ELEMENT_BOUNDING_BOX' (state, { boundingBox, id }: { boundingBox: BoundingBox, id: string }) {
+    state.items[id].boundingBox = boundingBox
   },
 
-  'SET_GROUP_BOUNDING_BOX' (state, { boundingBox, id }: { boundingBox: any, id: string }) {
+  'SET_GROUP_BOUNDING_BOX' (state, { boundingBox, id }: { boundingBox: BoundingBox, id: string }) {
     state.groups[id].boundingBox = boundingBox
   },
 
-  'SET_ALL_SELECTION_STATES' (state, isSelected) {
+  'SET_ALL_SELECTION_STATES' (state, isSelected: boolean) {
     for (let id in state.connections) {
       state.connections[id].isSelected = isSelected
     }
 
-    for (let id in state.elements) {
-      state.elements[id].isSelected = isSelected
+    for (let id in state.items) {
+      state.items[id].isSelected = isSelected
     }
 
     for (let id in state.groups) {
@@ -724,8 +743,8 @@ const mutations = {
   },
 
   'SET_SELECTION_STATE' (state, { id, isSelected }: { id: string, isSelected: boolean }) {
-    if (state.elements[id]) {
-      state.elements[id].isSelected = isSelected
+    if (state.items[id]) {
+      state.items[id].isSelected = isSelected
     } else if (state.connections[id]) {
       state.connections[id].isSelected = isSelected
     } else if (state.groups[id]) {
@@ -733,28 +752,29 @@ const mutations = {
     }
   },
 
-  'SET_Z_INDEX' (state, { item, zIndex }) {
+  'SET_Z_INDEX' (state, { item, zIndex }: { item: BaseItem, zIndex: number }) {
+    const items: BaseItem[] = Object.values(state.items)
+    const connections: BaseItem[] = Object.values(state.connections)
     let index = 0
 
-    Object
-      .values(state.connections)
-      .concat(state.connections)
-      .sort((a: any, b: any) => {
-        // sort all connections and elements by their zIndexes
+    items
+      .concat(connections)
+      .sort((a, b) => {
+        // sort all connections and items by their zIndexes
         if (a.zIndex > b.zIndex) return -1
         else if (a.zIndex < b.zIndex) return 1
         return 0
       })
-      .forEach((i: any) => {
-        const type = i.type ? 'elements' : 'connections'
+      .forEach(i => {
+        const type = i.hasOwnProperty('type') ? 'items' : 'connections'
 
         index++
 
         if (item.id === i.id) {
-          state[type][i.id] = zIndex
+          state[type][i.id].zIndex = zIndex
           index++
         } else {
-          state[type][i.id] = index
+          state[type][i.id].zIndex = index
         }
       })
   },
@@ -775,6 +795,8 @@ const mutations = {
         id,
         source,
         target,
+        trueTargetId: target,
+        groupId: null,
         zIndex,
         isSelected: false
       }
@@ -782,11 +804,9 @@ const mutations = {
   },
 
   'DISCONNECT' (state, { source, target }) {
-    const connection: any = Object
+    const connection = Object
       .values(state.connections)
-      .find((c: any) => {
-        return c.source === source && c.target === target
-      })
+      .find(c => c.source === source && c.target === target)
 
     if (connection) {
       delete state.connections[connection.id]
@@ -796,9 +816,9 @@ const mutations = {
   'GROUP_ITEMS' (state, group) {
     state.groups[group.id] = group
 
-    // set the groupId of all elements in the group
-    group.elementIds.forEach(id => {
-      state.elements[id].groupId = group.id
+    // set the groupId of all items in the group
+    group.itemIds.forEach(id => {
+      state.items[id].groupId = group.id
     })
 
     // set the groupId of all connections in the group
@@ -810,10 +830,10 @@ const mutations = {
   'UNGROUP' (state, groupId: string) {
     const group = state.groups[groupId]
 
-    // remove the groupId of all elements in the group and select them
-    group.elementIds.forEach(id => {
-      state.elements[id].groupId = null
-      state.elements[id].isSelected = true
+    // remove the groupId of all items in the group and select them
+    group.itemIds.forEach(id => {
+      state.items[id].groupId = null
+      state.items[id].isSelected = true
     })
 
     // remove the groupId of all connections in the group and select them
@@ -825,8 +845,12 @@ const mutations = {
     delete state.groups[groupId]
   },
 
-  'CREATE_FREEPORT_ELEMENT' (state, { itemId, inputPortId, outputPortId, position }: { itemId: string, position: any, outputPortId?: string, inputPortId?: string }) {
-    const createPort = (id, type, orientation) => ({
+  'CREATE_FREEPORT_ELEMENT' (
+    state,
+    { itemId, inputPortId, outputPortId, position }:
+    { itemId: string, position: Point, outputPortId?: string, inputPortId?: string }
+  ) {
+    const createPort = (id: string, type: PortType, orientation: Direction) => ({
       id,
       type,
       orientation,
@@ -849,12 +873,18 @@ const mutations = {
       portIds.push(outputPortId)
     }
 
-    state.elements[itemId] = {
+    state.items[itemId] = {
       id: itemId,
       type: 'Freeport',
       portIds,
       position,
       rotation: 0,
+      boundingBox: {
+        left: position.x,
+        top: position.y,
+        right: position.x,
+        bottom: position.y
+      },
       isSelected: true,
       groupId: null,
       zIndex: 3,
@@ -864,10 +894,10 @@ const mutations = {
   },
 
   'ROTATE_ELEMENT' (state, { id, rotation }) {
-    state.elements[id].rotation = rotation
+    state.items[id].rotation = rotation
 
     state
-      .elements[id]
+      .items[id]
       .portIds
       .forEach(portId => {
         state.ports[portId].rotation = rotation

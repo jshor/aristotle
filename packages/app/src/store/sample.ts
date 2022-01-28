@@ -90,12 +90,18 @@ export default {
     }
   },
   groups: {},
-  elements: {
+  items: {
     abc: {
       id: 'abc',
       type: 'Element',
       portIds: ['a', 'b'],
       position: { x: 300, y: 300 },
+      boundingBox: {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
+      },
       rotation: 0,
       isSelected: false,
       properties: {
@@ -111,6 +117,12 @@ export default {
       type: 'Element',
       portIds: ['d'],
       position: { x: 900, y: 900 },
+      boundingBox: {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
+      },
       rotation: 0,
       isSelected: false,
       properties: {
@@ -126,6 +138,12 @@ export default {
       type: 'Element',
       portIds: ['c'],
       position: { x: 650, y: 650 },
+      boundingBox: {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
+      },
       rotation: 1,
       isSelected: false,
       properties: {
@@ -141,6 +159,12 @@ export default {
       type: 'Freeport',
       portIds: ['fp1', 'fp2'],
       position: { x: 500, y: 500 },
+      boundingBox: {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
+      },
       rotation: 0,
       isSelected: false,
       groupId: null,
