@@ -1,12 +1,19 @@
 <template>
-  <div class="selector" @mousedown.left.self="mousedown">
-    <div v-if="selection" ref="selection" class="selector__selection" :style="style" />
+  <div
+    @mousedown.left.self="mousedown"
+    class="selector"
+  >
+    <div
+      v-if="selection"
+      :style="style"
+      ref="selection"
+      class="selector__selection"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import IPoint from '../interfaces/IPoint'
 
 export default defineComponent({
   name: 'Selector',
@@ -22,11 +29,11 @@ export default defineComponent({
       start: {
         x: 0,
         y: 0
-      } as IPoint,
+      } as Point,
       end: {
         x: 0,
         y: 0
-      } as IPoint,
+      } as Point
     }
   },
   computed: {

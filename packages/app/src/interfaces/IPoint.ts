@@ -1,7 +1,7 @@
 /**
  * Represents a point in 2D Cartesian space (x, y).
  */
-export default interface IPoint {
+export default interface Point {
   /**
    * X-axis coordinate.
    *

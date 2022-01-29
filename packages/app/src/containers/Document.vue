@@ -20,7 +20,7 @@
         :z-index="group.zIndex"
       />
 
-      <wire
+      <connection
         v-for="connection in connections"
         :id="connection.id"
         :key="connection.id"
@@ -46,15 +46,6 @@
         :is-selected="item.isSelected"
         @select="$e => selectItem($e, item.id)"
       />
-
-      <bounding-box
-        v-for="item in items"
-        :key="item.id"
-        :x="item.boundingBox?.left"
-        :y="item.boundingBox?.top"
-        :width="item.boundingBox?.right - item.boundingBox?.left"
-        :height="item.boundingBox?.bottom - item.boundingBox?.top"
-      />
     </editor>
 
     <div class="documents__toolbar">
@@ -72,18 +63,16 @@
 <script lang="ts">
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { defineComponent } from 'vue'
-import BoundingBox from '../components/BoundingBox.vue'
 import Editor from '../components/Editor.vue'
-import Wire from './Wire.vue'
+import Connection from './Connection.vue'
 import Group from './Group.vue'
 import Item from './Item.vue'
 
 export default defineComponent({
   name: 'Document',
   components: {
-    BoundingBox,
     Editor,
-    Wire,
+    Connection,
     Group,
     Item
   },

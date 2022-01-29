@@ -31,7 +31,6 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import IPoint from '../interfaces/IPoint'
 import Draggable from '../components/Draggable.vue'
 import PortHandle from '../components/PortHandle.vue'
 import PortPivot from '../components/PortPivot.vue'
@@ -61,7 +60,7 @@ export default defineComponent({
      * Position of the port on the canvas.
      */
     position: {
-      type: Object as PropType<IPoint>,
+      type: Object as PropType<Point>,
       default: () => ({
         x: 0,
         y: 0
