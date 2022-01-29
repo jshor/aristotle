@@ -135,7 +135,6 @@ export default defineComponent({
   methods: {
     ...mapActions([
       'createFreeport',
-      'moveItemPosition',
       'setSnapBoundaries'
     ]),
 

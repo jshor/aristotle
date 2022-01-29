@@ -11,7 +11,7 @@
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
-  name: 'Draggable',
+  name: 'DraggablePort',
   props: {
     position: {
       type: Object as PropType<Point>,
@@ -23,10 +23,6 @@ export default defineComponent({
     zoom: {
       type: Number,
       default: 1
-    },
-    snapMode: {
-      type: String,
-      default: 'outer'
     },
     snapBoundaries: {
       type: Array,
@@ -44,10 +40,6 @@ export default defineComponent({
     isDraggable: {
       type: Boolean,
       default: true
-    },
-    forceDragging: {
-      type: Boolean,
-      default: false
     }
   },
   data () {
@@ -74,45 +66,15 @@ export default defineComponent({
         right: 0,
         bottom: 0
       } as BoundingBox,
-      isDragging: false,
-      isRadialSnap: false
-    }
-  },
-  watch: {
-    position: {
-      handler (position: Point) {
-        this.realPositionFromStore = position
-
-        if (!this.isDragging) {
-          this.truePosition = position
-        }
-      },
-      immediate: true
-    },
-    boundingBox: {
-      handler () {
-        if (!this.isDragging) {
-          this.apparentPosition = this.truePosition
-        }
-      }
-    },
-    forceDragging: {
-      handler (forceDragging: boolean) {
-        if (forceDragging) {
-          const { top, left } = this.$el.getBoundingClientRect()
-
-          this.initDragging(left, top)
-        }
-      }
+      isDragging: false
     }
   },
   computed: {
     style () {
       return {
         position: 'absolute',
-        pointerEvents: 'none',
-        left: `${this.apparentPosition.x || this.truePosition.x}px`,
-        top: `${this.apparentPosition.y || this.truePosition.y}px`
+        left: `${this.position.x}px`,
+        top: `${this.position.y}px`
       }
     }
   },
@@ -171,75 +133,19 @@ export default defineComponent({
       }
       const box = this.box
       const boundaries = this.snapBoundaries as BoundingBox[]
-      const offset: Point = {
-        x: 0,
-        y: 0
-      }
-      let snapPosition: Point | null = null
-
-      boundaries.forEach((xob: BoundingBox) => {
-        if (this.snapMode === 'radius') {
-          const isWithin = Math.sqrt(Math.pow(xob.left - box.left, 2) + Math.pow(xob.top - box.top, 2)) <= d
-
-          if (isWithin) {
-            offset.x = xob.left - box.left
-            offset.y = xob.top - box.top
-
-            snapPosition = {
-              x: xob.left,
-              y: xob.top
-            }
-            return
-          }
-        }
-
-        const ts = Math.abs(xob.top - box.bottom) <= d
-        const bs = Math.abs(xob.bottom - box.top) <= d
-        const ls = Math.abs(xob.left - box.right) <= d
-        const rs = Math.abs(xob.right - box.left) <= d
-
-        if (
-          (box.left <= xob.right && box.left >= xob.left) ||
-          (box.right >= xob.left && box.right <= xob.right) ||
-          (box.left <= xob.left && box.right >= xob.right)
-        ) {
-          // box is within the y-axis boundaries
-          if (ts) offset.y = xob.top - box.bottom
-          if (bs) offset.y = xob.bottom - box.top
-        }
-
-        if (
-          (box.top <= xob.bottom && box.top >= xob.top) ||
-          (box.bottom >= xob.top && box.bottom <= xob.bottom) ||
-          (box.top <= xob.top && box.bottom >= xob.bottom)
-        ) {
-          // box is within the x-axis boundaries
-          if (ls) offset.x = xob.left - box.right
-          if (rs) offset.x = xob.right - box.left
-        }
+      const position = boundaries.find((xob: BoundingBox) => {
+        return Math.sqrt(Math.pow(xob.left - box.left, 2) + Math.pow(xob.top - box.top, 2)) <= d
       })
 
       this.mousePosition = {
         x: $event.clientX,
         y: $event.clientY
       }
-      this.apparentPosition = {
-        x: this.truePosition.x + delta.x + offset.x,
-        y: this.truePosition.y + delta.y + offset.y,
-      }
-      this.truePosition = {
-        x: this.truePosition.x + delta.x,
-        y: this.truePosition.y + delta.y
-      }
 
-      if (snapPosition) {
-        this.$emit('drag', snapPosition)
-      } else {
-        this.$emit('drag', {
-          x: this.apparentPosition.x,
-          y: this.apparentPosition.y
-        })
-      }
+      this.$emit('drag', {
+        x: this.position.x + position.left,
+        y: this.position.y + position.top
+      })
     },
 
     mouseup ($event: MouseEvent) {

@@ -35,7 +35,7 @@ export default defineComponent({
       default: 1
     },
     gridSize: {
-      type: Boolean,
+      type: Number,
       default: 0
     }
   },
