@@ -17,7 +17,7 @@
     @mousedown="mousedown"
     @contextmenu="contextmenu"
   >
-    <div class="item__freeport" v-if="type === 'Freeport'" />
+    <freeport v-if="type === 'Freeport'" />
     <logic-gate v-else />
     <div
       v-for="(ports, orientation) in portList"
@@ -31,10 +31,10 @@
         :key="port.id"
         :type="port.type"
         :is-freeport="port.isFreeport"
-        :siblings="portList"
         :position="port.position"
         :orientation="port.orientation + rotation"
         :rotation="rotation"
+        :snap-boundaries="snapBoundaries"
         :show-helper="port.showHelper"
       />
     </div>
@@ -46,17 +46,21 @@
 import ResizeObserver from 'resize-observer-polyfill'
 import { mapActions, mapGetters } from 'vuex'
 import { defineComponent, PropType } from 'vue'
+import Draggable from '../components/Draggable.vue'
 import LogicGate from '../components/LogicGate.vue'
+import ItemShell from '../components/ItemShell.vue'
+import Freeport from '../components/Freeport.vue'
 import PortItem from './PortItem.vue'
-import Draggable from './Draggable.vue'
 import { mapState } from 'vuex'
 
 export default defineComponent({
   name: 'Item',
   components: {
+    Draggable,
     LogicGate,
-    PortItem,
-    Draggable
+    Freeport,
+    ItemShell,
+    PortItem
   },
   props: {
     position: {
@@ -132,6 +136,10 @@ export default defineComponent({
       const ports = this.ports as Port[]
 
       return ports.reduce((map: { [l: string]: Port[] }, port: Port) => {
+        if (!port) {
+          console.log('UNDEFINED')
+          return map
+        }
         return {
           ...map,
           [locations[port.orientation]]: [
@@ -145,6 +153,9 @@ export default defineComponent({
     }
   },
   methods: {
+    filterByOrientation (orientation: number): Port[] {
+      return (this.ports as Port[]).filter(p => p.orientation === orientation)
+    },
     ...mapActions([
       'setSnapBoundaries',
       'updateItemPosition',
@@ -167,8 +178,7 @@ export default defineComponent({
       this.moveItemPosition({ id: this.id, delta, boundingBox, offset })
     },
 
-    dragEnd ({ delta, offset }) {
-      // this.moveItemPosition({ id: this.id, delta, offset })
+    dragEnd () {
       this.setItemBoundingBox(this.id)
     },
 
@@ -188,19 +198,9 @@ export default defineComponent({
 
 <style lang="scss">
 .item {
-  box-sizing: border-box;
-  position: absolute;
-
-  &__freeport {
-    width: 1px;
-    height: 1px;
-    background: blue;
-  }
-
   &__ports {
     position: relative;
     display: flex;
-    align-items: center;
     position: absolute;
 
     &--left, &--right {
@@ -209,15 +209,13 @@ export default defineComponent({
       bottom: 0;
       right: 0;
       width: 50%;
-    }
-
-    &--left {
-      justify-content: flex-start;
+      flex-direction: column;
+      justify-content: space-around;
     }
 
     &--right {
       left: 50%;
-      justify-content: flex-end;
+      align-items: flex-end;
     }
 
     &--bottom, &--top {
@@ -228,6 +226,8 @@ export default defineComponent({
       right: 0;
       height: 50%;
       justify-content: center;
+      align-items: center;
+      justify-content: space-around;
     }
 
     &--bottom {
@@ -239,10 +239,6 @@ export default defineComponent({
       bottom: 50%;
       align-items: flex-start;
     }
-  }
-
-  &--selected {
-    opacity: 0.5;
   }
 }
 </style>

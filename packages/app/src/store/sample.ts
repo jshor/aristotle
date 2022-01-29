@@ -22,6 +22,17 @@ export default {
   },
   zoomLevel: 1,
   ports: {
+    eeee: {
+      id: 'eeee',
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: 0,
+      rotation: 0,
+      orientation: 0,
+      isFreeport: false
+    },
     a: {
       id: 'a',
       position: {
@@ -94,7 +105,7 @@ export default {
     abc: {
       id: 'abc',
       type: 'Element',
-      portIds: ['a', 'b'],
+      portIds: ['a', 'eeee', 'b'],
       position: { x: 300, y: 300 },
       boundingBox: {
         left: 0,
