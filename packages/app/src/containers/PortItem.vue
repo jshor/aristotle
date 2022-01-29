@@ -2,28 +2,26 @@
   <port-pivot :rotation="rotation">
     <draggable
       v-if="!isFreeport"
-      :position="{ x: 0, y: 0 }"
       :snap-boundaries="snapBoundaries"
+      :zoom="zoom"
       :bounding-box="{
         left: position.x,
         top: position.y,
         right: position.x,
         bottom: position.y
       }"
+      :key="isDragging"
       snap-mode="radius"
       @drag-start="dragStart"
-      @drag="onDrag"
-      @dragEnd="dragEnd"
+      @drag-end="dragEnd"
     >
       <port-handle
-        data-id="inner-handle"
         :type="type"
         :active="connectablePortIds.includes(id)"
       />
     </draggable>
     <port-handle
       v-else
-        data-id="outer-handle"
       :type="type"
       :active="connectablePortIds.includes(id)"
     />
@@ -99,16 +97,7 @@ export default defineComponent({
   },
   data () {
     return {
-      /**
-       * The relative dragged position of the dragged port.
-       */
-      dragPosition: {
-        x: 0,
-        y: 0
-      } as IPoint,
-
       newFreeport: {} as any,
-
       isDragging: false
     }
   },
@@ -123,13 +112,9 @@ export default defineComponent({
   },
   methods: {
     ...mapActions([
-      'createFreeport',
       'connectFreeport',
-      'setConnectablePortIds',
-      'moveItemPosition',
-      'rotateFreeport',
-      'connect',
-      'disconnect'
+      'createFreeport',
+      'setConnectablePortIds'
     ]),
 
     /**
@@ -154,42 +139,9 @@ export default defineComponent({
         this.newFreeport.sourceId = this.id
         this.newFreeport.portType = 1
       }
-      this.dragPosition = {
-        x: 0,
-        y: 0
-      }
 
       this.createFreeport(this.newFreeport)
       this.setConnectablePortIds(this.id)
-    },
-
-    /**
-     * Updates the store position with the absolute position of the port.
-     */
-    onDrag (position: IPoint) {
-      if (!this.isDragging) return
-
-      const delta: IPoint = {
-        x: position.x - this.dragPosition.x,
-        y: position.y - this.dragPosition.y
-      }
-
-      let rotation = (() => {
-        if (this.orientation > 1) {
-          if (position.x < 0) return 0
-          return 2
-        }
-
-        if (position.x < 0) return 0
-        if (position.y < 0) return 2
-        if (position.x >= 0) return 2
-        if (position.y >= 0) return 3
-        else return 1
-      })()
-
-      this.moveItemPosition({ id: this.newFreeport.itemId, delta })
-      this.rotateFreeport({ id: this.newFreeport.itemId, rotation })
-      this.dragPosition = position
     },
 
     /**
@@ -200,11 +152,7 @@ export default defineComponent({
       if (!this.isDragging) return
 
       this.isDragging = false
-      this.dragPosition = {
-        x: 0,
-        y: 0
-      }
-      return
+
       if (this.type === 0) {
         this.connectFreeport({
           portId: this.newFreeport.outputPortId,

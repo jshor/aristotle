@@ -276,24 +276,19 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     setPortGroupPositions(portGroups.get(Direction.Bottom))
   },
 
-  moveItemPosition ({ commit, dispatch, state }, { id, delta, isMovedByGroup = false }: { id: string, delta: Point, isMovedByGroup: boolean }) {
+  setItemPosition ({ commit, dispatch, state }, { id, position, isMovedByGroup }: { id: string, position: Point, isMovedByGroup?: boolean }) {
     const item = state.items[id]
-
-    if (!item) return
+    const delta = {
+      x: position.x - item.position.x,
+      y: position.y - item.position.y
+    }
 
     if (item.groupId && !isMovedByGroup) {
       // if the item is part of a group, move the entire group instead
       return dispatch('moveGroupPosition', { id: item.groupId, delta })
     }
 
-    commit('SET_ELEMENT_POSITION', {
-      id,
-      position: {
-        x: item.position.x + delta.x,
-        y: item.position.y + delta.y
-      }
-    })
-
+    commit('SET_ELEMENT_POSITION', { id, position })
     commit('SET_ELEMENT_BOUNDING_BOX', {
       id,
       boundingBox: {
@@ -321,7 +316,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       })
   },
 
-  moveGroupPosition ({ commit, dispatch, state }, { id, delta }) {
+  moveGroupPosition ({ commit, dispatch, state }, { id, delta }: { id: string, delta: Point }) {
     const group = state.groups[id]
 
     commit('SET_GROUP_BOUNDING_BOX', {
@@ -339,10 +334,13 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       .forEach(itemId => {
         const item = state.items[itemId]
 
-        dispatch('moveItemPosition', {
+        dispatch('setItemPosition', {
           id: item.id,
           isMovedByGroup: true,
-          delta
+          position: {
+            x: item.position.x + delta.x,
+            y: item.position.y + delta.y
+          }
         })
       })
   },
@@ -500,7 +498,13 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
   },
 
-  createFreeport ({ commit, dispatch }, data) {
+  createFreeport ({ commit, dispatch }, data: {
+    itemId: string,
+    outputPortId: string,
+    inputPortId: string,
+    sourceId?: string,
+    targetId?: string
+  }) {
     dispatch('deselectAll')
     commit('CREATE_FREEPORT_ELEMENT', data)
     dispatch('setItemBoundingBox', data.itemId)
@@ -555,10 +559,6 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       .map(({ id }) => id))
   },
 
-  rotateFreeport ({ commit }, { id, rotation }: { id: string, rotation: number }) {
-    commit('ROTATE_ELEMENT', { id, rotation })
-  },
-
   connectFreeport ({ commit, dispatch, state }, { sourceId, targetId, portId }: { sourceId?: string, targetId?: string, portId: string }) {
     const port = state.ports[portId]
     const newPort = Object
@@ -588,6 +588,8 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       .values(state.items)
       .find(({ portIds }) => portIds.includes(portId))
 
+    console.log('REMOVE? ', item)
+
     dispatch('removeItem', item?.id)
     commit('SET_CONNECTABLE_PORT_IDS', [])
   },
@@ -614,20 +616,16 @@ const actions: ActionTree<DocumentState, DocumentState> = {
           const newAngle = (90 * direction * (Math.PI / 180)) + currentAngleRad
           const newAx = (L * Math.cos(newAngle)) + mx
           const newAy = (L * Math.sin(newAngle)) + my
-
-          const x = newAx - (item.width / 2)
-          const y = newAy - (item.height / 2)
-
-          const delta = {
-            x: x - item.position.x,
-            y: y - item.position.y
+          const position = {
+            x: newAx - (item.width / 2),
+            y: newAy - (item.height / 2)
           }
 
           commit('ROTATE_ELEMENT', {
             id: itemId,
             rotation: rotate(item.rotation + direction)
           })
-          dispatch('moveItemPosition', { id: itemId, delta, isMovedByGroup: true })
+          dispatch('setItemPosition', { id: itemId, position, isMovedByGroup: true })
           dispatch('setItemBoundingBox', itemId)
           dispatch('setItemPortPositions', itemId)
         })
@@ -657,10 +655,6 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
   disconnect ({ commit }, { source, target }: { source: string, target: string }) {
     commit('DISCONNECT', { source, target })
-  },
-
-  selectBaseItems ({ commit }, ids: string[]) {
-    commit('GROUP_ITEMS', ids)
   },
 
   changeSelectionZIndex ({ commit, state }, fn: (i: BaseItem) => number) {

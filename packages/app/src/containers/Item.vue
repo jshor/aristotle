@@ -9,11 +9,12 @@
     :class="{
       'item--selected': isSelected
     }"
+    :snap-mode="type === 'Freeport' ? 'radius' : 'outer'"
     :snap-boundaries="snapBoundaries"
     :bounding-box="boundingBox"
     :force-dragging="forceDragging"
     @drag-start="setSnapBoundaries(id)"
-    @drag="delta => moveItemPosition({ id, delta })"
+    @drag="position => setItemPosition({ id, position })"
     @mousedown="mousedown"
     @contextmenu="contextmenu"
   >
@@ -158,10 +159,8 @@ export default defineComponent({
     },
     ...mapActions([
       'setSnapBoundaries',
-      'updateItemPosition',
       'setItemSize',
-      'moveItemPosition',
-      'setItemBoundingBox'
+      'setItemPosition'
     ]),
 
     onSizeChanged ([ target ]: ResizeObserverEntry[]) {
@@ -172,14 +171,6 @@ export default defineComponent({
 
     mousedown ($event: MouseEvent) {
       this.$emit('select', $event)
-    },
-
-    drag ({ delta, boundingBox, offset }) {
-      this.moveItemPosition({ id: this.id, delta, boundingBox, offset })
-    },
-
-    dragEnd () {
-      this.setItemBoundingBox(this.id)
     },
 
     contextmenu ($event: MouseEvent) {
