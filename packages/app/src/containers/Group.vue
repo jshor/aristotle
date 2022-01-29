@@ -23,7 +23,7 @@
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex'
 import { defineComponent } from 'vue'
-import Draggable from './Draggable.vue'
+import Draggable from '../components/Draggable.vue'
 import Item from './Item.vue'
 
 export default defineComponent({

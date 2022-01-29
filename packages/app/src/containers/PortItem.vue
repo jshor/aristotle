@@ -14,14 +14,16 @@
       @drag-start="dragStart"
       @drag="onDrag"
       @dragEnd="dragEnd"
-      class="port">
+    >
       <port-handle
+        data-id="inner-handle"
         :type="type"
         :active="connectablePortIds.includes(id)"
       />
     </draggable>
     <port-handle
       v-else
+        data-id="outer-handle"
       :type="type"
       :active="connectablePortIds.includes(id)"
     />
@@ -32,7 +34,7 @@
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import IPoint from '../interfaces/IPoint'
-import Draggable from './Draggable.vue'
+import Draggable from '../components/Draggable.vue'
 import PortHandle from '../components/PortHandle.vue'
 import PortPivot from '../components/PortPivot.vue'
 
@@ -135,8 +137,6 @@ export default defineComponent({
      */
     dragStart () {
       this.isDragging = true
-      // $event.preventDefault()
-      // $event.stopPropagation()
 
       const rand = () => `id_${(Math.floor(Math.random() * 1000000) + 5)}` // TODO: use uuid
 
@@ -204,7 +204,7 @@ export default defineComponent({
         x: 0,
         y: 0
       }
-
+      return
       if (this.type === 0) {
         this.connectFreeport({
           portId: this.newFreeport.outputPortId,

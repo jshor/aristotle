@@ -3,8 +3,8 @@
     class="port-handle"
     :class="{
       'port-handle--active': active,
-      'port-handle--input': type === 0,
-      'port-handle--output': type === 1
+      'port-handle--output': type === 0,
+      'port-handle--input': type === 1
     }"
     @mousedown="mousedown"
     @mouseup="mouseup"
@@ -62,6 +62,7 @@ export default defineComponent({
   background-color: red;
   border-radius: 50%;
   cursor: move;
+  pointer-events: all;
   transition: all 0.25s;
   z-index: 1001;
 

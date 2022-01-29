@@ -120,6 +120,22 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     const snapBoundaries = ((): BoundingBox[] => {
       const item = state.items[id]
 
+      if (state.connectablePortIds.length) {
+        // if there are connectable port ids, then use those for boundaries
+        return state
+          .connectablePortIds
+          .map(id => {
+            const port = state.ports[id]
+
+            return {
+              left: port.position.x,
+              top: port.position.y,
+              right: port.position.x,
+              bottom: port.position.y
+            } as BoundingBox
+          })
+      }
+
       if (item && !item.groupId) {
         // the item with the given id is an item that does not belong to a group
         if (item.type === 'Freeport') {
@@ -224,20 +240,26 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       ]))
 
     const setPortGroupPositions = (ports: Port[] = []) => {
-      ports.forEach(port => {
+      ports.forEach((port, index) => {
+        // ports use CSS "space around" flex property for positions
+        // compute the spacing of each port based on the element width/height
+        // there are n spacings for n ports
         const spacing = (port.orientation + item.rotation) % 2 === 0
-          ? Math.floor((bottom - top) / (ports.length + 1))
-          : Math.floor((right - left) / (ports.length + 1))
+          ? Math.floor((bottom - top) / ports.length)
+          : Math.floor((right - left) / ports.length)
+        // compute the distance (from left-to-right or top-to-bottom)
+        // the distance will be the center of the computed spacing
+        const distance = (spacing * (index + 1)) - (spacing / 2)
         const position = (() => {
           switch (rotate(port.orientation + item.rotation)) {
             case Direction.Left:
-              return { x: left, y: top + spacing }
+              return { x: left, y: top + distance }
             case Direction.Top:
-              return { x: left + spacing, y: top }
+              return { x: right - distance, y: top }
             case Direction.Right:
-              return { x: right, y: top + spacing }
+              return { x: right, y: bottom - distance }
             case Direction.Bottom:
-              return { x: left + spacing, y: bottom }
+              return { x: left + distance, y: bottom }
           }
         })()
 
@@ -521,30 +543,16 @@ const actions: ActionTree<DocumentState, DocumentState> = {
         return portIds.concat([connection.source, connection.target])
       }, [])
 
-    connectedPortIds.splice(-2) // remove the last two items (the currently-dragged connection)
+    connectedPortIds.splice(-2) // remove the last two ports (the two ports on opposite ends of the currently-dragged connection)
 
     const filter = port.type === PortType.Output
       ? (p: Port) => p.type === PortType.Input && !p.isFreeport && !connectedPortIds.includes(p.id)
       : (p: Port) => p.type === PortType.Output && !p.isFreeport && !connectedPortIds.includes(port.id)
 
-    const portIds: string[] = []
-    const snapBoundaries: BoundingBox[] = []
-
-    Object
+    commit('SET_CONNECTABLE_PORT_IDS', Object
       .values(state.ports)
       .filter(filter)
-      .forEach(({ id, position }: Port) => {
-        snapBoundaries.push({
-          left: position.x,
-          top: position.y,
-          right: position.x,
-          bottom: position.y
-        })
-        portIds.push(id)
-      })
-
-    commit('SET_CONNECTABLE_PORT_IDS', portIds)
-    commit('SET_SNAP_BOUNDARIES', snapBoundaries)
+      .map(({ id }) => id))
   },
 
   rotateFreeport ({ commit }, { id, rotation }: { id: string, rotation: number }) {

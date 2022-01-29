@@ -9,13 +9,12 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import IPoint from '../interfaces/IPoint'
 
 export default defineComponent({
   name: 'Draggable',
   props: {
     position: {
-      type: Object as PropType<IPoint>,
+      type: Object as PropType<Point>,
       default: () => ({
         x: 0,
         y: 0
@@ -34,7 +33,7 @@ export default defineComponent({
       default: () => []
     },
     boundingBox: {
-      type: Object,
+      type: Object as PropType<BoundingBox>,
       default: () => ({
         left: 0,
         top: 0,
@@ -56,31 +55,31 @@ export default defineComponent({
       mousePosition: {
         x: 0,
         y: 0
-      } as IPoint,
+      } as Point,
       apparentPosition: {
         x: 0,
         y: 0
-      } as IPoint,
+      } as Point,
       truePosition: {
         x: 0,
         y: 0
-      } as IPoint,
+      } as Point,
       realPositionFromStore: {
         x: 0,
         y: 0
-      } as IPoint,
+      } as Point,
       box: {
         left: 0,
         top: 0,
         right: 0,
         bottom: 0
-      },
+      } as BoundingBox,
       isDragging: false
     }
   },
   watch: {
     position: {
-      handler (position) {
+      handler (position: Point) {
         this.realPositionFromStore = position
 
         if (!this.isDragging) {
@@ -97,7 +96,7 @@ export default defineComponent({
       }
     },
     forceDragging: {
-      handler (forceDragging) {
+      handler (forceDragging: boolean) {
         if (forceDragging) {
           const { top, left } = this.$el.getBoundingClientRect()
 
@@ -109,6 +108,8 @@ export default defineComponent({
   computed: {
     style () {
       return {
+        position: 'absolute',
+        pointerEvents: 'none',
         left: `${this.apparentPosition.x || this.truePosition.x}px`,
         top: `${this.apparentPosition.y || this.truePosition.y}px`
       }
@@ -168,50 +169,49 @@ export default defineComponent({
         bottom: this.box.bottom + delta.y
       }
       const box = this.box
-      const offset = {
+      const boundaries = this.snapBoundaries as BoundingBox[]
+      const offset: Point = {
         x: 0,
         y: 0
       }
 
-      this
-        .snapBoundaries
-        .forEach((xob: any) => {
-          if (this.snapMode === 'radius') {
-            const isWithin = Math.sqrt(Math.pow(xob.left - box.left, 2) + Math.pow(xob.top - box.top, 2)) <= d
+      boundaries.forEach((xob: BoundingBox) => {
+        if (this.snapMode === 'radius') {
+          const isWithin = Math.sqrt(Math.pow(xob.left - box.left, 2) + Math.pow(xob.top - box.top, 2)) <= d
 
-            if (isWithin) {
-              offset.x = xob.left - box.left
-              offset.y = xob.top - box.top
+          if (isWithin) {
+            offset.x = xob.left - box.left
+            offset.y = xob.top - box.top
 
-              return
-            }
+            return
           }
+        }
 
-          const ts = Math.abs(xob.top - box.bottom) <= d
-          const bs = Math.abs(xob.bottom - box.top) <= d
-          const ls = Math.abs(xob.left - box.right) <= d
-          const rs = Math.abs(xob.right - box.left) <= d
+        const ts = Math.abs(xob.top - box.bottom) <= d
+        const bs = Math.abs(xob.bottom - box.top) <= d
+        const ls = Math.abs(xob.left - box.right) <= d
+        const rs = Math.abs(xob.right - box.left) <= d
 
-          if (
-            (box.left <= xob.right && box.left >= xob.left) ||
-            (box.right >= xob.left && box.right <= xob.right) ||
-            (box.left <= xob.left && box.right >= xob.right)
-          ) {
-            // box is within the y-axis boundaries
-            if (ts) offset.y = xob.top - box.bottom
-            if (bs) offset.y = xob.bottom - box.top
-          }
+        if (
+          (box.left <= xob.right && box.left >= xob.left) ||
+          (box.right >= xob.left && box.right <= xob.right) ||
+          (box.left <= xob.left && box.right >= xob.right)
+        ) {
+          // box is within the y-axis boundaries
+          if (ts) offset.y = xob.top - box.bottom
+          if (bs) offset.y = xob.bottom - box.top
+        }
 
-          if (
-            (box.top <= xob.bottom && box.top >= xob.top) ||
-            (box.bottom >= xob.top && box.bottom <= xob.bottom) ||
-            (box.top <= xob.top && box.bottom >= xob.bottom)
-          ) {
-            // box is within the x-axis boundaries
-            if (ls) offset.x = xob.left - box.right
-            if (rs) offset.x = xob.right - box.left
-          }
-        })
+        if (
+          (box.top <= xob.bottom && box.top >= xob.top) ||
+          (box.bottom >= xob.top && box.bottom <= xob.bottom) ||
+          (box.top <= xob.top && box.bottom >= xob.bottom)
+        ) {
+          // box is within the x-axis boundaries
+          if (ls) offset.x = xob.left - box.right
+          if (rs) offset.x = xob.right - box.left
+        }
+      })
 
       this.mousePosition = {
         x: $event.clientX,
