@@ -1,4 +1,3 @@
-import IPoint from '@/interfaces/IPoint'
 import IWireGeometry from '@/interfaces/IWireGeometry'
 import rotate from './rotate'
 
@@ -10,7 +9,7 @@ const WIRE_PADDING = 15
  * @param source
  * @param target
  */
-export default function renderLayout (source, target): IWireGeometry {
+export default function renderLayout (source: Port, target: Port): IWireGeometry {
   const a = source.position
   const b = target.position
   const { start, end } = getEndpoints(a, b)
@@ -26,7 +25,7 @@ export default function renderLayout (source, target): IWireGeometry {
 }
 
 
-export function computeStraightLine (a: IPoint, b: IPoint) {
+export function computeStraightLine (a: Point, b: Point) {
   return {
     path: `M ${a.x},${a.y} L ${b.x},${b.y}`,
     width: Math.abs(a.x - b.x) + WIRE_PADDING,
@@ -43,7 +42,7 @@ export function computeStraightLine (a: IPoint, b: IPoint) {
  * @param {number} direction
  * @returns {number}
  */
-export function inflectDirection (direction: number, a: IPoint, b: IPoint) {
+export function inflectDirection (direction: number, a: Point, b: Point) {
   switch (direction) {
     case 0:
       return a.y > b.y ? 2 : 0
@@ -62,11 +61,11 @@ export function inflectDirection (direction: number, a: IPoint, b: IPoint) {
  * Returns the wire direction for a given port.
  *
  * @param {IPort} port
- * @param {IPoint} a - the source point
- * @param {IPoint} b - the target point
+ * @param {Point} a - the source point
+ * @param {Point} b - the target point
  * @returns {number}
  */
-export function getPortDirection (port, a: IPoint, b: IPoint) {
+export function getPortDirection (port, a: Point, b: Point) {
   // the true direction needs to take into account inherent orientation + its rotation
   // bezier index directions are one integer off (see computeBezier()) -- subtract by 1
   let direction = rotate(port.orientation + port.rotation - 1)
@@ -88,11 +87,11 @@ export function getPortDirection (port, a: IPoint, b: IPoint) {
  * This prevents translations or rotations from "swapping" the start and end points.
  *
  * @param {IPort} port
- * @param {IPoint} a - the source point
- * @param {IPoint} b - the target point
- * @returns {object<{ start: IPoint, end: IPoint }>}
+ * @param {Point} a - the source point
+ * @param {Point} b - the target point
+ * @returns {object<{ start: Point, end: Point }>}
  */
-export function getEndpoints (a: IPoint, b: IPoint): { start: IPoint, end: IPoint } {
+export function getEndpoints (a: Point, b: Point): { start: Point, end: Point } {
   if (a.x <= b.x) {
     if (a.y <= b.y) {
       // top left (a) to bottom right (b)
@@ -152,10 +151,10 @@ export function getEndpoints (a: IPoint, b: IPoint): { start: IPoint, end: IPoin
  *
  * @param {number} sourceDirection - the direction that the source is pointing to
  * @param {number} targetDirection - the direction that the target is pointing from
- * @param {IPoint} start - the source port position
- * @param {IPoint} end - the target port position
+ * @param {Point} start - the source port position
+ * @param {Point} end - the target port position
  */
-export function computeBezier (sourceDirection: number, targetDirection: number, start: IPoint, end: IPoint): IWireGeometry {
+export function computeBezier (sourceDirection: number, targetDirection: number, start: Point, end: Point): IWireGeometry {
   const x1 = start.x
   const y1 = start.y
   const x4 = end.x

@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts">
+/// <reference path="./types/index.d.ts" />
 import { defineComponent } from 'vue'
 import Document from './containers/Document.vue'
 

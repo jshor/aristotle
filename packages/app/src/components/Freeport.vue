@@ -3,9 +3,11 @@
 </template>
 
 <script type="ts">
-export default {
+import { defineComponent } from 'vue'
+
+export default defineComponent({
   name: 'Freeport'
-}
+})
 </script>
 
 <style lang="scss">

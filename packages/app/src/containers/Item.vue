@@ -20,37 +20,37 @@
   >
     <freeport v-if="type === 'Freeport'" />
     <logic-gate v-else />
-    <div
-      v-for="(ports, orientation) in portList"
-      :key="orientation"
-      :class="`item__ports--${orientation}`"
-      class="item__ports">
-      <port-item
-        v-for="port in ports"
-        :id="port.id"
-        :ref="port.id"
-        :key="port.id"
-        :type="port.type"
-        :is-freeport="port.isFreeport"
-        :position="port.position"
-        :orientation="port.orientation + rotation"
-        :rotation="rotation"
-        :snap-boundaries="snapBoundaries"
-        :show-helper="port.showHelper"
-      />
-    </div>
+    <port-set>
+      <template
+        v-for="(ports, orientation) in portList"
+        v-slot:[orientation]
+      >
+        <port-item
+          v-for="port in ports"
+          :id="port.id"
+          :ref="port.id"
+          :key="port.id"
+          :type="port.type"
+          :is-freeport="port.isFreeport"
+          :position="port.position"
+          :orientation="port.orientation + rotation"
+          :rotation="rotation"
+          :snap-boundaries="snapBoundaries"
+          :show-helper="port.showHelper"
+        />
+      </template>
+    </port-set>
   </draggable>
 </template>
 
 <script lang="ts">
-/// <reference path="../types/index.d.ts" />
 import ResizeObserver from 'resize-observer-polyfill'
 import { mapActions, mapGetters } from 'vuex'
 import { defineComponent, PropType } from 'vue'
 import Draggable from '../components/Draggable.vue'
 import LogicGate from '../components/LogicGate.vue'
-import ItemShell from '../components/ItemShell.vue'
 import Freeport from '../components/Freeport.vue'
+import PortSet from '../components/PortSet.vue'
 import PortItem from './PortItem.vue'
 import { mapState } from 'vuex'
 
@@ -60,7 +60,7 @@ export default defineComponent({
     Draggable,
     LogicGate,
     Freeport,
-    ItemShell,
+    PortSet,
     PortItem
   },
   props: {
@@ -186,50 +186,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-.item {
-  &__ports {
-    position: relative;
-    display: flex;
-    position: absolute;
-
-    &--left, &--right {
-      left: 0;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      width: 50%;
-      flex-direction: column;
-      justify-content: space-around;
-    }
-
-    &--right {
-      left: 50%;
-      align-items: flex-end;
-    }
-
-    &--bottom, &--top {
-      flex: 1;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-      height: 50%;
-      justify-content: center;
-      align-items: center;
-      justify-content: space-around;
-    }
-
-    &--bottom {
-      top: 50%;
-      align-items: flex-end;
-    }
-
-    &--top {
-      bottom: 50%;
-      align-items: flex-start;
-    }
-  }
-}
-</style>

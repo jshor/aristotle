@@ -8,43 +8,38 @@
       width: `${boundingBox.right - boundingBox.left}px`,
       height: `${boundingBox.bottom - boundingBox.top}px`
     }"
-    :class="{
-      'group--is-selected': isSelected
-    }"
     :zoom="zoom"
     :bounding-box="boundingBox"
-    class="group"
     @contextmenu="onContextMenu"
     @drag="delta => moveGroupPosition({ id, delta })"
-    @mousedown="mousedown"
-  />
+    @mousedown="$event => $emit('select', { $event, id })"
+  >
+    <group-box :is-selected="isSelected" />
+  </draggable>
 </template>
 
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import Draggable from '../components/Draggable.vue'
+import GroupBox from '../components/GroupBox.vue'
 import Item from './Item.vue'
 
 export default defineComponent({
   name: 'Group',
   components: {
     Draggable,
+    GroupBox,
     Item
   },
   props: {
     boundingBox: {
-      type: Object,
-      default: () => ({
-        left: 0,
-        top: 0,
-        bottom: 0,
-        right: 0
-      })
+      type: Object as PropType<BoundingBox>,
+      required: true
     },
     id: {
       type: String,
-      default: ''
+      required: true
     },
     isSelected: {
       type: Boolean,
@@ -61,10 +56,6 @@ export default defineComponent({
       'moveGroupPosition'
     ]),
 
-    mousedown ($event: MouseEvent) {
-      this.$emit('select', { $event, id: this.id })
-    },
-
     onContextMenu ($event: MouseEvent) {
       console.log('GROUP context menu')
       $event.preventDefault()
@@ -72,20 +63,4 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-.group {
-  border: 2px dashed #808080;
-  box-sizing: border-box;
-  position: absolute;
-  pointer-events: none;
-
-  &--is-selected {
-    display: block;
-    border-color: #000;
-    pointer-events: all;
-    cursor: move;
-  }
-}
-</style>
 
