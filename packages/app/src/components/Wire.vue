@@ -35,6 +35,10 @@
     </defs>
     <path
       class="wire__display"
+      :class="{
+        'wire__display--on': source.value === 1,
+        'wire__display--off': source.value === -1
+      }"
       fill="none"
       stroke="#868686"
       :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
@@ -106,6 +110,15 @@ export default defineComponent({
     animation: animate1 30s infinite linear;
     stroke-linejoin: bevel;
     stroke-linecap: square !important;
+    stroke: darkred;
+
+    &--on {
+      stroke: green;
+    }
+
+    &--off {
+      stroke: gray;
+    }
 
     &--forward {
       animation: animate2 30s infinite linear;
@@ -119,10 +132,10 @@ export default defineComponent({
 
 @keyframes animate1 {
   from {
-    stroke-dashoffset: -1000;
+    stroke-dashoffset: 0;
   }
   to {
-    stroke-dashoffset: 0;
+    stroke-dashoffset: -1000;
   }
 }
 

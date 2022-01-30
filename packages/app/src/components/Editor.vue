@@ -194,8 +194,10 @@ export default defineComponent({
 <style lang="scss">
 .editor {
   overflow: hidden;
-  flex: 1;
   height: 100%;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
 
   &__grid {
     position: relative;

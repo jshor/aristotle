@@ -2,11 +2,11 @@ import CircuitNode from '../base/CircuitNode'
 
 class Connection {
   node: CircuitNode
-  index: number
+  id: string
 
-  constructor (node: CircuitNode, index: number) {
+  constructor (node: CircuitNode, id: string) {
     this.node = node
-    this.index = index
+    this.id = id
   }
 }
 

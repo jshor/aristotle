@@ -8,7 +8,10 @@ class OutputNode extends CircuitNode {
    * @param {LogicValue} value
    */
   public update = (value: number): void => {
-    this.newValue = value
+    if (this.newValue !== value) {
+      this.newValue = value
+      this.invokeEvent('change', value)
+    }
   }
 }
 

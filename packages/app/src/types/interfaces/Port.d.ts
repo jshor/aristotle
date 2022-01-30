@@ -7,6 +7,7 @@ declare global {
     type: PortType
     rotation: number
     orientation: number
+    value: number
     isFreeport: boolean
   }
 }
