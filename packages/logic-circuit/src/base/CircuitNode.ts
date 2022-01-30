@@ -1,6 +1,5 @@
 import Connection from '../types/Connection'
 import LogicValue from '../types/LogicValue'
-import OutputNode from './OutputNode'
 
 class CircuitNode {
   /**
@@ -8,7 +7,7 @@ class CircuitNode {
    *
    * @type {Array<LogicValue>}
    */
-  public inputValues: Array<number> = []
+  public inputValues: { [id: string]: number } = {}
 
   /**
    * List of outgoing connections.
@@ -66,11 +65,14 @@ class CircuitNode {
    * Constructor.
    *
    * @param {String} name - name of the node
-   * @param {Number} [inputCount = 2] - number of inputs the node has
+   * @param {Number} [inputIds = []] - ids for each input port
    */
-  constructor (name: string, inputCount: number = 2) {
+  constructor (name: string, inputIds: string[] = []) {
     this.name = name
-    this.inputValues = new Array(inputCount).fill(LogicValue.UNKNOWN)
+    this.inputValues = inputIds.reduce((map, id) => ({
+      ...map,
+      [id]: LogicValue.UNKNOWN
+    }), {})
   }
 
   /**
@@ -113,8 +115,8 @@ class CircuitNode {
    * @returns {Number}
    */
   protected valueCount = (compare: number): number => {
-    return this
-      .inputValues
+    return Object
+      .values(this.inputValues)
       .filter((value) => value === compare)
       .length
   }
@@ -125,8 +127,8 @@ class CircuitNode {
    * @param {LogicValue} newValue - new value to output to the nodes
    */
   public updateOutputs = (newValue: number): void => {
-    this.outputs.forEach(({ node, index }: Connection) => {
-      node.update(newValue, index)
+    this.outputs.forEach(({ node, id }: Connection) => {
+      node.update(newValue, id)
     })
   }
 
@@ -134,10 +136,10 @@ class CircuitNode {
    * Updates the input value at the given index with the given value.
    *
    * @param {LogicValue} value - new value
-   * @param {Number} index - source index
+   * @param {Number} id - source port id
    */
-  public update = (value: number, index: number): void => {
-    this.inputValues[index] = value
+  public update = (value: number, id: string): void => {
+    this.inputValues[id] = value
     this.newValue = this.eval()
   }
 
@@ -179,7 +181,7 @@ class CircuitNode {
 
   /**
    * Returns the value of the node next time the circuit is evaluated.
-   * 
+   *
    * @returns {Number}
    */
   public getProjectedValue = (): number => {

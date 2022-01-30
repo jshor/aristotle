@@ -4,58 +4,66 @@
       <pre>{{ JSON.stringify(ports, null, 2) }}</pre>
     </div>
 
-    <editor
-      :zoom="zoom"
-      :grid-size="gridSize"
-      @deselect="deselectAll"
-      @selection="createSelection"
-      @zoom="setZoom"
-    >
-      <group
-        v-for="group in groups"
-        :key="group.id"
-        :id="group.id"
-        :bounding-box="group.boundingBox"
-        :is-selected="group.isSelected"
-        :z-index="group.zIndex"
-      />
+    <div class="documents__panel">
+      <div class="documents__toolbar">
+        Grid size: <input type="number" v-model.number="gridSize" /><br />
 
-      <connection
-        v-for="connection in connections"
-        :id="connection.id"
-        :key="connection.id"
-        :target="connection.source"
-        :source="connection.target"
-        :group-id="connection.groupId"
-        :is-selected="connection.isSelected"
-        :z-index="connection.zIndex"
-        @select="$e => selectItem($e, connection.id)"
-      />
+        <button @click="rotate(-1)">Rotate 90&deg; CCW</button>
+        <button @click="rotate(1)">Rotate 90&deg; CW</button><br />
+        <button @click="group">Group</button>
+        <button @click="ungroup">Ungroup</button>
+        <button @click="addNewItem">Add item</button>
+      </div>
 
-      <item
-        v-for="item in items"
-        :id="item.id"
-        :key="item.id"
-        :ports="item.ports"
-        :type="item.type"
-        :position="item.position"
-        :rotation="item.rotation"
-        :group-id="item.groupId"
-        :bounding-box="item.boundingBox"
-        :properties="item.properties"
-        :is-selected="item.isSelected"
-        @select="$e => selectItem($e, item.id)"
-      />
-    </editor>
+      <div class="documents__editor">
+        <editor
+          :zoom="zoom"
+          :grid-size="gridSize"
+          @deselect="deselectAll"
+          @selection="createSelection"
+          @zoom="setZoom"
+        >
+          <group
+            v-for="group in groups"
+            :key="group.id"
+            :id="group.id"
+            :bounding-box="group.boundingBox"
+            :is-selected="group.isSelected"
+            :z-index="group.zIndex"
+          />
 
-    <div class="documents__toolbar">
-      Grid size: <input type="number" v-model.number="gridSize" /><br />
+          <connection
+            v-for="connection in connections"
+            :id="connection.id"
+            :key="connection.id"
+            :source="connection.source"
+            :target="connection.target"
+            :group-id="connection.groupId"
+            :is-selected="connection.isSelected"
+            :z-index="connection.zIndex"
+            @select="$e => selectItem($e, connection.id)"
+          />
 
-      <button @click="rotate(-1)">Rotate 90&deg; CCW</button>
-      <button @click="rotate(1)">Rotate 90&deg; CW</button><br />
-      <button @click="group">Group</button>
-      <button @click="ungroup">Ungroup</button>
-      <button @click="addNewItem">Add item</button>
+          <item
+            v-for="item in items"
+            :id="item.id"
+            :key="item.id"
+            :ports="item.ports"
+            :type="item.type"
+            :position="item.position"
+            :rotation="item.rotation"
+            :group-id="item.groupId"
+            :bounding-box="item.boundingBox"
+            :properties="item.properties"
+            :is-selected="item.isSelected"
+            @select="$e => selectItem($e, item.id)"
+          />
+        </editor>
+      </div>
+
+      <div class="documents__oscilloscope">
+        <oscilloscope :waves="waves" />
+      </div>
     </div>
   </div>
 </template>
@@ -64,6 +72,7 @@
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { defineComponent } from 'vue'
 import Editor from '../components/Editor.vue'
+import Oscilloscope from '../components/Oscilloscope.vue'
 import Connection from './Connection.vue'
 import Group from './Group.vue'
 import Item from './Item.vue'
@@ -72,6 +81,7 @@ export default defineComponent({
   name: 'Document',
   components: {
     Editor,
+    Oscilloscope,
     Connection,
     Group,
     Item
@@ -79,7 +89,8 @@ export default defineComponent({
   computed: {
     ...mapState([
       'groups',
-      'snapBoundaries'
+      'snapBoundaries',
+      'waves'
     ]),
     ...mapGetters([
       'items',
@@ -92,6 +103,11 @@ export default defineComponent({
     return {
       gridSize: 20
     }
+  },
+  mounted () {
+    this.$nextTick(() => {
+      this.buildCircuit()
+    })
   },
   methods: {
     /**
@@ -165,7 +181,8 @@ export default defineComponent({
       'setZoom',
       'createSelection',
       'selectConnection',
-      'rotate'
+      'rotate',
+      'buildCircuit'
     ])
   }
 })
@@ -173,26 +190,41 @@ export default defineComponent({
 
 <style lang="scss">
 .documents {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   display: flex;
 
   &__debug-info {
-    width: 300px;
+    width: 15vw;
     height: 100%;
     overflow-y: scroll;
     background-color: #c0c0c0;
   }
 
+  &__panel {
+    height: 100%;
+    width: 85vw;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__editor {
+    max-width: 100%;
+    width: 100%;
+    background-color: red;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  &__oscilloscope {
+    max-height: 30%;
+    height: 200px;
+    background-color: green;
+  }
+
   &__toolbar {
-    position: absolute;
-    right: 0;
-    top: 0;
-    z-index: 1000;
-    background-color: rgba(0,0,0,0.8);
-    color: #fff;
-    width: 300px;
-    padding: 1em;
+    max-height: 100px;
+    background-color: salmon;
   }
 }
 </style>

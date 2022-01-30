@@ -10,6 +10,8 @@ import Item from '@/types/interfaces/Item'
 import Point from '@/types/interfaces/Point'
 import Port from '@/types/interfaces/Port'
 import BoundingBox from '@/types/types/BoundingBox'
+import { Nor } from '@aristotle/logic-circuit'
+import CircuitService from '@/services/CircuitService'
 
 const rand = () => `id_${(Math.floor(Math.random() * 100) + 5)}` // TODO: use uuid
 
@@ -29,11 +31,15 @@ export interface DocumentState {
     [id: string]: Group
   }
   zoomLevel: number
+  circuit: CircuitService,
+  waves: any
 }
 
 const state: DocumentState = {
   snapBoundaries: [],
   connectablePortIds: [],
+  circuit: new CircuitService([], [], {}),
+  waves: {},
   ...sample
 }
 
@@ -82,12 +88,25 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     commit('SET_ZOOM', zoom)
   },
 
-  addItem ({ commit, dispatch }, { item, ports }: { item: Item, ports: Port[] }) {
-    commit('ADD_ELEMENT', { item, ports })
-    dispatch('setItemPortPositions', item.id)
+  buildCircuit ({ commit, state }) {
+    const circuit = new CircuitService(Object.values(state.items), Object.values(state.connections), state.ports)
+
+    circuit.onChange((valueMap: any, wave: any) => {
+      commit('SET_PORT_VALUES', valueMap)
+      commit('SET_WAVE_LIST', wave)
+    })
+
+    commit('SET_CIRCUIT', circuit)
   },
 
-  removeItem ({ commit, state }, id: string) {
+  addItem ({ commit, dispatch, state }, { item, ports }: { item: Item, ports: Port[] }) {
+    commit('ADD_ELEMENT', { item, ports })
+    dispatch('setItemPortPositions', item.id)
+
+    state.circuit.addNode(item, state.ports)
+  },
+
+  removeItem ({ commit, dispatch, state }, id: string) {
     const item = state.items[id]
 
     if (!item) return
@@ -98,7 +117,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       .filter(c => item.portIds.includes(c.source) || item.portIds.includes(c.target))
 
     connections.forEach(c => {
-      commit('DISCONNECT', {
+      dispatch('disconnect', {
         source: c.source,
         target: c.target
       })
@@ -106,7 +125,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
     if (item.type === 'Freeport' && connections.length === 2) {
       // if this is a freeport, then reconnect the two disconnected wires
-      commit('CONNECT', {
+      dispatch('connect', {
         source: connections[0].source,
         target: connections[1].target
       })
@@ -498,35 +517,39 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
   },
 
-  createFreeport ({ commit, dispatch }, data: {
+  createFreeport ({ commit, dispatch, state }, data: {
     itemId: string,
     outputPortId: string,
     inputPortId: string,
     sourceId?: string,
     targetId?: string
   }) {
+    if (state.items[data.itemId]) return
+
     dispatch('deselectAll')
     commit('CREATE_FREEPORT_ELEMENT', data)
     dispatch('setItemBoundingBox', data.itemId)
 
+    state.circuit.addNode(state.items[data.itemId], state.ports)
+
     if (data.sourceId && data.targetId) {
-      commit('DISCONNECT', {
+      dispatch('disconnect', {
         source: data.sourceId,
         target: data.targetId
       })
     }
 
     if (data.sourceId) {
-      commit('CONNECT', {
+      dispatch('connect', {
         source: data.sourceId,
-        target: data.outputPortId,
+        target: data.inputPortId,
         zIndex: getters.nextZIndex
       })
     }
 
     if (data.targetId) {
-      commit('CONNECT', {
-        source: data.inputPortId,
+      dispatch('connect', {
+        source: data.outputPortId,
         target: data.targetId,
         zIndex: getters.nextZIndex
       })
@@ -572,12 +595,12 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
     if (newPort) {
       if (sourceId) {
-        commit('CONNECT', {
+        dispatch('connect', {
           source: sourceId,
           target: newPort.id
         })
       } else {
-        commit('CONNECT', {
+        dispatch('connect', {
           source: newPort.id,
           target: targetId
         })
@@ -651,9 +674,11 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
   connect ({ commit, getters }, { source, target }: { source: string, target: string }) {
     commit('CONNECT', { source, target, zIndex: getters.nextZIndex })
+    state.circuit.addConnection(source, target)
   },
 
   disconnect ({ commit }, { source, target }: { source: string, target: string }) {
+    state.circuit.removeConnection(source, target)
     commit('DISCONNECT', { source, target })
   },
 
@@ -686,10 +711,29 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
   bringToFront ({ dispatch }) {
     dispatch('changeSelectionZIndex', (i: BaseItem) => 0)
+  },
+
+  setPortValue ({ commit, state }, { id, value }: { id: string, value: number }) {
+    commit('SET_PORT_VALUES', { [id]: value })
+    state.circuit.setPortValue(id, value)
   }
 }
 
 const mutations: MutationTree<DocumentState> = {
+  'SET_CIRCUIT' (state, circuit: CircuitService) {
+    state.circuit = circuit
+  },
+
+  'SET_WAVE_LIST' (state, waves: WaveList) {
+    state.waves = waves
+  },
+
+  'SET_PORT_VALUES' (state, valueMap) {
+    for (const portId in valueMap) {
+      state.ports[portId].value = valueMap[portId]
+    }
+  },
+
   'ADD_ELEMENT' (state, { item, ports }: { item: Item, ports: Port[] }) {
     state.items[item.id] = item
 
@@ -861,7 +905,8 @@ const mutations: MutationTree<DocumentState> = {
         x: 0,
         y: 0
       },
-      rotation: 0
+      rotation: 0,
+      value: 0
     })
     const portIds: string[] = []
 

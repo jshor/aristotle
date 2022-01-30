@@ -5,6 +5,7 @@ import OutputNode from './base/OutputNode'
 import Nor from './gates/Nor'
 import Or from './gates/Or'
 import Buffer from './gates/Buffer'
+import ProxyNode from './gates/ProxyNode'
 import LogicValue from './types/LogicValue'
 
 export {
@@ -15,5 +16,6 @@ export {
   Nor,
   Or,
   Buffer,
+  ProxyNode,
   LogicValue
 }

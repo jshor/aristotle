@@ -2,13 +2,14 @@
   "name": "@aristotle/logic-circuit",
   "version": "0.9.0",
   "description": "",
-  "main": "dist/logic-circuit.js",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "webpack -w",
-    "build": "webpack",
+    "build": "yarn tsc",
     "test": "jest",
     "docs": "typedoc --includes ./manual ./src --exclude **/*.spec.ts --out ./docs"
   },
+  "types": "./dist/index.d.ts",
   "keywords": [],
   "author": "",
   "license": "MIT",

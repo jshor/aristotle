@@ -5,7 +5,6 @@
     :style="{
       transform: `rotate(${90 * rotation}deg)`
     }"
-    class="item"
     :class="{
       'item--selected': isSelected
     }"
@@ -19,6 +18,15 @@
     @contextmenu="contextmenu"
   >
     <freeport v-if="type === 'Freeport'" />
+    <input-switch
+      v-else-if="type === 'InputNode'"
+      :value="ports[0].value"
+      @toggle="value => setPortValue({ id: ports[0].id, value })"
+    />
+    <lightbulb
+      v-else-if="type === 'OutputNode'"
+      :value="ports[0].value"
+    />
     <logic-gate v-else />
     <port-set>
       <template
@@ -45,14 +53,15 @@
 
 <script lang="ts">
 import ResizeObserver from 'resize-observer-polyfill'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { defineComponent, PropType } from 'vue'
 import Draggable from '../components/Draggable.vue'
 import LogicGate from '../components/LogicGate.vue'
+import InputSwitch from '../components/InputSwitch.vue'
+import Lightbulb from '../components/Lightbulb.vue'
 import Freeport from '../components/Freeport.vue'
 import PortSet from '../components/PortSet.vue'
 import PortItem from './PortItem.vue'
-import { mapState } from 'vuex'
 
 export default defineComponent({
   name: 'Item',
@@ -60,6 +69,8 @@ export default defineComponent({
     Draggable,
     LogicGate,
     Freeport,
+    InputSwitch,
+    Lightbulb,
     PortSet,
     PortItem
   },
@@ -160,7 +171,8 @@ export default defineComponent({
     ...mapActions([
       'setSnapBoundaries',
       'setItemSize',
-      'setItemPosition'
+      'setItemPosition',
+      'setPortValue'
     ]),
 
     onSizeChanged ([ target ]: ResizeObserverEntry[]) {
@@ -186,3 +198,9 @@ export default defineComponent({
   }
 })
 </script>
+
+<style scoped>
+.item--selected {
+  opacity: 0.5; /* TODO: only temporary */
+}
+</style>

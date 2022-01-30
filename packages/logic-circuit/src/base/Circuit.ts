@@ -1,7 +1,7 @@
 import CircuitNode from '../base/CircuitNode'
-import InputNode from '../base/InputNode'
 import Connection from '../types/Connection'
 import LogicValue from '../types/LogicValue'
+import InputNode from './InputNode'
 
 class Circuit {
   /**
@@ -58,10 +58,10 @@ class Circuit {
    *
    * @param {CircuitNode} source - source node
    * @param {CircuitNode} target - target node
-   * @param {Number} targetIndex - entry index on the target node for the connection
+   * @param {Number} targetId - entry port id on the target node for the connection
    */
-  public addConnection = (source: CircuitNode, target: CircuitNode, targetIndex: number): void => {
-    source.outputs.push(new Connection(target, targetIndex))
+  public addConnection = (source: CircuitNode, target: CircuitNode, targetId: string): void => {
+    source.outputs.push(new Connection(target, targetId))
     source.value = LogicValue.UNKNOWN
     this.enqueue(source)
     this.next()
@@ -78,10 +78,10 @@ class Circuit {
     sourceNode
       .outputs
       .concat()
-      .forEach(({ node, index }: Connection, i: number) => {
+      .forEach(({ node, id }: Connection, i: number) => {
         if (targetNode === node) {
           // reset the input of the target for this connection to hi-Z
-          targetNode.update(LogicValue.UNKNOWN, index)
+          targetNode.update(LogicValue.UNKNOWN, id)
 
           // remove the output entry at the source
           sourceNode.outputs.splice(i, 1)

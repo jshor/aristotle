@@ -14,7 +14,6 @@ declare global {
      */
     y: number
   }
-
 }
 
 export default Point

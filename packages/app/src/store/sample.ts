@@ -1,51 +1,127 @@
+import PortType from "@/types/enums/PortType";
+
 export default {
 
   connections: {
-    conn_1: {
-      id: 'conn_1',
-      source: 'b',
-      target: 'fp1',
-      trueTargetId: 'c',
+    switch1_nor1_conn: {
+      id: 'switch1_nor1_conn',
+      source: 'switchOutputPort1',
+      target: 'nor1InputPort1',
+      trueTargetId: 'nor1InputPort1',
       isSelected: false,
       groupId: null,
       zIndex: 5
     },
-    conn_2: {
-      id: 'conn_2',
-      source: 'fp2',
-      target: 'c',
-      trueTargetId: 'c',
+    switch2_nor2_conn: {
+      id: 'switch2_nor2_conn',
+      source: 'switchOutputPort2',
+      target: 'nor2InputPort1',
+      trueTargetId: 'nor2InputPort1',
       isSelected: false,
       groupId: null,
-      zIndex: 6
+      zIndex: 5
+    },
+    nor1_nor2_conn: {
+      id: 'nor1_nor2_conn',
+      source: 'nor1OutputPort1',
+      target: 'nor2InputPort2',
+      trueTargetId: 'nor2InputPort2',
+      isSelected: false,
+      groupId: null,
+      zIndex: 5
+    },
+    nor2_nor1_conn: {
+      id: 'nor2_nor1_conn',
+      source: 'nor2OutputPort1',
+      target: 'nor1InputPort2',
+      trueTargetId: 'nor1InputPort2',
+      isSelected: false,
+      groupId: null,
+      zIndex: 5
+    },
+    nor1_lightbulb1_conn: {
+      id: 'nor1_lightbulb1_conn',
+      source: 'nor1OutputPort1',
+      target: 'lightbulbInputPort1',
+      trueTargetId: 'lightbulbInputPort1',
+      isSelected: false,
+      groupId: null,
+      zIndex: 5
+    },
+    nor2_lightbulb2_conn: {
+      id: 'nor2_lightbulb2_conn',
+      source: 'nor2OutputPort1',
+      target: 'lightbulbInputPort2',
+      trueTargetId: 'lightbulbInputPort2',
+      isSelected: false,
+      groupId: null,
+      zIndex: 5
     }
   },
   zoomLevel: 1,
   ports: {
-    eeee: {
-      id: 'eeee',
+    nor1InputPort1: {
+      id: 'nor1InputPort1',
       position: {
         x: 0,
         y: 0
       },
-      type: 0,
+      type: PortType.Input,
       rotation: 0,
       orientation: 0,
+      value: 0,
       isFreeport: false
     },
-    a: {
-      id: 'a',
+    nor1InputPort2: {
+      id: 'nor1InputPort2',
       position: {
         x: 0,
         y: 0
       },
-      type: 1, // 0 = output, 1 = input, 2 = freeport
+      type: PortType.Input,
       rotation: 0,
-      orientation: 0, // [0, 1, 2, 3] = [left, top, right, bottom]
+      orientation: 0,
+      value: 0,
       isFreeport: false
     },
-    b: {
-      id: 'b',
+    nor1OutputPort1: {
+      id: 'nor1OutputPort1',
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: PortType.Output,
+      rotation: 0,
+      orientation: 2,
+      value: 0,
+      isFreeport: false
+    },
+    nor2InputPort1: {
+      id: 'nor2InputPort1',
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: PortType.Input,
+      rotation: 0,
+      orientation: 0,
+      value: 0,
+      isFreeport: false
+    },
+    nor2InputPort2: {
+      id: 'nor2InputPort2',
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: PortType.Input,
+      rotation: 0,
+      orientation: 0,
+      value: 0,
+      isFreeport: false
+    },
+    nor2OutputPort1: {
+      id: 'nor2OutputPort1',
       position: {
         x: 0,
         y: 0
@@ -53,59 +129,64 @@ export default {
       type: 0,
       rotation: 0,
       orientation: 2,
+      value: 0,
       isFreeport: false
     },
-    c: {
-      id: 'c',
+    switchOutputPort1: {
+      id: 'switchOutputPort1',
       position: {
         x: 0,
         y: 0
       },
-      type: 1,
-      rotation: 1,
-      orientation: 1,
-      isFreeport: false
-    },
-    d: {
-      id: 'd',
-      position: {
-        x: 0,
-        y: 0
-      },
-      type: 1,
-      rotation: 0,
-      orientation: 3,
-      isFreeport: false
-    },
-    fp1: {
-      id: 'fp1',
-      position: {
-        x: 0,
-        y: 0
-      },
-      type: 1,
-      rotation: 0,
-      orientation: 0,
-      isFreeport: true
-    },
-    fp2: {
-      id: 'fp2',
-      position: {
-        x: 0,
-        y: 0
-      },
-      type: 0,
+      type: PortType.Output,
       rotation: 0,
       orientation: 2,
-      isFreeport: true
+      value: 0,
+      isFreeport: false
+    },
+    switchOutputPort2: {
+      id: 'switchOutputPort2',
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: PortType.Output,
+      rotation: 0,
+      orientation: 2,
+      value: 0,
+      isFreeport: false
+    },
+    lightbulbInputPort1: {
+      id: 'lightbulbInputPort1',
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: PortType.Input,
+      rotation: 0,
+      orientation: 0,
+      value: 0,
+      isFreeport: false
+    },
+    lightbulbInputPort2: {
+      id: 'lightbulbInputPort2',
+      position: {
+        x: 0,
+        y: 0
+      },
+      type: PortType.Input,
+      rotation: 0,
+      orientation: 0,
+      value: 0,
+      isFreeport: false
     }
   },
   groups: {},
   items: {
-    abc: {
-      id: 'abc',
-      type: 'Element',
-      portIds: ['a', 'eeee', 'b'],
+    nor1: {
+      id: 'nor1',
+      type: 'LogicGate',
+      portIds: ['nor1InputPort1', 'nor1InputPort2', 'nor1OutputPort1'],
       position: { x: 300, y: 300 },
       boundingBox: {
         left: 0,
@@ -123,11 +204,11 @@ export default {
       width: 100,
       height: 150
     },
-    def: {
-      id: 'def',
-      type: 'Element',
-      portIds: ['d'],
-      position: { x: 900, y: 900 },
+    nor2: {
+      id: 'nor2',
+      type: 'LogicGate',
+      portIds: ['nor2InputPort2', 'nor2InputPort1', 'nor2OutputPort1'],
+      position: { x: 300, y: 500 },
       boundingBox: {
         left: 0,
         top: 0,
@@ -141,35 +222,35 @@ export default {
       },
       groupId: null,
       zIndex: 1,
-      width: 100,
-      height: 150
+      width: 120,
+      height: 51
     },
-    ghi: {
-      id: 'ghi',
-      type: 'Element',
-      portIds: ['c'],
-      position: { x: 650, y: 650 },
+    switch1: {
+      id: 'switch1',
+      type: 'InputNode',
+      portIds: ['switchOutputPort1'],
+      position: { x: 100, y: 300 },
       boundingBox: {
         left: 0,
         top: 0,
         right: 0,
         bottom: 0
       },
-      rotation: 1,
+      rotation: 0,
       isSelected: false,
       properties: {
         inputCount: 1
       },
       groupId: null,
       zIndex: 2,
-      width: 100,
-      height: 150
+      width: 40,
+      height: 40
     },
-    freeport1: {
-      id: 'freeport1',
-      type: 'Freeport',
-      portIds: ['fp1', 'fp2'],
-      position: { x: 500, y: 500 },
+    switch2: {
+      id: 'switch2',
+      type: 'InputNode',
+      portIds: ['switchOutputPort2'],
+      position: { x: 100, y: 500 },
       boundingBox: {
         left: 0,
         top: 0,
@@ -180,8 +261,44 @@ export default {
       isSelected: false,
       groupId: null,
       zIndex: 3,
-      width: 10,
-      height: 10
+      width: 40,
+      height: 40
+    },
+    lightbulb1: {
+      id: 'lightbulb1',
+      type: 'OutputNode',
+      portIds: ['lightbulbInputPort1'],
+      position: { x: 700, y: 300 },
+      boundingBox: {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
+      },
+      rotation: 0,
+      isSelected: false,
+      groupId: null,
+      zIndex: 3,
+      width: 40,
+      height: 40
+    },
+    lightbulb2: {
+      id: 'lightbulb2',
+      type: 'OutputNode',
+      portIds: ['lightbulbInputPort2'],
+      position: { x: 700, y: 500 },
+      boundingBox: {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
+      },
+      rotation: 0,
+      isSelected: false,
+      groupId: null,
+      zIndex: 3,
+      width: 40,
+      height: 40
     }
   }
 }

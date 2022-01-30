@@ -131,12 +131,14 @@ export default defineComponent({
           y: this.topLeft.y + relativePosition.y
         }
 
+        console.log('CREATING FREEPORT')
+
         this.newFreeport = {
           itemId: rand(),
           inputPortId: rand(),
           outputPortId: rand(),
-          sourceId: this.target.id,
-          targetId: this.source.id,
+          sourceId: this.source.id,
+          targetId: this.target.id,
           position: absolutePosition
         }
 
