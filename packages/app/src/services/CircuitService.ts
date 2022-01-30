@@ -101,6 +101,24 @@ export default class CircuitService {
     this.circuit.addNode(node)
   }
 
+  removeNode = (portIds: string[] = []) => {
+    const node = portIds
+      .map(portId => this.nodes[portId])
+      .find(node => !!node)
+
+    if (node) {
+      this.circuit.removeNode(node)
+      // this.oscillator.remove(this.waves)
+
+      portIds.forEach(portId => {
+        delete this.nodes[portId]
+        delete this.valueMap[portId]
+      })
+    } else {
+      console.log('DID NOT FIND NODE FOR: ', portIds)
+    }
+  }
+
   addConnection = (sourceId: string, targetId: string) => {
     this.circuit.addConnection(this.nodes[sourceId], this.nodes[targetId], targetId)
   }
