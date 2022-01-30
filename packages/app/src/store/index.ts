@@ -111,16 +111,13 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
     if (!item) return
 
-    // remove all connections first
+    // find all first-degree connections first
     const connections: Connection[] = Object
       .values(state.connections)
       .filter(c => item.portIds.includes(c.source) || item.portIds.includes(c.target))
 
     connections.forEach(c => {
-      dispatch('disconnect', {
-        source: c.source,
-        target: c.target
-      })
+      dispatch('removeConnection', { id: c.id, removeLineage: true })
     })
 
     if (item.type === 'Freeport' && connections.length === 2) {
@@ -132,7 +129,75 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
 
     // remove the item
-    commit('REMOVE_ELEMENT', id)
+    if (state.items[id]) {
+      state.circuit.removeNode(state.items[id].portIds)
+      commit('REMOVE_ELEMENT', id)
+    }
+  },
+
+  deleteSelection ({ dispatch, state }) {
+    const connection = Object
+      .values(state.connections)
+      .filter(({ isSelected }) => isSelected)
+    const items = Object
+      .values(state.items)
+      .filter(({ isSelected }) => isSelected)
+
+    items.forEach(i => {
+      dispatch('removeItem', i.id)
+    })
+    connection.forEach(c => {
+      dispatch('removeConnection', { id: c.id })
+    })
+  },
+
+  removeConnection ({ dispatch, state }, { id, removeLineage }: { id: string, removeLineage?: boolean }) {
+    const connection = state.connections[id]
+
+    if (!connection) return
+
+    const connections = Object.values(state.connections)
+    const freeportConnectionMap: Record<string, string> = {}
+    const freeportIds: string[] = []
+
+    Object
+      .values(state.items)
+      .filter(({ type }) => type === 'Freeport')
+      .forEach(item => {
+        freeportIds.push(item.id)
+        freeportConnectionMap[item.portIds[0]] = item.portIds[1]
+      })
+
+    function getFollowedConnections (conns: Connection[]) {
+      const l = conns.slice(-1).pop()
+
+      if (l && freeportConnectionMap[l.target]) {
+        const c = connections.find(({ source }) => source === freeportConnectionMap[l.target])
+
+        if (c) return getFollowedConnections(conns.concat(c))
+      }
+
+      return conns
+    }
+
+    if (removeLineage) {
+      // remove all related segments of this connection, including freeports
+      getFollowedConnections([connection]).forEach(({ source, target }) => {
+        dispatch('disconnect', { source, target })
+      })
+
+      freeportIds.forEach(id => {
+        dispatch('removeItem', state.items[id]?.id)
+      })
+    } else {
+      // otherwise, remove just this segment
+      dispatch('disconnect', {
+        source: connection.source,
+        target: connection.target
+      })
+
+      // TODO: need to reconnect ancestor of source and successor of target
+    }
   },
 
   setSnapBoundaries ({ commit, state }, id: string) {
@@ -496,6 +561,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
   toggleSelectionState ({ commit, state }, { id, forcedValue = null }: { id: string, forcedValue: boolean | null }) {
     const item = state.items[id] || state.connections[id] || state.groups[id]
+    if (!item) return
     const isSelected = forcedValue === null
       ? !item.isSelected
       : forcedValue
@@ -539,6 +605,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       })
     }
 
+    console.log('DATA:', data)
     if (data.sourceId) {
       dispatch('connect', {
         source: data.sourceId,

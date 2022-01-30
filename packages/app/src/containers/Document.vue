@@ -1,6 +1,7 @@
 <template>
   <div class="documents">
     <div class="documents__debug-info">
+      <pre>{{ JSON.stringify(connections, null, 2) }}</pre>
       <pre>{{ JSON.stringify(ports, null, 2) }}</pre>
     </div>
 
@@ -13,6 +14,7 @@
         <button @click="group">Group</button>
         <button @click="ungroup">Ungroup</button>
         <button @click="addNewItem">Add item</button>
+        <button @click="deleteSelection">Delete selection</button>
       </div>
 
       <div class="documents__editor">
@@ -175,6 +177,7 @@ export default defineComponent({
       'disconnect',
       'selectAll',
       'deselectAll',
+      'deleteSelection',
       'toggleSelectionState',
       'group',
       'ungroup',

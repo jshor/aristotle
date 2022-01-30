@@ -130,11 +130,11 @@ export default defineComponent({
       }
 
       if (this.type === 1) {
-        this.newFreeport.inputPortId = rand()
+        this.newFreeport.outputPortId = rand()
         this.newFreeport.targetId = this.id
         this.newFreeport.portType = 0
       } else {
-        this.newFreeport.outputPortId = rand()
+        this.newFreeport.inputPortId = rand()
         this.newFreeport.sourceId = this.id
         this.newFreeport.portType = 1
       }
@@ -154,13 +154,13 @@ export default defineComponent({
 
       if (this.type === 0) {
         this.connectFreeport({
-          portId: this.newFreeport.outputPortId,
-          targetId: this.id
+          portId: this.newFreeport.inputPortId,
+          sourceId: this.id
         })
       } else {
         this.connectFreeport({
-          portId: this.newFreeport.inputPortId,
-          sourceId: this.id
+          portId: this.newFreeport.outputPortId,
+          targetId: this.id
         })
       }
     }
