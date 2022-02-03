@@ -782,25 +782,25 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
     if (newPort) {
       if (sourceId) {
-        dispatch('connect', {
-        // commit('CONNECT', {
-          source: sourceId,
-          target: newPort.id
-        })
         dispatch('disconnect', {
           // commit('CONNECT', {
           source: sourceId,
           target: portId
         })
-      } else {
         dispatch('connect', {
         // commit('CONNECT', {
-          source: newPort.id,
-          target: targetId
+          source: sourceId,
+          target: newPort.id
         })
+      } else {
         dispatch('disconnect', {
           // commit('CONNECT', {
           source: portId,
+          target: targetId
+        })
+        dispatch('connect', {
+        // commit('CONNECT', {
+          source: newPort.id,
           target: targetId
         })
       }
@@ -876,6 +876,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   },
 
   connect ({ commit, getters }, { source, target, connectionChainId }: { source: string, target: string, connectionChainId?: string }) {
+    console.log('connecting: ', source, target)
     commit('CONNECT', { source, target, zIndex: getters.nextZIndex, connectionChainId })
     state.circuit.addConnection(source, target)
   },

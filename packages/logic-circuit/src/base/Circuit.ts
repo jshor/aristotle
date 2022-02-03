@@ -87,7 +87,7 @@ class Circuit {
           sourceNode.outputs.splice(i, 1)
 
           // place the target node in the queue for processing
-          this.enqueue(sourceNode, targetNode)
+          this.enqueue(targetNode)
         }
       })
     this.next()
@@ -145,7 +145,9 @@ class Circuit {
     let isValueChanged = false
     let forceContinue = false
 
-    this.queue.forEach((node) => {
+    while (this.queue.length > 0) {
+      const node = this.queue.shift()
+
       this.enqueue(...node.propagate())
       this.dequeue(node)
 
@@ -157,7 +159,7 @@ class Circuit {
       if (node.forceContinue) {
         forceContinue = true
       }
-    })
+    }
 
     if (!this.isComplete() && (!isValueChanged || forceContinue)) {
       // queue is not finished and the node determined we should step again
