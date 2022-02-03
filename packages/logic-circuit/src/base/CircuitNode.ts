@@ -21,7 +21,7 @@ class CircuitNode {
    *
    * @type {Boolean}
    */
-  public isValueChanged: boolean = false
+  public isValueChanged: boolean = true
 
   /**
    * Set to true to have the debugger continue regardless of whether this node changed or not.

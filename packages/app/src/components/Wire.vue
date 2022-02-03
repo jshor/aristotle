@@ -42,13 +42,13 @@
       fill="none"
       stroke="#868686"
       :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
-      :d="wire.path" stroke-linecap="round" stroke-linejoin="round" opacity="1"
+      :d="wire.path"
     />
     <path
       class="wire__clickable"
       fill="none"
       :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
-      :d="wire.path" stroke-linecap="round" stroke-linejoin="round" opacity="1"
+      :d="wire.path"
     />
   </svg>
 </template>
@@ -107,9 +107,8 @@ export default defineComponent({
     stroke-width: 6;
     pointer-events: all;
     stroke-dasharray: 14;
-    animation: animate1 30s infinite linear;
-    stroke-linejoin: bevel;
-    stroke-linecap: square !important;
+    animation: animate1 300s infinite linear;
+    stroke-linecap: square;
     stroke: darkred;
 
     &--on {
@@ -135,7 +134,7 @@ export default defineComponent({
     stroke-dashoffset: 0;
   }
   to {
-    stroke-dashoffset: -1000;
+    stroke-dashoffset: -10000;
   }
 }
 

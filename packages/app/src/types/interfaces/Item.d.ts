@@ -10,6 +10,17 @@ declare global {
     zIndex: number
     width: number
     height: number
+    integratedCircuit?: {
+      items: {
+        [id: string]: Item
+      },
+      connections: {
+        [id: string]: Connection
+      },
+      ports: {
+        [id: string]: Port
+      }
+    }
   }
 }
 

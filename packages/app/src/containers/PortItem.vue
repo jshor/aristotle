@@ -1,5 +1,5 @@
 <template>
-  <port-pivot :rotation="rotation">
+  <port-pivot :rotation="rotation" :title="id">
     <draggable
       v-if="!isFreeport"
       :snap-boundaries="snapBoundaries"

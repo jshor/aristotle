@@ -19,11 +19,11 @@ class Circuit {
   public nodes: Array<CircuitNode> = []
 
   /**
-   * A list of all input nodes in the circuit.jest
+   * A list of all input nodes in the circuit.
    *
    * @type {Array<CircuitNode>}
    */
-  public inputs: Array<InputNode> = []
+  public inputNodes: Array<InputNode> = []
 
   /**
    * Adds a node to the circuit and its appropriate queue(s).
@@ -32,7 +32,7 @@ class Circuit {
    */
   public addNode = (node: CircuitNode): void => {
     if (node instanceof InputNode) {
-      this.inputs.push(node)
+      this.inputNodes.push(node)
       this.enqueue(node)
     }
     this.nodes.push(node)
@@ -45,7 +45,7 @@ class Circuit {
    */
   public removeNode = (node: CircuitNode): void => {
     if (node instanceof InputNode) {
-      this.inputs.splice(this.inputs.indexOf(node), 1)
+      this.inputNodes.splice(this.inputNodes.indexOf(node), 1)
       this.reset()
     }
     this.nodes.splice(this.nodes.indexOf(node), 1)
@@ -160,7 +160,7 @@ class Circuit {
     })
 
     if (!this.isComplete() && (!isValueChanged || forceContinue)) {
-      // queue is not finished but the node determined we should step again
+      // queue is not finished and the node determined we should step again
       return this.next()
     }
   }

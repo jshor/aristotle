@@ -13,8 +13,12 @@
         <button @click="rotate(1)">Rotate 90&deg; CW</button><br />
         <button @click="group">Group</button>
         <button @click="ungroup">Ungroup</button>
-        <button @click="addNewItem">Add item</button>
+        <button @click="addLogicGate">Add NOR</button>
+        <button @click="addLightbulb">Add lightbulb</button>
+        <button @click="addSwitch">Add switch</button>
         <button @click="deleteSelection">Delete selection</button>
+        <button @click="saveIntegratedCircuit">Build IC</button>
+
       </div>
 
       <div class="documents__editor">
@@ -41,6 +45,7 @@
             :source="connection.source"
             :target="connection.target"
             :group-id="connection.groupId"
+            :connection-chain-id="connection.connectionChainId"
             :is-selected="connection.isSelected"
             :z-index="connection.zIndex"
             @select="$e => selectItem($e, connection.id)"
@@ -78,6 +83,22 @@ import Oscilloscope from '../components/Oscilloscope.vue'
 import Connection from './Connection.vue'
 import Group from './Group.vue'
 import Item from './Item.vue'
+
+const rand = () => `id_${(Math.floor(Math.random() * 10000000000000) + 5)}` // TODO: use uuid
+
+const createPort = (elementId, id, orientation, type): Port => ({
+  id,
+  orientation,
+  position: {
+    x: 0,
+    y: 0
+  },
+  type,
+  rotation: 0,
+  elementId,
+  value: 0,
+  isFreeport: false
+})
 
 export default defineComponent({
   name: 'Document',
@@ -124,16 +145,11 @@ export default defineComponent({
       this.toggleSelectionState({ id })
     },
 
-    addNewItem () {
-      const rand = () => `id_${(Math.floor(Math.random() * 100) + 5)}` // TODO: use uuid
-
-      const outputPortId = rand()
-      const inputPortId = rand()
-      const inputPortId2 = rand()
-      const item = {
-        id: rand(),
-        type: 'Item',
-        portIds: [inputPortId, inputPortId2, outputPortId],
+    addNewItem (id: string, type: string, width: number, height: number, ports: Port[] = []) {
+      const item: Item = {
+        id,
+        type,
+        portIds: ports.map(({ id }) => id),
         position: { x: 400, y: 400 },
         rotation: 0,
         isSelected: false,
@@ -142,33 +158,43 @@ export default defineComponent({
         },
         boundingBox: {
           left: 400,
-          right: 500,
+          right: 400 + width,
           top: 400,
-          bottom: 550
+          bottom: 400 + height
         },
         groupId: null,
         zIndex: 0,
-        width: 100,
-        height: 150
+        width,
+        height
       }
-      const createPort = (id, orientation, type) => ({
-        id,
-        orientation,
-        position: {
-          x: 0,
-          y: 0
-        },
-        type,
-        rotation: 0,
-        isFreeport: false
-      })
-      const ports = [
-        createPort(inputPortId, 0, 1),
-        createPort(inputPortId2, 0, 1),
-        createPort(outputPortId, 2, 0)
-      ]
 
       this.addItem({ item, ports })
+    },
+
+    addLogicGate () {
+      const elementId = rand()
+
+      this.addNewItem(elementId, 'LogicGate', 100, 150, [
+        createPort(elementId, rand(), 0, 1),
+        createPort(elementId, rand(), 0, 1),
+        createPort(elementId, rand(), 2, 0)
+      ])
+    },
+
+    addLightbulb () {
+      const elementId = rand()
+
+      this.addNewItem(elementId, 'OutputNode', 40, 40, [
+        createPort(elementId, rand(), 0, 1)
+      ])
+    },
+
+    addSwitch () {
+      const elementId = rand()
+
+      this.addNewItem(elementId, 'InputNode', 40, 40, [
+        createPort(elementId, rand(), 2, 0)
+      ])
     },
 
     ...mapActions([
@@ -185,7 +211,8 @@ export default defineComponent({
       'createSelection',
       'selectConnection',
       'rotate',
-      'buildCircuit'
+      'buildCircuit',
+      'saveIntegratedCircuit'
     ])
   }
 })

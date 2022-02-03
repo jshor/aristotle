@@ -1,5 +1,5 @@
 import PortType from '@/types/enums/PortType'
-import { Circuit, CircuitNode, Nor, InputNode, OutputNode, ProxyNode } from '@aristotle/logic-circuit'
+import { Circuit, CircuitNode, Nor, InputNode, OutputNode, ProxyNode, Buffer } from '@aristotle/logic-circuit'
 import BinaryWaveService from './BinaryWaveService'
 import OscillationService from './OscillationService'
 
@@ -52,7 +52,14 @@ export default class CircuitService {
 
   setOutputValue = (id: string, value: number) => {
     this.valueMap[id] = value
+    // console.log('map: ', this.valueMap)
     this.fn(this.valueMap)
+  }
+
+  setPortValue2 = (portId: string, value: number) => {
+    this.nodes[portId].value = value
+    this.nodes[portId].newValue = value
+    // this.nodes[portId].updateOutputs(value)
   }
 
   setPortValue = (portId: string, value: number) => {
@@ -68,35 +75,62 @@ export default class CircuitService {
         return new InputNode(id, inputIds)
       case 'LogicGate':
         return new Nor(id, inputIds)
+      case 'Freeport':
+        return new Buffer(id, inputIds)
       default:
-        return new OutputNode(id, inputIds)
+        return new OutputNode(id, inputIds) // TODO: use generic CircuitNode instead?
     }
   }
 
-  addNode = (item: Item, ports: { [id: string]: Port }) => {
+  addIntegratedCircuit = (item: Item) => {
+    if (!item.integratedCircuit) return
+
+    const { items, connections, ports } = item.integratedCircuit
+
+    Object
+      .values(items)
+      .forEach(item => this.addNode(item, ports, true, false))
+    Object
+      .values(connections)
+      .forEach(c => this.addConnection(c.source, c.target))
+  }
+
+  addNode = (item: Item, ports: { [id: string]: Port }, forceContinue: boolean = false, showInOscilloscope: boolean = true) => {
     if (item.portIds.length === 0) return // if there are no ports, then there is nothing to add
 
+    if (item.type === 'IntegratedCircuit') {
+      return this.addIntegratedCircuit(item)
+    }
+
     const inputIds = item.portIds.filter(portId => ports[portId].type === PortType.Input)
-    const outputId = item.portIds.find(portId => ports[portId].type === PortType.Output)
+    const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
     const node = this.getCircuitNode(item.type, item.id, inputIds)
 
+    node.forceContinue = forceContinue
+    // node.value = 1
+
     inputIds.forEach(inputId => {
+      // this.setOutputValue(inputId, 0)
       this.nodes[inputId] = node
       node.on('change', (value: number) => {
         this.setOutputValue(inputId, value)
       })
     })
 
-    if (outputId) {
+    outputIds.forEach(outputId => {
+      // this.setOutputValue(outputId, ports[outputId].value)
       this.nodes[outputId] = node
-      this.waves[outputId] = new BinaryWaveService(outputId)
-      this.oscillator.add(this.waves[outputId])
+
+      if (showInOscilloscope) {
+        this.waves[outputId] = new BinaryWaveService(outputId)
+        this.oscillator.add(this.waves[outputId])
+      }
 
       node.on('change', (value: number) => {
         this.setOutputValue(outputId, value)
-        this.waves[outputId].drawPulseChange(value)
+        this.waves[outputId]?.drawPulseChange(value)
       })
-    }
+    })
 
     this.circuit.addNode(node)
   }
@@ -120,10 +154,19 @@ export default class CircuitService {
   }
 
   addConnection = (sourceId: string, targetId: string) => {
-    this.circuit.addConnection(this.nodes[sourceId], this.nodes[targetId], targetId)
+    if (this.nodes[sourceId] && this.nodes[targetId]) {
+      this.circuit.addConnection(this.nodes[sourceId], this.nodes[targetId], targetId)
+    } else {
+      console.log('MISSING NODE FOR ADDING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
+    }
   }
 
   removeConnection = (sourceId: string, targetId: string) => {
-    this.circuit.removeConnection(this.nodes[sourceId], this.nodes[targetId])
+    if (this.nodes[sourceId] && this.nodes[targetId]) {
+      this.circuit.removeConnection(this.nodes[sourceId], this.nodes[targetId])
+      // this.next()
+    } else {
+      console.log('MISSING NODE FOR REMOVING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
+    }
   }
 }

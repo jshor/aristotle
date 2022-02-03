@@ -2,9 +2,8 @@ declare global {
   interface Connection extends BaseItem {
     source: string
     target: string
-    trueTargetId: string
+    connectionChainId: string
     groupId: string | null
-    zIndex: number
   }
 }
 

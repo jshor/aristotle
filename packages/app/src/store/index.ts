@@ -1,6 +1,7 @@
 import { ActionTree, createStore, GetterTree, MutationTree } from 'vuex'
 import rotate from '../layout/rotate'
-import sample from './sample'
+import sample from './sample2'
+// import sample from './test.json'
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
 import BaseItem from '@/types/interfaces/BaseItem'
@@ -10,10 +11,10 @@ import Item from '@/types/interfaces/Item'
 import Point from '@/types/interfaces/Point'
 import Port from '@/types/interfaces/Port'
 import BoundingBox from '@/types/types/BoundingBox'
-import { Nor } from '@aristotle/logic-circuit'
 import CircuitService from '@/services/CircuitService'
+import { cloneDeep } from 'lodash' // TODO
 
-const rand = () => `id_${(Math.floor(Math.random() * 100) + 5)}` // TODO: use uuid
+const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
 export interface DocumentState {
   snapBoundaries: BoundingBox[]
@@ -40,6 +41,8 @@ const state: DocumentState = {
   connectablePortIds: [],
   circuit: new CircuitService([], [], {}),
   waves: {},
+  groups: {}, // TODO: remove
+  zoomLevel: 1,
   ...sample
 }
 
@@ -88,6 +91,130 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     commit('SET_ZOOM', zoom)
   },
 
+  saveIntegratedCircuit ({ state }) {
+    const ports = cloneDeep(state.ports)
+    const items = cloneDeep(state.items)
+    const connections = cloneDeep(state.connections)
+    const createNewPort = (rotation: number, orientation: number, type: PortType, prefix: string, elementId: string): Port => ({
+      id: `${prefix}_${rand()}`,
+      elementId,
+      position: {
+        x: 0,
+        y: 0
+      },
+      rotation,
+      orientation,
+      type,
+      value: 0,
+      isFreeport: false
+    })
+    const createConnection = (id: string, source: string, target: string): Connection => ({
+      id,
+      source,
+      target,
+      connectionChainId: id,
+      groupId: null,
+      isSelected: false,
+      zIndex: 0
+    })
+
+    const documentItems = {}
+    const documentPorts = {}
+    const documentConnections = {}
+
+    const icItem: Item = {
+      id: rand(),
+      type: 'IntegratedCircuit',
+      portIds: [],
+      boundingBox: {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
+      },
+      position: {
+        x: 400,
+        y: 400
+      },
+      rotation: 0,
+      isSelected: false,
+      properties: {},
+      groupId: null,
+      zIndex: 0,
+      width: 200,
+      height: 150
+    }
+
+    Object
+      .values(items)
+      .forEach(item => {
+        if (item.type === 'InputNode') {
+          const docItem = {
+            ...cloneDeep(item),
+            id: rand()
+          }
+          const docPort = {
+            ...cloneDeep(ports[item.portIds[0]]),
+            id: rand()
+          }
+          const port = createNewPort(item.rotation, 0, PortType.Input, 'inputNode', icItem.id)
+
+          item.type = 'CircuitNode'
+          item.portIds.unshift(port.id)
+          items[item.id] = item
+          ports[port.id] = port
+          icItem.portIds.push(port.id)
+
+          docItem.portIds = [docPort.id]
+          documentPorts[port.id] = port
+          documentPorts[docPort.id] = docPort
+          documentItems[docItem.id] = docItem
+
+          const docConnection = createConnection(`doc_conn_${rand()}`, docPort.id, port.id)
+          documentConnections[docConnection.id] = docConnection
+        } else if (item.type === 'OutputNode') {
+          const docItem = {
+            ...cloneDeep(item),
+            id: rand()
+          }
+          const docPort = {
+            ...cloneDeep(ports[item.portIds[0]]),
+            id: rand()
+          }
+          const port = createNewPort(item.rotation, 2, PortType.Output, 'outputNode', icItem.id)
+
+          item.type = 'CircuitNode'
+          item.portIds.unshift(port.id)
+          items[item.id] = item
+          ports[port.id] = port
+          icItem.portIds.push(port.id)
+
+          docItem.portIds = [docPort.id]
+          documentPorts[port.id] = port
+          documentPorts[docPort.id] = docPort
+          documentItems[docItem.id] = docItem
+
+          const docConnection = createConnection(`inner_ic_conn_${rand()}`, port.id, docPort.id)
+          documentConnections[docConnection.id] = docConnection
+        }
+      })
+
+    icItem.integratedCircuit = {
+      items,
+      connections,
+      ports
+    }
+    documentItems[icItem.id] = icItem
+
+    const circuit = {
+      connections: documentConnections,
+      items: documentItems,
+      ports: documentPorts
+    }
+
+    console.log('IC: ', JSON.stringify(circuit, null, 2))
+  },
+
   buildCircuit ({ commit, state }) {
     const circuit = new CircuitService(Object.values(state.items), Object.values(state.connections), state.ports)
 
@@ -106,98 +233,85 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     state.circuit.addNode(item, state.ports)
   },
 
-  removeItem ({ commit, dispatch, state }, id: string) {
+  removeFreeport ({ commit, dispatch, state }, id: string) {
     const item = state.items[id]
 
-    if (!item) return
+    let originalSourceId = ''
+    let originalTargetId = ''
 
-    // find all first-degree connections first
-    const connections: Connection[] = Object
-      .values(state.connections)
-      .filter(c => item.portIds.includes(c.source) || item.portIds.includes(c.target))
-
-    connections.forEach(c => {
-      dispatch('removeConnection', { id: c.id, removeLineage: true })
-    })
-
-    if (item.type === 'Freeport' && connections.length === 2) {
-      // if this is a freeport, then reconnect the two disconnected wires
-      dispatch('connect', {
-        source: connections[0].source,
-        target: connections[1].target
-      })
-    }
-
-    // remove the item
-    if (state.items[id]) {
-      state.circuit.removeNode(state.items[id].portIds)
-      commit('REMOVE_ELEMENT', id)
-    }
-  },
-
-  deleteSelection ({ dispatch, state }) {
-    const connection = Object
-      .values(state.connections)
-      .filter(({ isSelected }) => isSelected)
-    const items = Object
-      .values(state.items)
-      .filter(({ isSelected }) => isSelected)
-
-    items.forEach(i => {
-      dispatch('removeItem', i.id)
-    })
-    connection.forEach(c => {
-      dispatch('removeConnection', { id: c.id })
-    })
-  },
-
-  removeConnection ({ dispatch, state }, { id, removeLineage }: { id: string, removeLineage?: boolean }) {
-    const connection = state.connections[id]
-
-    if (!connection) return
-
-    const connections = Object.values(state.connections)
-    const freeportConnectionMap: Record<string, string> = {}
-    const freeportIds: string[] = []
-
+    // find the true source and target port ids
     Object
-      .values(state.items)
-      .filter(({ type }) => type === 'Freeport')
-      .forEach(item => {
-        freeportIds.push(item.id)
-        freeportConnectionMap[item.portIds[0]] = item.portIds[1]
+      .values(state.connections)
+      .forEach(c => {
+        if (c.target === item.portIds[0]) originalSourceId = c.source
+        if (c.source === item.portIds[1]) originalTargetId = c.target
       })
 
-    function getFollowedConnections (conns: Connection[]) {
-      const l = conns.slice(-1).pop()
-
-      if (l && freeportConnectionMap[l.target]) {
-        const c = connections.find(({ source }) => source === freeportConnectionMap[l.target])
-
-        if (c) return getFollowedConnections(conns.concat(c))
-      }
-
-      return conns
+    if (originalSourceId) dispatch('disconnect', { source: originalSourceId, target: item.portIds[0] })
+    if (originalTargetId) dispatch('disconnect', { source: item.portIds[1], target: originalTargetId })
+    if (originalSourceId && originalTargetId) {
+      // reconnect the true source and target
+      dispatch('connect', { source: originalSourceId, target: originalTargetId })
     }
 
-    if (removeLineage) {
-      // remove all related segments of this connection, including freeports
-      getFollowedConnections([connection]).forEach(({ source, target }) => {
-        dispatch('disconnect', { source, target })
-      })
+    // finally, remove the element
+    state.circuit.removeNode(state.items[id].portIds)
+    commit('REMOVE_ELEMENT', id)
+  },
 
-      freeportIds.forEach(id => {
-        dispatch('removeItem', state.items[id]?.id)
-      })
-    } else {
-      // otherwise, remove just this segment
+
+  deleteSelection ({ commit, dispatch, state }) {
+    const connections = Object
+      .values(state.connections)
+      .filter(({ isSelected }) => isSelected)
+    const nonFreeportItems = Object
+      .values(state.items)
+      .filter(({ isSelected, type }) => isSelected && type !== 'Freeport')
+    const nonFreeportItemIds = nonFreeportItems.map(({ id }) => id)
+    const freeportItems = Object
+      .values(state.items)
+      .filter(({ isSelected, type }) => isSelected && type === 'Freeport')
+
+    const removedElementConnections = Object
+      .values(state.connections)
+      .filter(c => {
+        const sourcePort = state.ports[c.source]
+        const targetPort = state.ports[c.target]
+
+        if (sourcePort && targetPort) {
+          return nonFreeportItemIds.includes(sourcePort.elementId) ||
+            nonFreeportItemIds.includes(targetPort.elementId)
+      }
+    })
+
+    connections.forEach(connection => {
       dispatch('disconnect', {
         source: connection.source,
         target: connection.target
       })
+    })
 
-      // TODO: need to reconnect ancestor of source and successor of target
-    }
+    removedElementConnections.forEach(connection => {
+      dispatch('disconnect', {
+        source: connection.source,
+        target: connection.target
+      })
+    })
+
+    nonFreeportItems.forEach(i => {
+      const item = state.items[i.id]
+
+      if (item.integratedCircuit) {
+        Object
+          .values(item.integratedCircuit?.items)
+          .forEach(({ portIds }) => state.circuit.removeNode(portIds))
+      } else {
+        state.circuit.removeNode(state.items[i.id].portIds)
+      }
+      commit('REMOVE_ELEMENT', i.id)
+    })
+
+    freeportItems.forEach(f => dispatch('removeFreeport', f.id))
   },
 
   setSnapBoundaries ({ commit, state }, id: string) {
@@ -534,10 +648,10 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       commit('SET_SELECTION_STATE', { id, isSelected: true })
     })
 
-    dispatch('selectConnections', itemIds)
+    dispatch('selectItemConnections', itemIds)
   },
 
-  selectConnections ({ commit, state }, itemIds: string[]) {
+  selectItemConnections ({ commit, state }, itemIds: string[]) {
     const portIds = itemIds.reduce((portIds: string[], itemId: string) => {
       return portIds.concat(state.items[itemId].portIds)
     }, [])
@@ -587,8 +701,10 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     itemId: string,
     outputPortId: string,
     inputPortId: string,
+    value?: number,
     sourceId?: string,
-    targetId?: string
+    targetId?: string,
+    connectionChainId?: string
   }) {
     if (state.items[data.itemId]) return
 
@@ -596,29 +712,33 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     commit('CREATE_FREEPORT_ELEMENT', data)
     dispatch('setItemBoundingBox', data.itemId)
 
-    state.circuit.addNode(state.items[data.itemId], state.ports)
+    state.circuit.addNode(state.items[data.itemId], state.ports, true, false)
 
     if (data.sourceId && data.targetId) {
       dispatch('disconnect', {
+      // commit('DISCONNECT', {
         source: data.sourceId,
         target: data.targetId
       })
     }
 
-    console.log('DATA:', data)
     if (data.sourceId) {
       dispatch('connect', {
+      // commit('CONNECT', {
         source: data.sourceId,
         target: data.inputPortId,
-        zIndex: getters.nextZIndex
+        zIndex: getters.nextZIndex,
+        connectionChainId: data.connectionChainId
       })
     }
 
     if (data.targetId) {
       dispatch('connect', {
+      // commit('CONNECT', {
         source: data.outputPortId,
         target: data.targetId,
-        zIndex: getters.nextZIndex
+        zIndex: getters.nextZIndex,
+        connectionChainId: data.connectionChainId
       })
     }
   },
@@ -663,24 +783,40 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     if (newPort) {
       if (sourceId) {
         dispatch('connect', {
+        // commit('CONNECT', {
           source: sourceId,
           target: newPort.id
         })
+        dispatch('disconnect', {
+          // commit('CONNECT', {
+          source: sourceId,
+          target: portId
+        })
       } else {
         dispatch('connect', {
+        // commit('CONNECT', {
           source: newPort.id,
           target: targetId
         })
+        dispatch('disconnect', {
+          // commit('CONNECT', {
+          source: portId,
+          target: targetId
+        })
       }
+
     }
 
     const item = Object
       .values(state.items)
       .find(({ portIds }) => portIds.includes(portId))
 
-    console.log('REMOVE? ', item)
+    if (item) {
+      state.circuit.removeNode(item.portIds)
+      commit('REMOVE_ELEMENT', item.id)
+    }
 
-    dispatch('removeItem', item?.id)
+    // commit('REMOVE_ELEMENT', item?.id)
     commit('SET_CONNECTABLE_PORT_IDS', [])
   },
 
@@ -739,8 +875,8 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
   },
 
-  connect ({ commit, getters }, { source, target }: { source: string, target: string }) {
-    commit('CONNECT', { source, target, zIndex: getters.nextZIndex })
+  connect ({ commit, getters }, { source, target, connectionChainId }: { source: string, target: string, connectionChainId?: string }) {
+    commit('CONNECT', { source, target, zIndex: getters.nextZIndex, connectionChainId })
     state.circuit.addConnection(source, target)
   },
 
@@ -797,7 +933,8 @@ const mutations: MutationTree<DocumentState> = {
 
   'SET_PORT_VALUES' (state, valueMap) {
     for (const portId in valueMap) {
-      state.ports[portId].value = valueMap[portId]
+      if (state.ports[portId])
+        state.ports[portId].value = valueMap[portId]
     }
   },
 
@@ -857,10 +994,33 @@ const mutations: MutationTree<DocumentState> = {
 
   'SET_SELECTION_STATE' (state, { id, isSelected }: { id: string, isSelected: boolean }) {
     if (state.items[id]) {
+      // select an individual item
       state.items[id].isSelected = isSelected
     } else if (state.connections[id]) {
-      state.connections[id].isSelected = isSelected
+      const connection = state.connections[id]
+      const freeportIds: string[] = []
+
+      // select all connection segments that are part of this connection chain
+      Object
+        .values(state.connections)
+        .forEach(c => {
+          if (connection.connectionChainId === c.connectionChainId) {
+            const sourcePort = state.ports[c.source]
+            const targetPort = state.ports[c.target]
+
+            c.isSelected = isSelected
+
+            if (sourcePort?.isFreeport) freeportIds.push(sourcePort.elementId)
+            if (targetPort?.isFreeport) freeportIds.push(targetPort.elementId)
+          }
+        })
+
+      // select all freeports that are part of this connection chain
+      freeportIds.forEach(id => {
+        state.items[id].isSelected = isSelected
+      })
     } else if (state.groups[id]) {
+      // select a group
       state.groups[id].isSelected = isSelected
     }
   },
@@ -900,7 +1060,7 @@ const mutations: MutationTree<DocumentState> = {
     state.connectablePortIds = connectablePortIds
   },
 
-  'CONNECT' (state, { source, target, zIndex }) {
+  'CONNECT' (state, { source, target, zIndex, connectionChainId }) {
     const id = `conn_${rand()}`
 
     if (source && target) {
@@ -908,7 +1068,7 @@ const mutations: MutationTree<DocumentState> = {
         id,
         source,
         target,
-        trueTargetId: target,
+        connectionChainId: connectionChainId || id,
         groupId: null,
         zIndex,
         isSelected: false
@@ -960,12 +1120,15 @@ const mutations: MutationTree<DocumentState> = {
 
   'CREATE_FREEPORT_ELEMENT' (
     state,
-    { itemId, inputPortId, outputPortId, position }:
-    { itemId: string, position: Point, outputPortId?: string, inputPortId?: string }
+    { itemId, inputPortId, outputPortId, position, value }:
+    { itemId: string, position: Point, outputPortId?: string, inputPortId?: string,
+      value?: number }
   ) {
+
     const createPort = (id: string, type: PortType, orientation: Direction) => ({
       id,
       type,
+      elementId: itemId,
       orientation,
       isFreeport: true,
       position: {
@@ -973,7 +1136,7 @@ const mutations: MutationTree<DocumentState> = {
         y: 0
       },
       rotation: 0,
-      value: 0
+      value: value || 0
     })
     const portIds: string[] = []
 
