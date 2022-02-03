@@ -18,6 +18,7 @@
     @contextmenu="contextmenu"
   >
     <freeport v-if="type === 'Freeport'" />
+    <integrated-circuit v-else-if="type === 'IntegratedCircuit'" />
     <input-switch
       v-else-if="type === 'InputNode'"
       :value="ports[0].value"
@@ -58,6 +59,7 @@ import { defineComponent, PropType } from 'vue'
 import Draggable from '../components/Draggable.vue'
 import LogicGate from '../components/LogicGate.vue'
 import InputSwitch from '../components/InputSwitch.vue'
+import IntegratedCircuit from '../components/IntegratedCircuit.vue'
 import Lightbulb from '../components/Lightbulb.vue'
 import Freeport from '../components/Freeport.vue'
 import PortSet from '../components/PortSet.vue'
@@ -70,6 +72,7 @@ export default defineComponent({
     LogicGate,
     Freeport,
     InputSwitch,
+    IntegratedCircuit,
     Lightbulb,
     PortSet,
     PortItem
@@ -146,22 +149,24 @@ export default defineComponent({
     portList () {
       const locations = ['left', 'top', 'right', 'bottom']
       const ports = this.ports as Port[]
-
-      return ports.reduce((map: { [l: string]: Port[] }, port: Port) => {
-        if (!port) {
-          console.log('UNDEFINED')
-          return map
-        }
-        return {
+      const map = ports.reduce((map: { [l: string]: Port[] }, port: Port) => ({
           ...map,
           [locations[port.orientation]]: [
             ...map[locations[port.orientation]],
             port
           ]
-        }
-      }, locations.reduce((m, type) => ({
+      }), locations.reduce((m, type) => ({
         ...m, [type]: []
-      }), {}))
+      }), {
+        left: [],
+        top: [],
+        right: [],
+        bottom: []
+      }))
+
+      map.right = map.right.reverse()
+
+      return map
     }
   },
   methods: {

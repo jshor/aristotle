@@ -1,5 +1,6 @@
 <template>
   <wire
+    :title="`from ${source.id} to ${target.id}`"
     :source="source"
     :target="target"
     :top-left="topLeft"
@@ -32,6 +33,10 @@ export default defineComponent({
       type: String,
       default: null
     },
+    connectionChainId: {
+      type: String,
+      default: null
+    },
     isSelected: {
       type: Boolean,
       default: false
@@ -47,6 +52,8 @@ export default defineComponent({
         itemId: '',
         inputPortId: '',
         outputPortId: '',
+        connectionChainId: this.id,
+        value: 0,
         sourceId: '',
         targetId: '',
         position: {}
@@ -131,12 +138,12 @@ export default defineComponent({
           y: this.topLeft.y + relativePosition.y
         }
 
-        console.log('CREATING FREEPORT')
-
         this.newFreeport = {
           itemId: rand(),
           inputPortId: rand(),
           outputPortId: rand(),
+          connectionChainId: this.connectionChainId,
+          value: this.source.value,
           sourceId: this.source.id,
           targetId: this.target.id,
           position: absolutePosition

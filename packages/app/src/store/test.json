@@ -1,0 +1,669 @@
+{
+  "connections": {
+    "doc_conn_id_3237723": {
+      "id": "doc_conn_id_3237723",
+      "source": "id_1830360",
+      "target": "inputNode_id_1987055",
+      "trueTargetId": "inputNode_id_1987055",
+      "groupId": null,
+      "isSelected": false,
+      "zIndex": 0
+    },
+    "doc_conn_id_6286848": {
+      "id": "doc_conn_id_6286848",
+      "source": "id_4504670",
+      "target": "inputNode_id_957339",
+      "trueTargetId": "inputNode_id_957339",
+      "groupId": null,
+      "isSelected": false,
+      "zIndex": 0
+    },
+    "doc_conn_id_191426": {
+      "id": "doc_conn_id_191426",
+      "source": "outputNode_id_3471287",
+      "target": "id_4515684",
+      "trueTargetId": "id_4515684",
+      "groupId": null,
+      "isSelected": false,
+      "zIndex": 0
+    },
+    "doc_conn_id_7600822": {
+      "id": "doc_conn_id_7600822",
+      "source": "outputNode_id_4819483",
+      "target": "id_9829028",
+      "trueTargetId": "id_9829028",
+      "groupId": null,
+      "isSelected": false,
+      "zIndex": 0
+    }
+  },
+  "items": {
+    "id_9737999": {
+      "id": "id_9737999",
+      "type": "InputNode",
+      "portIds": [
+        "id_1830360"
+      ],
+      "position": {
+        "x": 99,
+        "y": 299
+      },
+      "boundingBox": {
+        "left": 99,
+        "top": 299,
+        "bottom": 341,
+        "right": 141
+      },
+      "rotation": 0,
+      "isSelected": false,
+      "properties": {
+        "inputCount": 1
+      },
+      "groupId": null,
+      "zIndex": 2,
+      "width": 42,
+      "height": 42
+    },
+    "id_6269677": {
+      "id": "id_6269677",
+      "type": "InputNode",
+      "portIds": [
+        "id_4504670"
+      ],
+      "position": {
+        "x": 99,
+        "y": 499
+      },
+      "boundingBox": {
+        "left": 99,
+        "top": 499,
+        "bottom": 541,
+        "right": 141
+      },
+      "rotation": 0,
+      "isSelected": false,
+      "groupId": null,
+      "zIndex": 3,
+      "width": 42,
+      "height": 42
+    },
+    "id_9736635": {
+      "id": "id_9736635",
+      "type": "OutputNode",
+      "portIds": [
+        "id_4515684"
+      ],
+      "position": {
+        "x": 699,
+        "y": 299
+      },
+      "boundingBox": {
+        "left": 699,
+        "top": 299,
+        "bottom": 341,
+        "right": 741
+      },
+      "rotation": 0,
+      "isSelected": false,
+      "groupId": null,
+      "zIndex": 3,
+      "width": 42,
+      "height": 42
+    },
+    "id_3302927": {
+      "id": "id_3302927",
+      "type": "OutputNode",
+      "portIds": [
+        "id_9829028"
+      ],
+      "position": {
+        "x": 699,
+        "y": 499
+      },
+      "boundingBox": {
+        "left": 699,
+        "top": 499,
+        "bottom": 541,
+        "right": 741
+      },
+      "rotation": 0,
+      "isSelected": false,
+      "groupId": null,
+      "zIndex": 3,
+      "width": 42,
+      "height": 42
+    },
+    "id_9940890": {
+      "id": "id_9940890",
+      "type": "IntegratedCircuit",
+      "portIds": [
+        "inputNode_id_1987055",
+        "inputNode_id_957339",
+        "outputNode_id_4819483",
+        "outputNode_id_3471287"
+      ],
+      "boundingBox": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "position": {
+        "x": 400,
+        "y": 400
+      },
+      "rotation": 0,
+      "isSelected": false,
+      "properties": {},
+      "groupId": null,
+      "zIndex": 0,
+      "width": 200,
+      "height": 150,
+      "integratedCircuit": {
+        "items": {
+          "nor1": {
+            "id": "nor1",
+            "type": "LogicGate",
+            "portIds": [
+              "nor1InputPort1",
+              "nor1InputPort2",
+              "nor1OutputPort1"
+            ],
+            "position": {
+              "x": 289,
+              "y": 349.5
+            },
+            "boundingBox": {
+              "left": 289,
+              "top": 349.5,
+              "bottom": 400.5,
+              "right": 411
+            },
+            "rotation": 0,
+            "isSelected": false,
+            "properties": {
+              "inputCount": 1
+            },
+            "groupId": null,
+            "zIndex": 0,
+            "width": 122,
+            "height": 51
+          },
+          "nor2": {
+            "id": "nor2",
+            "type": "LogicGate",
+            "portIds": [
+              "nor2InputPort2",
+              "nor2InputPort1",
+              "nor2OutputPort1"
+            ],
+            "position": {
+              "x": 299,
+              "y": 500
+            },
+            "boundingBox": {
+              "left": 299,
+              "top": 500,
+              "bottom": 551,
+              "right": 421
+            },
+            "rotation": 0,
+            "isSelected": false,
+            "properties": {
+              "inputCount": 1
+            },
+            "groupId": null,
+            "zIndex": 1,
+            "width": 122,
+            "height": 51
+          },
+          "switch1": {
+            "id": "switch1",
+            "type": "CircuitNode",
+            "portIds": [
+              "inputNode_id_1987055",
+              "switchOutputPort1"
+            ],
+            "position": {
+              "x": 99,
+              "y": 299
+            },
+            "boundingBox": {
+              "left": 99,
+              "top": 299,
+              "bottom": 341,
+              "right": 141
+            },
+            "rotation": 0,
+            "isSelected": false,
+            "properties": {
+              "inputCount": 1
+            },
+            "groupId": null,
+            "zIndex": 2,
+            "width": 42,
+            "height": 42
+          },
+          "switch2": {
+            "id": "switch2",
+            "type": "CircuitNode",
+            "portIds": [
+              "inputNode_id_957339",
+              "switchOutputPort2"
+            ],
+            "position": {
+              "x": 99,
+              "y": 499
+            },
+            "boundingBox": {
+              "left": 99,
+              "top": 499,
+              "bottom": 541,
+              "right": 141
+            },
+            "rotation": 0,
+            "isSelected": false,
+            "groupId": null,
+            "zIndex": 3,
+            "width": 42,
+            "height": 42
+          },
+          "lightbulb1": {
+            "id": "lightbulb1",
+            "type": "CircuitNode",
+            "portIds": [
+              "outputNode_id_3471287",
+              "lightbulbInputPort1"
+            ],
+            "position": {
+              "x": 699,
+              "y": 299
+            },
+            "boundingBox": {
+              "left": 699,
+              "top": 299,
+              "bottom": 341,
+              "right": 741
+            },
+            "rotation": 0,
+            "isSelected": false,
+            "groupId": null,
+            "zIndex": 3,
+            "width": 42,
+            "height": 42
+          },
+          "lightbulb2": {
+            "id": "lightbulb2",
+            "type": "CircuitNode",
+            "portIds": [
+              "outputNode_id_4819483",
+              "lightbulbInputPort2"
+            ],
+            "position": {
+              "x": 699,
+              "y": 499
+            },
+            "boundingBox": {
+              "left": 699,
+              "top": 499,
+              "bottom": 541,
+              "right": 741
+            },
+            "rotation": 0,
+            "isSelected": false,
+            "groupId": null,
+            "zIndex": 3,
+            "width": 42,
+            "height": 42
+          }
+        },
+        "connections": {
+          "switch1_nor1_conn": {
+            "id": "switch1_nor1_conn",
+            "source": "switchOutputPort1",
+            "target": "nor1InputPort1",
+            "trueTargetId": "nor1InputPort1",
+            "isSelected": false,
+            "groupId": null,
+            "zIndex": 5
+          },
+          "switch2_nor2_conn": {
+            "id": "switch2_nor2_conn",
+            "source": "switchOutputPort2",
+            "target": "nor2InputPort1",
+            "trueTargetId": "nor2InputPort1",
+            "isSelected": false,
+            "groupId": null,
+            "zIndex": 5
+          },
+          "nor1_nor2_conn": {
+            "id": "nor1_nor2_conn",
+            "source": "nor1OutputPort1",
+            "target": "nor2InputPort2",
+            "trueTargetId": "nor2InputPort2",
+            "isSelected": false,
+            "groupId": null,
+            "zIndex": 5
+          },
+          "nor2_nor1_conn": {
+            "id": "nor2_nor1_conn",
+            "source": "nor2OutputPort1",
+            "target": "nor1InputPort2",
+            "trueTargetId": "nor1InputPort2",
+            "isSelected": false,
+            "groupId": null,
+            "zIndex": 5
+          },
+          "nor1_lightbulb1_conn": {
+            "id": "nor1_lightbulb1_conn",
+            "source": "nor1OutputPort1",
+            "target": "lightbulbInputPort1",
+            "trueTargetId": "lightbulbInputPort1",
+            "isSelected": false,
+            "groupId": null,
+            "zIndex": 5
+          },
+          "nor2_lightbulb2_conn": {
+            "id": "nor2_lightbulb2_conn",
+            "source": "nor2OutputPort1",
+            "target": "lightbulbInputPort2",
+            "trueTargetId": "lightbulbInputPort2",
+            "isSelected": false,
+            "groupId": null,
+            "zIndex": 5
+          }
+        },
+        "ports": {
+          "nor1InputPort1": {
+            "id": "nor1InputPort1",
+            "elementId": "nor1",
+            "position": {
+              "x": 289,
+              "y": 362
+            },
+            "type": 1,
+            "rotation": 0,
+            "orientation": 0,
+            "value": 0,
+            "isFreeport": false
+          },
+          "nor1InputPort2": {
+            "id": "nor1InputPort2",
+            "elementId": "nor1",
+            "position": {
+              "x": 289,
+              "y": 387
+            },
+            "type": 1,
+            "rotation": 0,
+            "orientation": 0,
+            "value": 0,
+            "isFreeport": false
+          },
+          "nor1OutputPort1": {
+            "id": "nor1OutputPort1",
+            "elementId": "nor1",
+            "position": {
+              "x": 411,
+              "y": 375
+            },
+            "type": 0,
+            "rotation": 0,
+            "orientation": 2,
+            "value": 0,
+            "isFreeport": false
+          },
+          "nor2InputPort1": {
+            "id": "nor2InputPort1",
+            "elementId": "nor2",
+            "position": {
+              "x": 299,
+              "y": 537.5
+            },
+            "type": 1,
+            "rotation": 0,
+            "orientation": 0,
+            "value": 0,
+            "isFreeport": false
+          },
+          "nor2InputPort2": {
+            "id": "nor2InputPort2",
+            "elementId": "nor2",
+            "position": {
+              "x": 299,
+              "y": 512.5
+            },
+            "type": 1,
+            "rotation": 0,
+            "orientation": 0,
+            "value": 0,
+            "isFreeport": false
+          },
+          "nor2OutputPort1": {
+            "id": "nor2OutputPort1",
+            "elementId": "nor2",
+            "position": {
+              "x": 421,
+              "y": 525.5
+            },
+            "type": 0,
+            "rotation": 0,
+            "orientation": 2,
+            "value": 0,
+            "isFreeport": false
+          },
+          "switchOutputPort1": {
+            "id": "switchOutputPort1",
+            "elementId": "switch1",
+            "position": {
+              "x": 141,
+              "y": 320
+            },
+            "type": 0,
+            "rotation": 0,
+            "orientation": 2,
+            "value": 0,
+            "isFreeport": false
+          },
+          "switchOutputPort2": {
+            "id": "switchOutputPort2",
+            "elementId": "switch2",
+            "position": {
+              "x": 141,
+              "y": 520
+            },
+            "type": 0,
+            "rotation": 0,
+            "orientation": 2,
+            "value": 0,
+            "isFreeport": false
+          },
+          "lightbulbInputPort1": {
+            "id": "lightbulbInputPort1",
+            "elementId": "lightbulb1",
+            "position": {
+              "x": 699,
+              "y": 320
+            },
+            "type": 1,
+            "rotation": 0,
+            "orientation": 0,
+            "value": 0,
+            "isFreeport": false
+          },
+          "lightbulbInputPort2": {
+            "id": "lightbulbInputPort2",
+            "elementId": "lightbulb2",
+            "position": {
+              "x": 699,
+              "y": 520
+            },
+            "type": 1,
+            "rotation": 0,
+            "orientation": 0,
+            "value": 0,
+            "isFreeport": false
+          },
+          "inputNode_id_1987055": {
+            "id": "inputNode_id_1987055",
+            "elementId": "id_9940890",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "rotation": 0,
+            "orientation": 0,
+            "type": 1,
+            "value": 0,
+            "isFreeport": false
+          },
+          "inputNode_id_957339": {
+            "id": "inputNode_id_957339",
+            "elementId": "id_9940890",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "rotation": 0,
+            "orientation": 0,
+            "type": 1,
+            "value": 0,
+            "isFreeport": false
+          },
+          "outputNode_id_3471287": {
+            "id": "outputNode_id_3471287",
+            "elementId": "id_9940890",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "rotation": 0,
+            "orientation": 2,
+            "type": 0,
+            "value": 0,
+            "isFreeport": false
+          },
+          "outputNode_id_4819483": {
+            "id": "outputNode_id_4819483",
+            "elementId": "id_9940890",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "rotation": 0,
+            "orientation": 2,
+            "type": 0,
+            "value": 0,
+            "isFreeport": false
+          }
+        }
+      }
+    }
+  },
+  "ports": {
+    "inputNode_id_1987055": {
+      "id": "inputNode_id_1987055",
+      "elementId": "id_9940890",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "rotation": 0,
+      "orientation": 0,
+      "type": 1,
+      "value": 0,
+      "isFreeport": false
+    },
+    "id_1830360": {
+      "id": "id_1830360",
+      "elementId": "switch1",
+      "position": {
+        "x": 141,
+        "y": 320
+      },
+      "type": 0,
+      "rotation": 0,
+      "orientation": 2,
+      "value": 0,
+      "isFreeport": false
+    },
+    "inputNode_id_957339": {
+      "id": "inputNode_id_957339",
+      "elementId": "id_9940890",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "rotation": 0,
+      "orientation": 0,
+      "type": 1,
+      "value": 0,
+      "isFreeport": false
+    },
+    "id_4504670": {
+      "id": "id_4504670",
+      "elementId": "switch2",
+      "position": {
+        "x": 141,
+        "y": 520
+      },
+      "type": 0,
+      "rotation": 0,
+      "orientation": 2,
+      "value": 0,
+      "isFreeport": false
+    },
+    "outputNode_id_3471287": {
+      "id": "outputNode_id_3471287",
+      "elementId": "id_9940890",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "rotation": 0,
+      "orientation": 2,
+      "type": 0,
+      "value": 0,
+      "isFreeport": false
+    },
+    "id_4515684": {
+      "id": "id_4515684",
+      "elementId": "lightbulb1",
+      "position": {
+        "x": 699,
+        "y": 320
+      },
+      "type": 1,
+      "rotation": 0,
+      "orientation": 0,
+      "value": 0,
+      "isFreeport": false
+    },
+    "outputNode_id_4819483": {
+      "id": "outputNode_id_4819483",
+      "elementId": "id_9940890",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "rotation": 0,
+      "orientation": 2,
+      "type": 0,
+      "value": 0,
+      "isFreeport": false
+    },
+    "id_9829028": {
+      "id": "id_9829028",
+      "elementId": "lightbulb2",
+      "position": {
+        "x": 699,
+        "y": 520
+      },
+      "type": 1,
+      "rotation": 0,
+      "orientation": 0,
+      "value": 0,
+      "isFreeport": false
+    }
+  }
+}

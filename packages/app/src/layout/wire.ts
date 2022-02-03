@@ -65,7 +65,7 @@ export function inflectDirection (direction: number, a: Point, b: Point) {
  * @param {Point} b - the target point
  * @returns {number}
  */
-export function getPortDirection (port, a: Point, b: Point) {
+export function getPortDirection (port: Port, a: Point, b: Point) {
   // the true direction needs to take into account inherent orientation + its rotation
   // bezier index directions are one integer off (see computeBezier()) -- subtract by 1
   let direction = rotate(port.orientation + port.rotation - 1)
