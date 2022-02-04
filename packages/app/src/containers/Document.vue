@@ -18,6 +18,8 @@
         <button @click="addSwitch">Add switch</button>
         <button @click="deleteSelection">Delete selection</button>
         <button @click="saveIntegratedCircuit">Build IC</button>
+        <button @click="undo" :disabled="!canUndo">Undo</button>
+        <button @click="redo" :disabled="!canRedo">Redo</button>
 
       </div>
 
@@ -116,6 +118,8 @@ export default defineComponent({
       'waves'
     ]),
     ...mapGetters([
+      'canUndo',
+      'canRedo',
       'items',
       'zoom',
       'connections',
@@ -212,7 +216,9 @@ export default defineComponent({
       'selectConnection',
       'rotate',
       'buildCircuit',
-      'saveIntegratedCircuit'
+      'saveIntegratedCircuit',
+      'undo',
+      'redo'
     ])
   }
 })

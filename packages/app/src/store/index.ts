@@ -17,6 +17,9 @@ import { cloneDeep } from 'lodash' // TODO
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
 export interface DocumentState {
+  cachedState: string | null
+  undoStack: string[]
+  redoStack: string[]
   snapBoundaries: BoundingBox[]
   connectablePortIds: string[]
   ports: {
@@ -33,14 +36,23 @@ export interface DocumentState {
   }
   zoomLevel: number
   circuit: CircuitService,
-  waves: any
+  waves: any,
+  activeFreeportId: string | null
 }
 
 const state: DocumentState = {
+  cachedState: null,
+  activeFreeportId: null,
+  undoStack: [],
+  redoStack: [],
   snapBoundaries: [],
   connectablePortIds: [],
   circuit: new CircuitService([], [], {}),
-  waves: {},
+  waves: {
+    waves: {},
+    secondsElapsed: 0,
+    secondsOffset: 0
+  },
   groups: {}, // TODO: remove
   zoomLevel: 1,
   ...sample
@@ -83,6 +95,14 @@ const getters: GetterTree<DocumentState, DocumentState> = {
 
   nextZIndex (state) {
     return Object.keys(state.items).length + Object.keys(state.connections).length
+  },
+
+  canUndo (state) {
+    return state.undoStack.length > 0
+  },
+
+  canRedo (state) {
+    return state.redoStack.length > 0
   }
 }
 
@@ -227,6 +247,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   },
 
   addItem ({ commit, dispatch, state }, { item, ports }: { item: Item, ports: Port[] }) {
+    dispatch('commitState')
     commit('ADD_ELEMENT', { item, ports })
     dispatch('setItemPortPositions', item.id)
 
@@ -259,20 +280,47 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     commit('REMOVE_ELEMENT', id)
   },
 
+  cacheState ({ commit }) {
+    commit('CACHE_STATE')
+  },
+
+  undo ({ commit, state }) {
+    const undoState = state.undoStack.slice(-1)
+
+    if (undoState) {
+      commit('CACHE_STATE')
+      commit('COMMIT_TO_REDO')
+      commit('APPLY_STATE', undoState)
+      commit('REMOVE_LAST_UNDO_STATE')
+    }
+  },
+
+  redo ({ commit, state }) {
+    const redoState = state.redoStack.slice(-1)
+
+    if (redoState) {
+      commit('CACHE_STATE')
+      commit('COMMIT_TO_UNDO')
+      commit('APPLY_STATE', redoState)
+      commit('REMOVE_LAST_REDO_STATE')
+    }
+  },
+
+  commitState ({ commit }) {
+    commit('CACHE_STATE')
+    commit('COMMIT_CACHED_STATE')
+  },
 
   deleteSelection ({ commit, dispatch, state }) {
-    const connections = Object
-      .values(state.connections)
-      .filter(({ isSelected }) => isSelected)
+    dispatch('commitState')
+
     const nonFreeportItems = Object
       .values(state.items)
       .filter(({ isSelected, type }) => isSelected && type !== 'Freeport')
     const nonFreeportItemIds = nonFreeportItems.map(({ id }) => id)
-    const freeportItems = Object
-      .values(state.items)
-      .filter(({ isSelected, type }) => isSelected && type === 'Freeport')
 
-    const removedElementConnections = Object
+    // select the full chains of each connection attached to each selected item
+    Object
       .values(state.connections)
       .filter(c => {
         const sourcePort = state.ports[c.source]
@@ -281,23 +329,22 @@ const actions: ActionTree<DocumentState, DocumentState> = {
         if (sourcePort && targetPort) {
           return nonFreeportItemIds.includes(sourcePort.elementId) ||
             nonFreeportItemIds.includes(targetPort.elementId)
-      }
-    })
-
-    connections.forEach(connection => {
-      dispatch('disconnect', {
-        source: connection.source,
-        target: connection.target
+        }
       })
-    })
+      .forEach(({ id }) => dispatch('toggleSelectionState', { id, forcedValue: true }))
 
-    removedElementConnections.forEach(connection => {
-      dispatch('disconnect', {
-        source: connection.source,
-        target: connection.target
+    // remove all selected connections
+    Object
+      .values(state.connections)
+      .filter(({ isSelected }) => isSelected)
+      .forEach(connection => {
+        dispatch('disconnect', {
+          source: connection.source,
+          target: connection.target
+        })
       })
-    })
 
+    // delete all selected non-freeport items
     nonFreeportItems.forEach(i => {
       const item = state.items[i.id]
 
@@ -311,7 +358,11 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       commit('REMOVE_ELEMENT', i.id)
     })
 
-    freeportItems.forEach(f => dispatch('removeFreeport', f.id))
+  // handle selected freeport deletions using removeFreeport
+  Object
+    .values(state.items)
+    .filter(({ isSelected, type }) => isSelected && type === 'Freeport')
+    .forEach(f => dispatch('removeFreeport', f.id))
   },
 
   setSnapBoundaries ({ commit, state }, id: string) {
@@ -486,6 +537,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       return dispatch('moveGroupPosition', { id: item.groupId, delta })
     }
 
+    commit('COMMIT_CACHED_STATE')
     commit('SET_ELEMENT_POSITION', { id, position })
     commit('SET_ELEMENT_BOUNDING_BOX', {
       id,
@@ -517,6 +569,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   moveGroupPosition ({ commit, dispatch, state }, { id, delta }: { id: string, delta: Point }) {
     const group = state.groups[id]
 
+    commit('COMMIT_CACHED_STATE')
     commit('SET_GROUP_BOUNDING_BOX', {
       boundingBox: {
         left: group.boundingBox.left + delta.x,
@@ -598,6 +651,8 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   },
 
   group ({ commit, dispatch, state }) {
+    dispatch('commitState')
+
     const id = rand()
     const itemIds = Object
       .keys(state.items)
@@ -610,7 +665,9 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     dispatch('setGroupBoundingBox', id)
   },
 
-  ungroup ({ commit, state }) {
+  ungroup ({ commit, dispatch, state }) {
+    dispatch('commitState')
+
     for (const id in state.groups) {
       if (state.groups[id].isSelected) {
         commit('UNGROUP', id)
@@ -708,9 +765,14 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   }) {
     if (state.items[data.itemId]) return
 
+    if (data.sourceId && data.targetId) {
+      dispatch('commitState')
+    }
+
     dispatch('deselectAll')
     commit('CREATE_FREEPORT_ELEMENT', data)
     dispatch('setItemBoundingBox', data.itemId)
+    dispatch('setActiveFreeportId', data.itemId)
 
     state.circuit.addNode(state.items[data.itemId], state.ports, true, false)
 
@@ -781,6 +843,8 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       })
 
     if (newPort) {
+      dispatch('commitState')
+
       if (sourceId) {
         dispatch('disconnect', {
           // commit('CONNECT', {
@@ -821,6 +885,8 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   },
 
   rotate ({ commit, dispatch, state }, direction: number) {
+    dispatch('commitState')
+
     for (const id in state.groups) {
       const group = state.groups[id]
 
@@ -876,7 +942,6 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   },
 
   connect ({ commit, getters }, { source, target, connectionChainId }: { source: string, target: string, connectionChainId?: string }) {
-    console.log('connecting: ', source, target)
     commit('CONNECT', { source, target, zIndex: getters.nextZIndex, connectionChainId })
     state.circuit.addConnection(source, target)
   },
@@ -920,10 +985,112 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   setPortValue ({ commit, state }, { id, value }: { id: string, value: number }) {
     commit('SET_PORT_VALUES', { [id]: value })
     state.circuit.setPortValue(id, value)
+  },
+
+  setActiveFreeportId ({ commit }, activeFreeportId: string) {
+    commit('SET_ACTIVE_FREEPORT_ID', activeFreeportId)
   }
 }
 
 const mutations: MutationTree<DocumentState> = {
+  'CACHE_STATE' (state) {
+    state.cachedState = JSON.stringify({
+      connections: state.connections,
+      items: state.items,
+      ports: state.ports,
+      groups: state.groups
+    })
+  },
+
+  'COMMIT_CACHED_STATE' (state) {
+    if (state.cachedState) {
+      state.undoStack.push(state.cachedState.toString())
+      state.cachedState = null
+
+      while (state.redoStack.length > 0) {
+        state.redoStack.pop()
+      }
+    }
+  },
+
+  'COMMIT_TO_REDO' (state) {
+    if (state.cachedState) {
+      state.redoStack.push(state.cachedState)
+      state.cachedState = null
+    }
+  },
+
+  'COMMIT_TO_UNDO' (state) {
+    if (state.cachedState) {
+      state.undoStack.push(state.cachedState)
+      state.cachedState = null
+    }
+  },
+
+  'REMOVE_LAST_UNDO_STATE' (state) {
+    state.undoStack.pop()
+  },
+
+  'REMOVE_LAST_REDO_STATE' (state) {
+    state.redoStack.pop()
+  },
+
+  'APPLY_STATE' (state, savedState: string) {
+    // console.log('APPLYING: ', JSON.stringify(JSON.parse(savedState), null, 2))
+    const { items, connections, ports, groups } = JSON.parse(savedState) as {
+      items: { [id: string]: Item },
+      connections: { [id: string]: Connection },
+      ports: { [id: string]: Port },
+      groups: { [id: string]: Group },
+    }
+
+    /* returns everything in a not in b */
+    function getExcludedMembers (a: { [id: string]: BaseItem }, b: { [id: string]: BaseItem }) {
+      const aIds = Object.keys(a)
+      const bIds = Object.keys(b)
+
+      return aIds.filter(id => !bIds.includes(id))
+    }
+
+    // find all items and connections in current state that are not in undo state and remove them from the circuit
+    const removedItems = getExcludedMembers(state.items, items)
+    const removedConnections = getExcludedMembers(state.connections, connections)
+
+    // add any new items from the undone state to the circuit
+    const addedItems = getExcludedMembers(items, state.items)
+    const addedConnections = getExcludedMembers(connections, state.connections)
+
+    state.circuit.pause() // pause the circuit to prevent interruption
+
+    removedConnections.forEach(id => {
+      const connection = state.connections[id]
+
+      state.circuit.removeConnection(connection.source, connection.target)
+    })
+    removedItems.forEach(id => {
+      state.circuit.removeNode(state.items[id].portIds)
+    })
+
+    state.ports = ports
+    state.items = items
+    state.connections = connections
+    state.groups = groups
+
+    addedItems.forEach(id => {
+      state.circuit.addNode(items[id], ports)
+      state.items[id].isSelected = true
+    })
+    addedConnections.forEach(id => {
+      const connection = connections[id]
+
+      state.connections[id].isSelected = true
+      state.circuit.addConnection(connection.source, connection.target)
+    })
+
+    // continue the circuit simulation
+    state.circuit.unpause()
+  },
+
   'SET_CIRCUIT' (state, circuit: CircuitService) {
     state.circuit = circuit
   },
@@ -1181,6 +1348,10 @@ const mutations: MutationTree<DocumentState> = {
         state.ports[portId].rotation = rotation
       })
   },
+
+  'SET_ACTIVE_FREEPORT_ID' (state, activeFreeportId: string) {
+    state.activeFreeportId = activeFreeportId
+  }
 }
 
 export default createStore({
