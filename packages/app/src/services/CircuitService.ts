@@ -16,6 +16,8 @@ export default class CircuitService {
 
   fn: Function = () => {}
 
+  isPaused: boolean = false
+
   payload: any = {
     waves: {},
     secondsElapsed: 0,
@@ -39,7 +41,18 @@ export default class CircuitService {
 
   debugMode: boolean = false
 
+  pause = () => {
+    this.isPaused = true
+  }
+
+  unpause = () => {
+    this.isPaused = false
+    this.fn(this.valueMap, this.payload)
+  }
+
   step = (force = false) => {
+    if (this.isPaused) return
+
     if (!this.circuit.isComplete() || force) {
       this.circuit.next()
 

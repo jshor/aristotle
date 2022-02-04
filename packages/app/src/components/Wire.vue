@@ -125,7 +125,7 @@ export default defineComponent({
   }
 
   &--selected {
-    opacity: 0.5;
+    filter: sepia(1) contrast(200%);
   }
 }
 

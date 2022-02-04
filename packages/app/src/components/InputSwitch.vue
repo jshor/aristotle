@@ -32,8 +32,6 @@ export default defineComponent({
       $event.preventDefault()
       $event.stopPropagation()
 
-      console.log('EVENT: ', $event)
-
       this.$emit('toggle', this.value === 1 ? -1 : 1)
 
       return false

@@ -11,6 +11,7 @@
     :zoom="zoom"
     :bounding-box="boundingBox"
     @contextmenu="onContextMenu"
+    @drag-start="cacheState"
     @drag="delta => moveGroupPosition({ id, delta })"
     @mousedown="$event => $emit('select', { $event, id })"
   >
@@ -53,6 +54,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions([
+      'cacheState',
       'moveGroupPosition'
     ]),
 

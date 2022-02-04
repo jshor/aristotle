@@ -115,6 +115,7 @@ export default defineComponent({
         x: $event.clientX,
         y: $event.clientY
       }
+      this.$emit('select', $event)
     },
 
     mousemove ($event: MouseEvent) {

@@ -12,7 +12,7 @@
     :snap-boundaries="snapBoundaries"
     :bounding-box="boundingBox"
     :force-dragging="forceDragging"
-    @drag-start="setSnapBoundaries(id)"
+    @drag-start="dragStart"
     @drag="position => setItemPosition({ id, position })"
     @mousedown="mousedown"
     @contextmenu="contextmenu"
@@ -133,14 +133,16 @@ export default defineComponent({
 
     observer.observe(this.$el)
 
-    if (this.isSelected) {
+    if (this.activeFreeportId === this.id) {
       // if the item is selected when it is created, then it is actively being drawn
       // allow for it to be moved when the mouse moves on first creation
       this.forceDragging = true
+      this.setActiveFreeportId(null)
     }
   },
   computed: {
     ...mapState([
+      'activeFreeportId',
       'snapBoundaries'
     ]),
     ...mapGetters([
@@ -170,10 +172,9 @@ export default defineComponent({
     }
   },
   methods: {
-    filterByOrientation (orientation: number): Port[] {
-      return (this.ports as Port[]).filter(p => p.orientation === orientation)
-    },
     ...mapActions([
+      'cacheState',
+      'setActiveFreeportId',
       'setSnapBoundaries',
       'setItemSize',
       'setItemPosition',
@@ -184,6 +185,13 @@ export default defineComponent({
       if (target) {
         this.setItemSize({ id: this.id, rect: target.contentRect })
       }
+    },
+
+    dragStart () {
+      if (this.type !== 'Freeport') {
+        this.cacheState()
+      }
+      this.setSnapBoundaries(this.id)
     },
 
     mousedown ($event: MouseEvent) {
@@ -204,8 +212,8 @@ export default defineComponent({
 })
 </script>
 
-<style scoped>
+<style lang="scss">
 .item--selected {
-  opacity: 0.5; /* TODO: only temporary */
+  filter: sepia(1) contrast(200%);
 }
 </style>
