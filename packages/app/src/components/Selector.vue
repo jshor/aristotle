@@ -60,30 +60,31 @@ export default defineComponent({
     window.removeEventListener('mouseup', this.mouseup)
   },
   methods: {
-    getPosition (event) {
+    getPosition ($event: MouseEvent) {
       const { top, left } = (this.$el as any).getBoundingClientRect()
-      const x = (event.x - left) / this.zoom
-      const y = (event.y - top) / this.zoom
+      const x = ($event.x - left) / this.zoom
+      const y = ($event.y - top) / this.zoom
 
       return { x, y }
     },
-    mousedown (event) {
-      const position = this.getPosition(event)
+
+    mousedown ($event: MouseEvent) {
+      const position = this.getPosition($event)
 
       this.selection = true
       this.start = position
       this.end = position
 
-      this.$emit('selectionStart', event)
+      this.$emit('selectionStart', $event)
     },
 
-    mousemove (event) {
+    mousemove ($event: MouseEvent) {
       if (this.selection) {
-        this.end = this.getPosition(event)
+        this.end = this.getPosition($event)
       }
     },
 
-    mouseup (event) {
+    mouseup () {
       if (this.selection) {
         this.createSelection()
 
@@ -96,7 +97,17 @@ export default defineComponent({
     },
 
     createSelection () {
-      this.$emit('selectionEnd', (this.$refs.selection as any).getBoundingClientRect())
+      const left = Math.min(this.start.x, this.end.x)
+      const top = Math.min(this.start.y, this.end.y)
+      const width = Math.abs(this.start.x - this.end.x)
+      const height = Math.abs(this.start.y - this.end.y)
+
+      this.$emit('selectionEnd', {
+        left,
+        top,
+        bottom: height + top,
+        right: left + width
+      })
     }
   }
 })

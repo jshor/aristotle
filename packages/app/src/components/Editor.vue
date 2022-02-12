@@ -160,19 +160,8 @@ export default defineComponent({
      *
      * @emits `selection`
      */
-    selectionEnd (rect: DOMRect) {
-      const point = this.fromDocumentToEditorCoordinates({
-        x: rect.x,
-        y: rect.y
-      })
-      const boundingBox: BoundingBox = {
-        left: point.x,
-        top: point.y,
-        right: point.x + rect.width,
-        bottom: point.y + rect.height
-      }
-
-      this.$emit('selection', boundingBox)
+    selectionEnd (boundary: BoundingBox) {
+      this.$emit('selection', boundary)
     },
 
     /**

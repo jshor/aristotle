@@ -31,7 +31,7 @@ export default class OscillationService {
    * Starts the oscillator.
    */
   start = (): void => {
-    this.interval = setInterval(this.tick.bind(this))
+    this.interval = window.setInterval(this.tick.bind(this))
   }
 
   /**

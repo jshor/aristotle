@@ -6,22 +6,7 @@
     </div>
 
     <div class="documents__panel">
-      <div class="documents__toolbar">
-        Grid size: <input type="number" v-model.number="gridSize" /><br />
-
-        <button @click="rotate(-1)">Rotate 90&deg; CCW</button>
-        <button @click="rotate(1)">Rotate 90&deg; CW</button><br />
-        <button @click="group">Group</button>
-        <button @click="ungroup">Ungroup</button>
-        <button @click="addLogicGate">Add NOR</button>
-        <button @click="addLightbulb">Add lightbulb</button>
-        <button @click="addSwitch">Add switch</button>
-        <button @click="deleteSelection">Delete selection</button>
-        <button @click="saveIntegratedCircuit">Build IC</button>
-        <button @click="undo" :disabled="!canUndo">Undo</button>
-        <button @click="redo" :disabled="!canRedo">Redo</button>
-
-      </div>
+      <toolbar />
 
       <div class="documents__editor">
         <editor
@@ -85,22 +70,7 @@ import Oscilloscope from '../components/Oscilloscope.vue'
 import Connection from './Connection.vue'
 import Group from './Group.vue'
 import Item from './Item.vue'
-
-const rand = () => `id_${(Math.floor(Math.random() * 10000000000000) + 5)}` // TODO: use uuid
-
-const createPort = (elementId, id, orientation, type): Port => ({
-  id,
-  orientation,
-  position: {
-    x: 0,
-    y: 0
-  },
-  type,
-  rotation: 0,
-  elementId,
-  value: 0,
-  isFreeport: false
-})
+import Toolbar from './Toolbar.vue'
 
 export default defineComponent({
   name: 'Document',
@@ -109,7 +79,8 @@ export default defineComponent({
     Oscilloscope,
     Connection,
     Group,
-    Item
+    Item,
+    Toolbar
   },
   computed: {
     ...mapState([
@@ -148,77 +119,14 @@ export default defineComponent({
 
       this.toggleSelectionState({ id })
     },
-
-    addNewItem (id: string, type: string, width: number, height: number, ports: Port[] = []) {
-      const item: Item = {
-        id,
-        type,
-        portIds: ports.map(({ id }) => id),
-        position: { x: 400, y: 400 },
-        rotation: 0,
-        isSelected: false,
-        properties: {
-          inputCount: 1
-        },
-        boundingBox: {
-          left: 400,
-          right: 400 + width,
-          top: 400,
-          bottom: 400 + height
-        },
-        groupId: null,
-        zIndex: 0,
-        width,
-        height
-      }
-
-      this.addItem({ item, ports })
-    },
-
-    addLogicGate () {
-      const elementId = rand()
-
-      this.addNewItem(elementId, 'LogicGate', 100, 150, [
-        createPort(elementId, rand(), 0, 1),
-        createPort(elementId, rand(), 0, 1),
-        createPort(elementId, rand(), 2, 0)
-      ])
-    },
-
-    addLightbulb () {
-      const elementId = rand()
-
-      this.addNewItem(elementId, 'OutputNode', 40, 40, [
-        createPort(elementId, rand(), 0, 1)
-      ])
-    },
-
-    addSwitch () {
-      const elementId = rand()
-
-      this.addNewItem(elementId, 'InputNode', 40, 40, [
-        createPort(elementId, rand(), 2, 0)
-      ])
-    },
-
     ...mapActions([
       'addItem',
-      'connect',
-      'disconnect',
-      'selectAll',
       'deselectAll',
-      'deleteSelection',
       'toggleSelectionState',
-      'group',
-      'ungroup',
       'setZoom',
       'createSelection',
       'selectConnection',
-      'rotate',
-      'buildCircuit',
-      'saveIntegratedCircuit',
-      'undo',
-      'redo'
+      'buildCircuit'
     ])
   }
 })
