@@ -15,7 +15,6 @@
     @drag-start="dragStart"
     @drag="position => setItemPosition({ id, position })"
     @mousedown="mousedown"
-    @contextmenu="contextmenu"
   >
     <freeport v-if="type === 'Freeport'" />
     <integrated-circuit v-else-if="type === 'IntegratedCircuit'" />
@@ -28,7 +27,10 @@
       v-else-if="type === 'OutputNode'"
       :value="ports[0].value"
     />
-    <logic-gate v-else />
+    <logic-gate
+      v-else
+      :input-count="properties.inputCount?.value"
+    />
     <port-set>
       <template
         v-for="(ports, orientation) in portList"
@@ -49,6 +51,12 @@
         />
       </template>
     </port-set>
+    <properties
+      v-if="isPropertiesEnabled"
+      :properties="properties"
+      :id="id"
+      @update="setProperties"
+    />
   </draggable>
 </template>
 
@@ -64,6 +72,7 @@ import Lightbulb from '../components/Lightbulb.vue'
 import Freeport from '../components/Freeport.vue'
 import PortSet from '../components/PortSet.vue'
 import PortItem from './PortItem.vue'
+import Properties from '../components/Properties.vue'
 
 export default defineComponent({
   name: 'Item',
@@ -75,7 +84,8 @@ export default defineComponent({
     IntegratedCircuit,
     Lightbulb,
     PortSet,
-    PortItem
+    PortItem,
+    Properties
   },
   props: {
     position: {
@@ -86,7 +96,7 @@ export default defineComponent({
       })
     },
     boundingBox: {
-      type: Object,
+      type: Object as PropType<BoundingBox>,
       default: () => ({
         left: 0,
         top: 0,
@@ -111,7 +121,7 @@ export default defineComponent({
       default: () => []
     },
     properties: {
-      type: Object,
+      type: Object as PropType<PropertySet>,
       default: () => ({})
     },
     groupId: {
@@ -125,7 +135,8 @@ export default defineComponent({
   },
   data () {
     return {
-      forceDragging: false
+      forceDragging: false,
+      showProperties: false,
     }
   },
   mounted () {
@@ -139,6 +150,11 @@ export default defineComponent({
       this.forceDragging = true
       this.setActiveFreeportId(null)
     }
+
+    this.setProperties({
+      id: this.id,
+      properties: this.properties
+    })
   },
   computed: {
     ...mapState([
@@ -146,8 +162,14 @@ export default defineComponent({
       'snapBoundaries'
     ]),
     ...mapGetters([
+      'selectedItemsData',
       'zoom'
     ]),
+    isPropertiesEnabled () {
+      return this.isSelected &&
+        this.selectedItemsData.count === 1 &&
+        Object.keys(this.properties).length > 0
+    },
     portList () {
       const locations = ['left', 'top', 'right', 'bottom']
       const ports = this.ports as Port[]
@@ -178,7 +200,8 @@ export default defineComponent({
       'setSnapBoundaries',
       'setItemSize',
       'setItemPosition',
-      'setPortValue'
+      'setPortValue',
+      'setProperties'
     ]),
 
     onSizeChanged ([ target ]: ResizeObserverEntry[]) {
@@ -196,17 +219,6 @@ export default defineComponent({
 
     mousedown ($event: MouseEvent) {
       this.$emit('select', $event)
-    },
-
-    contextmenu ($event: MouseEvent) {
-      if (this.groupId === null) {
-        // show a context menu for this item only if it is not part of a group
-        console.log('Item context menu', this.id)
-      } else {
-        console.log('PARENT GROUP context menu')
-      }
-
-      $event.preventDefault()
     }
   }
 })

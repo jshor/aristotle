@@ -32,7 +32,6 @@ export default class CircuitService {
       this.payload = payload
       this.fn(this.valueMap, payload)
     })
-    // this.oscillator.start() // TODO: uncomment to allow oscilloscope
   }
 
   onChange = (fn: Function) => {
@@ -69,12 +68,6 @@ export default class CircuitService {
     this.fn(this.valueMap)
   }
 
-  setPortValue2 = (portId: string, value: number) => {
-    this.nodes[portId].value = value
-    this.nodes[portId].newValue = value
-    // this.nodes[portId].updateOutputs(value)
-  }
-
   setPortValue = (portId: string, value: number) => {
     this.nodes[portId].setValue(value)
     this.circuit.enqueue(this.nodes[portId])
@@ -102,13 +95,13 @@ export default class CircuitService {
 
     Object
       .values(items)
-      .forEach(item => this.addNode(item, ports, true, false))
+      .forEach(item => this.addNode(item, ports, true))
     Object
       .values(connections)
       .forEach(c => this.addConnection(c.source, c.target))
   }
 
-  addNode = (item: Item, ports: { [id: string]: Port }, forceContinue: boolean = false, showInOscilloscope: boolean = true) => {
+  addNode = (item: Item, ports: { [id: string]: Port }, forceContinue: boolean = false) => {
     if (item.portIds.length === 0) return // if there are no ports, then there is nothing to add
 
     if (item.type === 'IntegratedCircuit') {
@@ -118,34 +111,33 @@ export default class CircuitService {
     const inputIds = item.portIds.filter(portId => ports[portId].type === PortType.Input)
     const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
     const node = this.getCircuitNode(item.type, item.id, inputIds)
+    const subscribe = (portId: string) => {
+      this.nodes[portId] = node
+
+      node.on('change', (value: number) => {
+        this.setOutputValue(portId, value)
+        this.waves[portId]?.drawPulseChange(value)
+      })
+    }
 
     node.forceContinue = forceContinue
-    // node.value = 1
 
-    inputIds.forEach(inputId => {
-      // this.setOutputValue(inputId, 0)
-      this.nodes[inputId] = node
-      node.on('change', (value: number) => {
-        this.setOutputValue(inputId, value)
-      })
-    })
-
-    outputIds.forEach(outputId => {
-      // this.setOutputValue(outputId, ports[outputId].value)
-      this.nodes[outputId] = node
-
-      if (showInOscilloscope) {
-        this.waves[outputId] = new BinaryWaveService(outputId)
-        this.oscillator.add(this.waves[outputId])
-      }
-
-      node.on('change', (value: number) => {
-        this.setOutputValue(outputId, value)
-        this.waves[outputId]?.drawPulseChange(value)
-      })
-    })
+    inputIds.forEach(subscribe)
+    outputIds.forEach(subscribe)
 
     this.circuit.addNode(node)
+  }
+
+  monitorPort = (portId: string, value: number) => {
+    this.waves[portId] = new BinaryWaveService(portId, value)
+    this.oscillator.add(this.waves[portId])
+  }
+
+  unmonitorPort = (portId: string) => {
+    if (this.waves[portId]) {
+      this.oscillator.remove(this.waves[portId])
+      this.oscillator.broadcast()
+    }
   }
 
   removeNode = (portIds: string[] = []) => {
@@ -155,11 +147,12 @@ export default class CircuitService {
 
     if (node) {
       this.circuit.removeNode(node)
-      // this.oscillator.remove(this.waves)
 
       portIds.forEach(portId => {
         delete this.nodes[portId]
         delete this.valueMap[portId]
+
+        this.unmonitorPort(portId)
       })
     } else {
       console.log('DID NOT FIND NODE FOR: ', portIds)
@@ -177,7 +170,6 @@ export default class CircuitService {
   removeConnection = (sourceId: string, targetId: string) => {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
       this.circuit.removeConnection(this.nodes[sourceId], this.nodes[targetId])
-      // this.next()
     } else {
       console.log('MISSING NODE FOR REMOVING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
     }

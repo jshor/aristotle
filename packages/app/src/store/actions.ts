@@ -6,6 +6,7 @@ import CircuitService from '@/services/CircuitService'
 import boundaries from '@/layout/boundaries'
 import rotation from '@/layout/rotation'
 import createIntegratedCircuit from '@/utils/createIntegratedCircuit'
+import getConnectionChain from '@/utils/getConnectionChain'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
@@ -800,6 +801,95 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       .filter(filter)
       .map(({ id }) => id))
   },
+
+  /**
+   * Adds the item having the given ID to the oscilloscope if the value is true, or removes it otherwise.
+   *
+   * @param store
+   * @param payload
+   * @param payload.id - item ID
+   * @param payload.value
+   */
+  setOscilloscopeVisibility ({ commit }, { id, value }: { id: string, value: boolean }) {
+    if (value) {
+      commit('ADD_TO_OSCILLOSCOPE', id)
+    } else {
+      commit('REMOVE_FROM_OSCILLOSCOPE', id)
+    }
+  },
+
+  /**
+   * Sets the number of input ports that a LogicGate should have.
+   * If the number is less than the current number of ports, take away the difference number of existing ports.
+   *
+   * @param store
+   * @param payload
+   * @param payload.id - LogicGate ID
+   * @param payload.count - new number of input ports
+   */
+  setInputCount ({ commit, dispatch, state }, { id, count }: { id: string, count: number }) {
+    const item = state.items[id]
+    const oldCount = item.properties.inputCount.value as number
+
+    if (oldCount > count) {
+      // if the count has decreased, find the last remaining port IDs which will be removed
+      state.items[id].portIds
+        .filter(portId => state.ports[portId].type === PortType.Input)
+        .slice(count)
+        .forEach(portId => commit('REMOVE_PORT', portId))
+    } else {
+      for (let i = oldCount; i < count; i++) {
+        // add the difference of ports one by one
+        commit('ADD_PORT', {
+          id: rand(),
+          type: PortType.Input,
+          elementId: id,
+          orientation: Direction.Left,
+          isFreeport: false,
+          position: {
+            x: 0,
+            y: 0
+          },
+          rotation: 0,
+          value: 0
+        } as Port)
+      }
+    }
+
+    dispatch('setItemPortPositions', id)
+  },
+
+  /**
+   * Updates the properties values. If no properties have changed, then no changes will take effect.
+   * This will perform any actions necessary to occur when a property value changes.
+   *
+   * @param store
+   * @param payload
+   * @param payload.id - item ID
+   * @param payload.properties - new version of the properties
+   */
+  setProperties ({ commit, dispatch, state }, { id, properties }: { id: string, properties: PropertySet }) {
+    const item = state.items[id]
+
+    for (const propertyName in properties) {
+      const property = properties[propertyName]
+
+      if (item.properties[propertyName].value === property.value) {
+        continue // do nothing if the property value has not changed
+      }
+
+      switch (propertyName) {
+        case 'showInOscilloscope':
+          dispatch('setOscilloscopeVisibility', { id, value: property.value })
+          break
+        case 'inputCount':
+          dispatch('setInputCount', { id, count: property.value })
+          break
+      }
+
+      commit('SET_ITEM_PROPERTY', { id, propertyName, value: property.value })
+    }
+  }
 }
 
 export default actions

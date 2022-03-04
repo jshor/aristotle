@@ -51,7 +51,13 @@ export default function createIntegratedCircuit (state: DocumentState) {
     },
     rotation: 0,
     isSelected: false,
-    properties: {},
+    properties: {
+      showInOscilloscope: {
+        label: 'Show in oscilloscope',
+        value: false,
+        type: 'boolean'
+      }
+    },
     groupId: null,
     zIndex: 0,
     width: 200,
@@ -97,10 +103,10 @@ export default function createIntegratedCircuit (state: DocumentState) {
         const port = createNewPort(item.rotation, 2, PortType.Output, 'outputNode', icItem.id)
 
         item.type = 'CircuitNode'
-        item.portIds.unshift(port.id)
+        item.portIds.push(port.id)
         items[item.id] = item
         ports[port.id] = port
-        icItem.portIds.push(port.id)
+        icItem.portIds.unshift(port.id)
 
         docItem.portIds = [docPort.id]
         documentPorts[port.id] = port
@@ -125,5 +131,7 @@ export default function createIntegratedCircuit (state: DocumentState) {
     ports: documentPorts
   }
 
-  console.log('IC: ', JSON.stringify(circuit, null, 2))
+  console.log(JSON.stringify(circuit, null, 2))
+
+  return circuit
 }

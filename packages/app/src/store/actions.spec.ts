@@ -2,6 +2,7 @@ import { ActionContext, ActionHandler } from 'vuex'
 import actions from './actions'
 import DocumentState from './DocumentState'
 import CircuitService from '../services/CircuitService'
+import Direction from '../types/enums/Direction'
 import PortType from '../types/enums/PortType'
 import boundaries from '@/layout/boundaries'
 
@@ -1709,6 +1710,192 @@ describe('actions', () => {
 
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('SET_CONNECTABLE_PORT_IDS', [])
+    })
+  })
+
+  describe('setOscilloscopeVisibility', () => {
+    const id = 'item1'
+
+    it('should add the item to the oscilloscope monitor when the value is true', () => {
+      invokeAction('setOscilloscopeVisibility', createContext({ commit }), { id, value: true })
+
+      expect(commit).toHaveBeenCalledTimes(1)
+      expect(commit).toHaveBeenCalledWith('ADD_TO_OSCILLOSCOPE', id)
+    })
+
+    it('should remove the item from the oscilloscope monitor when the value is false', () => {
+      invokeAction('setOscilloscopeVisibility', createContext({ commit }), { id, value: false })
+
+      expect(commit).toHaveBeenCalledTimes(1)
+      expect(commit).toHaveBeenCalledWith('REMOVE_FROM_OSCILLOSCOPE', id)
+    })
+  })
+
+  describe('setInputCount', () => {
+    const id = 'item1'
+    const port1 = createPort('port1', id, PortType.Input)
+    const port2 = createPort('port2', id, PortType.Output)
+    const port3 = createPort('port3', id, PortType.Input)
+    const item1 = createItem(id, 'InputNode', {
+      portIds: [port1.id, port2.id, port3.id],
+      properties: {
+        inputCount: {
+          value: 2,
+          type: 'number',
+          label: 'Input Count'
+        }
+      }
+    })
+    const context = createContext({
+      state: {
+        ...createState(),
+        items: { item1 },
+        ports: { port1, port2, port3 }
+      },
+      commit,
+      dispatch
+    })
+
+    describe('when the input count is increased', () => {
+      beforeEach(() => {
+        invokeAction('setInputCount', context, { id, count: 4 })
+      })
+
+      it('should add the difference number of input ports', () => {
+        expect(commit).toHaveBeenCalledTimes(2)
+        expect(commit).toHaveBeenCalledWith('ADD_PORT', {
+          id: expect.any(String),
+          type: PortType.Input,
+          elementId: id,
+          orientation: Direction.Left,
+          isFreeport: false,
+          position: {
+            x: 0,
+            y: 0
+          },
+          rotation: 0,
+          value: 0
+        })
+      })
+
+      it('should set the item port positions', () => {
+        expect(dispatch).toHaveBeenCalledTimes(1)
+        expect(dispatch).toHaveBeenCalledWith('setItemPortPositions', id)
+      })
+    })
+
+    describe('when the input count is decreased', () => {
+      beforeEach(() => {
+        invokeAction('setInputCount', context, { id, count: 1 })
+      })
+
+      it('should remove the difference number of input ports at the end of the list', () => {
+        expect(commit).toHaveBeenCalledTimes(1)
+        expect(commit).toHaveBeenCalledWith('REMOVE_PORT', port3.id)
+      })
+
+      it('should set the item port positions', () => {
+        expect(dispatch).toHaveBeenCalledTimes(1)
+        expect(dispatch).toHaveBeenCalledWith('setItemPortPositions', id)
+      })
+    })
+  })
+
+  describe('setProperties', () => {
+    const id = 'item1'
+    const createProperties = (): PropertySet => ({
+      inputCount: {
+        value: 2,
+        label: 'Input Count',
+        type: 'number'
+      },
+      showInOscilloscope: {
+        value: true,
+        label: 'Show in oscilloscope',
+        type: 'boolean'
+      },
+      name: {
+        value: 'Some name',
+        label: 'Name',
+        type: 'text'
+      }
+    })
+
+    it('should not change anything if no properties have changed', () => {
+      const properties = createProperties()
+      const item1 = createItem(id, 'LogicGate', { properties })
+      const context = createContext({
+        state: {
+          ...createState(),
+          items: { item1 }
+        },
+        commit,
+        dispatch
+      })
+
+      invokeAction('setProperties', context, { id, properties })
+
+      expect(commit).not.toHaveBeenCalled()
+      expect(dispatch).not.toHaveBeenCalled()
+    })
+
+    it('should dispatch setOscilloscopeVisibility when the showInOscilloscope has changed', () => {
+      const item1 = createItem(id, 'LogicGate', { properties: createProperties() })
+      const context = createContext({
+        state: {
+          ...createState(),
+          items: { item1 }
+        },
+        commit,
+        dispatch
+      })
+      const properties = createProperties()
+      properties.showInOscilloscope.value = false
+
+      invokeAction('setProperties', context, { id, properties })
+
+      expect(dispatch).toHaveBeenCalledTimes(1)
+      expect(dispatch).toHaveBeenCalledWith('setOscilloscopeVisibility', { id, value: false })
+    })
+
+    it('should dispatch setInputCount when the inputCount has changed', () => {
+      const item1 = createItem(id, 'LogicGate', { properties: createProperties() })
+      const context = createContext({
+        state: {
+          ...createState(),
+          items: { item1 }
+        },
+        commit,
+        dispatch
+      })
+      const properties = createProperties()
+      properties.inputCount.value = 3
+
+      invokeAction('setProperties', context, { id, properties })
+
+      expect(dispatch).toHaveBeenCalledTimes(1)
+      expect(dispatch).toHaveBeenCalledWith('setInputCount', { id, count: 3 })
+    })
+
+    it('should set the new item property value', () => {
+      const propertyName = 'name'
+      const value = 'New value'
+      const item1 = createItem(id, 'LogicGate', { properties: createProperties() })
+      const context = createContext({
+        state: {
+          ...createState(),
+          items: { item1 }
+        },
+        commit,
+        dispatch
+      })
+      const properties = createProperties()
+      properties[propertyName].value = value
+
+      invokeAction('setProperties', context, { id, properties })
+
+      expect(commit).toHaveBeenCalledTimes(1)
+      expect(commit).toHaveBeenCalledWith('SET_ITEM_PROPERTY', { id, propertyName, value })
     })
   })
 })

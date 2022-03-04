@@ -6,10 +6,12 @@ declare global {
     rotation: number
     boundingBox: BoundingBox
     position: Point
-    properties?: any
     zIndex: number
     width: number
     height: number
+    properties: {
+      [propertyName: string]: Property
+    }
     integratedCircuit?: {
       items: {
         [id: string]: Item
