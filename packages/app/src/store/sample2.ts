@@ -211,7 +211,17 @@ export default {
       rotation: 0,
       isSelected: false,
       properties: {
-        inputCount: 1
+        inputCount: {
+          label: 'Input count',
+          value: 2,
+          type: 'number',
+          min: 2
+        },
+        showInOscilloscope: {
+          label: 'Show in oscilloscope',
+          value: false,
+          type: 'boolean'
+        }
       },
       groupId: null,
       zIndex: 0,
@@ -232,7 +242,17 @@ export default {
       rotation: 0,
       isSelected: false,
       properties: {
-        inputCount: 1
+        inputCount: {
+          label: 'Input count',
+          value: 2,
+          type: 'number',
+          min: 2
+        },
+        showInOscilloscope: {
+          label: 'Show in oscilloscope',
+          value: false,
+          type: 'boolean'
+        }
       },
       groupId: null,
       zIndex: 1,
@@ -253,7 +273,26 @@ export default {
       rotation: 0,
       isSelected: false,
       properties: {
-        inputCount: 1
+        name: {
+          label: 'Name',
+          value: '',
+          type: 'text'
+        },
+        startValue: {
+          label: 'Start value',
+          value: -1,
+          type: 'number',
+          options: {
+            'True': 1,
+            'Hi-Z': 0,
+            'False': -1
+          }
+        },
+        showInOscilloscope: {
+          label: 'Show in oscilloscope',
+          value: false,
+          type: 'boolean'
+        }
       },
       groupId: null,
       zIndex: 2,
@@ -273,6 +312,28 @@ export default {
       },
       rotation: 0,
       isSelected: false,
+      properties: {
+        name: {
+          label: 'Name',
+          value: '',
+          type: 'text'
+        },
+        startValue: {
+          label: 'Start value',
+          value: -1,
+          type: 'number',
+          options: {
+            'True': 1,
+            'Hi-Z': 0,
+            'False': -1
+          }
+        },
+        showInOscilloscope: {
+          label: 'Show in oscilloscope',
+          value: false,
+          type: 'boolean'
+        }
+      },
       groupId: null,
       zIndex: 3,
       width: 40,
@@ -291,6 +352,18 @@ export default {
       },
       rotation: 0,
       isSelected: false,
+      properties: {
+        name: {
+          label: 'Name',
+          value: '',
+          type: 'text'
+        },
+        showInOscilloscope: {
+          label: 'Show in oscilloscope',
+          value: false,
+          type: 'boolean'
+        }
+      },
       groupId: null,
       zIndex: 3,
       width: 40,
@@ -309,6 +382,18 @@ export default {
       },
       rotation: 0,
       isSelected: false,
+      properties: {
+        name: {
+          label: 'Name',
+          value: '',
+          type: 'text'
+        },
+        showInOscilloscope: {
+          label: 'Show in oscilloscope',
+          value: false,
+          type: 'boolean'
+        }
+      },
       groupId: null,
       zIndex: 3,
       width: 40,

@@ -1,12 +1,24 @@
 <template>
-  <div class="gate">
+  <div class="gate" :style="{ height: `${(25 * inputCount)}px` }">
     <div class="gate__wires">
-      <div class="gate__wires-divider">
-        <div class="gate__wire">
-        </div>
+      <div class="gate__wires-divider"
+
+        :class="{
+          'gate__wires-divider--multiwire': inputCount > 2
+        }"
+      >
+        <div
+          v-for="index in inputCount - 1"
+          :key="index"
+          class="gate__wire"
+        />
         <div class="gate__wire">
         </div>
       </div>
+      <div
+        v-if="inputCount > 2"
+        class="gate__wires--multiwire"
+      />
       <div class="gate__wires-divider">
         <div class="gate__wire">
         </div>
@@ -26,6 +38,12 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'LogicGate',
+  props: {
+    inputCount: {
+      type: Number,
+      default: 2
+    }
+  },
   data () {
     return {
       rotation: 0,
@@ -66,6 +84,13 @@ export default defineComponent({
     left: 0;
     right: 0;
     display: flex;
+
+    &--multiwire {
+      background-color: #000;
+      width: 2px;
+      height: calc(100% - 22px);
+      margin-top: 11px;
+    }
   }
 
   &__wires-divider {
@@ -74,6 +99,10 @@ export default defineComponent({
     display: flex;
     justify-content: space-around;
     flex-direction: column;
+
+    &--multiwire {
+      width: 20%;
+    }
   }
 
   &__element--or {
@@ -95,7 +124,6 @@ export default defineComponent({
     display: block;
     pointer-events: all;
   }
-
 }
 
 

@@ -2,8 +2,6 @@ import BinaryWaveService from './BinaryWaveService'
 
 const BASE_REFRESH_RATE = 100
 
-const MAX_HISTORY_SECONDS = 5
-
 /**
  * @class OscillationManager
  * @description Manages all oscillating services, including binary waves and clock pulses.
@@ -41,6 +39,13 @@ export default class OscillationService {
     clearInterval(this.interval)
   }
 
+  clear = () => {
+    this.lastSignalTime = 0
+    this.secondsElapsed = 0
+    this.secondsOffset = 0
+    this.ticks = 0
+  }
+
   incrementElapsed = (): void => {
     const r = this.refreshRate
     const s = this.secondsElapsed
@@ -74,7 +79,7 @@ export default class OscillationService {
   }
 
   broadcast = () => {
-    const MAX_HISTORY_COUNT = 40
+    const MAX_HISTORY_COUNT = 40 // TODO: should be user-configurable
 
     if (this.secondsElapsed - this.secondsOffset >= MAX_HISTORY_COUNT) {
       this.secondsOffset += MAX_HISTORY_COUNT / 2
@@ -90,8 +95,8 @@ export default class OscillationService {
 
     this.fn({
       waves: this.computeWaveGeometry(this.waves),
-      secondsElapsed: this.secondsElapsed,
-      secondsOffset: this.secondsOffset
+      secondsElapsed: Math.ceil(this.secondsElapsed),
+      secondsOffset: Math.ceil(this.secondsOffset)
     })
   }
 
@@ -132,6 +137,11 @@ export default class OscillationService {
   add = (wave: Pulse): void => {
     if (!this.waves.hasOwnProperty(wave.id)) {
       this.waves[wave.id] = wave
+
+      if (this.ticks === 0) {
+        this.start()
+        this.broadcast()
+      }
     }
   }
 
@@ -142,5 +152,10 @@ export default class OscillationService {
    */
   remove = ({ id }: Pulse): void => {
     delete this.waves[id]
+
+    if (Object.keys(this.waves).length === 0) {
+      this.stop()
+      this.clear()
+    }
   }
 }

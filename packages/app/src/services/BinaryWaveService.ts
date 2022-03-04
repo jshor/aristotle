@@ -1,21 +1,23 @@
 import { LogicValue } from '@aristotle/logic-circuit'
 
-const BASE_REFRESH_RATE = 100
-
 const SIGNAL_HEIGHT = 2
 const SEGMENT_WIDTH = 4 // px per refresh rate
 
 export default class BinaryWaveService implements Pulse {
   public id: string
-  private interval: number = 0
   public width: number = 0
   private lastY: number = 0
   public segments: Point[] = [{ x: 0, y: SIGNAL_HEIGHT }]
   private segmentWidth: number = SEGMENT_WIDTH
   public hasGeometry: boolean = true
 
-  constructor (id: string) {
+  constructor (id: string, value: number = 1) {
     this.id = id
+
+    if (value === 1) {
+      this.segments[0] = { x: 0, y: 0 }
+      this.lastY = SIGNAL_HEIGHT
+    }
   }
 
   public update = (ticks: number): void => {

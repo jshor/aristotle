@@ -8,7 +8,7 @@
     <button @click="addLightbulb">Add lightbulb</button>
     <button @click="addSwitch">Add switch</button>
     <button @click="deleteSelection" :disabled="selectionCount === 0">Delete selection</button>
-    <button @click="saveIntegratedCircuit" :disabled="selectionCount === 0">Build IC</button>
+    <button @click="saveIntegratedCircuit">Build IC</button>
     <button @click="undo" :disabled="!canUndo">Undo</button>
     <button @click="redo" :disabled="!canRedo">Redo</button>
   </div>
@@ -62,9 +62,6 @@ export default defineComponent({
         position: { x: 400, y: 400 },
         rotation: 0,
         isSelected: false,
-        properties: {
-          inputCount: 1
-        },
         boundingBox: {
           left: 400,
           right: 400 + width,
@@ -75,6 +72,62 @@ export default defineComponent({
         zIndex: 0,
         width,
         height
+      }
+
+      switch (type) {
+        case 'LogicGate':
+          item.properties = {
+            inputCount: {
+              label: 'Input count',
+              value: 2,
+              type: 'number',
+              min: 2
+            },
+            showInOscilloscope: {
+              label: 'Show in oscilloscope',
+              value: false,
+              type: 'boolean'
+            }
+          }
+          break
+        case 'Switch':
+          item.properties = {
+            name: {
+              label: 'Name',
+              value: '',
+              type: 'text'
+            },
+            startValue: {
+              label: 'Start value',
+              value: -1,
+              type: 'number',
+              options: {
+                'True': 1,
+                'Hi-Z': 0,
+                'False': -1
+              }
+            },
+            showInOscilloscope: {
+              label: 'Show in oscilloscope',
+              value: true,
+              type: 'boolean'
+            }
+          }
+          break
+        case 'Lightbulb':
+          item.properties = {
+            name: {
+              label: 'Name',
+              value: '',
+              type: 'text'
+            },
+            showInOscilloscope: {
+              label: 'Show in oscilloscope',
+              value: true,
+              type: 'boolean'
+            }
+          }
+          break
       }
 
       this.addItem({ item, ports })
