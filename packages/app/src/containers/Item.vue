@@ -23,6 +23,11 @@
       :value="ports[0].value"
       @toggle="value => setPortValue({ id: ports[0].id, value })"
     />
+    <clock
+      v-else-if="type === 'Clock'"
+      :value="ports[0].value"
+      @toggle="value => setPortValue({ id: ports[0].id, value })"
+    />
     <lightbulb
       v-else-if="type === 'OutputNode'"
       :value="ports[0].value"
@@ -64,6 +69,7 @@
 import ResizeObserver from 'resize-observer-polyfill'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { defineComponent, PropType } from 'vue'
+import Clock from '../components/Clock.vue'
 import Draggable from '../components/Draggable.vue'
 import LogicGate from '../components/LogicGate.vue'
 import InputSwitch from '../components/InputSwitch.vue'
@@ -77,6 +83,7 @@ import Properties from '../components/Properties.vue'
 export default defineComponent({
   name: 'Item',
   components: {
+    Clock,
     Draggable,
     LogicGate,
     Freeport,

@@ -68,6 +68,7 @@ export default defineComponent({
           top: 400,
           bottom: 400 + height
         },
+        properties: {},
         groupId: null,
         zIndex: 0,
         width,

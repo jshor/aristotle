@@ -17,4 +17,9 @@ describe('HelloWorld.vue', () => {
     })
     expect(wrapper).toMatchSnapshot()
   })
+
+
+  describe('portList', () => {
+
+  })
 })
