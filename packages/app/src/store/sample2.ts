@@ -261,7 +261,7 @@ export default {
     },
     switch1: {
       id: 'switch1',
-      type: 'InputNode',
+      type: 'Clock',
       portIds: ['switchOutputPort1'],
       position: { x: 100, y: 300 },
       boundingBox: {

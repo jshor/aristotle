@@ -1,12 +1,15 @@
 import PortType from '@/types/enums/PortType'
 import { Circuit, CircuitNode, Nor, InputNode, OutputNode, ProxyNode, Buffer } from '@aristotle/logic-circuit'
 import BinaryWaveService from './BinaryWaveService'
+import ClockService from './ClockService'
 import OscillationService from './OscillationService'
 
 export default class CircuitService {
   nodes: { [id: string]: CircuitNode } = {}
 
   waves: { [id: string]: BinaryWaveService } = {}
+
+  clocks: { [id: string]: ClockService } = {}
 
   valueMap: { [id: string]: number } = {}
 
@@ -78,6 +81,7 @@ export default class CircuitService {
   getCircuitNode = (type: string, id: string, inputIds: string[]): CircuitNode => {
     switch (type) {
       case 'InputNode':
+      case 'Clock':
         return new InputNode(id, inputIds)
       case 'LogicGate':
         return new Nor(id, inputIds)
@@ -124,6 +128,14 @@ export default class CircuitService {
 
     inputIds.forEach(subscribe)
     outputIds.forEach(subscribe)
+
+    if (item.type === 'Clock') {
+      this.clocks[outputIds[0]] = new ClockService(outputIds[0], 1000)
+      this.clocks[outputIds[0]].onUpdate((value: number) => {
+        this.setPortValue(outputIds[0], value)
+      })
+      this.oscillator.add(this.clocks[outputIds[0]])
+    }
 
     this.circuit.addNode(node)
   }

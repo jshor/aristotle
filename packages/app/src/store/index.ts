@@ -323,14 +323,12 @@ const mutations: MutationTree<DocumentState> = {
       ? PortType.Input // output elements (lightbulb, etc.) will monitor incoming port values
       : PortType.Output // all other elements will monitor the outgoing port values
 
-      console.log('WILL MONITOR: ', item.type)
     item
       .portIds
       .forEach(portId => {
         const port = state.ports[portId]
 
         if (port.type === portType) {
-          console.log('MONITOR: ', portId)
           state
             .circuit
             .monitorPort(portId, port.value)
@@ -574,6 +572,7 @@ const mutations: MutationTree<DocumentState> = {
         right: position.x,
         bottom: position.y
       },
+      properties: {},
       isSelected: true,
       groupId: null,
       zIndex: 3,
