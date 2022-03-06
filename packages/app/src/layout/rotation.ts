@@ -1,5 +1,6 @@
 
 import Direction from '@/types/enums/Direction'
+// TODO: rename parent 'layout' folder to 'geometry'
 
 /**
  * Normalizes the given rotation with respect to any additional rotation to augment by.

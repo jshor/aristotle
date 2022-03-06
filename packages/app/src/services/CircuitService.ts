@@ -1,10 +1,16 @@
-import PortType from '@/types/enums/PortType'
-import { Circuit, CircuitNode, Nor, InputNode, OutputNode, ProxyNode, Buffer } from '@aristotle/logic-circuit'
+import { Circuit, CircuitNode, Nor, InputNode, OutputNode, Buffer } from '@aristotle/logic-circuit'
 import BinaryWaveService from './BinaryWaveService'
 import ClockService from './ClockService'
 import OscillationService from './OscillationService'
+import ItemType from '@/types/enums/ItemType'
+import ItemSubtype from '@/types/enums/ItemSubtype'
+import PortType from '@/types/enums/PortType'
 
-export default class CircuitService {
+/**
+ * The CircuitService ties together all aspects of a running simulation, including clock pulses, oscilloscope
+ * wave management, and circuit component I/O. Effectively serves as an oracle for all circuit computations.
+ */
+export default class CircuitService { // TODO: rename to SimulationService
   nodes: { [id: string]: CircuitNode } = {}
 
   waves: { [id: string]: BinaryWaveService } = {}
@@ -78,28 +84,40 @@ export default class CircuitService {
     this.step()
   }
 
-  getCircuitNode = (type: string, id: string, inputIds: string[]): CircuitNode => {
-    switch (type) {
-      case 'InputNode':
-      case 'Clock':
-        return new InputNode(id, inputIds)
-      case 'LogicGate':
+  getLogicGateNode = (subtype: ItemSubtype, id: string, inputIds: string[]): CircuitNode => {
+    switch (subtype) {
+      case ItemSubtype.And:
         return new Nor(id, inputIds)
-      case 'Freeport':
+      default:
+        return new Nor(id, inputIds)
+    }
+  }
+
+  getCircuitNode = ({ id, type, subtype }: Item, inputIds: string[]): CircuitNode => {
+    switch (type) {
+      case ItemType.CircuitNode:
+        return new CircuitNode(id, inputIds)
+      case ItemType.InputNode:
+        return new InputNode(id, inputIds)
+      case ItemType.LogicGate:
+        return this.getLogicGateNode(subtype, id, inputIds)
+      case ItemType.Buffer:
+      case ItemType.Freeport:
         return new Buffer(id, inputIds)
       default:
         return new OutputNode(id, inputIds) // TODO: use generic CircuitNode instead?
     }
   }
 
-  addIntegratedCircuit = (item: Item) => {
+  addIntegratedCircuit = (item: Item, embeddedPorts: { [id: string]: Port }) => {
     if (!item.integratedCircuit) return
 
     const { items, connections, ports } = item.integratedCircuit
 
     Object
       .values(items)
-      .forEach(item => this.addNode(item, ports, true))
+      .forEach(item => this.addNode(item, { ...ports, ...embeddedPorts }, true))
+
     Object
       .values(connections)
       .forEach(c => this.addConnection(c.source, c.target))
@@ -108,13 +126,10 @@ export default class CircuitService {
   addNode = (item: Item, ports: { [id: string]: Port }, forceContinue: boolean = false) => {
     if (item.portIds.length === 0) return // if there are no ports, then there is nothing to add
 
-    if (item.type === 'IntegratedCircuit') {
-      return this.addIntegratedCircuit(item)
-    }
-
     const inputIds = item.portIds.filter(portId => ports[portId].type === PortType.Input)
     const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
-    const node = this.getCircuitNode(item.type, item.id, inputIds)
+    const node = this.getCircuitNode(item, inputIds)
+
     const subscribe = (portId: string) => {
       this.nodes[portId] = node
 
@@ -129,7 +144,7 @@ export default class CircuitService {
     inputIds.forEach(subscribe)
     outputIds.forEach(subscribe)
 
-    if (item.type === 'Clock') {
+    if (item.type === ItemType.InputNode && item.subtype === ItemSubtype.Clock) {
       this.clocks[outputIds[0]] = new ClockService(outputIds[0], 1000)
       this.clocks[outputIds[0]].onUpdate((value: number) => {
         this.setPortValue(outputIds[0], value)
@@ -149,6 +164,8 @@ export default class CircuitService {
     if (this.waves[portId]) {
       this.oscillator.remove(this.waves[portId])
       this.oscillator.broadcast()
+
+      delete this.waves[portId]
     }
   }
 
@@ -161,10 +178,18 @@ export default class CircuitService {
       this.circuit.removeNode(node)
 
       portIds.forEach(portId => {
-        delete this.nodes[portId]
-        delete this.valueMap[portId]
+
+        if (this.clocks[portId]) {
+          this.oscillator.remove(this.clocks[portId])
+
+          console.log('REMOVED CLOCK')
+        }
 
         this.unmonitorPort(portId)
+
+        delete this.nodes[portId]
+        delete this.valueMap[portId]
+        delete this.clocks[portId]
       })
     } else {
       console.log('DID NOT FIND NODE FOR: ', portIds)

@@ -1,6 +1,10 @@
+import ItemSubtype from '../enums/ItemSubtype'
+import ItemType from '../enums/ItemType'
+
 declare global {
   interface Item extends BaseItem {
-    type: string // TODO: should be enum
+    type: ItemType
+    subtype: ItemSubtype
     portIds: string[]
     groupId: string | null
     rotation: number

@@ -6,7 +6,8 @@ import CircuitService from '@/services/CircuitService'
 import boundaries from '@/layout/boundaries'
 import rotation from '@/layout/rotation'
 import createIntegratedCircuit from '@/utils/createIntegratedCircuit'
-import getConnectionChain from '@/utils/getConnectionChain'
+import ItemType from '@/types/enums/ItemType'
+import idMapper from '@/utils/idMapper'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
@@ -21,8 +22,15 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     commit('SET_ZOOM', zoom)
   },
 
-  saveIntegratedCircuit ({ state }) {
-    createIntegratedCircuit(state)
+  loadDocument ({ commit, dispatch }, document: string) {
+    commit('APPLY_STATE', document)
+    dispatch('deselectAll')
+  },
+
+  saveIntegratedCircuit ({ state, commit }) {
+    const { integratedCircuitItem, integratedCircuitPorts } = createIntegratedCircuit(state)
+
+    commit('ADD_INTEGRATED_CIRCUIT', idMapper.mapIntegratedCircuitIds(integratedCircuitItem, integratedCircuitPorts))
   },
 
   buildCircuit ({ commit, state }) {
@@ -91,7 +99,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
     const nonFreeportItems = Object
       .values(state.items)
-      .filter(({ isSelected, type }) => isSelected && type !== 'Freeport')
+      .filter(({ isSelected, type }) => isSelected && type !== ItemType.Freeport)
     const nonFreeportItemIds = nonFreeportItems.map(({ id }) => id)
 
     // select the full chains of each connection attached to each selected item
@@ -120,23 +128,12 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       })
 
     // delete all selected non-freeport items
-    nonFreeportItems.forEach(i => {
-      const item = state.items[i.id]
-
-      if (item.integratedCircuit) {
-        Object
-          .values(item.integratedCircuit?.items)
-          .forEach(({ id }) => commit('REMOVE_CIRCUIT_NODE', id))
-      } else {
-        commit('REMOVE_CIRCUIT_NODE', i.id)
-      }
-      commit('REMOVE_ELEMENT', i.id)
-    })
+    nonFreeportItems.forEach(i => commit('REMOVE_ELEMENT', i.id))
 
     // handle selected freeport deletions using removeFreeport
     Object
       .values(state.items)
-      .filter(({ isSelected, type }) => isSelected && type === 'Freeport')
+      .filter(({ isSelected, type }) => isSelected && type === ItemType.Freeport)
       .forEach(f => dispatch('removeFreeport', f.id))
   },
 
@@ -159,7 +156,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
       if (item && !item.groupId) {
         // the item with the given id is an item that does not belong to a group
-        if (item.type === 'Freeport') {
+        if (item.type === ItemType.Freeport) {
           if (item.portIds.length > 1) {
             // if only one port exists on the freeport, then it is a port being dragged by the user and does not apply
             // freeports should snap to "straighten out" wires
@@ -181,7 +178,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
           // this an item that can snap to align with the outer edge of any non-freeport item
           return Object
             .values(state.items)
-            .filter(e => e.id !== id && e.type !== 'Freeport')
+            .filter(e => e.id !== id && e.type !== ItemType.Freeport)
             .map(e => e.boundingBox)
         }
       }
@@ -463,27 +460,32 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   createSelection ({ commit, dispatch, state }, selection: BoundingBox) {
     if (!boundaries.isTwoDimensional(selection)) return // omit selection lines or points
 
-    const itemIds = Object
-      .keys(state.items)
-      .filter(id => boundaries.hasIntersection(selection, state.items[id].boundingBox))
-    const connectionIds = Object
-      .keys(state.connections)
-      .filter(id => {
-        const connection = state.connections[id]
-        const source = state.ports[connection.source]
-        const target = state.ports[connection.target]
-        const boundary = boundaries.getBoundaryByCorners(source.position, target.position)
+    try {
+      const itemIds = Object
+        .keys(state.items)
+        .filter(id => boundaries.hasIntersection(selection, state.items[id].boundingBox))
+      const connectionIds = Object
+        .keys(state.connections)
+        .filter(id => {
+          const connection = state.connections[id]
+          const source = state.ports[connection.source]
+          const target = state.ports[connection.target]
+          const boundary = boundaries.getBoundaryByCorners(source.position, target.position)
 
-        return boundaries.hasIntersection(selection, boundary)
-      })
+          return boundaries.hasIntersection(selection, boundary)
+        })
 
-    itemIds
-      .concat(connectionIds)
-      .forEach(id => {
-        commit('SET_SELECTION_STATE', { id, isSelected: true })
-      })
+      itemIds
+        .concat(connectionIds)
+        .forEach(id => {
+          commit('SET_SELECTION_STATE', { id, isSelected: true })
+        })
 
-    dispatch('selectItemConnections', itemIds)
+      dispatch('selectItemConnections', itemIds)
+    } catch (error) {
+      // TODO: this really shouldn't ever throw an error, investigate why it does...
+      // do nothing, ignore the error
+    }
   },
 
   /**
@@ -516,7 +518,6 @@ const actions: ActionTree<DocumentState, DocumentState> = {
    */
   toggleSelectionState ({ commit, state }, { id, forcedValue = null }: { id: string, forcedValue: boolean | null }) {
     const element = state.items[id] || state.connections[id] || state.groups[id]
-    if (!element) return
     const isSelected = forcedValue === null
       ? !element.isSelected
       : forcedValue
@@ -655,7 +656,6 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
 
     // finally, remove the element
-    commit('REMOVE_CIRCUIT_NODE', id)
     commit('REMOVE_ELEMENT', id)
   },
 
@@ -687,7 +687,6 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     commit('CREATE_FREEPORT_ELEMENT', data)
     dispatch('setItemBoundingBox', data.itemId)
     dispatch('setActiveFreeportId', data.itemId)
-    commit('ADD_CIRCUIT_NODE', data.itemId)
 
     if (data.sourceId && data.targetId) {
       commit('DISCONNECT', {
@@ -761,7 +760,6 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       .find(({ portIds }) => portIds.includes(portId))
 
     if (item) {
-      commit('REMOVE_CIRCUIT_NODE', item.id)
       commit('REMOVE_ELEMENT', item.id)
     }
 

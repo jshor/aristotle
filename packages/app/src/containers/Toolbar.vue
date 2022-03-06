@@ -17,6 +17,8 @@
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex'
 import { defineComponent } from 'vue'
+import ItemSubtype from '../types/enums/ItemSubtype'
+import ItemType from '../types/enums/ItemType'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000000000) + 5)}` // TODO: use uuid
 
@@ -54,10 +56,11 @@ export default defineComponent({
     }
   },
   methods: {
-    addNewItem (id: string, type: string, width: number, height: number, ports: Port[] = []) {
+    addNewItem (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports: Port[] = []) {
       const item: Item = {
         id,
         type,
+        subtype,
         portIds: ports.map(({ id }) => id),
         position: { x: 400, y: 400 },
         rotation: 0,
@@ -76,7 +79,7 @@ export default defineComponent({
       }
 
       switch (type) {
-        case 'LogicGate':
+        case ItemType.LogicGate:
           item.properties = {
             inputCount: {
               label: 'Input count',
@@ -91,7 +94,7 @@ export default defineComponent({
             }
           }
           break
-        case 'Switch':
+        case ItemType.InputNode:
           item.properties = {
             name: {
               label: 'Name',
@@ -115,7 +118,7 @@ export default defineComponent({
             }
           }
           break
-        case 'Lightbulb':
+        case ItemType.OutputNode:
           item.properties = {
             name: {
               label: 'Name',
@@ -137,7 +140,7 @@ export default defineComponent({
     addLogicGate () {
       const elementId = rand()
 
-      this.addNewItem(elementId, 'LogicGate', 100, 150, [
+      this.addNewItem(elementId, ItemType.LogicGate, ItemSubtype.Nor, 100, 150, [
         createPort(elementId, rand(), 0, 1),
         createPort(elementId, rand(), 0, 1),
         createPort(elementId, rand(), 2, 0)
@@ -147,7 +150,7 @@ export default defineComponent({
     addLightbulb () {
       const elementId = rand()
 
-      this.addNewItem(elementId, 'OutputNode', 40, 40, [
+      this.addNewItem(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, [
         createPort(elementId, rand(), 0, 1)
       ])
     },
@@ -155,7 +158,7 @@ export default defineComponent({
     addSwitch () {
       const elementId = rand()
 
-      this.addNewItem(elementId, 'InputNode', 40, 40, [
+      this.addNewItem(elementId, ItemType.InputNode, ItemSubtype.Switch, 40, 40, [
         createPort(elementId, rand(), 2, 0)
       ])
     },
