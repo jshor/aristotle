@@ -1,43 +1,21 @@
 import { cloneDeep } from 'lodash' // TODO
 import DocumentState from '@/store/DocumentState'
+import ItemSubtype from '@/types/enums/ItemSubtype'
+import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'
+import Direction from '@/types/enums/Direction'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
 export default function createIntegratedCircuit (state: DocumentState) {
-  const ports = cloneDeep(state.ports)
-  const items = cloneDeep(state.items)
-  const connections = cloneDeep(state.connections)
-  const createNewPort = (rotation: number, orientation: number, type: PortType, prefix: string, elementId: string): Port => ({
-    id: `${prefix}_${rand()}`,
-    elementId,
-    position: {
-      x: 0,
-      y: 0
-    },
-    rotation,
-    orientation,
-    type,
-    value: 0,
-    isFreeport: false
-  })
-  const createConnection = (id: string, source: string, target: string): Connection => ({
-    id,
-    source,
-    target,
-    connectionChainId: id,
-    groupId: null,
-    isSelected: false,
-    zIndex: 0
-  })
+  const ports = cloneDeep<{ [id: string]: Port }>(state.ports)
+  const items = cloneDeep<{ [id: string]: Item }>(state.items)
+  const connections = cloneDeep<{ [id: string]: Connection }>(state.connections)
 
-  const documentItems = {}
-  const documentPorts = {}
-  const documentConnections = {}
-
-  const icItem: Item = {
+  const integratedCircuitItem: Item = {
     id: rand(),
-    type: 'IntegratedCircuit',
+    type: ItemType.IntegratedCircuit,
+    subtype: ItemSubtype.None,
     portIds: [],
     boundingBox: {
       left: 0,
@@ -64,74 +42,45 @@ export default function createIntegratedCircuit (state: DocumentState) {
     height: 150
   }
 
+  const integratedCircuitPorts = {}
+
   Object
     .values(items)
+    .filter(({ type }) => type === ItemType.InputNode || type === ItemType.OutputNode)
     .forEach(item => {
-      if (item.type === 'InputNode') {
-        const docItem = {
-          ...cloneDeep(item),
-          id: rand()
-        }
-        const docPort = {
-          ...cloneDeep(ports[item.portIds[0]]),
-          id: rand()
-        }
-        const port = createNewPort(item.rotation, 0, PortType.Input, 'inputNode', icItem.id)
+      const portType = item.type === ItemType.InputNode
+        ? PortType.Output
+        : PortType.Input
+      const orientation = item.type === ItemType.InputNode
+        ? Direction.Left
+        : Direction.Right
 
-        item.type = 'CircuitNode'
-        item.portIds.unshift(port.id)
-        items[item.id] = item
-        ports[port.id] = port
-        icItem.portIds.push(port.id)
+      item
+        .portIds
+        .filter(portId => ports[portId].type === portType)
+        .forEach(portId => {
+          const newId = rand()
 
-        docItem.portIds = [docPort.id]
-        documentPorts[port.id] = port
-        documentPorts[docPort.id] = docPort
-        documentItems[docItem.id] = docItem
+          integratedCircuitPorts[newId] = {
+            ...cloneDeep<Port>(ports[portId]),
+            type: item.type === ItemType.InputNode
+              ? PortType.Input
+              : PortType.Output,
+            id: newId,
+            elementId: integratedCircuitItem.id,
+            virtualElementId: item.id,
+            orientation
+          }
 
-        const docConnection = createConnection(`doc_conn_${rand()}`, docPort.id, port.id)
-        documentConnections[docConnection.id] = docConnection
-      } else if (item.type === 'OutputNode') {
-        const docItem = {
-          ...cloneDeep(item),
-          id: rand()
-        }
-        const docPort = {
-          ...cloneDeep(ports[item.portIds[0]]),
-          id: rand()
-        }
-        const port = createNewPort(item.rotation, 2, PortType.Output, 'outputNode', icItem.id)
-
-        item.type = 'CircuitNode'
-        item.portIds.push(port.id)
-        items[item.id] = item
-        ports[port.id] = port
-        icItem.portIds.unshift(port.id)
-
-        docItem.portIds = [docPort.id]
-        documentPorts[port.id] = port
-        documentPorts[docPort.id] = docPort
-        documentItems[docItem.id] = docItem
-
-        const docConnection = createConnection(`inner_ic_conn_${rand()}`, port.id, docPort.id)
-        documentConnections[docConnection.id] = docConnection
-      }
+          integratedCircuitItem.portIds.push(newId)
+        })
     })
 
-  icItem.integratedCircuit = {
+  integratedCircuitItem.integratedCircuit = {
     items,
     connections,
     ports
   }
-  documentItems[icItem.id] = icItem
 
-  const circuit = {
-    connections: documentConnections,
-    items: documentItems,
-    ports: documentPorts
-  }
-
-  console.log(JSON.stringify(circuit, null, 2))
-
-  return circuit
+  return { integratedCircuitItem, integratedCircuitPorts }
 }

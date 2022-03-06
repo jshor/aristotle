@@ -244,17 +244,17 @@ describe('actions', () => {
             'port6': createPort('port6', 'item4', PortType.Output)
           },
           items: {
-            'item1': createItem('item1', 'InputNode', { portIds: ['port1'], isSelected: true }),
-            'item2': createItem('item2', 'OutputNode', { portIds: ['port4'] }),
-            'freeport': createItem('freeport', 'Freeport', { portIds: ['port2', 'port3'], isSelected: true }),
-            'item3': createItem('item3', 'InputNode', { portIds: ['port5'] }),
-            'item4': createItem('item4', 'OutputNode', { portIds: ['port6'] }),
-            'ic': createItem('ic', 'IntegratedCircuit', {
+            'item1': createItem('item1', ItemType.InputNode, { portIds: ['port1'], isSelected: true }),
+            'item2': createItem('item2', ItemType.OutputNode, { portIds: ['port4'] }),
+            'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port2', 'port3'], isSelected: true }),
+            'item3': createItem('item3', ItemType.InputNode, { portIds: ['port5'] }),
+            'item4': createItem('item4', ItemType.OutputNode, { portIds: ['port6'] }),
+            'ic': createItem('ic', ItemType.IntegratedCircuit, {
               portIds: ['icPort'],
               isSelected: true,
               integratedCircuit: {
                 items: {
-                  icNode: createItem('icNode', 'InputNode')
+                  icNode: createItem('icNode', ItemType.InputNode)
                 }
               }
             })
@@ -295,12 +295,7 @@ describe('actions', () => {
       expect(commit).not.toHaveBeenCalledWith('REMOVE_ELEMENT', 'freeport')
     })
 
-    it('should remove the circuit node elements of each element within an selected integrated circuit', () => {
-      expect(commit).toHaveBeenCalledWith('REMOVE_CIRCUIT_NODE', 'icNode')
-      expect(commit).not.toHaveBeenCalledWith('REMOVE_CIRCUIT_NODE', 'ic')
-    })
-
-    it('should remove the circuit node element of selected non-freeport, non-IC items', () => {
+    it('should remove selected non-freeport, non-IC items', () => {
       expect(commit).toHaveBeenCalledWith('REMOVE_ELEMENT', 'item1')
     })
 
@@ -321,7 +316,7 @@ describe('actions', () => {
 
     describe('when there are connectable ports defined', () => {
       it('should return boundaries for each port position', () => {
-        const item1 = createItem('item1', 'Freeport')
+        const item1 = createItem('item1', ItemType.Freeport)
         const port1 = createPort('port1', 'item1', PortType.Input, { position: { x: 10, y: 20 } })
         const port2 = createPort('port2', 'item2', PortType.Output, { position: { x: 8, y: 42 } })
         const context = createContext({
@@ -345,7 +340,7 @@ describe('actions', () => {
     })
 
     it('should not apply any snap boundaries for grouped items', () => {
-      const item1 = createItem('item1', 'LogicGate', { groupId: 'group1' })
+      const item1 = createItem('item1', ItemType.LogicGate, { groupId: 'group1' })
       const context = createContext({
         commit,
         state: {
@@ -366,7 +361,7 @@ describe('actions', () => {
           const itemPort = createPort('itemPort', 'item1', PortType.Output)
           const draggedPort = createPort('draggedPort', '', PortType.Input)
           const connection = createConnection('connection1', itemPort.id, draggedPort.id)
-          const freeport = createItem('freeport', 'Freeport', { portIds: ['itemPort'] })
+          const freeport = createItem('freeport', ItemType.Freeport, { portIds: ['itemPort'] })
 
           invokeAction('setSnapBoundaries', createContext({
             commit,
@@ -399,8 +394,8 @@ describe('actions', () => {
           const connection2 = createConnection('connection2', freeportPort2.id, port2.id)
           const connection3 = createConnection('connection2', freeportPort3.id, port3.id)
 
-          const freeport = createItem('freeport', 'Freeport', { portIds: ['freeportPort1', 'freeportPort2'] })
-          const item1 = createItem('item1', 'LogicGate', { portIds: ['port1'] })
+          const freeport = createItem('freeport', ItemType.Freeport, { portIds: ['freeportPort1', 'freeportPort2'] })
+          const item1 = createItem('item1', ItemType.LogicGate, { portIds: ['port1'] })
           const item2 = createItem('item2', 'Lightbulb', { portIds: ['port2'] })
 
           jest
@@ -443,10 +438,10 @@ describe('actions', () => {
         const bbox4: BoundingBox = { left: 15, top: 16, right: 13, bottom: 14 }
 
         beforeEach(() => {
-          const item1 = createItem('item1', 'LogicGate', { boundingBox: bbox1 })
-          const item2 = createItem('item2', 'LogicGate', { boundingBox: bbox2 })
-          const item3 = createItem('item3', 'LogicGate', { boundingBox: bbox3 })
-          const item4 = createItem('item4', 'Freeport', { boundingBox: bbox4 })
+          const item1 = createItem('item1', ItemType.LogicGate, { boundingBox: bbox1 })
+          const item2 = createItem('item2', ItemType.LogicGate, { boundingBox: bbox2 })
+          const item3 = createItem('item3', ItemType.LogicGate, { boundingBox: bbox3 })
+          const item4 = createItem('item4', ItemType.Freeport, { boundingBox: bbox4 })
 
           invokeAction('setSnapBoundaries', createContext({
             commit,
@@ -489,7 +484,7 @@ describe('actions', () => {
 
     describe('when no ports are present', () => {
       it('should not update any port positions', () => {
-        const item1 = createItem('item1', 'LogicGate')
+        const item1 = createItem('item1', ItemType.LogicGate)
         const context = createContext({
           commit,
           state: {
@@ -505,7 +500,7 @@ describe('actions', () => {
     })
 
     describe('when ports are present', () => {
-      const item1 = createItem('item1', 'LogicGate', { portIds: ['leftPort', 'topPort', 'rightPort', 'bottomPort'] })
+      const item1 = createItem('item1', ItemType.LogicGate, { portIds: ['leftPort', 'topPort', 'rightPort', 'bottomPort'] })
       const leftPort = createPort('leftPort', 'item1', PortType.Output, { orientation: 0 })
       const topPort = createPort('topPort', 'item1', PortType.Output, { orientation: 1 })
       const rightPort = createPort('rightPort', 'item1', PortType.Output, { orientation: 2 })
@@ -568,7 +563,7 @@ describe('actions', () => {
 
   describe('setItemPosition', () => {
     const position = { x: 210, y: 452 }
-    const item1 = createItem('item1', 'LogicGate', {
+    const item1 = createItem('item1', ItemType.LogicGate, {
       portIds: ['port1'],
       position: { x: 10, y: 25 },
       groupId: 'group1'
@@ -610,7 +605,7 @@ describe('actions', () => {
 
     describe('when the item is not part of a group', () => {
       const position = { x: 210, y: 452 }
-      const item1 = createItem('item1', 'LogicGate', {
+      const item1 = createItem('item1', ItemType.LogicGate, {
         portIds: ['port1'],
         position: { x: 10, y: 25 }
       })
@@ -667,7 +662,7 @@ describe('actions', () => {
 
   describe('moveGroupPosition', () => {
     const delta = { x: 42, y: -15 }
-    const item1 = createItem('item1', 'LogicGate', {
+    const item1 = createItem('item1', ItemType.LogicGate, {
       position: { x: 10, y: 25 }
     })
     const group1 = createGroup('group1', ['item1'])
@@ -728,7 +723,7 @@ describe('actions', () => {
         right: 100,
         bottom: 231
       }
-      const item1 = createItem('item1', 'LogicGate')
+      const item1 = createItem('item1', ItemType.LogicGate)
       const context = createContext({
         commit,
         state: {
@@ -765,7 +760,7 @@ describe('actions', () => {
         right: 100,
         bottom: 231
       }
-      const item1 = createItem('item1', 'LogicGate')
+      const item1 = createItem('item1', ItemType.LogicGate)
       const group1 = createGroup('group1', ['item1'])
       const context = createContext({
         commit,
@@ -791,9 +786,9 @@ describe('actions', () => {
   })
 
   describe('group', () => {
-    const item1 = createItem('item1', 'LogicGate', { isSelected: true })
-    const item2 = createItem('item2', 'LogicGate', { groupId: 'group1', isSelected: true })
-    const item3 = createItem('item3', 'LogicGate', { isSelected: false })
+    const item1 = createItem('item1', ItemType.LogicGate, { isSelected: true })
+    const item2 = createItem('item2', ItemType.LogicGate, { groupId: 'group1', isSelected: true })
+    const item3 = createItem('item3', ItemType.LogicGate, { isSelected: false })
     const connection1 = createConnection('connection1', 'port1', 'port2', { isSelected: true })
     const connection2 = createConnection('connection2', 'port3', 'port4', { groupId: 'group1', isSelected: true })
     const connection3 = createConnection('connection3', 'port5', 'port6', { isSelected: false })
@@ -897,8 +892,8 @@ describe('actions', () => {
 
     describe('when the selection is a two-dimensional rectangle', () => {
       const port = createPort('port', 'item1', PortType.Input)
-      const item1 = createItem('item1', 'LogicGate')
-      const item2 = createItem('item2', 'LogicGate')
+      const item1 = createItem('item1', ItemType.LogicGate)
+      const item2 = createItem('item2', ItemType.LogicGate)
       const connection1 = createConnection('connection1', 'port', 'port')
       const connection2 = createConnection('connection2', 'port', 'port')
 
@@ -957,10 +952,10 @@ describe('actions', () => {
   })
 
   describe('selectItemConnections', () => {
-    const item1 = createItem('item1', 'LogicGate', { portIds: ['port1'] })
-    const item2 = createItem('item2', 'LogicGate', { portIds: ['port2'] })
-    const item3 = createItem('item3', 'LogicGate', { portIds: ['port3'] })
-    const item4 = createItem('item4', 'LogicGate', { portIds: ['port4'] })
+    const item1 = createItem('item1', ItemType.LogicGate, { portIds: ['port1'] })
+    const item2 = createItem('item2', ItemType.LogicGate, { portIds: ['port2'] })
+    const item3 = createItem('item3', ItemType.LogicGate, { portIds: ['port3'] })
+    const item4 = createItem('item4', ItemType.LogicGate, { portIds: ['port4'] })
     const port1 = createPort('port1', 'item1', PortType.Output)
     const port2 = createPort('port2', 'item2', PortType.Input)
     const port3 = createPort('port3', 'item3', PortType.Output)
@@ -999,8 +994,8 @@ describe('actions', () => {
   describe('toggleSelectionState', () => {
     describe('when the element is part of a larger group', () => {
       const groupId = 'group1'
-      const item1 = createItem('item1', 'LogicGate', { groupId })
-      const item2 = createItem('item2', 'LogicGate', { groupId })
+      const item1 = createItem('item1', ItemType.LogicGate, { groupId })
+      const item2 = createItem('item2', ItemType.LogicGate, { groupId })
       const connection1 = createConnection('connection1', 'port1', 'port2', { groupId })
       const connection2 = createConnection('connection2', 'port3', 'port4')
       const group1 = createGroup('group1', ['item1', 'item2'], { connectionIds: ['connection1'] })
@@ -1038,7 +1033,7 @@ describe('actions', () => {
     })
 
     it('should select only the element when the element is not a member of any group', () => {
-      const item1 = createItem('item1', 'LogicGate')
+      const item1 = createItem('item1', ItemType.LogicGate)
       const context = createContext({
         state: {
           ...createState(),
@@ -1054,7 +1049,7 @@ describe('actions', () => {
     })
 
     it('should invert the selection value of the element if no value is forced', () => {
-      const item1 = createItem('item1', 'LogicGate', { isSelected: true })
+      const item1 = createItem('item1', ItemType.LogicGate, { isSelected: true })
       const context = createContext({
         state: {
           ...createState(),
@@ -1080,8 +1075,8 @@ describe('actions', () => {
 
   describe('rotate', () => {
     describe('rotating a group', () => {
-      const item1 = createItem('item1', 'LogicGate', { groupId: 'group1' })
-      const item2 = createItem('item2', 'LogicGate', { groupId: 'group1' })
+      const item1 = createItem('item1', ItemType.LogicGate, { groupId: 'group1' })
+      const item2 = createItem('item2', ItemType.LogicGate, { groupId: 'group1' })
       const group1 = createGroup('group1', ['item1', 'item2'], { isSelected: true })
       const group2 = createGroup('group2', [], { isSelected: false })
 
@@ -1153,7 +1148,7 @@ describe('actions', () => {
     })
 
     describe('rotating an individual item', () => {
-      const item1 = createItem('item1', 'LogicGate', { isSelected: true })
+      const item1 = createItem('item1', ItemType.LogicGate, { isSelected: true })
 
       beforeEach(() => {
         const context = createContext({
@@ -1207,9 +1202,9 @@ describe('actions', () => {
               'port4': createPort('port4', 'item2', PortType.Input)
             },
             items: {
-              'item1': createItem('item1', 'InputNode', { portIds: ['port1'] }),
-              'item2': createItem('item2', 'OutputNode', { portIds: ['port4'] }),
-              'freeport': createItem('freeport', 'Freeport', { portIds: ['port2', 'port3'] })
+              'item1': createItem('item1', ItemType.InputNode, { portIds: ['port1'] }),
+              'item2': createItem('item2', ItemType.OutputNode, { portIds: ['port4'] }),
+              'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port2', 'port3'] })
             }
           }
         })
@@ -1229,8 +1224,7 @@ describe('actions', () => {
         expect(commit).toHaveBeenCalledWith('CONNECT', { source: 'port1', target: 'port4' })
       })
 
-      it('should remove the item and the circuit node from the document', () => {
-        expect(commit).toHaveBeenCalledWith('REMOVE_CIRCUIT_NODE', 'freeport')
+      it('should remove the item from the document', () => {
         expect(commit).toHaveBeenCalledWith('REMOVE_ELEMENT', 'freeport')
       })
     })
@@ -1250,8 +1244,8 @@ describe('actions', () => {
               'port3': createPort('port3', 'freeport', PortType.Output, { isFreeport: true })
             },
             items: {
-              'item1': createItem('item1', 'InputNode', { portIds: ['port1'] }),
-              'freeport': createItem('freeport', 'Freeport', { portIds: ['port2', 'port3'] })
+              'item1': createItem('item1', ItemType.InputNode, { portIds: ['port1'] }),
+              'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port2', 'port3'] })
             }
           }
         })
@@ -1263,8 +1257,7 @@ describe('actions', () => {
         expect(commit).toHaveBeenCalledWith('DISCONNECT', { source: 'port1', target: 'port2' })
       })
 
-      it('should remove the item and the circuit node from the document', () => {
-        expect(commit).toHaveBeenCalledWith('REMOVE_CIRCUIT_NODE', 'freeport')
+      it('should remove the item from the document', () => {
         expect(commit).toHaveBeenCalledWith('REMOVE_ELEMENT', 'freeport')
       })
     })
@@ -1284,8 +1277,8 @@ describe('actions', () => {
               'port4': createPort('port4', 'item2', PortType.Input)
             },
             items: {
-              'freeport': createItem('freeport', 'Freeport', { portIds: ['port2', 'port3'] }),
-              'item2': createItem('item2', 'OutputNode', { portIds: ['port4'] })
+              'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port2', 'port3'] }),
+              'item2': createItem('item2', ItemType.OutputNode, { portIds: ['port4'] })
             }
           }
         })
@@ -1297,8 +1290,7 @@ describe('actions', () => {
         expect(commit).toHaveBeenCalledWith('DISCONNECT', { source: 'port3', target: 'port4' })
       })
 
-      it('should remove the item and the circuit node from the document', () => {
-        expect(commit).toHaveBeenCalledWith('REMOVE_CIRCUIT_NODE', 'freeport')
+      it('should remove the item from the document', () => {
         expect(commit).toHaveBeenCalledWith('REMOVE_ELEMENT', 'freeport')
       })
     })
@@ -1329,7 +1321,7 @@ describe('actions', () => {
         state: {
           ...createState(),
           items: {
-            [itemId]: createItem(itemId, 'Freeport')
+            [itemId]: createItem(itemId, ItemType.Freeport)
           }
         }
       }), { itemId })
@@ -1362,7 +1354,6 @@ describe('actions', () => {
 
       it('should create the new freeport', () => {
         expect(commit).toHaveBeenCalledWith('CREATE_FREEPORT_ELEMENT', data)
-        expect(commit).toHaveBeenCalledWith('ADD_CIRCUIT_NODE', itemId)
         expect(dispatch).toHaveBeenCalledWith('setItemBoundingBox', itemId)
         expect(dispatch).toHaveBeenCalledWith('setActiveFreeportId', itemId)
       })
@@ -1399,7 +1390,6 @@ describe('actions', () => {
 
       it('should create the new freeport', () => {
         expect(commit).toHaveBeenCalledWith('CREATE_FREEPORT_ELEMENT', data)
-        expect(commit).toHaveBeenCalledWith('ADD_CIRCUIT_NODE', itemId)
         expect(dispatch).toHaveBeenCalledWith('setItemBoundingBox', itemId)
         expect(dispatch).toHaveBeenCalledWith('setActiveFreeportId', itemId)
       })
@@ -1443,7 +1433,6 @@ describe('actions', () => {
 
       it('should create the new freeport', () => {
         expect(commit).toHaveBeenCalledWith('CREATE_FREEPORT_ELEMENT', data)
-        expect(commit).toHaveBeenCalledWith('ADD_CIRCUIT_NODE', itemId)
         expect(dispatch).toHaveBeenCalledWith('setItemBoundingBox', itemId)
         expect(dispatch).toHaveBeenCalledWith('setActiveFreeportId', itemId)
       })
@@ -1568,21 +1557,19 @@ describe('actions', () => {
           const context = createLocalContext()
 
           context.state.items = {
-            [itemId]: createItem(itemId, 'Freeport', { portIds: [portId] }),
-            [otherItemId]: createItem(otherItemId, 'Freeport', { portIds: [sourceId, targetId] })
+            [itemId]: createItem(itemId, ItemType.Freeport, { portIds: [portId] }),
+            [otherItemId]: createItem(otherItemId, ItemType.Freeport, { portIds: [sourceId, targetId] })
           }
 
           invokeAction('connectFreeport', context, { sourceId, portId })
         })
 
-        it('should remove the item and its circuit node', () => {
+        it('should remove the item', () => {
           expect(commit).toHaveBeenCalledWith('REMOVE_ELEMENT', itemId)
-          expect(commit).toHaveBeenCalledWith('REMOVE_CIRCUIT_NODE', itemId)
         })
 
-        it('should not remove any other items or their circuit nodes', () => {
+        it('should not remove any other items', () => {
           expect(commit).not.toHaveBeenCalledWith('REMOVE_ELEMENT', otherItemId)
-          expect(commit).not.toHaveBeenCalledWith('REMOVE_CIRCUIT_NODE', otherItemId)
         })
       })
     })
@@ -1736,7 +1723,7 @@ describe('actions', () => {
     const port1 = createPort('port1', id, PortType.Input)
     const port2 = createPort('port2', id, PortType.Output)
     const port3 = createPort('port3', id, PortType.Input)
-    const item1 = createItem(id, 'InputNode', {
+    const item1 = createItem(id, ItemType.InputNode, {
       portIds: [port1.id, port2.id, port3.id],
       properties: {
         inputCount: {
@@ -1823,7 +1810,7 @@ describe('actions', () => {
 
     it('should not change anything if no properties have changed', () => {
       const properties = createProperties()
-      const item1 = createItem(id, 'LogicGate', { properties })
+      const item1 = createItem(id, ItemType.LogicGate, { properties })
       const context = createContext({
         state: {
           ...createState(),
@@ -1840,7 +1827,7 @@ describe('actions', () => {
     })
 
     it('should dispatch setOscilloscopeVisibility when the showInOscilloscope has changed', () => {
-      const item1 = createItem(id, 'LogicGate', { properties: createProperties() })
+      const item1 = createItem(id, ItemType.LogicGate, { properties: createProperties() })
       const context = createContext({
         state: {
           ...createState(),
@@ -1859,7 +1846,7 @@ describe('actions', () => {
     })
 
     it('should dispatch setInputCount when the inputCount has changed', () => {
-      const item1 = createItem(id, 'LogicGate', { properties: createProperties() })
+      const item1 = createItem(id, ItemType.LogicGate, { properties: createProperties() })
       const context = createContext({
         state: {
           ...createState(),
@@ -1880,7 +1867,7 @@ describe('actions', () => {
     it('should set the new item property value', () => {
       const propertyName = 'name'
       const value = 'New value'
-      const item1 = createItem(id, 'LogicGate', { properties: createProperties() })
+      const item1 = createItem(id, ItemType.LogicGate, { properties: createProperties() })
       const context = createContext({
         state: {
           ...createState(),

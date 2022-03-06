@@ -4,6 +4,7 @@ declare global {
   interface Port {
     id: string
     elementId: string
+    virtualElementId?: string
     position: Point
     type: PortType
     rotation: number

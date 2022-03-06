@@ -44,6 +44,7 @@
             :key="item.id"
             :ports="item.ports"
             :type="item.type"
+            :subtype="item.subtype"
             :position="item.position"
             :rotation="item.rotation"
             :group-id="item.groupId"
@@ -71,6 +72,9 @@ import Connection from './Connection.vue'
 import Group from './Group.vue'
 import Item from './Item.vue'
 import Toolbar from './Toolbar.vue'
+// import test from './fixtures/basic.json'
+import test from './fixtures/flipflop.json'
+// import test from './fixtures/ic.json'
 
 export default defineComponent({
   name: 'Document',
@@ -105,6 +109,7 @@ export default defineComponent({
   mounted () {
     this.$nextTick(() => {
       this.buildCircuit()
+      this.loadDocument(JSON.stringify(test))
     })
   },
   methods: {
@@ -122,6 +127,7 @@ export default defineComponent({
     ...mapActions([
       'addItem',
       'deselectAll',
+      'loadDocument',
       'toggleSelectionState',
       'setZoom',
       'createSelection',

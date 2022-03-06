@@ -8,7 +8,7 @@
     :class="{
       'item--selected': isSelected
     }"
-    :snap-mode="type === 'Freeport' ? 'radius' : 'outer'"
+    :snap-mode="type === ItemType.Freeport ? 'radius' : 'outer'"
     :snap-boundaries="snapBoundaries"
     :bounding-box="boundingBox"
     :force-dragging="forceDragging"
@@ -16,25 +16,27 @@
     @drag="position => setItemPosition({ id, position })"
     @mousedown="mousedown"
   >
-    <freeport v-if="type === 'Freeport'" />
-    <integrated-circuit v-else-if="type === 'IntegratedCircuit'" />
+    <freeport v-if="type === ItemType.Freeport" />
+    <integrated-circuit v-else-if="type === ItemType.IntegratedCircuit" />
     <input-switch
-      v-else-if="type === 'InputNode'"
+      v-else-if="type === ItemType.InputNode"
       :value="ports[0].value"
       @toggle="value => setPortValue({ id: ports[0].id, value })"
     />
     <clock
-      v-else-if="type === 'Clock'"
+      v-else-if="subtype === ItemSubtype.Clock"
       :value="ports[0].value"
       @toggle="value => setPortValue({ id: ports[0].id, value })"
     />
     <lightbulb
-      v-else-if="type === 'OutputNode'"
+      v-else-if="type === ItemType.OutputNode"
       :value="ports[0].value"
+      :type="subtype"
     />
     <logic-gate
       v-else
       :input-count="properties.inputCount?.value"
+      :type="subtype"
     />
     <port-set>
       <template
@@ -69,16 +71,18 @@
 import ResizeObserver from 'resize-observer-polyfill'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { defineComponent, PropType } from 'vue'
-import Clock from '../components/Clock.vue'
+import Clock from '../components/item/elements/Clock.vue'
 import Draggable from '../components/Draggable.vue'
-import LogicGate from '../components/LogicGate.vue'
-import InputSwitch from '../components/InputSwitch.vue'
-import IntegratedCircuit from '../components/IntegratedCircuit.vue'
-import Lightbulb from '../components/Lightbulb.vue'
-import Freeport from '../components/Freeport.vue'
-import PortSet from '../components/PortSet.vue'
+import LogicGate from '../components/item/elements/LogicGate.vue'
+import InputSwitch from '../components/item/elements/InputSwitch.vue'
+import IntegratedCircuit from '../components/item/elements/IntegratedCircuit.vue'
+import Lightbulb from '../components/item/elements/Lightbulb.vue'
+import Freeport from '../components/item/Freeport.vue'
+import PortSet from '../components/item/PortSet.vue'
+import Properties from '../components/item/Properties.vue'
 import PortItem from './PortItem.vue'
-import Properties from '../components/Properties.vue'
+import ItemType from '../types/enums/ItemType'
+import ItemSubtype from '../types/enums/ItemSubtype'
 
 export default defineComponent({
   name: 'Item',
@@ -120,8 +124,12 @@ export default defineComponent({
       default: false
     },
     type: {
-      type: String,
-      default: null
+      type: String as PropType<ItemType>,
+      required: true
+    },
+    subtype: {
+      subtype: String as PropType<ItemSubtype>,
+      required: true
     },
     ports: {
       type: Array,
@@ -144,6 +152,8 @@ export default defineComponent({
     return {
       forceDragging: false,
       showProperties: false,
+      ItemSubtype,
+      ItemType
     }
   },
   mounted () {
@@ -218,7 +228,7 @@ export default defineComponent({
     },
 
     dragStart () {
-      if (this.type !== 'Freeport') {
+      if (this.type !== ItemType.Freeport) {
         this.cacheState()
       }
       this.setSnapBoundaries(this.id)

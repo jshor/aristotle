@@ -1,6 +1,4 @@
 import { createStore, GetterTree, MutationTree } from 'vuex'
-import sample from './sample2'
-// import sample from './test.json'
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
 import CircuitService from '@/services/CircuitService'
@@ -8,6 +6,8 @@ import actions from './actions'
 import DocumentState from './DocumentState'
 import getConnectionChain from '@/utils/getConnectionChain'
 import createIntegratedCircuit from '@/utils/createIntegratedCircuit'
+import ItemType from '@/types/enums/ItemType'
+import ItemSubtype from '@/types/enums/ItemSubtype'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
@@ -24,9 +24,11 @@ const state: DocumentState = {
     secondsElapsed: 0,
     secondsOffset: 0
   },
-  groups: {}, // TODO: remove
-  zoomLevel: 1,
-  ...sample
+  items: {},
+  connections: {},
+  ports: {},
+  groups: {},
+  zoomLevel: 1
 }
 
 const getters: GetterTree<DocumentState, DocumentState> = {
@@ -108,26 +110,6 @@ const getters: GetterTree<DocumentState, DocumentState> = {
 
 
 const mutations: MutationTree<DocumentState> = {
-  'SET_IC_CIRCUIT' (state) {
-    const circuit = createIntegratedCircuit(state)
-
-    state.items = circuit.items
-    state.connections = circuit.connections
-    state.ports = circuit.ports
-  },
-
-  'ADD_CIRCUIT_NODE' (state, itemId: string) {
-    state
-      .circuit
-      .addNode(state.items[itemId], state.ports, true)
-  },
-
-  'REMOVE_CIRCUIT_NODE' (state, itemId: string) {
-    state
-      .circuit
-      .removeNode(state.items[itemId].portIds)
-  },
-
   'CACHE_STATE' (state) {
     state.cachedState = JSON.stringify({
       connections: state.connections,
@@ -171,7 +153,6 @@ const mutations: MutationTree<DocumentState> = {
   },
 
   'APPLY_STATE' (state, savedState: string) {
-    // console.log('APPLYING: ', JSON.stringify(JSON.parse(savedState), null, 2))
     const { items, connections, ports, groups } = JSON.parse(savedState) as {
       items: { [id: string]: Item },
       connections: { [id: string]: Connection },
@@ -179,7 +160,7 @@ const mutations: MutationTree<DocumentState> = {
       groups: { [id: string]: Group },
     }
 
-    /* returns everything in a not in b */
+    /* returns everything in a that is not in b */
     function getExcludedMembers (a: { [id: string]: BaseItem }, b: { [id: string]: BaseItem }) {
       const aIds = Object.keys(a)
       const bIds = Object.keys(b)
@@ -299,27 +280,68 @@ const mutations: MutationTree<DocumentState> = {
   },
 
   'ADD_ELEMENT' (state, { item, ports }: { item: Item, ports: Port[] }) {
-    state.items[item.id] = item
-
     ports.forEach(port => {
       state.ports[port.id] = port
     })
+
+    state.items[item.id] = item
 
     state
       .circuit
       .addNode(item, state.ports)
   },
 
+  'ADD_INTEGRATED_CIRCUIT' (state, { integratedCircuitItem, integratedCircuitPorts }: {
+    integratedCircuitItem: Item,
+    integratedCircuitPorts: { [id: string]: Port }
+  }) {
+    if (!integratedCircuitItem.integratedCircuit) return
+
+    // assign the visible IC ports
+    Object
+      .values(integratedCircuitPorts)
+      .forEach(port => {
+        state.ports[port.id] = port
+      })
+
+    state.items[integratedCircuitItem.id] = integratedCircuitItem
+
+    state
+      .circuit
+      .addIntegratedCircuit(integratedCircuitItem, integratedCircuitPorts)
+  },
+
   'REMOVE_ELEMENT' (state, id: string) {
-    state.items[id].portIds.forEach(portId => {
+    const item = state.items[id]
+
+    if (item.integratedCircuit) {
+      // remove all circuit nodes associated with the integrated circuit
+      Object
+        .values(item.integratedCircuit?.items)
+        .forEach(({ id, portIds }) => {
+          state
+            .circuit
+            .removeNode(portIds)
+        })
+    } else {
+      // remove the singular circuit node
+      state
+        .circuit
+        .removeNode(item.portIds)
+    }
+
+    // remove all ports associated with the item
+    item.portIds.forEach(portId => {
       delete state.ports[portId]
     })
+
+    // remove the item
     delete state.items[id]
   },
 
   'ADD_TO_OSCILLOSCOPE' (state, id: string) {
     const item = state.items[id]
-    const portType = item.type === 'OutputNode'
+    const portType = item.type === ItemType.OutputNode
       ? PortType.Input // output elements (lightbulb, etc.) will monitor incoming port values
       : PortType.Output // all other elements will monitor the outgoing port values
 
@@ -465,21 +487,11 @@ const mutations: MutationTree<DocumentState> = {
         zIndex: 0, // TODO
         isSelected: false
       }
-
-      if (state.ports[target].type === PortType.Input) {
-        // if the target is an input, check to make sure it has no incoming connections already
-        const connection = Object
-          .values(state.connections)
-          .find(c => c.target === target)
-
-        if (!connection) {
-          // if there is no connection, then add it to the circuit
-          state
-            .circuit
-            .addConnection(source, target)
-        }
-      }
     }
+
+    state
+      .circuit
+      .addConnection(source, target)
   },
 
   'DISCONNECT' (state, { source, target }: { source: string, target: string }) {
@@ -562,7 +574,8 @@ const mutations: MutationTree<DocumentState> = {
 
     state.items[itemId] = {
       id: itemId,
-      type: 'Freeport',
+      type: ItemType.Freeport,
+      subtype: ItemSubtype.None,
       portIds,
       position,
       rotation: 0,
@@ -579,6 +592,10 @@ const mutations: MutationTree<DocumentState> = {
       width: 1,
       height: 1
     }
+
+    state
+      .circuit
+      .addNode(state.items[itemId], state.ports, true)
   },
 
   'ROTATE_ELEMENT' (state, { id, rotation }) {

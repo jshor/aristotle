@@ -14,7 +14,6 @@ export default defineComponent({
 .freeport {
   width: 0px;
   height: 1px;
-  background: green;
   pointer-events: all;
 }
 </style>
