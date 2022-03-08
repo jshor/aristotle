@@ -1,20 +1,33 @@
+/**
+ * Returns all connections and any associated freeport items within a connection chain.
+ *
+ * @param connections - list of all connections to explore
+ * @param portMap - ID-to-port mapping of the entire document
+ * @param connectionChainId - ID of the connection chain to explore
+ * @returns the IDs of the connections and the freeports discovered in the chain
+ */
 export default function getConnectionChain (connections: Connection[], portMap: { [id: string]: Port }, connectionChainId: string) {
-  return Object
+  const { connectionIds, freeportIds } = Object
     .values(connections)
     .reduce(({ connectionIds, freeportIds }, connection) => {
       if (connectionChainId === connection.connectionChainId) {
         const sourcePort = portMap[connection.source]
         const targetPort = portMap[connection.target]
 
-        connectionIds.push(connection.id)
+        connectionIds.add(connection.id)
 
-        if (sourcePort?.isFreeport) freeportIds.push(sourcePort.elementId)
-        if (targetPort?.isFreeport) freeportIds.push(targetPort.elementId)
+        if (sourcePort?.isFreeport) freeportIds.add(sourcePort.elementId)
+        if (targetPort?.isFreeport) freeportIds.add(targetPort.elementId)
       }
 
       return { connectionIds, freeportIds }
     }, {
-      connectionIds: [] as string[],
-      freeportIds: [] as string[]
+      connectionIds: new Set<string>(),
+      freeportIds: new Set<string>()
     })
+
+  return {
+    connectionIds: Array.from(connectionIds),
+    freeportIds: Array.from(freeportIds)
+  }
 }

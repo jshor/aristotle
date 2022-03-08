@@ -2,7 +2,7 @@ import { ActionTree } from 'vuex'
 import DocumentState from './DocumentState'
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
-import CircuitService from '@/services/CircuitService'
+import SimulationService from '@/services/SimulationService'
 import boundaries from '@/layout/boundaries'
 import rotation from '@/layout/rotation'
 import createIntegratedCircuit from '@/utils/createIntegratedCircuit'
@@ -34,7 +34,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   },
 
   buildCircuit ({ commit, state }) {
-    const circuit = new CircuitService(Object.values(state.items), Object.values(state.connections), state.ports)
+    const circuit = new SimulationService(Object.values(state.items), Object.values(state.connections), state.ports)
 
     circuit.onChange((valueMap: any, wave: any) => {
       commit('SET_PORT_VALUES', valueMap)
@@ -483,6 +483,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
 
       dispatch('selectItemConnections', itemIds)
     } catch (error) {
+      console.log('SELECTION ERROR: ', error, selection)
       // TODO: this really shouldn't ever throw an error, investigate why it does...
       // do nothing, ignore the error
     }
@@ -518,6 +519,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
    */
   toggleSelectionState ({ commit, state }, { id, forcedValue = null }: { id: string, forcedValue: boolean | null }) {
     const element = state.items[id] || state.connections[id] || state.groups[id]
+    if (!element) return
     const isSelected = forcedValue === null
       ? !element.isSelected
       : forcedValue
@@ -753,6 +755,12 @@ const actions: ActionTree<DocumentState, DocumentState> = {
           target: targetId
         })
       }
+    } else {
+      // no port can be connected, so disconnect the temporary dragged wire
+      commit('DISCONNECT', {
+        source: sourceId || portId,
+        target: targetId || portId
+      })
     }
 
     const item = Object

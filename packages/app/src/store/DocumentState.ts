@@ -1,4 +1,4 @@
-import CircuitService from '@/services/CircuitService'
+import SimulationService from '@/services/SimulationService'
 
 export default interface DocumentState {
   cachedState: string | null
@@ -19,7 +19,7 @@ export default interface DocumentState {
     [id: string]: Group
   }
   zoomLevel: number
-  circuit: CircuitService
+  simulation: SimulationService
   waves: any,
   activeFreeportId: string | null
 }
