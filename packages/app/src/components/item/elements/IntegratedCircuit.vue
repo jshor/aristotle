@@ -31,7 +31,6 @@ export default defineComponent({
   height: 150px;
   width: 200px;
   border: 1px solid red;
-  position: relative;
   pointer-events: none;
   cursor: pointer;
   display: flex;

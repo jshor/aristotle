@@ -7,10 +7,10 @@ import ItemSubtype from '@/types/enums/ItemSubtype'
 import PortType from '@/types/enums/PortType'
 
 /**
- * The CircuitService ties together all aspects of a running simulation, including clock pulses, oscilloscope
+ * The SimulationService ties together all aspects of a running simulation, including clock pulses, oscilloscope
  * wave management, and circuit component I/O. Effectively serves as an oracle for all circuit computations.
  */
-export default class CircuitService { // TODO: rename to SimulationService
+export default class SimulationService {
   nodes: { [id: string]: CircuitNode } = {}
 
   waves: { [id: string]: BinaryWaveService } = {}
@@ -198,6 +198,7 @@ export default class CircuitService { // TODO: rename to SimulationService
 
   addConnection = (sourceId: string, targetId: string) => {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
+      console.log('ADDING CONNECTION')
       this.circuit.addConnection(this.nodes[sourceId], this.nodes[targetId], targetId)
     } else {
       console.log('MISSING NODE FOR ADDING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
@@ -206,6 +207,7 @@ export default class CircuitService { // TODO: rename to SimulationService
 
   removeConnection = (sourceId: string, targetId: string) => {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
+      console.log('REMOVING CONNECTION')
       this.circuit.removeConnection(this.nodes[sourceId], this.nodes[targetId])
     } else {
       console.log('MISSING NODE FOR REMOVING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
