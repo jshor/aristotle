@@ -1,5 +1,9 @@
 <template>
-  <port-pivot :rotation="rotation" :title="id">
+  <port-pivot
+    :rotation="rotation"
+    @keydown="onKeyDown"
+    @keydown.esc="onEscapeKey"
+  >
     <draggable
       v-if="!isFreeport"
       :snap-boundaries="snapBoundaries"
@@ -17,13 +21,13 @@
     >
       <port-handle
         :type="type"
-        :active="connectablePortIds.includes(id)"
+        :active="activePortId === id || connectablePortIds.includes(id)"
       />
     </draggable>
     <port-handle
       v-else
       :type="type"
-      :active="connectablePortIds.includes(id)"
+      :active="activePortId === id || connectablePortIds.includes(id)"
     />
   </port-pivot>
 </template>
@@ -92,6 +96,11 @@ export default defineComponent({
     orientation: {
       type: Number,
       default: 0
+    },
+
+    connectedPortIds: {
+      type: Object as PropType<string[]>,
+      default: []
     }
   },
   data () {
@@ -100,21 +109,56 @@ export default defineComponent({
       isDragging: false
     }
   },
+  watch: {
+    activePortId (activePortId) {
+      if (activePortId === this.id && document.activeElement !== this.$el) {
+        this.$el.focus()
+      }
+    }
+  },
   computed: {
     ...mapGetters([
       'zoom'
     ]),
     ...mapState([
+      'activePortId',
       'connectablePortIds',
       'snapBoundaries'
-    ])
+    ]),
+    isSelected () {
+      return this.activePortId === this.id
+    },
+    label () {
+      if (this.connectedPortIds.length > 0) {
+        return `${this.id} Connected to: ${this.connectedPortIds.join(', ')}`
+      }
+      return `${this.id} Not connected to anything.`
+    }
   },
   methods: {
     ...mapActions([
       'connectFreeport',
       'createFreeport',
+      'cycleDocumentPorts',
       'setConnectablePortIds'
     ]),
+
+    onKeyDown ($event: KeyboardEvent) {
+      if ($event.key === 'c' || $event.key === ' ') {
+        this.cycleDocumentPorts({
+          portId: this.id,
+          direction: 1,
+          clearConnection: $event.key !== 'c'
+        })
+      }
+    },
+
+    onEscapeKey ($event: KeyboardEvent) {
+      $event.preventDefault()
+      $event.stopPropagation()
+
+      this.$emit('deselect', $event)
+    },
 
     /**
      * Creates a new freeport that can be moved around using the mouse.
@@ -140,7 +184,7 @@ export default defineComponent({
       }
 
       this.createFreeport(this.newFreeport)
-      this.setConnectablePortIds(this.id)
+      this.setConnectablePortIds({ portId: this.id })
     },
 
     /**

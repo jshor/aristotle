@@ -78,7 +78,8 @@
     "collectCoverage": true,
     "coverageDirectory": "<rootDir>/test/.coverage",
     "coveragePathIgnorePatterns": [
-      "<rootDir>/src/.*/__spec__/.*"
+      "<rootDir>/src/.*/__spec__",
+      "<rootDir>/src/.*/__tests__"
     ],
     "preset": "@vue/cli-plugin-unit-jest/presets/typescript-and-babel",
     "testMatch": [

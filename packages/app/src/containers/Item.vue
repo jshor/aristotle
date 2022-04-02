@@ -3,7 +3,8 @@
     :position="position"
     :zoom="zoom"
     :style="{
-      transform: `rotate(${90 * rotation}deg)`
+      transform: `rotate(${90 * rotation}deg)`,
+      zIndex
     }"
     :class="{
       'item--selected': isSelected
@@ -12,10 +13,25 @@
     :snap-boundaries="snapBoundaries"
     :bounding-box="boundingBox"
     :force-dragging="forceDragging"
-    @drag-start="dragStart"
-    @drag="position => setItemPosition({ id, position })"
-    @mousedown="mousedown"
+    :aria-label="name"
+    :title="name"
+    :tabindex="0"
+    @keydown.esc="onEscapeKey"
+    @drag-start="onDragStart"
+    @drag="position => setSelectionPosition({ id, position })"
+    @focus="onFocus"
+    @blur="onBlur"
+    @mousedown.stop="focus"
   >
+    <properties
+      v-if="isPropertiesEnabled"
+      :properties="properties"
+      :id="id"
+      @update="setProperties"
+      @focus="onPropertiesFocus"
+      @blur="onBlur"
+      aria-label="Properties dialog"
+    />
     <freeport v-if="type === ItemType.Freeport" />
     <integrated-circuit v-else-if="type === ItemType.IntegratedCircuit" />
     <input-switch
@@ -38,7 +54,7 @@
       :input-count="properties.inputCount?.value"
       :type="subtype"
     />
-    <port-set>
+    <port-set v-if="type !== 'Freeport'">
       <template
         v-for="(ports, orientation) in portList"
         v-slot:[orientation]
@@ -52,17 +68,19 @@
           :is-freeport="port.isFreeport"
           :position="port.position"
           :orientation="port.orientation + rotation"
+          :connected-port-ids="port.connectedPortIds"
           :rotation="rotation"
-          :snap-boundaries="snapBoundaries"
           :show-helper="port.showHelper"
+          @keypress.esc="onEscapeKey"
+          @focus="$event => onPortFocus($event, port.id)"
+          @blur="$event => onPortBlur($event, port.id)"
+          @deselect="focus"
         />
       </template>
     </port-set>
-    <properties
-      v-if="isPropertiesEnabled"
-      :properties="properties"
-      :id="id"
-      @update="setProperties"
+    <port-handle
+      v-else
+      :active="hasFocus"
     />
   </draggable>
 </template>
@@ -78,6 +96,7 @@ import InputSwitch from '../components/item/elements/InputSwitch.vue'
 import IntegratedCircuit from '../components/item/elements/IntegratedCircuit.vue'
 import Lightbulb from '../components/item/elements/Lightbulb.vue'
 import Freeport from '../components/item/Freeport.vue'
+import PortHandle from '../components/PortHandle.vue'
 import PortSet from '../components/item/PortSet.vue'
 import Properties from '../components/item/Properties.vue'
 import PortItem from './PortItem.vue'
@@ -94,6 +113,7 @@ export default defineComponent({
     InputSwitch,
     IntegratedCircuit,
     Lightbulb,
+    PortHandle,
     PortSet,
     PortItem,
     Properties
@@ -119,6 +139,10 @@ export default defineComponent({
       type: Number,
       default: 0
     },
+    zIndex: {
+      type: Number,
+      default: 0
+    },
     isSelected: {
       type: Boolean,
       default: false
@@ -128,8 +152,12 @@ export default defineComponent({
       required: true
     },
     subtype: {
-      subtype: String as PropType<ItemSubtype>,
+      type: String,
       required: true
+    },
+    name: {
+      type: String,
+      default: 'Node'
     },
     ports: {
       type: Array,
@@ -152,8 +180,16 @@ export default defineComponent({
     return {
       forceDragging: false,
       showProperties: false,
+      hasFocus: false,
       ItemSubtype,
       ItemType
+    }
+  },
+  watch: {
+    isSelected (isSelected: boolean) {
+      if (isSelected) {
+        this.$el.focus()
+      }
     }
   },
   mounted () {
@@ -166,6 +202,7 @@ export default defineComponent({
       // allow for it to be moved when the mouse moves on first creation
       this.forceDragging = true
       this.setActiveFreeportId(null)
+      this.$el.focus()
     }
 
     this.setProperties({
@@ -175,17 +212,15 @@ export default defineComponent({
   },
   computed: {
     ...mapState([
+      'activePortId',
       'activeFreeportId',
       'snapBoundaries'
     ]),
     ...mapGetters([
-      'selectedItemsData',
       'zoom'
     ]),
     isPropertiesEnabled () {
-      return this.isSelected &&
-        this.selectedItemsData.count === 1 &&
-        Object.keys(this.properties).length > 0
+      return this.isSelected && this.hasFocus && Object.keys(this.properties).length > 0
     },
     portList () {
       const locations = ['left', 'top', 'right', 'bottom']
@@ -212,30 +247,77 @@ export default defineComponent({
   },
   methods: {
     ...mapActions([
-      'cacheState',
+      'commitState',
+      'cycleDocumentPorts',
+      'setSelectionPosition',
       'setActiveFreeportId',
+      'setActivePortId',
       'setSnapBoundaries',
       'setItemSize',
-      'setItemPosition',
       'setPortValue',
       'setProperties'
     ]),
+
+    focus () {
+      this.$el.focus()
+    },
+
+    onDragStart () {
+      if (this.type !== ItemType.Freeport) {
+        this.commitState()
+      }
+      this.setSnapBoundaries(this.id)
+    },
+
+    onEscapeKey ($event: KeyboardEvent) {
+      if (document.activeElement === this.$el) {
+        this.$el.blur()
+      } else {
+        $event.preventDefault()
+      }
+    },
+
+    onBlur ($event: FocusEvent) {
+      if (!this.$el.contains($event.relatedTarget as Node)) {
+        this.hasFocus = false
+      }
+    },
+
+    onFocus ($event: FocusEvent) {
+      if (!this.isSelected) {
+        this.$emit('select', {
+          shiftKey: false
+        })
+      }
+
+      this.hasFocus = true
+    },
+
+    onPropertiesFocus () {
+      this.setActivePortId(null)
+      this.hasFocus = true
+    },
+
+    onPortFocus ($event: FocusEvent, portId: string) {
+      if (!this.isSelected) {
+        this.$emit('select', {})
+      }
+
+      this.setActivePortId(portId)
+      this.hasFocus = true
+    },
+
+    onPortBlur ($event: FocusEvent, portId: string) {
+      if (this.activePortId === portId) {
+        this.setActivePortId(null)
+      }
+      this.onBlur($event)
+    },
 
     onSizeChanged ([ target ]: ResizeObserverEntry[]) {
       if (target) {
         this.setItemSize({ id: this.id, rect: target.contentRect })
       }
-    },
-
-    dragStart () {
-      if (this.type !== ItemType.Freeport) {
-        this.cacheState()
-      }
-      this.setSnapBoundaries(this.id)
-    },
-
-    mousedown ($event: MouseEvent) {
-      this.$emit('select', $event)
     }
   }
 })

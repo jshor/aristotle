@@ -14,8 +14,9 @@ export default function createIntegratedCircuit (state: DocumentState) {
 
   const integratedCircuitItem: Item = {
     id: rand(),
+    name: 'Integrated Circuit',
     type: ItemType.IntegratedCircuit,
-    subtype: ItemSubtype.None,
+    subtype: 'custom circuit',
     portIds: [],
     boundingBox: {
       left: 0,

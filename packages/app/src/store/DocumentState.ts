@@ -6,20 +6,19 @@ export default interface DocumentState {
   redoStack: string[]
   snapBoundaries: BoundingBox[]
   connectablePortIds: string[]
-  ports: {
-    [id: string]: Port
-  }
-  items: {
-    [id: string]: Item
-  }
-  connections: {
-    [id: string]: Connection
-  }
-  groups: {
-    [id: string]: Group
-  }
+  ports: Record<string, Port>
+  items: Record<string, Item>
+  connections: Record<string, Connection>
+  groups: Record<string, Group>
+  taxonomyCounts: Record<string, number>
   zoomLevel: number
   simulation: SimulationService
-  waves: any,
+  waves: any // TODO
   activeFreeportId: string | null
+  selectedItemIds: string[]
+  selectedConnectionIds: string[]
+  selectedPortIndex: number
+  zIndex: number
+  activePortId: string | null
+  previewConnectedPortId: string | null
 }

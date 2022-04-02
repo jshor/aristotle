@@ -3,6 +3,7 @@ import PortType from '../enums/PortType'
 declare global {
   interface Port {
     id: string
+    name: string
     elementId: string
     virtualElementId?: string
     position: Point
@@ -11,6 +12,7 @@ declare global {
     orientation: number
     value: number
     isFreeport: boolean
+    connectedPortIds: string[]
   }
 }
 

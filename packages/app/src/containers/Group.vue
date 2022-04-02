@@ -1,26 +1,24 @@
 <template>
   <draggable
+    :tabindex="-1"
     :position="{
       x: boundingBox.left,
       y: boundingBox.top
     }"
     :style="{
       width: `${boundingBox.right - boundingBox.left}px`,
-      height: `${boundingBox.bottom - boundingBox.top}px`
+      height: `${boundingBox.bottom - boundingBox.top}px`,
+      zIndex
     }"
     :zoom="zoom"
     :bounding-box="boundingBox"
-    @contextmenu="onContextMenu"
-    @drag-start="cacheState"
-    @drag="delta => moveGroupPosition({ id, delta })"
-    @mousedown="$event => $emit('select', { $event, id })"
   >
     <group-box :is-selected="isSelected" />
   </draggable>
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import { defineComponent, PropType } from 'vue'
 import Draggable from '../components/Draggable.vue'
 import GroupBox from '../components/GroupBox.vue'
@@ -45,23 +43,16 @@ export default defineComponent({
     isSelected: {
       type: Boolean,
       default: false
+    },
+    zIndex: {
+      type: Number,
+      default: 0
     }
   },
   computed: {
     ...mapGetters([
       'zoom'
     ])
-  },
-  methods: {
-    ...mapActions([
-      'cacheState',
-      'moveGroupPosition'
-    ]),
-
-    onContextMenu ($event: MouseEvent) {
-      console.log('GROUP context menu')
-      $event.preventDefault()
-    }
   }
 })
 </script>

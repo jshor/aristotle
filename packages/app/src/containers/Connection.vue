@@ -1,18 +1,21 @@
 <template>
   <wire
-    :title="`from ${source.id} to ${target.id}`"
+    :style="{ zIndex }"
     :source="source"
     :target="target"
     :top-left="topLeft"
     :bottom-right="bottomRight"
     :is-selected="isSelected"
+    :aria-selected="isSelected"
+    :label="label"
+    :tabindex="0"
     @mousedown="mousedown"
   />
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import Wire from '../components/Wire.vue'
 
 export default defineComponent({
@@ -44,6 +47,10 @@ export default defineComponent({
     id: {
       type: String,
       required: true
+    },
+    zIndex: {
+      type: Number,
+      default: 0
     }
   },
   data () {
@@ -67,6 +74,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState([
+      'items'
+    ]),
     ...mapGetters([
       'zoom'
     ]),
@@ -87,11 +97,35 @@ export default defineComponent({
       const y = Math.max(this.a.y, this.b.y)
 
       return { x, y }
+    },
+    label () {
+      const from = this.items[this.source.elementId]
+      const to = this.items[this.target.elementId]
+
+      if (from) {
+        if (to) {
+          return `Connection from ${from.name} ${this.source.name} to ${to.name} ${this.target.name}.`
+        }
+        return `New connection from ${from.name} ${this.source.name}.`
+      }
+
+      if (to) {
+        return `New connection to ${to.name} ${this.target.name}.`
+      }
+
+      return 'Empty connection.'
     }
   },
   mounted () {
     window.addEventListener('mousemove', this.mousemove)
     window.addEventListener('mouseup', this.mouseup)
+  },
+  watch: {
+    isSelected (value: boolean) {
+      if (value) {
+        this.$el.focus()
+      }
+    }
   },
   destroy () {
     window.removeEventListener('mousemove', this.mousemove)

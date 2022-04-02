@@ -1,30 +1,37 @@
 <template>
   <div class="toolbar">
-    <button @click="rotate(-1)" :disabled="!canRotate">Rotate 90&deg; CCW</button>
-    <button @click="rotate(1)" :disabled="!canRotate">Rotate 90&deg; CW</button><br />
-    <button @click="group" :disabled="selectionCount <= 1">Group</button>
-    <button @click="ungroup" :disabled="selectedGroupsCount === 0">Ungroup</button>
-    <button @click="addLogicGate">Add NOR</button>
-    <button @click="addLightbulb">Add lightbulb</button>
-    <button @click="addSwitch">Add switch</button>
-    <button @click="deleteSelection" :disabled="selectionCount === 0">Delete selection</button>
-    <button @click="saveIntegratedCircuit">Build IC</button>
-    <button @click="undo" :disabled="!canUndo">Undo</button>
-    <button @click="redo" :disabled="!canRedo">Redo</button>
+    <toolbar-button @click="rotate(-1)" :disabled="!hasSelectedItems">Rotate 90&deg; CCW</toolbar-button>
+    <toolbar-button @click="rotate(1)" :disabled="!hasSelectedItems">Rotate 90&deg; CW</toolbar-button><br />
+    <toolbar-button @click="group" :disabled="!canGroup">Group</toolbar-button>
+    <toolbar-button @click="ungroup" :disabled="!canUngroup">Ungroup</toolbar-button>
+    <toolbar-button @click="addLogicGate">Add NOR</toolbar-button>
+    <toolbar-button @click="addLightbulb">Add lightbulb</toolbar-button>
+    <toolbar-button @click="addSwitch">Add switch</toolbar-button>
+    <toolbar-button @click="deleteSelection" :disabled="!hasSelection">Delete selection</toolbar-button>
+    <toolbar-button @click="saveIntegratedCircuit">Build IC</toolbar-button>
+    <toolbar-button @click="undo" :disabled="!canUndo">Undo</toolbar-button>
+    <toolbar-button @click="redo" :disabled="!canRedo">Redo</toolbar-button>
+    <toolbar-button @click="bringForward" :disabled="!hasSelectedItems">Bring forward</toolbar-button>
+    <toolbar-button @click="sendBackward" :disabled="!hasSelectedItems">Send backward</toolbar-button>
+    <toolbar-button @click="sendToBack" :disabled="!hasSelectedItems">Send to back</toolbar-button>
+    <toolbar-button @click="bringToFront" :disabled="!hasSelectedItems">Bring to front</toolbar-button>
   </div>
 </template>
 
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex'
 import { defineComponent } from 'vue'
+import ToolbarButton from '../components/toolbar/ToolbarButton.vue'
 import ItemSubtype from '../types/enums/ItemSubtype'
 import ItemType from '../types/enums/ItemType'
+import { mapState } from 'vuex'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000000000) + 5)}` // TODO: use uuid
 
-const createPort = (elementId, id, orientation, type): Port => ({
+const createPort = (elementId, id, orientation, type, name): Port => ({
   id,
   orientation,
+  name,
   position: {
     x: 0,
     y: 0
@@ -33,32 +40,34 @@ const createPort = (elementId, id, orientation, type): Port => ({
   rotation: 0,
   elementId,
   value: 0,
-  isFreeport: false
+  isFreeport: false,
+  connectedPortIds: []
 })
 
 export default defineComponent({
   name: 'Toolbar',
+  components: {
+    ToolbarButton
+  },
   computed: {
-    ...mapGetters([
-      'canUndo',
-      'canRedo',
-      'selectedItemsData',
-      'selectedConnectionsCount',
-      'selectedGroupsCount'
+    ...mapState([
+      'selectedConnectionIds',
+      'selectedItemIds',
     ]),
-    selectionCount (): number {
-      return this.selectedItemsData.count
-        + this.selectedConnectionsCount
-        + this.selectedGroupsCount
-    },
-    canRotate (): boolean {
-      return (this.selectedItemsData.count + this.selectedGroupsCount) > 0
-    }
+    ...mapGetters([
+      'hasSelectedItems',
+      'hasSelection',
+      'canUngroup',
+      'canGroup',
+      'canUndo',
+      'canRedo'
+    ])
   },
   methods: {
     addNewItem (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports: Port[] = []) {
       const item: Item = {
         id,
+        name: '',
         type,
         subtype,
         portIds: ports.map(({ id }) => id),
@@ -141,9 +150,9 @@ export default defineComponent({
       const elementId = rand()
 
       this.addNewItem(elementId, ItemType.LogicGate, ItemSubtype.Nor, 100, 150, [
-        createPort(elementId, rand(), 0, 1),
-        createPort(elementId, rand(), 0, 1),
-        createPort(elementId, rand(), 2, 0)
+        createPort(elementId, rand(), 0, 1, 'Input Port 1'),
+        createPort(elementId, rand(), 0, 1, 'Input Port 2'),
+        createPort(elementId, rand(), 2, 0, 'Output Port')
       ])
     },
 
@@ -151,7 +160,7 @@ export default defineComponent({
       const elementId = rand()
 
       this.addNewItem(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, [
-        createPort(elementId, rand(), 0, 1)
+        createPort(elementId, rand(), 0, 1, 'Input Port')
       ])
     },
 
@@ -159,16 +168,20 @@ export default defineComponent({
       const elementId = rand()
 
       this.addNewItem(elementId, ItemType.InputNode, ItemSubtype.Switch, 40, 40, [
-        createPort(elementId, rand(), 2, 0)
+        createPort(elementId, rand(), 2, 0, 'Output Port')
       ])
     },
 
     ...mapActions([
       'addItem',
+      'bringForward',
+      'bringToFront',
+      'sendBackward',
+      'sendToBack',
       'selectAll',
       'deselectAll',
       'deleteSelection',
-      'toggleSelectionState',
+      'setSelectionState',
       'group',
       'ungroup',
       'setZoom',

@@ -23,11 +23,6 @@ body {
   font-family: system-ui;
   min-height: 100vh;
   min-height: -webkit-fill-available;
-}
-
-.app {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
+  overflow: hidden;
 }
 </style>

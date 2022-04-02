@@ -11,6 +11,8 @@ const state: DocumentState = {
   redoStack: [],
   snapBoundaries: [],
   connectablePortIds: [],
+  selectedConnectionIds: [],
+  selectedItemIds: [],
   simulation: new SimulationService([], [], {}),
   waves: {
     waves: {},
@@ -21,16 +23,17 @@ const state: DocumentState = {
   connections: {},
   ports: {},
   groups: {},
-  zoomLevel: 1
+  taxonomyCounts: {},
+  zoomLevel: 1,
+  selectedPortIndex: -1,
+  zIndex: 1,
+  activePortId: null,
+  previewConnectedPortId: null
 }
 
 const getters: GetterTree<DocumentState, DocumentState> = {
   zoom (state) {
     return state.zoomLevel
-  },
-
-  ports (state) {
-    return state.ports
   },
 
   items (state) {
@@ -46,50 +49,30 @@ const getters: GetterTree<DocumentState, DocumentState> = {
       }))
   },
 
-  connections (state) {
-    const { ports } = state
-
-    return Object
-      .values(state.connections)
-      .map(wire => ({
-        ...wire,
-        source: ports[wire.source],
-        target: ports[wire.target]
-      }))
-      .filter(({ source, target }) => source && target)
+  hasSelection (state) {
+    return state.selectedItemIds.length > 0 && state.selectedConnectionIds.length > 0
   },
 
-  selectedItemsData (state) {
-    return Object
-      .values(state.items)
-      .reduce((selection, item: Item) => {
-        if (!item.isSelected) return selection
-
-        return {
-          type: selection.type && selection.type !== item.type
-            ? 'Mixed'
-            : item.type,
-          count: selection.count + 1
-        }
-      }, { type: '', count: 0 })
+  hasSelectedItems () {
+    return state.selectedItemIds.length > 0
   },
 
-  selectedConnectionsCount (state) {
-    return Object
-      .values(state.connections)
-      .filter(({ isSelected }) => isSelected)
-      .length
+  selectedGroupIds (state) {
+    const selectedGroupIds = new Set<string | null>()
+
+    state
+      .selectedItemIds
+      .forEach(id => selectedGroupIds.add(state.items[id]?.groupId))
+
+    return Array.from(selectedGroupIds)
   },
 
-  selectedGroupsCount (state) {
-    return Object
-      .values(state.connections)
-      .filter(({ isSelected }) => isSelected)
-      .length
+  canGroup (state, getters) {
+    return getters.selectedGroupIds.length > 1 || getters.selectedGroupIds[0] === null
   },
 
-  nextZIndex (state) {
-    return Object.keys(state.items).length + Object.keys(state.connections).length
+  canUngroup (state, getters) {
+    return !!getters.selectedGroupIds.find(id => !!id)
   },
 
   canUndo (state) {

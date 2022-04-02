@@ -169,17 +169,17 @@ describe('actions', () => {
     })
 
     it('should select all connections that are attached to selected non-freeport items', () => {
-      expect(dispatch).toHaveBeenCalledWith('toggleSelectionState', { id: 'connection1', forcedValue: true })
-      expect(dispatch).not.toHaveBeenCalledWith('toggleSelectionState', { id: 'connection3', forcedValue: true })
+      expect(dispatch).toHaveBeenCalledWith('setSelectionState', { id: 'connection1', value: true })
+      expect(dispatch).not.toHaveBeenCalledWith('setSelectionState', { id: 'connection3', value: true })
     })
 
     it('should not select connections attached to a freeport', () => {
-      expect(dispatch).not.toHaveBeenCalledWith('toggleSelectionState', { id: 'connection2', forcedValue: true })
+      expect(dispatch).not.toHaveBeenCalledWith('setSelectionState', { id: 'connection2', value: true })
     })
 
     it('should not select a connection with an invalid source port reference', () => {
-      expect(dispatch).not.toHaveBeenCalledWith('toggleSelectionState', { id: 'dragged_connection1', forcedValue: true })
-      expect(dispatch).not.toHaveBeenCalledWith('toggleSelectionState', { id: 'dragged_connection2', forcedValue: true })
+      expect(dispatch).not.toHaveBeenCalledWith('setSelectionState', { id: 'dragged_connection1', value: true })
+      expect(dispatch).not.toHaveBeenCalledWith('setSelectionState', { id: 'dragged_connection2', value: true })
     })
 
     it('should disconnect selected connections', () => {
@@ -464,107 +464,11 @@ describe('actions', () => {
     const position = { x: 210, y: 452 }
     const item1 = createItem('item1', ItemType.LogicGate, {
       portIds: ['port1'],
-      position: { x: 10, y: 25 },
-      groupId: 'group1'
+      position: { x: 10, y: 25 }
     })
     const port1 = createPort('port1', 'item1', PortType.Input, {
       position: { x: 10, y: 25 }
     })
-    const context = createContext({
-      commit,
-      dispatch,
-      state: {
-        ...createState(),
-        items: { item1 },
-        ports: { port1 }
-      }
-    })
-
-    describe('when the item is part of a group', () => {
-      it('should move its entire group if the sender of the action was not its own group', () => {
-        invokeAction('setItemPosition', context, { id: 'item1', position, isMovedByGroup: false })
-
-        expect(commit).not.toHaveBeenCalled()
-        expect(dispatch).toHaveBeenCalledWith('moveGroupPosition', {
-          id: item1.groupId,
-          delta: {
-            x: position.x - item1.position.x,
-            y: position.y - item1.position.y
-          }
-        })
-      })
-
-      it('should move the item itself if the action sender was its own group', () => {
-        invokeAction('setItemPosition', context, { id: 'item1', position, isMovedByGroup: true })
-
-        expect(dispatch).not.toHaveBeenCalled()
-        expect(commit).toHaveBeenCalledWith('SET_ELEMENT_POSITION', { id: 'item1', position })
-      })
-    })
-
-    describe('when the item is not part of a group', () => {
-      const position = { x: 210, y: 452 }
-      const item1 = createItem('item1', ItemType.LogicGate, {
-        portIds: ['port1'],
-        position: { x: 10, y: 25 }
-      })
-      const port1 = createPort('port1', 'item1', PortType.Input, { position: { x: 10, y: 25 } })
-
-      beforeEach(() => {
-        const context = createContext({
-          commit,
-          dispatch,
-          state: {
-            ...createState(),
-            items: { item1 },
-            ports: { port1 }
-          }
-        })
-
-        invokeAction('setItemPosition', context, { id: 'item1', position })
-      })
-
-      it('should commit the cached state', () => {
-        expect(commit).toHaveBeenCalledWith('COMMIT_CACHED_STATE')
-      })
-
-      it('should update the item\'s position to the new one provided', () => {
-        expect(commit).toHaveBeenCalledWith('SET_ELEMENT_POSITION', {
-          id: item1.id,
-          position
-        })
-      })
-
-      it('should move the bounding box of the item to the distance changed', () => {
-        expect(commit).toHaveBeenCalledWith('SET_ELEMENT_BOUNDING_BOX', {
-          id: item1.id,
-          boundingBox: {
-            left: item1.boundingBox.left + (position.x - item1.position.x),
-            top: item1.boundingBox.top + (position.y - item1.position.y),
-            right: item1.boundingBox.left + (position.x - item1.position.x),
-            bottom: item1.boundingBox.bottom + (position.y - item1.position.y)
-          }
-        })
-      })
-
-      it('should update the position of the ports according to the distance changed', () => {
-        expect(commit).toHaveBeenCalledWith('SET_PORT_POSITION', {
-          id: port1.id,
-          position: {
-            x: port1.position.x + (position.x - item1.position.x),
-            y: port1.position.y + (position.y - item1.position.y)
-          }
-        })
-      })
-    })
-  })
-
-  describe('moveGroupPosition', () => {
-    const delta = { x: 42, y: -15 }
-    const item1 = createItem('item1', ItemType.LogicGate, {
-      position: { x: 10, y: 25 }
-    })
-    const group1 = createGroup('group1', ['item1'])
 
     beforeEach(() => {
       const context = createContext({
@@ -573,36 +477,42 @@ describe('actions', () => {
         state: {
           ...createState(),
           items: { item1 },
-          groups: { group1 }
+          ports: { port1 }
         }
       })
 
-      invokeAction('moveGroupPosition', context, { id: 'group1', delta })
+      invokeAction('setItemPosition', context, { id: 'item1', position })
     })
 
     it('should commit the cached state', () => {
       expect(commit).toHaveBeenCalledWith('COMMIT_CACHED_STATE')
     })
 
-    it('should move the bounding box of the group augmented by the distance changed', () => {
-      expect(commit).toHaveBeenCalledWith('SET_GROUP_BOUNDING_BOX', {
-        id: group1.id,
+    it('should update the item\'s position to the new one provided', () => {
+      expect(commit).toHaveBeenCalledWith('SET_ELEMENT_POSITION', {
+        id: item1.id,
+        position
+      })
+    })
+
+    it('should move the bounding box of the item to the distance changed', () => {
+      expect(commit).toHaveBeenCalledWith('SET_ELEMENT_BOUNDING_BOX', {
+        id: item1.id,
         boundingBox: {
-          left: group1.boundingBox.left + delta.x,
-          top: group1.boundingBox.top + delta.y,
-          right: group1.boundingBox.right + delta.x,
-          bottom: group1.boundingBox.bottom + delta.y
+          left: item1.boundingBox.left + (position.x - item1.position.x),
+          top: item1.boundingBox.top + (position.y - item1.position.y),
+          right: item1.boundingBox.left + (position.x - item1.position.x),
+          bottom: item1.boundingBox.bottom + (position.y - item1.position.y)
         }
       })
     })
 
-    it('should update the position of the group\'s items augmented by the distance changed', () => {
-      expect(dispatch).toHaveBeenCalledWith('setItemPosition', {
-        id: item1.id,
-        isMovedByGroup: true,
+    it('should update the position of the ports according to the distance changed', () => {
+      expect(commit).toHaveBeenCalledWith('SET_PORT_POSITION', {
+        id: port1.id,
         position: {
-          x: item1.position.x + delta.x,
-          y: item1.position.y + delta.y
+          x: port1.position.x + (position.x - item1.position.x),
+          y: port1.position.y + (position.y - item1.position.y)
         }
       })
     })
@@ -685,12 +595,12 @@ describe('actions', () => {
   })
 
   describe('group', () => {
-    const item1 = createItem('item1', ItemType.LogicGate, { isSelected: true })
-    const item2 = createItem('item2', ItemType.LogicGate, { groupId: 'group1', isSelected: true })
-    const item3 = createItem('item3', ItemType.LogicGate, { isSelected: false })
-    const connection1 = createConnection('connection1', 'port1', 'port2', { isSelected: true })
-    const connection2 = createConnection('connection2', 'port3', 'port4', { groupId: 'group1', isSelected: true })
-    const connection3 = createConnection('connection3', 'port5', 'port6', { isSelected: false })
+    const item1 = createItem('item1', ItemType.LogicGate, { isSelected: true, zIndex: 1 })
+    const item2 = createItem('item2', ItemType.LogicGate, { groupId: 'group1', isSelected: true, zIndex: 2, portIds: ['port3', 'port4'] })
+    const item3 = createItem('item3', ItemType.LogicGate, { isSelected: false, zIndex: 3 })
+    const connection1 = createConnection('connection1', 'port1', 'port2', { isSelected: true, zIndex: 4 })
+    const connection2 = createConnection('connection2', 'port3', 'port4', { groupId: 'group1', isSelected: true, zIndex: 5 })
+    const connection3 = createConnection('connection3', 'port5', 'port6', { isSelected: false, zIndex: 6 })
 
     beforeEach(() => {
       const context = createContext({
@@ -714,17 +624,21 @@ describe('actions', () => {
       expect(commit).toHaveBeenCalledWith('UNGROUP', 'group1')
     })
 
-    it('should only group items and connections that are selected', () => {
+    it('should set the zIndex of the selected items to the highest one among them', () => {
+      expect(commit).toHaveBeenCalledWith('SET_Z_INDEX', 5)
+    })
+
+    it('should only group items and connections that are selected and whose ports are entirely belonging to items in the group', () => {
       expect(commit).toHaveBeenCalledWith('GROUP_ITEMS', {
         id: expect.any(String),
         itemIds: ['item1', 'item2'],
-        connectionIds: ['connection1', 'connection2'],
+        connectionIds: ['connection2'],
         isSelected: true
       })
     })
 
     it('should set the bounding box of the new group', () => {
-      expect(dispatch).toHaveBeenCalledWith('setGroupBoundingBox', expect.any(String))
+      expect(dispatch).toHaveBeenNthCalledWith(2, 'setGroupBoundingBox', expect.any(String))
     })
   })
 
@@ -759,11 +673,29 @@ describe('actions', () => {
   })
 
   describe('deselectAll', () => {
+    it('should commit the cached state when a connection is currently previewed', () => {
+      const state = {
+        ...createState(),
+        previewConnectedPortId: 'port-id'
+      }
+
+      invokeAction('deselectAll', createContext({ commit, dispatch, state }))
+
+      expect(commit).toHaveBeenNthCalledWith(1, 'COMMIT_CACHED_STATE')
+    })
+
     it('should set all selection states to false', () => {
-      invokeAction('deselectAll', createContext({ commit }))
+      invokeAction('deselectAll', createContext({ commit, dispatch, state: createState() }))
 
       expect(commit).toHaveBeenCalledTimes(1)
-      expect(commit).toHaveBeenCalledWith('SET_ALL_SELECTION_STATES', false)
+      expect(commit).toHaveBeenCalledWith('DESELECT_ALL')
+    })
+
+    it('should clear any active port id', () => {
+      invokeAction('deselectAll', createContext({ commit, dispatch, state: createState() }))
+
+      expect(dispatch).toHaveBeenCalledTimes(1)
+      expect(dispatch).toHaveBeenCalledWith('clearActivePortId')
     })
   })
 
@@ -772,7 +704,7 @@ describe('actions', () => {
       invokeAction('selectAll', createContext({ commit }))
 
       expect(commit).toHaveBeenCalledTimes(1)
-      expect(commit).toHaveBeenCalledWith('SET_ALL_SELECTION_STATES', true)
+      expect(commit).toHaveBeenCalledWith('SELECT_ALL')
     })
   })
 
@@ -890,7 +822,7 @@ describe('actions', () => {
     })
   })
 
-  describe('toggleSelectionState', () => {
+  describe('setSelectionState', () => {
     describe('when the element is part of a larger group', () => {
       const groupId = 'group1'
       const item1 = createItem('item1', ItemType.LogicGate, { groupId })
@@ -910,7 +842,7 @@ describe('actions', () => {
           commit
         })
 
-        invokeAction('toggleSelectionState', context, { id: 'item1', forcedValue: true })
+        invokeAction('setSelectionState', context, { id: 'item1', value: true })
       })
 
       it('should select all the elements and connections within that group', () => {
@@ -941,13 +873,13 @@ describe('actions', () => {
         commit
       })
 
-      invokeAction('toggleSelectionState', context, { id: 'item1', isSelected: true })
+      invokeAction('setSelectionState', context, { id: 'item1', value: true })
 
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('SET_SELECTION_STATE', { id: 'item1', isSelected: true })
     })
 
-    it('should invert the selection value of the element if no value is forced', () => {
+    it('should not commit any mutations if the value does not differ from the one provided', () => {
       const item1 = createItem('item1', ItemType.LogicGate, { isSelected: true })
       const context = createContext({
         state: {
@@ -957,16 +889,15 @@ describe('actions', () => {
         commit
       })
 
-      invokeAction('toggleSelectionState', context, { id: 'item1' })
+      invokeAction('setSelectionState', context, { id: 'item1', value: true })
 
-      expect(commit).toHaveBeenCalledTimes(1)
-      expect(commit).toHaveBeenCalledWith('SET_SELECTION_STATE', { id: 'item1', isSelected: false })
+      expect(commit).not.toHaveBeenCalled()
     })
 
     it('should not change the selection of an element that does not exist', () => {
       const context = createContext({ commit })
 
-      invokeAction('toggleSelectionState', context, { id: 'non-existing-id' })
+      invokeAction('setSelectionState', context, { id: 'non-existing-id', value: true })
 
       expect(commit).not.toHaveBeenCalled()
     })
@@ -974,10 +905,10 @@ describe('actions', () => {
 
   describe('rotate', () => {
     describe('rotating a group', () => {
-      const item1 = createItem('item1', ItemType.LogicGate, { groupId: 'group1' })
-      const item2 = createItem('item2', ItemType.LogicGate, { groupId: 'group1' })
-      const group1 = createGroup('group1', ['item1', 'item2'], { isSelected: true })
-      const group2 = createGroup('group2', [], { isSelected: false })
+      const item1 = createItem('item1', ItemType.LogicGate, { groupId: 'group1', isSelected: true })
+      const item2 = createItem('item2', ItemType.LogicGate, { groupId: 'group1', isSelected: true })
+      const group1 = createGroup('group1', ['item1', 'item2'])
+      const group2 = createGroup('group2', [])
 
       beforeEach(() => {
         const context = createContext({
@@ -997,7 +928,7 @@ describe('actions', () => {
         expect(dispatch).toHaveBeenCalledWith('commitState')
       })
 
-      it('should set the rotations of the items', () => {
+      it('should set the rotations of the selected items', () => {
         expect(commit).toHaveBeenCalledWith('ROTATE_ELEMENT', {
           id: 'item1',
           rotation: 1
@@ -1005,25 +936,6 @@ describe('actions', () => {
         expect(commit).toHaveBeenCalledWith('ROTATE_ELEMENT', {
           id: 'item2',
           rotation: 1
-        })
-      })
-
-      it('should set the new positions of all items within the group', () => {
-        expect(dispatch).toHaveBeenCalledWith('setItemPosition', {
-          id: 'item1',
-          position: {
-            x: expect.any(Number),
-            y: expect.any(Number)
-          },
-          isMovedByGroup: true
-        })
-        expect(dispatch).toHaveBeenCalledWith('setItemPosition', {
-          id: 'item2',
-          position: {
-            x: expect.any(Number),
-            y: expect.any(Number)
-          },
-          isMovedByGroup: true
         })
       })
 
@@ -1037,11 +949,11 @@ describe('actions', () => {
         expect(dispatch).toHaveBeenCalledWith('setItemPortPositions', 'item2')
       })
 
-      it('should update the group\'s bounding box', () => {
+      it('should update the group\'s bounding box for each group rotated', () => {
         expect(dispatch).toHaveBeenCalledWith('setGroupBoundingBox', 'group1')
       })
 
-      it('should not mutate a group which is not selected', () => {
+      it('should not mutate a group which has none of its elements selected', () => {
         expect(dispatch).not.toHaveBeenCalledWith('setGroupBoundingBox', 'group2')
       })
     })
@@ -1493,7 +1405,7 @@ describe('actions', () => {
       const sourcePort = createPort('source-port', '1', PortType.Output)
       const targetPort = createPort('target-port', '2', PortType.Input)
 
-      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), sourcePort.id)
+      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), { portId: sourcePort.id, isDragging: true })
 
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('SET_CONNECTABLE_PORT_IDS', ['target-port'])
@@ -1503,7 +1415,7 @@ describe('actions', () => {
       const sourcePort = createPort('source-port', '1', PortType.Output)
       const targetPort = createPort('target-port', '2', PortType.Output)
 
-      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), sourcePort.id)
+      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), { portId: sourcePort.id, isDragging: true })
 
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('SET_CONNECTABLE_PORT_IDS', [])
@@ -1528,7 +1440,7 @@ describe('actions', () => {
           [connectedSourcePort.id]: connectedSourcePort,
           [connectedTargetPort.id]: connectedTargetPort
         }
-      }), sourcePort.id)
+      }), { portId: sourcePort.id, isDragging: true })
 
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('SET_CONNECTABLE_PORT_IDS', [])
@@ -1553,7 +1465,7 @@ describe('actions', () => {
           [connectedSourcePort.id]: connectedSourcePort,
           [connectedTargetPort.id]: connectedTargetPort
         }
-      }), sourcePort.id)
+      }), { portId: sourcePort.id, isDragging: true })
 
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('SET_CONNECTABLE_PORT_IDS', [])
@@ -1563,7 +1475,7 @@ describe('actions', () => {
       const sourcePort = createPort('source-port', '1', PortType.Output)
       const targetPort = createPort('target-port', '2', PortType.Input, { isFreeport: true })
 
-      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), sourcePort.id)
+      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), { portId: sourcePort.id, isDragging: true })
 
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('SET_CONNECTABLE_PORT_IDS', [])
@@ -1573,7 +1485,7 @@ describe('actions', () => {
       const sourcePort = createPort('source-port', '1', PortType.Output, { isFreeport: true })
       const targetPort = createPort('target-port', '2', PortType.Input)
 
-      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), sourcePort.id)
+      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), { portId: sourcePort.id, isDragging: true })
 
       expect(commit).not.toHaveBeenCalled()
     })
@@ -1582,7 +1494,7 @@ describe('actions', () => {
       const sourcePort = createPort('source-port', '1', PortType.Input)
       const targetPort = createPort('target-port', '2', PortType.Output)
 
-      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), sourcePort.id)
+      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), { portId: sourcePort.id, isDragging: true })
 
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('SET_CONNECTABLE_PORT_IDS', ['target-port'])
@@ -1592,7 +1504,7 @@ describe('actions', () => {
       const sourcePort = createPort('source-port', '1', PortType.Output)
       const targetPort = createPort('target-port', '2', PortType.Output)
 
-      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), sourcePort.id)
+      invokeAction('setConnectablePortIds', createLocalContext(sourcePort, targetPort), { portId: sourcePort.id, isDragging: true })
 
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('SET_CONNECTABLE_PORT_IDS', [])

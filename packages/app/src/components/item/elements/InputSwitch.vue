@@ -1,18 +1,20 @@
 <template>
   <div class="input-switch">
-    <div
+    <button
+      type="button"
       class="input-switch__flipper"
+      :tabindex="0"
       :class="{
         'input-switch__flipper--on': value === 1,
         'input-switch__flipper--off': value === -1,
         'input-switch__flipper--high-z': value === 0
       }"
-      @mousedown.stop="click"
+      @click="click"
     >
       <span v-if="value === 1">ON</span>
       <span v-else-if="value === -1">OFF</span>
       <span v-else>?</span>
-    </div>
+    </button>
   </div>
 </template>
 

@@ -9,6 +9,7 @@
   }"
   @mousedown="mousedown"
   >
+    <title>{{ label }}</title>
     <defs>
       <filter id='inset' x='-50%' y='-50%' width='200%' height='200%'>
         <!--outside-stroke-->
@@ -75,6 +76,10 @@ export default defineComponent({
     bottomRight: {
       type: Object as PropType<Point>,
       required: true
+    },
+    label: {
+      type: String,
+      default: ''
     },
     isSelected: {
       type: Boolean,
