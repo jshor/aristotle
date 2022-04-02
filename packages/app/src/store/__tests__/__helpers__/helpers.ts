@@ -10,13 +10,20 @@ export const createState = (): DocumentState => ({
   redoStack: [],
   snapBoundaries: [],
   connectablePortIds: [],
-  circuit: new SimulationService([], [], {}),
+  selectedConnectionIds: [],
+  selectedItemIds: [],
+  simulation: new SimulationService([], [], {}),
+  taxonomyCounts: {},
   waves: {
     waves: {},
     secondsElapsed: 0,
     secondsOffset: 0
   },
   zoomLevel: 1,
+  selectedPortIndex: -1,
+  activePortId: null,
+  previewConnectedPortId: null,
+  zIndex: 1,
   groups: {},
   items: {},
   connections: {},
@@ -56,6 +63,8 @@ export const createConnection = (id: string, source: string, target: string, pay
 export const createPort = (id: string, elementId: string, type: PortType, payload: any = {}): Port => ({
   id,
   elementId,
+  name: '',
+  connectedPortIds: [],
   position: {
     x: 0,
     y: 0

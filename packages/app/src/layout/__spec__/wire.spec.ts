@@ -9,6 +9,8 @@ describe('Wire Layout', () => {
   describe('renderLayout()', () => {
     const createPort = (position): Port => ({
       id: '',
+      name: '',
+      connectedPortIds: [],
       elementId: '',
       value: 0,
       isFreeport: false,
@@ -118,9 +120,11 @@ describe('Wire Layout', () => {
   })
 
   describe('getPortDirection()', () => {
-    const basePort = {
+    const basePort: Port = {
       id: '1',
+      name: '',
       elementId: '1',
+      connectedPortIds: [],
       value: 0,
       isFreeport: false,
       type: 1,

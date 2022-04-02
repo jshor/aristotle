@@ -1,5 +1,8 @@
 <template>
-  <div class="oscilloscope">
+  <div
+    v-if="hasWaves"
+    class="oscilloscope"
+  >
     <div class="oscilloscope-list">
       <div
         v-for="(v, key) in oscillations"
@@ -42,6 +45,12 @@
       </div>
     </div>
   </div>
+  <div
+    v-else
+    class="oscilloscope"
+  >
+    No elements to observe.
+  </div>
 </template>
 
 <script lang="ts">
@@ -70,9 +79,13 @@ export default defineComponent({
     },
     oscillations () {
       return this.waves.waves
+    },
+    hasWaves () {
+      return Object.keys(this.oscillations).length > 0
     }
   },
   mounted () {
+    if (!this.hasWaves) return
     const timeline = this.$refs.timeline as HTMLElement
     timeline.scrollLeft = timeline.scrollWidth
     this.scrollToNextInterval()
@@ -87,6 +100,8 @@ export default defineComponent({
   watch: {
     waves: {
       handler () {
+        if (!this.hasWaves) return
+
         const { scrollLeft, offsetWidth, scrollWidth } = this.$refs.timeline as HTMLElement
 
         if (Math.abs(scrollLeft + offsetWidth - scrollWidth) <= 40) {
@@ -111,6 +126,7 @@ $color-secondary: #c0c0c0;
   width: 100%;
   text-align: right;
   display: flex;
+  color: #fff;
 }
 
 .oscilloscope-list {
@@ -121,7 +137,6 @@ $color-secondary: #c0c0c0;
 
   &__item {
     text-align: right;
-    color: #fff;
     flex: 1;
     display: flex;
     align-items: center;

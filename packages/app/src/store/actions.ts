@@ -114,7 +114,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
             nonFreeportItemIds.includes(targetPort.elementId)
         }
       })
-      .forEach(({ id }) => dispatch('toggleSelectionState', { id, forcedValue: true }))
+      .forEach(({ id }) => dispatch('setSelectionState', { id, value: true }))
 
     // remove all selected connections
     Object
@@ -268,23 +268,12 @@ const actions: ActionTree<DocumentState, DocumentState> = {
    * @param payload
    * @param payload.id - ID of the item
    * @param payload.position - new position to move to
-   * @param payload.isMovedByGroup - set to true if the action caller is a group
-   * @returns
    */
-  setItemPosition ({ commit, dispatch, state }, { id, position, isMovedByGroup }: {
-    id: string,
-    position: Point,
-    isMovedByGroup?: boolean
-  }) {
+  setItemPosition ({ commit, state }, { id, position }: { id: string, position: Point }) {
     const item = state.items[id]
-    const delta = {
+    const delta: Point = {
       x: position.x - item.position.x,
       y: position.y - item.position.y
-    }
-
-    if (item.groupId && !isMovedByGroup) {
-      // if the item is part of a group, move the entire group instead
-      return dispatch('moveGroupPosition', { id: item.groupId, delta })
     }
 
     commit('COMMIT_CACHED_STATE')
@@ -314,41 +303,57 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       })
   },
 
-  /**
-   * Moves a group (and its items) according to the delta provided.
-   *
-   * @param store
-   * @param id - ID of the group to be moved
-   * @param delta - distance change
-   */
-  moveGroupPosition ({ commit, dispatch, state }, { id, delta }: { id: string, delta: Point }) {
-    const group = state.groups[id]
+  moveSelectionPosition ({ dispatch, state }, delta: Point) {
+    const id: string | undefined = state.selectedItemIds[0]
 
-    commit('COMMIT_CACHED_STATE')
-    commit('SET_GROUP_BOUNDING_BOX', {
-      boundingBox: {
-        left: group.boundingBox.left + delta.x,
-        top: group.boundingBox.top + delta.y,
-        right: group.boundingBox.right +  delta.x,
-        bottom: group.boundingBox.bottom + delta.y
-      },
-      id
-    })
+    if (id) {
+      const item = state.items[id]
+      const position: Point = {
+        x: item.position.x + delta.x,
+        y: item.position.y + delta.y
+      }
 
-    group
-      .itemIds
-      .forEach(itemId => {
+      dispatch('setSelectionPosition', { id, position })
+    }
+  },
+
+  setSelectionPosition ({ commit, dispatch, state }, { id, position }: { id: string, position: Point }) {
+    const referenceItem = state.items[id]
+    const delta: Point = {
+      x: position.x - referenceItem.position.x,
+      y: position.y - referenceItem.position.y
+    }
+    const groupIds = new Set<string>()
+
+    state
+      .selectedItemIds
+      .forEach((itemId: string) => {
         const item = state.items[itemId]
+        const position: Point = {
+          x: item.position.x + delta.x,
+          y: item.position.y + delta.y
+        }
 
-        dispatch('setItemPosition', {
-          id: item.id,
-          isMovedByGroup: true,
-          position: {
-            x: item.position.x + delta.x,
-            y: item.position.y + delta.y
-          }
-        })
+        if (item.groupId) {
+          groupIds.add(item.groupId)
+        }
+
+        dispatch('setItemPosition', { id: itemId, position })
       })
+
+    groupIds.forEach(groupId => {
+      const group = state.groups[groupId]
+
+      commit('SET_GROUP_BOUNDING_BOX', {
+        boundingBox: {
+          left: group.boundingBox.left + delta.x,
+          top: group.boundingBox.top + delta.y,
+          right: group.boundingBox.right +  delta.x,
+          bottom: group.boundingBox.bottom + delta.y
+        },
+        id: groupId
+      })
+    })
   },
 
   /**
@@ -401,13 +406,26 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     const items = Object
       .values(state.items)
       .filter(({ isSelected }) => isSelected)
+    const portIds = items.reduce((portIds, item) => {
+      return portIds.concat(item.portIds)
+    }, [] as string[])
     const connections = Object
       .values(state.connections)
-      .filter(({ isSelected }) => isSelected)
+      .filter(c => {
+        // ensure both source and target ports are associated with items in the group
+        return portIds.includes(c.source) && portIds.includes(c.target) && c.isSelected
+      })
 
     // if any of the items or connections are part of another group, ungroup those
     items.forEach(i => i.groupId && commit('UNGROUP', i.groupId))
     connections.forEach(i => i.groupId && commit('UNGROUP', i.groupId))
+
+    // update the zIndex of all items to be the highest one among the selected
+    const zIndex = [...items, ...connections].reduce((zIndex: number, item: BaseItem) => {
+      return Math.max(item.zIndex, zIndex)
+    }, 0)
+
+    commit('SET_Z_INDEX', zIndex)
 
     commit('GROUP_ITEMS', {
       id,
@@ -433,13 +451,29 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
   },
 
+  clearActivePortId ({ commit, state }) {
+    const elementId = state.ports[state.activePortId || '']?.elementId
+
+    if (elementId && !state.items[elementId]?.isSelected) {
+      commit('SET_PREVIEW_CONNECTED_PORT_ID', null)
+      commit('SET_ACTIVE_PORT_ID', null)
+      commit('SET_SELECTED_PORT_INDEX', -1)
+      commit('SET_CONNECTABLE_PORT_IDS', [])
+    }
+  },
+
   /**
    * Deselects all elements.
    *
    * @param store
    */
-  deselectAll ({ commit }) {
-    commit('SET_ALL_SELECTION_STATES', false)
+  deselectAll ({ commit, dispatch, state }) {
+    if (state.previewConnectedPortId) {
+      commit('COMMIT_CACHED_STATE')
+    }
+
+    commit('DESELECT_ALL')
+    dispatch('clearActivePortId')
   },
 
   /**
@@ -448,7 +482,7 @@ const actions: ActionTree<DocumentState, DocumentState> = {
    * @param store
    */
   selectAll ({ commit }) {
-    commit('SET_ALL_SELECTION_STATES', true)
+    commit('SELECT_ALL')
   },
 
   /**
@@ -515,14 +549,13 @@ const actions: ActionTree<DocumentState, DocumentState> = {
    *
    * @param store
    * @param payload.id - the ID of the element to toggle its selection
-   * @param payload.forcedValue - optional value to force
+   * @param payload.value - new selection state value to set to
    */
-  toggleSelectionState ({ commit, state }, { id, forcedValue = null }: { id: string, forcedValue: boolean | null }) {
-    const element = state.items[id] || state.connections[id] || state.groups[id]
-    if (!element) return
-    const isSelected = forcedValue === null
-      ? !element.isSelected
-      : forcedValue
+  setSelectionState ({ commit, state }, { id, value }: { id: string, value: boolean }) {
+    const element = state.items[id] || state.connections[id]
+    const isSelected = value
+
+    if (!element || element.isSelected === isSelected) return
 
     if (element.groupId) {
       // if item is part of a group, select all items in that group
@@ -541,6 +574,65 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
   },
 
+  setConnectionPreview ({ commit, state }, portId: string | null) {
+    if (state.activePortId && portId) {
+      let source = state.activePortId
+      let target = portId
+
+      if (state.ports[state.activePortId].type === PortType.Input) {
+        source = portId
+        target = state.activePortId
+      }
+
+      if (portId === state.previewConnectedPortId) {
+        commit('DISCONNECT', { source, target })
+        commit('SET_PREVIEW_CONNECTED_PORT_ID', null)
+      } else {
+        commit('CONNECT', { source, target })
+        commit('SET_PREVIEW_CONNECTED_PORT_ID', portId)
+      }
+    }
+  },
+
+  cycleDocumentPorts ({ commit, dispatch, state }, { portId, direction, clearConnection }: { portId: string, direction: number, clearConnection: boolean }) {
+    if (portId && portId !== state.activePortId) {
+      dispatch('setActivePortId', portId)
+    }
+
+    let index = state.selectedPortIndex + direction
+
+    if (index < 0) index = 0
+    if (index >= state.connectablePortIds.length) index = -1
+
+    if (!state.cachedState) {
+      commit('CACHE_STATE')
+    }
+
+    if (clearConnection) {
+      dispatch('setConnectionPreview', state.previewConnectedPortId)
+    } else {
+      commit('COMMIT_CACHED_STATE')
+      dispatch('setConnectablePortIds', { portId })
+    }
+
+    dispatch('setConnectionPreview', state.connectablePortIds[index])
+
+    commit('SET_SELECTED_PORT_INDEX', index)
+  },
+
+  setActivePortId ({ commit, dispatch, state }, portId: string) {
+    if (state.activePortId !== portId) {
+      if (portId) {
+        dispatch('setConnectablePortIds', { portId })
+      } else {
+        commit('SET_CONNECTABLE_PORT_IDS', [])
+      }
+
+      commit('SET_ACTIVE_PORT_ID', portId)
+      commit('SET_SELECTED_PORT_INDEX', -1)
+    }
+  },
+
   /**
    * Rotates all selected elements by 90 degrees.
    *
@@ -550,75 +642,58 @@ const actions: ActionTree<DocumentState, DocumentState> = {
   rotate ({ commit, dispatch, state }, direction: number) {
     dispatch('commitState')
 
-    for (const id in state.groups) {
-      const group = state.groups[id]
-
-      if (group.isSelected) {
-        // rotate all selected groups
-        group.itemIds.forEach(itemId => {
-          const item = state.items[itemId]
-
-          commit('ROTATE_ELEMENT', {
-            id: itemId,
-            rotation: rotation.rotate(item.rotation + direction)
-          })
-          dispatch('setItemPosition', {
-            id: itemId,
-            position: rotation.getGroupedItemRotatedPosition(group.boundingBox, item, direction),
-            isMovedByGroup: true
-          })
-          dispatch('setItemBoundingBox', itemId)
-          dispatch('setItemPortPositions', itemId)
-        })
-
-        dispatch('setGroupBoundingBox', id)
-      }
-    }
-
-    for (const id in state.items) {
-      const item = state.items[id]
-
-      if (item.isSelected && !item.groupId) {
-        // rotate all selected, non-grouped items
-        commit('ROTATE_ELEMENT', {
-          id,
-          rotation: rotation.rotate(item.rotation + direction)
-        })
-        dispatch('setItemBoundingBox', id)
-        dispatch('setItemPortPositions', id)
-      }
-    }
-  },
-
-  changeSelectionZIndex ({ commit, state }, fn: (i: BaseItem) => number) {
-    const items: BaseItem[] = Object
+    const selectedItems = Object
       .values(state.items)
       .filter(({ isSelected }) => isSelected)
-    const connections: BaseItem[] = Object
-      .values(state.items)
-      .filter(({ isSelected }) => isSelected)
+    const boundingBox = selectedItems.reduce((boundingBox: BoundingBox, item) => ({
+      left: Math.min(item.boundingBox.left, boundingBox.left),
+      top: Math.min(item.boundingBox.top, boundingBox.top),
+      right: Math.max(item.boundingBox.right, boundingBox.right),
+      bottom: Math.max(item.boundingBox.bottom, boundingBox.bottom)
+    }), {
+      left: Infinity,
+      top: Infinity,
+      right: 0,
+      bottom: 0
+    })
+    const groupIds = new Set<string>()
 
-    items
-      .concat(connections)
-      .forEach(item => {
-        commit('SET_Z_INDEX', { item, zIndex: fn(item) })
+    selectedItems.forEach(item => {
+      if (item.groupId) {
+        groupIds.add(item.groupId)
+      }
+
+      commit('ROTATE_ELEMENT', {
+        id: item.id,
+        rotation: rotation.rotate(item.rotation + direction)
       })
+      dispatch('setItemPosition', {
+        id: item.id,
+        position: rotation.getGroupedItemRotatedPosition(boundingBox, item, direction)
+      })
+      dispatch('setItemBoundingBox', item.id)
+      dispatch('setItemPortPositions', item.id)
+    })
+
+    groupIds.forEach(groupId => {
+      dispatch('setGroupBoundingBox', groupId)
+    })
   },
 
-  sendBackward ({ dispatch }) {
-    dispatch('changeSelectionZIndex', (i: BaseItem) => i.zIndex - 1)
+  sendBackward ({ commit }) {
+    commit('INCREMENT_Z_INDEX', -1)
   },
 
-  bringForward ({ dispatch }) {
-    dispatch('changeSelectionZIndex', (i: BaseItem) => i.zIndex + 1)
+  bringForward ({ commit }) {
+    commit('INCREMENT_Z_INDEX', 1)
   },
 
-  sendToBack ({ dispatch, getters }) {
-    dispatch('changeSelectionZIndex', (i: BaseItem) => getters.zIndex)
+  sendToBack ({ commit }) {
+    commit('SET_Z_INDEX', 1)
   },
 
-  bringToFront ({ dispatch }) {
-    dispatch('changeSelectionZIndex', (i: BaseItem) => 0)
+  bringToFront ({ commit, state }) {
+    commit('SET_Z_INDEX', Object.keys(state.items).length)
   },
 
   setPortValue ({ commit }, { id, value }: { id: string, value: number }) {
@@ -712,6 +787,11 @@ const actions: ActionTree<DocumentState, DocumentState> = {
         connectionChainId: data.connectionChainId
       })
     }
+
+    if (data.sourceId && data.targetId) {
+      // bring forward the freeport item so that it is between the two new connections
+      dispatch('bringForward', data.itemId)
+    }
   },
 
   /**
@@ -782,25 +862,27 @@ const actions: ActionTree<DocumentState, DocumentState> = {
    * @param store
    * @param portId - the ID of the port being dragged
    */
-  setConnectablePortIds ({ commit, state }, portId: string) {
+  setConnectablePortIds ({ commit, state }, { portId, isDragging }: { portId: string, isDragging: boolean }) {
     const port = state.ports[portId]
 
     if (port.isFreeport) return // freeports cannot connect to anything
 
+    // generate a list of all port IDs that have at least one connection to/from it
     const connectedPortIds = Object
       .values(state.connections)
       .reduce((portIds: string[], connection: Connection) => {
-        // if (state.ports[portId].isFreeport) { // TODO: probably not needed
-        //   return portIds
-        // }
         return portIds.concat([connection.source, connection.target])
       }, [])
 
-    connectedPortIds.splice(-2) // remove the last two ports (the two ports on opposite ends of the currently-dragged connection)
+    if (isDragging) {
+      // if this port is being dragged, then the user intents to establish a new connection with it
+      // remove the last two ports (the two ports on opposite ends of the "preview" connection)
+      connectedPortIds.splice(-2)
+    }
 
     const filter = port.type === PortType.Output
-      ? (p: Port) => p.type === PortType.Input && !p.isFreeport && !connectedPortIds.includes(p.id)
-      : (p: Port) => p.type === PortType.Output && !p.isFreeport && !connectedPortIds.includes(port.id)
+      ? (p: Port) => p.type === PortType.Input && !p.isFreeport && !connectedPortIds.includes(p.id) && p.elementId !== port.elementId
+      : (p: Port) => p.type === PortType.Output && !p.isFreeport && !connectedPortIds.includes(port.id) && p.elementId !== port.elementId
 
     commit('SET_CONNECTABLE_PORT_IDS', Object
       .values(state.ports)

@@ -6,8 +6,21 @@ import DocumentState from './DocumentState'
 import getConnectionChain from '@/utils/getConnectionChain'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
+import sortByZIndex from '@/utils/sortByZIndex'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
+
+function generateItemName (item: Item, taxonomyCount: number) {
+  const name: string[] = [item.type]
+
+  if (item.subtype !== ItemSubtype.None) {
+    name.push(item.subtype)
+  }
+
+  name.push(taxonomyCount.toString())
+
+  return name.join(' ')
+}
 
 const mutations: MutationTree<DocumentState> = {
   /**
@@ -281,7 +294,16 @@ const mutations: MutationTree<DocumentState> = {
       state.ports[port.id] = port
     })
 
+    const taxonomy = `${item.type}_${item.subtype}`
+
+    if (!state.taxonomyCounts[taxonomy]) {
+      state.taxonomyCounts[taxonomy] = 0
+    }
+
+    item.name = generateItemName(item, ++state.taxonomyCounts[taxonomy])
+
     state.items[item.id] = item
+    state.items[item.id].zIndex = ++state.zIndex
 
     state
       .simulation
@@ -309,7 +331,15 @@ const mutations: MutationTree<DocumentState> = {
         state.ports[port.id] = port
       })
 
+    const taxonomy = `${integratedCircuitItem.type}_${integratedCircuitItem.subtype}`
+
+    if (!state.taxonomyCounts[taxonomy]) {
+      state.taxonomyCounts[taxonomy] = 0
+    }
+
     state.items[integratedCircuitItem.id] = integratedCircuitItem
+    state.items[integratedCircuitItem.id].name = generateItemName(integratedCircuitItem, ++state.taxonomyCounts[taxonomy])
+
 
     state
       .simulation
@@ -440,22 +470,40 @@ const mutations: MutationTree<DocumentState> = {
   },
 
   /**
-   * Sets the selection state for all connections, items, and groups to the given value.
+   * Selects all items and connections.
    *
    * @param state
-   * @param isSelected
    */
-  'SET_ALL_SELECTION_STATES' (state, isSelected: boolean) {
+  'SELECT_ALL' (state) {
+    state.selectedConnectionIds = []
+    state.selectedItemIds = []
+
     for (let id in state.connections) {
-      state.connections[id].isSelected = isSelected
+      state.connections[id].isSelected = true
+      state.selectedConnectionIds.push(id)
     }
 
     for (let id in state.items) {
-      state.items[id].isSelected = isSelected
+      state.items[id].isSelected = true
+      state.selectedItemIds.push(id)
+    }
+  },
+
+  /**
+   * Deselects all items and connections.
+   *
+   * @param state
+   */
+  'DESELECT_ALL' (state) {
+    for (let id in state.connections) {
+      state.connections[id].isSelected = false
+      state.selectedConnectionIds = []
     }
 
-    for (let id in state.groups) {
-      state.groups[id].isSelected = isSelected
+    for (let id in state.items) {
+      state.items[id].isSelected = false
+      state.selectedItemIds.push(id)
+      state.selectedItemIds = []
     }
   },
 
@@ -469,10 +517,29 @@ const mutations: MutationTree<DocumentState> = {
    * @param payload.isSelected - selection state to change to
    */
   'SET_SELECTION_STATE' (state, { id, isSelected }: { id: string, isSelected: boolean }) {
+    /**
+     * Updates the selection list (selectedConnectionIds or selectedItemIds) according to the selection value.
+     *
+     * @private
+     */
+    const updateSelectionList = (id: string, key: 'selectedConnectionIds' | 'selectedItemIds') => {
+      const index = state[key].findIndex((i: string) => i === id)
+
+      if (isSelected && index === -1) {
+        state[key].push(id)
+      }
+
+      if (!isSelected && index !== -1) {
+        state[key].splice(index, 1)
+      }
+    }
+
     if (state.items[id]) {
       // select an individual item
       state.items[id].isSelected = isSelected
+      updateSelectionList(id, 'selectedItemIds')
     } else if (state.connections[id]) {
+      // select a connection (chain)
       const { connectionChainId } = state.connections[id]
       const {
         connectionIds,
@@ -482,43 +549,94 @@ const mutations: MutationTree<DocumentState> = {
       // select all connection segments that are part of this connection chain
       connectionIds.forEach(id => {
         state.connections[id].isSelected = isSelected
+        updateSelectionList(id, 'selectedConnectionIds')
       })
 
       // select all freeports that are part of this connection chain
       freeportIds.forEach(id => {
         state.items[id].isSelected = isSelected
+        updateSelectionList(id, 'selectedItemIds')
       })
-    } else if (state.groups[id]) {
-      // select a group
-      state.groups[id].isSelected = isSelected
     }
   },
 
-  'SET_Z_INDEX' (state, { item, zIndex }: { item: BaseItem, zIndex: number }) {
+  'SET_SELECTED_PORT_INDEX' (state, selectedPortIndex: number) {
+    state.selectedPortIndex = selectedPortIndex
+  },
+
+  'SET_ACTIVE_PORT_ID' (state, activePortId: string | null) {
+    state.activePortId = activePortId
+  },
+
+  'SET_PREVIEW_CONNECTED_PORT_ID' (state, previewConnectedPortId: string | null) {
+    state.previewConnectedPortId = previewConnectedPortId
+  },
+
+  'INCREMENT_Z_INDEX' (state, direction: number) {
     const items: BaseItem[] = Object.values(state.items)
     const connections: BaseItem[] = Object.values(state.connections)
-    let index = 0
-
-    items
+    const baseItems = items
       .concat(connections)
-      .sort((a, b) => {
-        // sort all connections and items by their zIndexes
-        if (a.zIndex > b.zIndex) return -1
-        else if (a.zIndex < b.zIndex) return 1
-        return 0
-      })
-      .forEach(i => {
-        const type = i.hasOwnProperty('type') ? 'items' : 'connections'
+      .sort(sortByZIndex)
+    const selectedItemIds = baseItems
+      .filter(({ isSelected }) => isSelected)
+      .map(({ id }) => id)
 
-        index++
+    if (direction > 0) {
+      // if the direction is forward, then reverse the selected IDs
+      // this is because the next item that an item may want to swap with may also be swapping (and therefore frozen)
+      // reversing the order that we look at the items will prevent that from happening
+      selectedItemIds.reverse()
+    }
 
-        if (item.id === i.id) {
-          state[type][i.id].zIndex = zIndex
-          index++
-        } else {
-          state[type][i.id].zIndex = index
-        }
-      })
+    const frozenIds: string[] = []
+
+    selectedItemIds.forEach(id => {
+      const currentIndex = baseItems.findIndex(i => i.id === id)
+      const nextIndex = currentIndex + direction
+
+      if (nextIndex < 0 || nextIndex >= baseItems.length) {
+        // if the next zIndex pushes it out of bounds, freeze it
+        frozenIds.push(baseItems[currentIndex].id)
+        return
+      }
+
+      if (!frozenIds.includes(baseItems[nextIndex]?.id)) {
+        const item = baseItems[currentIndex]
+        // if the item to swap with is not frozen, then swap places with it
+        baseItems.splice(currentIndex, 1)
+        baseItems.splice(nextIndex, 0, item)
+      }
+    })
+
+    baseItems.forEach((item, index) => {
+      item.zIndex = index + 1
+    })
+
+    state.zIndex = Object.keys(baseItems).length
+  },
+
+  'SET_Z_INDEX' (state, zIndex: number) {
+    const items: BaseItem[] = Object.values(state.items)
+    const connections: BaseItem[] = Object.values(state.connections)
+    let baseItems = items
+      .concat(connections)
+      .sort(sortByZIndex)
+    const selectedItems = baseItems.filter(({ isSelected }) => isSelected)
+
+    for (let i = 0; i < baseItems.length; i++) {
+      if (baseItems[i].isSelected) {
+        baseItems.splice(i, 1)
+        i--
+      }
+    }
+
+    baseItems.splice(zIndex - 1, 0, ...selectedItems)
+    baseItems.forEach((item, index) => {
+      item.zIndex = index + 1
+    })
+
+    state.zIndex = Object.keys(baseItems).length
   },
 
   'SET_CONNECTABLE_PORT_IDS' (state, connectablePortIds: string[]) {
@@ -544,9 +662,12 @@ const mutations: MutationTree<DocumentState> = {
         target,
         connectionChainId: connectionChainId || id,
         groupId: null,
-        zIndex: 0, // TODO
+        zIndex: ++state.zIndex,
         isSelected: false
       }
+
+      state.ports[source].connectedPortIds.push(target)
+      state.ports[target].connectedPortIds.push(source)
 
       state
         .simulation
@@ -571,6 +692,12 @@ const mutations: MutationTree<DocumentState> = {
       state
         .simulation
         .removeConnection(source, target)
+
+      const sourceIndex = state.ports[source].connectedPortIds.findIndex(id => id === source)
+      const targetIndex = state.ports[target].connectedPortIds.findIndex(id => id === target)
+
+      state.ports[source].connectedPortIds.splice(sourceIndex, 1)
+      state.ports[target].connectedPortIds.splice(targetIndex, 1)
 
       delete state.connections[connection.id]
     }
@@ -608,13 +735,13 @@ const mutations: MutationTree<DocumentState> = {
     // remove the groupId of all items in the group and select them
     group.itemIds.forEach(id => {
       state.items[id].groupId = null
-      state.items[id].isSelected = true
+      state.selectedItemIds.push(id)
     })
 
     // remove the groupId of all connections in the group and select them
     group.connectionIds.forEach(id => {
       state.connections[id].groupId = null
-      state.connections[id].isSelected = true
+      state.selectedConnectionIds.push(id)
     })
 
     delete state.groups[groupId]
@@ -641,9 +768,10 @@ const mutations: MutationTree<DocumentState> = {
     inputPortId?: string
     value?: number
   }) {
-    const createPort = (id: string, type: PortType, orientation: Direction) => ({
+    const createPort = (id: string, type: PortType, orientation: Direction): Port => ({
       id,
       type,
+      name: '',
       elementId: itemId,
       orientation,
       isFreeport: true,
@@ -652,7 +780,8 @@ const mutations: MutationTree<DocumentState> = {
         y: 0
       },
       rotation: 0,
-      value: value || 0
+      value: value || 0,
+      connectedPortIds: []
     })
     const portIds: string[] = []
 
@@ -666,8 +795,13 @@ const mutations: MutationTree<DocumentState> = {
       portIds.push(outputPortId)
     }
 
+    if (!state.taxonomyCounts[ItemType.Freeport]) {
+      state.taxonomyCounts[ItemType.Freeport] = 0
+    }
+
     state.items[itemId] = {
       id: itemId,
+      name: '',
       type: ItemType.Freeport,
       subtype: ItemSubtype.None,
       portIds,
@@ -682,10 +816,12 @@ const mutations: MutationTree<DocumentState> = {
       properties: {},
       isSelected: true,
       groupId: null,
-      zIndex: 3,
+      zIndex: ++state.zIndex,
       width: 1,
       height: 1
     }
+    state.items[itemId].name = generateItemName(state.items[itemId], ++state.taxonomyCounts[ItemType.Freeport])
+    state.selectedItemIds.push(itemId)
 
     state
       .simulation

@@ -1,5 +1,7 @@
 <template>
   <div
+    @keydown.space="isOpen = true"
+    @keydown.esc="onKeyDown"
     @click="isOpen = true"
     @contextmenu="stopPropagation"
     @mousedown="stopPropagation"
@@ -9,8 +11,9 @@
   <div
     v-if="isOpen"
     class="properties__dialog"
+    :aria-hidden="!isOpen"
   >
-    <div class="properties__heading">
+    <div class="properties__heading" role="title">
       Properties
       <span
         @click="isOpen = false"
@@ -105,6 +108,11 @@ export default defineComponent({
     }
   },
   methods: {
+    onKeyDown ($event: KeyboardEvent) {
+      this.isOpen = false
+      $event.preventDefault()
+      this.$el.focus()
+    },
     stopPropagation ($event: MouseEvent) {
       $event.stopPropagation()
     }

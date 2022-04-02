@@ -4,7 +4,8 @@ import ItemType from '../enums/ItemType'
 declare global {
   interface Item extends BaseItem {
     type: ItemType
-    subtype: ItemSubtype
+    subtype: string
+    name: string
     portIds: string[]
     groupId: string | null
     rotation: number

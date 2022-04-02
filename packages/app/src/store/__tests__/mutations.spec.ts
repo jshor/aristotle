@@ -732,25 +732,22 @@ describe('mutations', () => {
     })
   })
 
-  describe('SET_ALL_SELECTION_STATES', () => {
+  describe('SELECT_ALL', () => {
     let state: DocumentState
 
     const item1 = createItem('item1', ItemType.Buffer)
     const item2 = createItem('item2', ItemType.Buffer)
     const connection1 = createConnection('connection1', 'port1', 'port2')
     const connection2 = createConnection('connection2', 'port3', 'port4')
-    const group1 = createGroup('group1')
-    const group2 = createGroup('group2')
 
     beforeEach(() => {
       state = {
         ...createState(),
         items: { item1, item2 },
-        connections: { connection1, connection2 },
-        groups: { group1, group2 }
+        connections: { connection1, connection2 }
       }
 
-      mutations.SET_ALL_SELECTION_STATES(state, true)
+      mutations.SELECT_ALL(state)
     })
 
     it('should set isSelected to true for all connections', () => {
@@ -763,9 +760,50 @@ describe('mutations', () => {
       expect(state.items.item2.isSelected).toBe(true)
     })
 
-    it('should set isSelected to true for all groups', () => {
-      expect(state.groups.group1.isSelected).toBe(true)
-      expect(state.groups.group1.isSelected).toBe(true)
+    it('should populate selectedItemIds to have exactly all item ids selected', () => {
+      expect(state.selectedItemIds).toHaveLength(2)
+      expect(state.selectedItemIds).toContain('item1')
+      expect(state.selectedItemIds).toContain('item2')
+    })
+
+    it('should populate selectedConnectionIds to have exactly all connection ids selected', () => {
+      expect(state.selectedConnectionIds).toHaveLength(2)
+      expect(state.selectedConnectionIds).toContain('connection1')
+      expect(state.selectedConnectionIds).toContain('connection2')
+    })
+  })
+
+  describe('DESELECT_ALL', () => {
+    let state: DocumentState
+
+    const item1 = createItem('item1', ItemType.Buffer, { isSelected: true })
+    const item2 = createItem('item2', ItemType.Buffer, { isSelected: true })
+    const connection1 = createConnection('connection1', 'port1', 'port2', { isSelected: true })
+    const connection2 = createConnection('connection2', 'port3', 'port4', { isSelected: true })
+
+    beforeEach(() => {
+      state = {
+        ...createState(),
+        items: { item1, item2 },
+        connections: { connection1, connection2 }
+      }
+
+      mutations.DESELECT_ALL(state)
+    })
+
+    it('should set isSelected to false for all connections', () => {
+      expect(state.connections.connection1.isSelected).toBe(false)
+      expect(state.connections.connection2.isSelected).toBe(false)
+    })
+
+    it('should set isSelected to false for all items', () => {
+      expect(state.items.item2.isSelected).toBe(false)
+      expect(state.items.item2.isSelected).toBe(false)
+    })
+
+    it('should empty the lists of selected connection and item ids', () => {
+      expect(state.selectedItemIds).toHaveLength(0)
+      expect(state.selectedConnectionIds).toHaveLength(0)
     })
   })
 
@@ -816,18 +854,6 @@ describe('mutations', () => {
       })
     })
 
-    it('should select the group', () => {
-      const group1 = createGroup('group1')
-      const state = {
-        ...createState(),
-        groups: { group1 }
-      }
-
-      mutations.SET_SELECTION_STATE(state, { id: 'group1', isSelected: true })
-
-      expect(state.groups.group1.isSelected).toBe(true)
-    })
-
     it('should select nothing if the element does not exist', () => {
       const item1 = createItem('item1', ItemType.Buffer)
       const state = {
@@ -848,7 +874,13 @@ describe('mutations', () => {
     const target = 'target-id'
 
     beforeEach(() => {
-      state = createState()
+      state = {
+        ...createState(),
+        ports: {
+          [source]: createPort(source, 'item1', PortType.Output),
+          [target]: createPort(target, 'item2', PortType.Input)
+        }
+      }
 
       jest
         .spyOn(state.simulation, 'addConnection')
@@ -885,11 +917,18 @@ describe('mutations', () => {
         target,
         connectionChainId: expect.any(String),
         groupId: null,
-        zIndex: 0,
+        zIndex: 2,
         isSelected: false
       })
       expect(state.simulation.addConnection).toHaveBeenCalledTimes(1)
       expect(state.simulation.addConnection).toHaveBeenCalledWith(source, target)
+    })
+
+    it('should add the connected port ids to each port\'s list', () => {
+      mutations.CONNECT(state, { source, target })
+
+      expect(state.ports[source].connectedPortIds).toEqual([target])
+      expect(state.ports[target].connectedPortIds).toEqual([source])
     })
 
     it('should add the connection to the specified chain if its ID is provided', () => {
@@ -906,7 +945,7 @@ describe('mutations', () => {
         target,
         connectionChainId,
         groupId: null,
-        zIndex: 0,
+        zIndex: 2,
         isSelected: false
       })
     })
@@ -922,7 +961,11 @@ describe('mutations', () => {
     beforeEach(() => {
       state = {
         ...createState(),
-        connections: { connection }
+        connections: { connection },
+        ports: {
+          [source]: createPort(source, 'item1', PortType.Output),
+          [target]: createPort(target, 'item2', PortType.Input)
+        }
       }
 
       jest
@@ -1070,6 +1113,8 @@ describe('mutations', () => {
       expect(state.ports[inputPortId]).toEqual({
         id: inputPortId,
         type: PortType.Input,
+        connectedPortIds: [],
+        name: '',
         elementId: itemId,
         orientation: Direction.Right,
         isFreeport: true,
@@ -1085,6 +1130,8 @@ describe('mutations', () => {
       expect(state.ports).toHaveProperty(outputPortId)
       expect(state.ports[outputPortId]).toEqual({
         id: outputPortId,
+        connectedPortIds: [],
+        name: '',
         type: PortType.Output,
         elementId: itemId,
         orientation: Direction.Left,
@@ -1101,6 +1148,7 @@ describe('mutations', () => {
       expect(state.items).toHaveProperty(itemId)
       expect(state.items[itemId]).toEqual({
         id: itemId,
+        name: 'Freeport 1',
         type: ItemType.Freeport,
         subtype: ItemSubtype.None,
         portIds: [inputPortId, outputPortId],
@@ -1115,7 +1163,7 @@ describe('mutations', () => {
         properties: {},
         isSelected: true,
         groupId: null,
-        zIndex: 3,
+        zIndex: 2,
         width: 1,
         height: 1
       })

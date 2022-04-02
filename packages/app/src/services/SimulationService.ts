@@ -84,7 +84,7 @@ export default class SimulationService {
     this.step()
   }
 
-  getLogicGateNode = (subtype: ItemSubtype, id: string, inputIds: string[]): CircuitNode => {
+  getLogicGateNode = (subtype: string, id: string, inputIds: string[]): CircuitNode => {
     switch (subtype) {
       case ItemSubtype.And:
         return new Nor(id, inputIds)
@@ -198,7 +198,6 @@ export default class SimulationService {
 
   addConnection = (sourceId: string, targetId: string) => {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
-      console.log('ADDING CONNECTION')
       this.circuit.addConnection(this.nodes[sourceId], this.nodes[targetId], targetId)
     } else {
       console.log('MISSING NODE FOR ADDING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
@@ -207,7 +206,6 @@ export default class SimulationService {
 
   removeConnection = (sourceId: string, targetId: string) => {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
-      console.log('REMOVING CONNECTION')
       this.circuit.removeConnection(this.nodes[sourceId], this.nodes[targetId])
     } else {
       console.log('MISSING NODE FOR REMOVING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
