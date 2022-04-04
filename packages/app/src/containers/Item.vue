@@ -248,7 +248,6 @@ export default defineComponent({
   methods: {
     ...mapActions([
       'commitState',
-      'cycleDocumentPorts',
       'setSelectionPosition',
       'setActiveFreeportId',
       'setActivePortId',

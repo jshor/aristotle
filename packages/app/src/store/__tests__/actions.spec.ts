@@ -518,6 +518,107 @@ describe('actions', () => {
     })
   })
 
+  describe('moveSelectionPosition', () => {
+    describe('when an item is selected', () => {
+      const position: Point = { x: 7, y: 49 }
+      const delta: Point = { x: 7, y: 49 }
+      const item1 = createItem('item1', ItemType.LogicGate, { position, isSelected: true })
+
+      beforeEach(() => {
+        const state = {
+          ...createState(),
+          items: { item1 },
+          selectedItemIds: ['item1', 'item2']
+        }
+
+        invokeAction('moveSelectionPosition', createContext({ dispatch, state }), delta)
+      })
+
+      it('should commit the current state', () => {
+        expect(dispatch).toHaveBeenNthCalledWith(1, 'commitState')
+      })
+
+      it('should move the first selected item according to the delta provided', () => {
+        expect(dispatch).toHaveBeenNthCalledWith(2, 'setSelectionPosition', {
+          id: 'item1',
+          position: {
+            x: item1.position.x + delta.x,
+            y: item1.position.y + delta.y
+          }
+        })
+      })
+    })
+
+    describe('when nothing is selected', () => {
+      const delta: Point = { x: 7, y: 49 }
+
+      beforeEach(() => {
+        invokeAction('moveSelectionPosition', createContext({ dispatch, state: createState() }), delta)
+      })
+
+      it('should not dispatch anything', () => {
+        expect(dispatch).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('setSelectionPosition', () => {
+    const oldPosition: Point = { x: 10, y: 24 }
+    const position: Point = { x: 7, y: 49 }
+    const delta: Point = {
+      x: position.x - oldPosition.x,
+      y: position.y - oldPosition.y
+    }
+    const item1 = createItem('item1', ItemType.LogicGate, { position: oldPosition, isSelected: true })
+    const item2 = createItem('item2', ItemType.LogicGate, { groupId: 'group1', isSelected: true })
+    const group1 = createGroup('group1', ['item1', 'item2'])
+
+    beforeEach(() => {
+      const state = {
+        ...createState(),
+        items: { item1, item2 },
+        groups: { group1 },
+        selectedItemIds: ['item1', 'item2']
+      }
+
+      invokeAction('setSelectionPosition', createContext({ commit, dispatch, state }), {
+        id: 'item1',
+        position
+      })
+    })
+
+    it('should set the position of each item according to the delta moved', () => {
+      expect(dispatch).toHaveBeenCalledTimes(2)
+      expect(dispatch).toHaveBeenCalledWith('setItemPosition', {
+        id: 'item1',
+        position: {
+          x: item1.position.x + delta.x,
+          y: item1.position.y + delta.y
+        }
+      })
+      expect(dispatch).toHaveBeenCalledWith('setItemPosition', {
+        id: 'item2',
+        position: {
+          x: item2.position.x + delta.x,
+          y: item2.position.y + delta.y
+        }
+      })
+    })
+
+    it('should move the group bounding box according to the delta moved', () => {
+      expect(commit).toHaveBeenCalledTimes(1)
+      expect(commit).toHaveBeenCalledWith('SET_GROUP_BOUNDING_BOX', {
+        boundingBox: {
+          left: group1.boundingBox.left + delta.x,
+          top: group1.boundingBox.top + delta.y,
+          right: group1.boundingBox.right +  delta.x,
+          bottom: group1.boundingBox.bottom + delta.y
+        },
+        id: 'group1'
+      })
+    })
+  })
+
   describe('setItemBoundingBox', () => {
     it('should not commit anything if the item does not exist', () => {
       invokeAction('setItemBoundingBox', createContext({ commit }), 'item1')
@@ -669,6 +770,93 @@ describe('actions', () => {
 
     it('should not destroy groups that are not selected', () => {
       expect(commit).not.toHaveBeenCalledWith('UNGROUP', 'group2')
+    })
+  })
+
+  describe('clearActivePortId', () => {
+    describe('when a port is active', () => {
+      beforeEach(() => {
+        const elementId = 'element-id'
+        const activePortId = 'port-id'
+        const state = {
+          ...createState(),
+          activePortId,
+          items: {
+            [elementId]: createItem(elementId, ItemType.InputNode, { portIds: [activePortId] })
+          },
+          ports: {
+            [activePortId]: createPort(activePortId, elementId, PortType.Output)
+          }
+        }
+
+        invokeAction('clearActivePortId', createContext({ commit, state }))
+      })
+
+      it('should clear the currently-connected port id', () => {
+        expect(commit).toHaveBeenNthCalledWith(1, 'SET_PREVIEW_CONNECTED_PORT_ID', null)
+      })
+
+      it('should clear the currently-active port id', () => {
+        expect(commit).toHaveBeenNthCalledWith(2, 'SET_ACTIVE_PORT_ID', null)
+      })
+
+      it('should clear the currently-selected port index', () => {
+        expect(commit).toHaveBeenNthCalledWith(3, 'SET_SELECTED_PORT_INDEX', -1)
+      })
+
+      it('should clear the connectable port IDs list', () => {
+        expect(commit).toHaveBeenNthCalledWith(4, 'SET_CONNECTABLE_PORT_IDS', [])
+      })
+    })
+
+    it('should still commit even if the item the port references does not exist', () => {
+      const elementId = 'element-id'
+      const activePortId = 'port-id'
+      const state = {
+        ...createState(),
+        activePortId,
+        ports: {
+          [activePortId]: createPort(activePortId, elementId, PortType.Output)
+        }
+      }
+
+      invokeAction('clearActivePortId', createContext({ commit, state }))
+
+      expect(commit).toHaveBeenCalledTimes(4)
+    })
+
+    it('should not commit anything if the active port is not defined', () => {
+      const activePortId = null
+      const state = {
+        ...createState(),
+        activePortId
+      }
+
+      invokeAction('clearActivePortId', createContext({ commit, state }))
+
+      expect(commit).not.toHaveBeenCalled()
+    })
+
+    it('should not commit anything if the item is currently selected', () => {
+      const elementId = 'element-id'
+      const activePortId = 'port-id'
+      const state = {
+        ...createState(),
+        activePortId,
+        items: {
+          [elementId]: createItem(elementId, ItemType.InputNode, {
+            portIds: [activePortId],
+            isSelected: true
+          })
+        },
+        ports: {
+          [activePortId]: createPort(activePortId, elementId, PortType.Output)
+        }
+      }
+
+      invokeAction('clearActivePortId', createContext({ commit, state }))
+
+      expect(commit).not.toHaveBeenCalled()
     })
   })
 
@@ -900,6 +1088,227 @@ describe('actions', () => {
       invokeAction('setSelectionState', context, { id: 'non-existing-id', value: true })
 
       expect(commit).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('setConnectionPreview', () => {
+    describe('when a port is active and a port ID is passed', () => {
+      const activePortId = 'active-port-id'
+      const portId = 'port-id'
+
+      describe('when the port is an output port', () => {
+        const port = createPort(activePortId, 'element-id', PortType.Output)
+
+        it('should clear the connection preview the port if it is already being previewed', () => {
+          const state = {
+            ...createState(),
+            activePortId,
+            previewConnectedPortId: portId,
+            ports: {
+              [activePortId]: port
+            }
+          }
+
+          invokeAction('setConnectionPreview', createContext({ commit, state }), portId)
+
+          expect(commit).toHaveBeenCalledTimes(2)
+          expect(commit).toHaveBeenCalledWith('DISCONNECT', { source: activePortId, target: portId })
+          expect(commit).toHaveBeenCalledWith('SET_PREVIEW_CONNECTED_PORT_ID', null)
+        })
+
+        it('should establish a preview connection if the port is not currently connected', () => {
+          const state = {
+            ...createState(),
+            activePortId,
+            ports: {
+              [activePortId]: port
+            }
+          }
+
+          invokeAction('setConnectionPreview', createContext({ commit, state }), portId)
+
+          expect(commit).toHaveBeenCalledTimes(2)
+          expect(commit).toHaveBeenCalledWith('CONNECT', { source: activePortId, target: portId })
+          expect(commit).toHaveBeenCalledWith('SET_PREVIEW_CONNECTED_PORT_ID', portId)
+        })
+      })
+
+      describe('when the port is an input port', () => {
+        const port = createPort(activePortId, 'element-id', PortType.Input)
+
+        it('should clear the connection preview the port if it is already being previewed', () => {
+          const state = {
+            ...createState(),
+            activePortId,
+            previewConnectedPortId: portId,
+            ports: {
+              [activePortId]: port
+            }
+          }
+
+          invokeAction('setConnectionPreview', createContext({ commit, state }), portId)
+
+          expect(commit).toHaveBeenCalledTimes(2)
+          expect(commit).toHaveBeenCalledWith('DISCONNECT', { source: portId, target: activePortId })
+          expect(commit).toHaveBeenCalledWith('SET_PREVIEW_CONNECTED_PORT_ID', null)
+        })
+
+        it('should establish a preview connection if the port is not currently connected', () => {
+          const state = {
+            ...createState(),
+            activePortId,
+            ports: {
+              [activePortId]: port
+            }
+          }
+
+          invokeAction('setConnectionPreview', createContext({ commit, state }), portId)
+
+          expect(commit).toHaveBeenCalledTimes(2)
+          expect(commit).toHaveBeenCalledWith('CONNECT', { source: portId, target: activePortId })
+          expect(commit).toHaveBeenCalledWith('SET_PREVIEW_CONNECTED_PORT_ID', portId)
+        })
+      })
+    })
+
+    it('should not commit anything if the port ID is not defined', () => {
+      invokeAction('setConnectionPreview', createContext({ commit, state: createState() }), null)
+
+      expect(commit).not.toHaveBeenCalled()
+    })
+
+    it('should not commit anything if there is no active port', () => {
+      invokeAction('setConnectionPreview', createContext({ commit, state: createState() }), 'port-id')
+
+      expect(commit).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('cycleDocumentPorts', () => {
+    const portId = 'preview-port-id'
+    const connectablePortIds = ['port1', 'port2', 'port3']
+
+    it('should set the active port ID to the one provided if its port is not already active', () => {
+      const state = {
+        ...createState(),
+        activePortId: 'old-port-id'
+      }
+      const portId = 'new-port-id'
+
+      invokeAction('cycleDocumentPorts', createContext({ commit, dispatch, state }), {
+        portId,
+        direction: 0,
+        clearConnection: false
+      })
+
+      expect(dispatch).toHaveBeenCalledWith('setConnectablePortIds', { portId })
+    })
+
+    it('should start cycling at index 0 if an index is not defined', () => {
+      const state = {
+        ...createState(),
+        activePortId: portId,
+        connectablePortIds,
+        selectedPortIndex: -1
+      }
+
+      invokeAction('cycleDocumentPorts', createContext({ commit, dispatch, state }), {
+        portId,
+        direction: 1,
+        clearConnection: false
+      })
+
+      expect(dispatch).toHaveBeenCalledWith('setConnectionPreview', connectablePortIds[0])
+    })
+
+    it('should clear the connection preview if all possible connections are cycled through already', () => {
+      const state = {
+        ...createState(),
+        activePortId: portId,
+        connectablePortIds,
+        selectedPortIndex: 2
+      }
+
+      invokeAction('cycleDocumentPorts', createContext({ commit, dispatch, state }), {
+        portId,
+        direction: 1,
+        clearConnection: false
+      })
+
+      expect(dispatch).toHaveBeenCalledWith('setConnectionPreview', undefined)
+    })
+
+    it('should not cache the state if a state is already cached', () => {
+      const state = {
+        ...createState(),
+        activePortId: portId,
+        cachedState: JSON.stringify(createState())
+      }
+
+      invokeAction('cycleDocumentPorts', createContext({ commit, dispatch, state }), {
+        portId,
+        direction: 1,
+        clearConnection: false
+      })
+
+      expect(commit).not.toHaveBeenCalledWith('CACHE_STATE')
+    })
+
+    it('should clear the current connection preview if opted to do so', () => {
+      const state = {
+        ...createState(),
+        activePortId: portId,
+        previewConnectedPortId: portId
+      }
+
+      invokeAction('cycleDocumentPorts', createContext({ commit, dispatch, state }), {
+        portId,
+        direction: 1,
+        clearConnection: true
+      })
+
+      expect(dispatch).toHaveBeenCalledWith('setConnectionPreview', portId)
+    })
+  })
+
+  describe('setActivePortId', () => {
+    describe('when the port ID differs from the currently-active one', () => {
+      it('should define the connectable port IDs if the port ID is defined', () => {
+        const state = {
+          ...createState(),
+          activePortId: 'active-port-id'
+        }
+        const portId = 'port-id'
+
+        invokeAction('setActivePortId', createContext({ commit, dispatch, state }), portId)
+
+        expect(dispatch).toHaveBeenCalledTimes(1)
+        expect(dispatch).toHaveBeenCalledWith('setConnectablePortIds', { portId })
+        expect(commit).toHaveBeenCalledWith('SET_ACTIVE_PORT_ID', portId)
+        expect(commit).toHaveBeenCalledWith('SET_SELECTED_PORT_INDEX', -1)
+      })
+
+      it('should clear the connectable port IDs if the port ID provided is not defined', () => {
+        invokeAction('setActivePortId', createContext({ commit, dispatch, state: createState() }))
+
+        expect(dispatch).not.toHaveBeenCalled()
+        expect(commit).toHaveBeenCalledWith('SET_CONNECTABLE_PORT_IDS', [])
+        expect(commit).toHaveBeenCalledWith('SET_ACTIVE_PORT_ID', undefined)
+        expect(commit).toHaveBeenCalledWith('SET_SELECTED_PORT_INDEX', -1)
+      })
+    })
+
+    it('should not make any changes if the given port ID is already active', () => {
+      const activePortId = 'active-port-id'
+      const state = {
+        ...createState(),
+        activePortId
+      }
+
+      invokeAction('setActivePortId', createContext({ commit, dispatch, state }), activePortId)
+
+      expect(commit).not.toHaveBeenCalled()
+      expect(dispatch).not.toHaveBeenCalled()
     })
   })
 
@@ -1387,7 +1796,6 @@ describe('actions', () => {
   })
 
   describe('setConnectablePortIds', () => {
-    const portId = 'port-id'
     const createLocalContext = (sourcePort: Port, targetPort: Port, state = {}) => createContext({
       commit,
       dispatch,

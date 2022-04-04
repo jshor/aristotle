@@ -303,6 +303,12 @@ const actions: ActionTree<DocumentState, DocumentState> = {
       })
   },
 
+  /**
+   * Moves all selected items according to the delta provided.
+   *
+   * @param store
+   * @param delta - delta to move the items by
+   */
   moveSelectionPosition ({ dispatch, state }, delta: Point) {
     const id: string | undefined = state.selectedItemIds[0]
 
@@ -313,10 +319,19 @@ const actions: ActionTree<DocumentState, DocumentState> = {
         y: item.position.y + delta.y
       }
 
+      dispatch('commitState')
       dispatch('setSelectionPosition', { id, position })
     }
   },
 
+  /**
+   * Moves all selected items according to the delta that the given item has moved by.
+   *
+   * @param store
+   * @param payload
+   * @param payload.id - ID of the reference item moving
+   * @param payload.position - new position that the reference item has moved to
+   */
   setSelectionPosition ({ commit, dispatch, state }, { id, position }: { id: string, position: Point }) {
     const referenceItem = state.items[id]
     const delta: Point = {
@@ -451,6 +466,11 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
   },
 
+  /**
+   * Clears the editor's actively-selected port ID.
+   *
+   * @param store
+   */
   clearActivePortId ({ commit, state }) {
     const elementId = state.ports[state.activePortId || '']?.elementId
 
@@ -574,6 +594,14 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
   },
 
+  /**
+   * Establishes a 'preview' of a connection (i.e., not saved in the current document state).
+   * This is so that the user can press a keyboard shortcut to quickly navigate/preview possible connections.
+   *
+   * @note Unlike {@link `cycleDocumentPorts`}, this will NOT commit the connection to the state.
+   * @param store
+   * @param portId - the ID of the port previewing connections for
+   */
   setConnectionPreview ({ commit, state }, portId: string | null) {
     if (state.activePortId && portId) {
       let source = state.activePortId
@@ -594,7 +622,19 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     }
   },
 
-  cycleDocumentPorts ({ commit, dispatch, state }, { portId, direction, clearConnection }: { portId: string, direction: number, clearConnection: boolean }) {
+  /**
+   * Establishes a 'preview' of a connection (i.e., not saved in the current document state).
+   * This is so that the user can press a keyboard shortcut to quickly navigate/preview possible connections.
+   *
+   * @note Unlike {@link `setConnectionPreview`}, this WILL commit the connection to the state.
+   * @param store
+   * @param portId - the ID of the port previewing connections for
+   */
+  cycleDocumentPorts ({ commit, dispatch, state }, { portId, direction, clearConnection }: {
+    portId: string,
+    direction: number,
+    clearConnection: boolean
+  }) {
     if (portId && portId !== state.activePortId) {
       dispatch('setActivePortId', portId)
     }
@@ -620,7 +660,13 @@ const actions: ActionTree<DocumentState, DocumentState> = {
     commit('SET_SELECTED_PORT_INDEX', index)
   },
 
-  setActivePortId ({ commit, dispatch, state }, portId: string) {
+  /**
+   * Sets the ID of the active (i.e., 'previewed'/'enlarged') port.
+   *
+   * @param store
+   * @param portId - ID of the port to activate, or null to remove it
+   */
+  setActivePortId ({ commit, dispatch, state }, portId: string | null) {
     if (state.activePortId !== portId) {
       if (portId) {
         dispatch('setConnectablePortIds', { portId })

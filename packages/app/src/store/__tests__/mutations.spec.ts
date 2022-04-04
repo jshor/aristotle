@@ -27,8 +27,9 @@ const createSerializedState = () => {
 
 beforeEach(() => {
   mutations.commit = jest.fn()
-  jest.resetAllMocks()
 })
+
+afterEach(() => jest.resetAllMocks())
 
 describe('mutations', () => {
   describe('SET_ZOOM', () => {
@@ -832,13 +833,14 @@ describe('mutations', () => {
       const endPort = createPort('endPort', 'item2', PortType.Input)
       const connectionPart1 = createConnection('connectionPart1', 'startPort', 'inputPort', { connectionChainId: 'connectionPart1' })
       const connectionPart2 = createConnection('connectionPart2', 'outputPort', 'endPort', { connectionChainId: 'connectionPart1' })
+      const connectionOther = createConnection('connectionOther', 'outputPort', 'endPort', { connectionChainId: 'connectionOther' })
 
       beforeEach(() => {
         state = {
           ...createState(),
           items: { item1, item2, freeportItem },
           ports: { inputPort, outputPort, startPort, endPort },
-          connections: { connectionPart1, connectionPart2 }
+          connections: { connectionPart1, connectionPart2, connectionOther }
         }
 
         mutations.SET_SELECTION_STATE(state, { id: 'connectionPart1', isSelected: true })
@@ -849,9 +851,38 @@ describe('mutations', () => {
         expect(state.connections.connectionPart2.isSelected).toBe(true)
       })
 
+      it('should populate the selected connection IDs to the list of cached selected connection IDs', () => {
+        expect(state.selectedConnectionIds).toHaveLength(2)
+        expect(state.selectedConnectionIds).toContain('connectionPart1')
+        expect(state.selectedConnectionIds).toContain('connectionPart2')
+      })
+
+      it('should not include a connection outside the connection chain', () => {
+        expect(state.connections.connectionOther.isSelected).toBe(false)
+      })
+
       it('should select all freeports associated to the chain', () => {
         expect(state.items.freeportItem.isSelected).toBe(true)
       })
+
+      it('should populate the selected freeport ID to the list of cached selected item IDs', () => {
+        expect(state.selectedItemIds).toHaveLength(1)
+        expect(state.selectedItemIds).toContain('freeportItem')
+      })
+    })
+
+    it('should remove the selection from the cached list if it is already selected', () => {
+      const item1 = createItem('item1', ItemType.Buffer, { isSelected: true })
+      const state = {
+        ...createState(),
+        items: { item1 },
+        selectedItemIds: ['item1']
+      }
+
+      mutations.SET_SELECTION_STATE(state, { id: 'item1', isSelected: false })
+
+      expect(state.items.item1.isSelected).toBe(false)
+      expect(state.selectedItemIds).toHaveLength(0)
     })
 
     it('should select nothing if the element does not exist', () => {
@@ -864,6 +895,158 @@ describe('mutations', () => {
       mutations.SET_SELECTION_STATE(state, { id: 'someNonExistingElement', isSelected: true })
 
       expect(state.items.item1.isSelected).not.toBe(true)
+    })
+  })
+
+  describe('INCREMENT_Z_INDEX', () => {
+    let state: DocumentState
+
+    beforeEach(() => {
+      state = {
+        ...createState(),
+        items: {
+          item1: createItem('item1', ItemType.InputNode, { zIndex: 1 }),
+          item2: createItem('item2', ItemType.InputNode, { zIndex: 3 }),
+          item3: createItem('item3', ItemType.InputNode, { zIndex: 5 }),
+          item4: createItem('item4', ItemType.InputNode, { zIndex: 7 })
+        },
+        connections: {
+          connection1: createConnection('connection1', 'port1', 'port2', { zIndex: 2 }),
+          connection2: createConnection('connection2', 'port3', 'port4', { zIndex: 4 }),
+          connection3: createConnection('connection3', 'port6', 'port5', { zIndex: 6 }),
+          connection4: createConnection('connection4', 'port7', 'port8', { zIndex: 8 })
+        }
+      }
+    })
+
+    it('should decrement selected items backward', () => {
+      state.items.item2.isSelected = true
+      state.items.item4.isSelected = true
+      state.connections.connection3.isSelected = true
+
+      mutations.INCREMENT_Z_INDEX(state, -1)
+
+      expect(state.items.item1.zIndex).toEqual(1)
+      expect(state.items.item2.zIndex).toEqual(2)
+      expect(state.items.item3.zIndex).toEqual(7)
+      expect(state.items.item4.zIndex).toEqual(6)
+      expect(state.connections.connection1.zIndex).toEqual(3)
+      expect(state.connections.connection2.zIndex).toEqual(4)
+      expect(state.connections.connection3.zIndex).toEqual(5)
+      expect(state.connections.connection4.zIndex).toEqual(8)
+    })
+
+    it('should increment selected items forward', () => {
+      state.items.item2.isSelected = true
+      state.items.item4.isSelected = true
+      state.connections.connection3.isSelected = true
+
+      mutations.INCREMENT_Z_INDEX(state, 1)
+
+      expect(state.items.item1.zIndex).toEqual(1)
+      expect(state.items.item2.zIndex).toEqual(4)
+      expect(state.items.item3.zIndex).toEqual(5)
+      expect(state.items.item4.zIndex).toEqual(8)
+      expect(state.connections.connection1.zIndex).toEqual(2)
+      expect(state.connections.connection2.zIndex).toEqual(3)
+      expect(state.connections.connection3.zIndex).toEqual(7)
+      expect(state.connections.connection4.zIndex).toEqual(6)
+    })
+
+    it('should not increment a selected item\'s z-index if it collides with the next item\'s movement', () => {
+      state = {
+        ...createState(),
+        items: {
+          item1: createItem('item1', ItemType.InputNode, {
+            zIndex: 1,
+            isSelected: true
+          }),
+          item2: createItem('item2', ItemType.InputNode, {
+            zIndex: 2,
+            isSelected: true
+          })
+        }
+      }
+
+      mutations.INCREMENT_Z_INDEX(state, 1)
+
+      expect(state.items.item1.zIndex).toEqual(1)
+      expect(state.items.item2.zIndex).toEqual(2)
+    })
+
+    it('should not allow sibling items to collide while moving forward', () => {
+      state.items.item3.isSelected = true
+      state.connections.connection3.isSelected = true
+
+      mutations.INCREMENT_Z_INDEX(state, 1)
+
+      expect(state.items.item3.zIndex).toEqual(6)
+      expect(state.connections.connection3.zIndex).toEqual(7)
+    })
+
+    it('should not allow sibling items to collide while moving backward', () => {
+      state.items.item3.isSelected = true
+      state.connections.connection3.isSelected = true
+
+      mutations.INCREMENT_Z_INDEX(state, -1)
+
+      expect(state.items.item3.zIndex).toEqual(4)
+      expect(state.connections.connection3.zIndex).toEqual(5)
+    })
+
+    it('should not allow an item already at the back to decrement further', () => {
+      state.items.item1.isSelected = true
+
+      mutations.INCREMENT_Z_INDEX(state, -1)
+
+      expect(state.items.item1.zIndex).toEqual(1)
+    })
+
+    it('should not allow an item already at the front to increment further', () => {
+      state.connections.connection4.isSelected = true
+
+      mutations.INCREMENT_Z_INDEX(state, 1)
+
+      expect(state.connections.connection4.zIndex).toEqual(8)
+    })
+  })
+
+  describe('SET_Z_INDEX', () => {
+    let state: DocumentState
+
+    beforeEach(() => {
+      state = {
+        ...createState(),
+        items: {
+          item1: createItem('item1', ItemType.InputNode, { zIndex: 1 }),
+          item2: createItem('item2', ItemType.InputNode, { zIndex: 3 }),
+          item3: createItem('item3', ItemType.InputNode, { zIndex: 5 }),
+          item4: createItem('item4', ItemType.InputNode, { zIndex: 7 })
+        },
+        connections: {
+          connection1: createConnection('connection1', 'port1', 'port2', { zIndex: 2 }),
+          connection2: createConnection('connection2', 'port3', 'port4', { zIndex: 4 }),
+          connection3: createConnection('connection3', 'port6', 'port5', { zIndex: 6 }),
+          connection4: createConnection('connection4', 'port7', 'port8', { zIndex: 8 })
+        }
+      }
+    })
+
+    it('should move all items together to the given zIndex value', () => {
+      state.items.item2.isSelected = true
+      state.items.item4.isSelected = true
+      state.connections.connection3.isSelected = true
+
+      mutations.SET_Z_INDEX(state, 8)
+
+      expect(state.items.item1.zIndex).toEqual(1)
+      expect(state.items.item3.zIndex).toEqual(4)
+      expect(state.connections.connection1.zIndex).toEqual(2)
+      expect(state.connections.connection2.zIndex).toEqual(3)
+      expect(state.connections.connection4.zIndex).toEqual(5)
+      expect(state.items.item2.zIndex).toEqual(6)
+      expect(state.connections.connection3.zIndex).toEqual(7)
+      expect(state.items.item4.zIndex).toEqual(8)
     })
   })
 
@@ -963,8 +1146,8 @@ describe('mutations', () => {
         ...createState(),
         connections: { connection },
         ports: {
-          [source]: createPort(source, 'item1', PortType.Output),
-          [target]: createPort(target, 'item2', PortType.Input)
+          [source]: createPort(source, 'item1', PortType.Output, { connectedPortIds: [target] }),
+          [target]: createPort(target, 'item2', PortType.Input, { connectedPortIds: [source] })
         }
       }
 
@@ -985,6 +1168,13 @@ describe('mutations', () => {
 
       expect(state.connections).toHaveProperty('connection')
       expect(state.connections.connection).toEqual(connection)
+    })
+
+    it('should remove the references to opposite connected ports whose connections were removed', () => {
+      mutations.DISCONNECT(state, { source, target })
+
+      expect(state.ports[source].connectedPortIds).toHaveLength(0)
+      expect(state.ports[target].connectedPortIds).toHaveLength(0)
     })
 
     it('should remove the connection from the state and the circuit', () => {
