@@ -572,6 +572,13 @@ const mutations: MutationTree<DocumentState> = {
     state.previewConnectedPortId = previewConnectedPortId
   },
 
+  /**
+   * Increments the zIndex of all items selected.
+   * If an item's movement collides with another item's movement, or it becomes out of bounds, its zIndex will not change.
+   *
+   * @param state
+   * @param direction - 1 to increment, -1 to decrement
+   */
   'INCREMENT_Z_INDEX' (state, direction: number) {
     const items: BaseItem[] = Object.values(state.items)
     const connections: BaseItem[] = Object.values(state.connections)
@@ -616,6 +623,13 @@ const mutations: MutationTree<DocumentState> = {
     state.zIndex = Object.keys(baseItems).length
   },
 
+  /**
+   * Moves all selected items to the given zIndex values.
+   * If those items aren't siblings already, they will be when this is invoked.
+   *
+   * @param state
+   * @param zIndex - new zIndex to move items to
+   */
   'SET_Z_INDEX' (state, zIndex: number) {
     const items: BaseItem[] = Object.values(state.items)
     const connections: BaseItem[] = Object.values(state.connections)
