@@ -11,10 +11,10 @@
     <toolbar-button @click="saveIntegratedCircuit">Build IC</toolbar-button>
     <toolbar-button @click="undo" :disabled="!canUndo">Undo</toolbar-button>
     <toolbar-button @click="redo" :disabled="!canRedo">Redo</toolbar-button>
-    <toolbar-button @click="bringForward" :disabled="!hasSelectedItems">Bring forward</toolbar-button>
-    <toolbar-button @click="sendBackward" :disabled="!hasSelectedItems">Send backward</toolbar-button>
-    <toolbar-button @click="sendToBack" :disabled="!hasSelectedItems">Send to back</toolbar-button>
-    <toolbar-button @click="bringToFront" :disabled="!hasSelectedItems">Bring to front</toolbar-button>
+    <toolbar-button @click="incrementZIndex(1)" :disabled="!hasSelectedItems">Bring forward</toolbar-button>
+    <toolbar-button @click="incrementZIndex(-1)" :disabled="!hasSelectedItems">Send backward</toolbar-button>
+    <toolbar-button @click="setZIndex(1)" :disabled="!hasSelectedItems">Send to back</toolbar-button>
+    <toolbar-button @click="setZIndex(zIndex)" :disabled="!hasSelectedItems">Bring to front</toolbar-button>
   </div>
 </template>
 
@@ -58,11 +58,12 @@ export default defineComponent({
       'canUngroup',
       'canGroup',
       'canUndo',
-      'canRedo'
+      'canRedo',
+      'zIndex'
     ])
   },
   methods: {
-    addNewItem (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports: Port[] = []) {
+    createItem (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports: Port[] = []) {
       const item: Item = {
         id,
         name: '',
@@ -141,13 +142,13 @@ export default defineComponent({
           break
       }
 
-      this.addItem({ item, ports })
+      this.insertItem({ item, ports })
     },
 
     addLogicGate () {
       const elementId = rand()
 
-      this.addNewItem(elementId, ItemType.LogicGate, ItemSubtype.Nor, 100, 150, [
+      this.createItem(elementId, ItemType.LogicGate, ItemSubtype.Nor, 100, 150, [
         createPort(elementId, rand(), 0, 1, 'Input Port 1'),
         createPort(elementId, rand(), 0, 1, 'Input Port 2'),
         createPort(elementId, rand(), 2, 0, 'Output Port')
@@ -157,7 +158,7 @@ export default defineComponent({
     addLightbulb () {
       const elementId = rand()
 
-      this.addNewItem(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, [
+      this.createItem(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, [
         createPort(elementId, rand(), 0, 1, 'Input Port')
       ])
     },
@@ -165,17 +166,15 @@ export default defineComponent({
     addSwitch () {
       const elementId = rand()
 
-      this.addNewItem(elementId, ItemType.InputNode, ItemSubtype.Switch, 40, 40, [
+      this.createItem(elementId, ItemType.InputNode, ItemSubtype.Switch, 40, 40, [
         createPort(elementId, rand(), 2, 0, 'Output Port')
       ])
     },
 
     ...mapActions(useDocumentStore, [
-      'addItem',
-      'bringForward',
-      'bringToFront',
-      'sendBackward',
-      'sendToBack',
+      'insertItem',
+      'incrementZIndex',
+      'setZIndex',
       'selectAll',
       'deselectAll',
       'deleteSelection',

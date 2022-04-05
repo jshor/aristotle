@@ -31,7 +31,7 @@ function generateItemName (item: Item, taxonomyCount: number) {
 }
 
 export const useDocumentStore = defineStore({
-  id: 'user',
+  id: 'document',
   state: (): DocumentState => ({
     cachedState: null,
     activeFreeportId: null,
@@ -124,11 +124,11 @@ export const useDocumentStore = defineStore({
      * @param zoom - percentage of zoom by decimal (e.g., 1.0 = 100%)
      */
     setZoom (zoom) {
-      this.SET_ZOOM(zoom)
+      this.zoomLevel = zoom
     },
 
     loadDocument (document: string) {
-      this.APPLY_STATE(document)
+      this.applyState(document)
       this.deselectAll()
     },
 
@@ -136,7 +136,7 @@ export const useDocumentStore = defineStore({
       const { integratedCircuitItem, integratedCircuitPorts } = createIntegratedCircuit(this.ports, this.items, this.connections)
 
       // TODO: typescript broken
-      // this.ADD_INTEGRATED_CIRCUIT(idMapper.mapIntegratedCircuitIds(integratedCircuitItem, integratedCircuitPorts))
+      // this.addIntegratedCircuit(idMapper.mapIntegratedCircuitIds(integratedCircuitItem, integratedCircuitPorts))
     },
 
     buildCircuit () {
@@ -155,14 +155,10 @@ export const useDocumentStore = defineStore({
       this.simulation = circuit
     },
 
-    addItem ({ item, ports }: { item: Item, ports: Port[] }) {
+    insertItem ({ item, ports }: { item: Item, ports: Port[] }) {
       this.commitState()
-      this.ADD_ELEMENT({ item, ports })
+      this.addNewItem({ item, ports })
       this.setItemPortPositions(item.id)
-    },
-
-    cacheState () {
-      this.CACHE_STATE()
     },
 
     /**
@@ -174,9 +170,13 @@ export const useDocumentStore = defineStore({
       const undoState = this.undoStack.slice(-1).pop()
 
       if (undoState) {
-        this.CACHE_STATE()
-        this.COMMIT_TO_REDO()
-        this.APPLY_STATE(undoState)
+        this.redoStack.push(JSON.stringify({
+          connections: this.connections,
+          items: this.items,
+          ports: this.ports,
+          groups: this.groups
+        }))
+        this.applyState(undoState)
         this.undoStack.pop()
       }
     },
@@ -190,16 +190,20 @@ export const useDocumentStore = defineStore({
       const redoState = this.redoStack.slice(-1).pop()
 
       if (redoState) {
-        this.CACHE_STATE()
-        this.COMMIT_TO_UNDO()
-        this.APPLY_STATE(redoState)
+        this.undoStack.push(JSON.stringify({
+          connections: this.connections,
+          items: this.items,
+          ports: this.ports,
+          groups: this.groups
+        }))
+        this.applyState(redoState)
         this.redoStack.pop()
       }
     },
 
     commitState () {
-      this.CACHE_STATE()
-      this.COMMIT_CACHED_STATE()
+      this.cacheState()
+      this.commitCachedState()
     },
 
     /**
@@ -232,14 +236,14 @@ export const useDocumentStore = defineStore({
         .values(this.connections)
         .filter(({ isSelected }) => isSelected)
         .forEach(connection => {
-          this.DISCONNECT({
+          this.disconnect({
             source: connection.source,
             target: connection.target
           })
         })
 
       // delete all selected non-freeport items
-      nonFreeportItems.forEach(i => this.REMOVE_ELEMENT(i.id))
+      nonFreeportItems.forEach(i => this.removeElement(i.id))
 
       // handle selected freeport deletions using removeFreeport
       Object
@@ -382,7 +386,7 @@ export const useDocumentStore = defineStore({
         y: position.y - item.position.y
       }
 
-      this.COMMIT_CACHED_STATE()
+      this.commitCachedState()
       this.items[id].position = position
       this.items[id].boundingBox = {
         left: item.boundingBox.left + delta.x,
@@ -422,11 +426,6 @@ export const useDocumentStore = defineStore({
         this.commitState()
         this.setSelectionPosition({ id, position })
       }
-    },
-
-
-    horribleFunction ({ id, position }: { id: string, position: Point }) {
-      throw new Error('FAIL')
     },
 
     /**
@@ -528,15 +527,15 @@ export const useDocumentStore = defineStore({
         })
 
       // if any of the items or connections are part of another group, ungroup those
-      items.forEach(i => i.groupId && this.UNGROUP(i.groupId))
-      connections.forEach(i => i.groupId && this.UNGROUP(i.groupId))
+      items.forEach(i => i.groupId && this.destroyGroup(i.groupId))
+      connections.forEach(i => i.groupId && this.destroyGroup(i.groupId))
 
       // update the zIndex of all items to be the highest one among the selected
       const zIndex = [...items, ...connections].reduce((zIndex: number, item: BaseItem) => {
         return Math.max(item.zIndex, zIndex)
       }, 0)
 
-      this.SET_Z_INDEX(zIndex)
+      this.setZIndex(zIndex)
 
       const group = {
         id,
@@ -580,7 +579,7 @@ export const useDocumentStore = defineStore({
 
       for (const id in this.groups) {
         if (this.groups[id].isSelected) {
-          this.UNGROUP(id)
+          this.destroyGroup(id)
         }
       }
     },
@@ -608,7 +607,7 @@ export const useDocumentStore = defineStore({
      */
     deselectAll () {
       if (this.previewConnectedPortId) {
-        this.COMMIT_CACHED_STATE()
+        this.commitCachedState()
       }
 
       for (let id in this.connections) {
@@ -753,10 +752,10 @@ export const useDocumentStore = defineStore({
         }
 
         if (portId === this.previewConnectedPortId) {
-          this.DISCONNECT({ source, target })
+          this.disconnect({ source, target })
           this.previewConnectedPortId = null
         } else {
-          this.CONNECT({ source, target })
+          this.connect({ source, target })
           this.previewConnectedPortId = portId
         }
       }
@@ -785,13 +784,13 @@ export const useDocumentStore = defineStore({
       if (index >= this.connectablePortIds.length) index = -1
 
       if (!this.cachedState) {
-        this.CACHE_STATE()
+        this.cacheState()
       }
 
       if (clearConnection) {
         this.setConnectionPreview(this.previewConnectedPortId)
       } else {
-        this.COMMIT_CACHED_STATE()
+        this.commitCachedState()
         this.setConnectablePortIds({ portId })
       }
 
@@ -872,22 +871,6 @@ export const useDocumentStore = defineStore({
       })
     },
 
-    sendBackward () {
-      this.INCREMENT_Z_INDEX(-1)
-    },
-
-    bringForward () {
-      this.INCREMENT_Z_INDEX(1)
-    },
-
-    sendToBack () {
-      this.SET_Z_INDEX(1)
-    },
-
-    bringToFront () {
-      this.SET_Z_INDEX(Object.keys(this.items).length)
-    },
-
     /**
      * Sets the value of the port in the circuit.
      *
@@ -922,15 +905,15 @@ export const useDocumentStore = defineStore({
           if (c.source === item.portIds[1]) originalTargetId = c.target
         })
 
-      if (originalSourceId) this.DISCONNECT({ source: originalSourceId, target: item.portIds[0] })
-      if (originalTargetId) this.DISCONNECT({ source: item.portIds[1], target: originalTargetId })
+      if (originalSourceId) this.disconnect({ source: originalSourceId, target: item.portIds[0] })
+      if (originalTargetId) this.disconnect({ source: item.portIds[1], target: originalTargetId })
       if (originalSourceId && originalTargetId) {
         // reconnect the true source and target
-        this.CONNECT({ source: originalSourceId, target: originalTargetId })
+        this.connect({ source: originalSourceId, target: originalTargetId })
       }
 
       // finally, remove the element
-      this.REMOVE_ELEMENT(id)
+      this.removeElement(id)
     },
 
     /**
@@ -958,7 +941,7 @@ export const useDocumentStore = defineStore({
       }
 
       this.deselectAll()
-      this.CREATE_FREEPORT_ELEMENT({
+      this.addFreeportItem({
         ...data,
         position: {
           x: 0, y: 0
@@ -968,14 +951,14 @@ export const useDocumentStore = defineStore({
       this.activeFreeportId = data.itemId
 
       if (data.sourceId && data.targetId) {
-        this.DISCONNECT({
+        this.disconnect({
           source: data.sourceId,
           target: data.targetId
         })
       }
 
       if (data.sourceId) {
-        this.CONNECT({
+        this.connect({
           source: data.sourceId,
           target: data.inputPortId,
           connectionChainId: data.connectionChainId
@@ -983,22 +966,22 @@ export const useDocumentStore = defineStore({
       }
 
       if (data.targetId) {
-        this.CONNECT({
+        this.connect({
           source: data.outputPortId,
           target: data.targetId,
           connectionChainId: data.connectionChainId
         })
       }
 
-      if (data.sourceId && data.targetId) {
-        // bring forward the freeport item so that it is between the two new connections
-        this.deselectAll()
-        this.setSelectionState({
-          id: data.itemId,
-          value: true
-        })
-        this.bringForward()
-      }
+      // if (data.sourceId && data.targetId) {
+      //   // bring forward the freeport item so that it is between the two new connections
+      //   this.deselectAll()
+      //   this.setSelectionState({
+      //     id: data.itemId,
+      //     value: true
+      //   })
+      //   this.bringForward()
+      // }
     },
 
     /**
@@ -1024,27 +1007,27 @@ export const useDocumentStore = defineStore({
         this.commitState()
 
         if (sourceId) {
-          this.DISCONNECT({
+          this.disconnect({
             source: sourceId,
             target: portId
           })
-          this.CONNECT({
+          this.connect({
             source: sourceId,
             target: newPort.id
           })
         } else if (targetId) {
-          this.DISCONNECT({
+          this.disconnect({
             source: portId,
             target: targetId
           })
-          this.CONNECT({
+          this.connect({
             source: newPort.id,
             target: targetId
           })
         }
       } else {
         // no port can be connected, so disconnect the temporary dragged wire
-        this.DISCONNECT({
+        this.disconnect({
           source: sourceId || portId,
           target: targetId || portId
         })
@@ -1055,7 +1038,7 @@ export const useDocumentStore = defineStore({
         .find(({ portIds }) => portIds.includes(portId))
 
       if (item) {
-        this.REMOVE_ELEMENT(item.id)
+        this.removeElement(item.id)
       }
 
       this.activeFreeportId = null
@@ -1154,11 +1137,13 @@ export const useDocumentStore = defineStore({
         this.items[id].portIds
           .filter(portId => this.ports[portId].type === PortType.Input)
           .slice(count)
-          .forEach(portId => this.REMOVE_PORT(portId))
+          .forEach(portId => this.removePort(portId))
       } else {
         for (let i = oldCount; i < count; i++) {
+          const portId = rand()
+
           // add the difference of ports one by one
-          this.ADD_PORT({
+          this.ports[portId] = {
             id: rand(),
             type: PortType.Input,
             elementId: id,
@@ -1170,7 +1155,9 @@ export const useDocumentStore = defineStore({
             },
             rotation: 0,
             value: 0
-          } as Port)
+          } as Port
+
+          this.items[id].portIds.push(portId)
         }
       }
 
@@ -1219,7 +1206,7 @@ export const useDocumentStore = defineStore({
      * @param this
      * @param valueMap - Port-ID-to-value mapping
      */
-     SET_PORT_VALUES (valueMap: { [id: string]: number }) {
+     setPortValues (valueMap: { [id: string]: number }) {
       for (const portId in valueMap) {
         if (this.ports[portId]) {
           this.ports[portId].value = valueMap[portId]
@@ -1228,22 +1215,12 @@ export const useDocumentStore = defineStore({
     },
 
     /**
-     * Sets the current zoom level of the document.
-     *
-     * @param this
-     * @param zoom - percentage as a decimal (e.g., 0.3 = 30%)
-     */
-    SET_ZOOM (zoom) {
-      this.zoomLevel = zoom
-    },
-
-    /**
      * Stringifies and caches the current document this.
      * This will save all connections, items, ports, and groups.
      *
      * @param this
      */
-    CACHE_STATE (this) {
+    cacheState (this) {
       this.cachedState = JSON.stringify({
         connections: this.connections,
         items: this.items,
@@ -1258,7 +1235,7 @@ export const useDocumentStore = defineStore({
      *
      * @param this
      */
-    COMMIT_CACHED_STATE () {
+    commitCachedState () {
       if (this.cachedState) {
         this.undoStack.push(this.cachedState.toString())
         this.cachedState = null
@@ -1266,32 +1243,6 @@ export const useDocumentStore = defineStore({
         while (this.redoStack.length > 0) {
           this.redoStack.pop()
         }
-      }
-    },
-
-    /**
-     * Commits the actively-cached this to the redo stack.
-     * This has the effect of setting a 'redo-able' action.
-     *
-     * @param this
-     */
-    COMMIT_TO_REDO () {
-      if (this.cachedState) {
-        this.redoStack.push(this.cachedState)
-        this.cachedState = null
-      }
-    },
-
-    /**
-     * Commits the actively-cached this to the undo stack.
-     * This has the effect of setting a 'undo-able' action.
-     *
-     * @param this
-     */
-    COMMIT_TO_UNDO () {
-      if (this.cachedState) {
-        this.undoStack.push(this.cachedState)
-        this.cachedState = null
       }
     },
 
@@ -1304,7 +1255,7 @@ export const useDocumentStore = defineStore({
      * @param this
      * @param savedState - JSON-serialized this string
      */
-    APPLY_STATE (savedState: string) {
+    applyState (savedState: string) {
       const { items, connections, ports, groups } = JSON.parse(savedState) as {
         items: { [id: string]: Item },
         connections: { [id: string]: Connection },
@@ -1328,8 +1279,8 @@ export const useDocumentStore = defineStore({
       const addedItems = getExcludedMembers(items, this.items)
       const addedConnections = getExcludedMembers(connections, this.connections)
 
-      removedConnections.forEach(id => this.DISCONNECT(this.connections[id]))
-      removedItems.forEach(id => this.REMOVE_ELEMENT(id))
+      removedConnections.forEach(id => this.disconnect(this.connections[id]))
+      removedItems.forEach(id => this.removeElement(id))
 
       this.ports = ports
       this.items = items
@@ -1337,30 +1288,19 @@ export const useDocumentStore = defineStore({
 
       addedItems.forEach(id => {
         if (items[id].integratedCircuit) {
-          this.ADD_INTEGRATED_CIRCUIT({
+          this.addIntegratedCircuit({
             integratedCircuitItem: items[id],
             integratedCircuitPorts: ports
           })
         } else {
-          this.ADD_ELEMENT({
+          this.addNewItem({
             item: items[id],
             ports: Object.values(ports)
           })
         }
       })
 
-      addedConnections.forEach(id => this.CONNECT(connections[id]))
-    },
-
-    /**
-     * Assigns the given port to the this.
-     *
-     * @param this
-     * @param port
-     */
-    ADD_PORT (port: Port) {
-      this.ports[port.id] = port
-      this.items[port.elementId].portIds.push(port.id)
+      addedConnections.forEach(id => this.connect(connections[id]))
     },
 
     /**
@@ -1370,7 +1310,7 @@ export const useDocumentStore = defineStore({
      * @param this
      * @param portId - ID of the port to destroy
      */
-    REMOVE_PORT (portId: string) {
+    removePort (portId: string) {
       // remove all connections associated with this port
       Object
         .values(this.connections)
@@ -1427,7 +1367,7 @@ export const useDocumentStore = defineStore({
      * @param payload.item - new item to add
      * @param payload.ports - list of ports associated to the item
      */
-    ADD_ELEMENT ({ item, ports }: { item: Item, ports: Port[] }) {
+    addNewItem ({ item, ports }: { item: Item, ports: Port[] }) {
       ports.forEach(port => {
         this.ports[port.id] = port
       })
@@ -1456,7 +1396,7 @@ export const useDocumentStore = defineStore({
      * @param payload.integratedCircuitItem - the IC to add
      * @param payload.integratedCircuitPorts - ID-to-Port map of visibile IC ports to add
      */
-    ADD_INTEGRATED_CIRCUIT ({ integratedCircuitItem, integratedCircuitPorts }: {
+    addIntegratedCircuit ({ integratedCircuitItem, integratedCircuitPorts }: {
       integratedCircuitItem: Item,
       integratedCircuitPorts: { [id: string]: Port }
     }) {
@@ -1490,7 +1430,7 @@ export const useDocumentStore = defineStore({
      * @param this
      * @param id - ID of the item to remove
      */
-    REMOVE_ELEMENT (id: string) {
+    removeElement (id: string) {
       const item = this.items[id]
 
       if (item.integratedCircuit) {
@@ -1578,7 +1518,7 @@ export const useDocumentStore = defineStore({
      * @param this
      * @param direction - 1 to increment, -1 to decrement
      */
-    INCREMENT_Z_INDEX (direction: number) {
+    incrementZIndex (direction: number) {
       const items: BaseItem[] = Object.values(this.items)
       const connections: BaseItem[] = Object.values(this.connections)
       const baseItems = items
@@ -1629,7 +1569,7 @@ export const useDocumentStore = defineStore({
      * @param this
      * @param zIndex - new zIndex to move items to
      */
-    SET_Z_INDEX (zIndex: number) {
+    setZIndex (zIndex: number) {
       const items: BaseItem[] = Object.values(this.items)
       const connections: BaseItem[] = Object.values(this.connections)
       let baseItems = items
@@ -1661,7 +1601,7 @@ export const useDocumentStore = defineStore({
      * @param payload.target - target port ID
      * @param payload.connectionChainId - optional connection chain ID to add the connection segment to
      */
-    CONNECT ({ source, target, connectionChainId }: { source?: string, target?: string, connectionChainId?: string }) {
+    connect ({ source, target, connectionChainId }: { source?: string, target?: string, connectionChainId?: string }) {
       const id = `conn_${rand()}`
 
       if (source && target) {
@@ -1692,7 +1632,7 @@ export const useDocumentStore = defineStore({
      * @param payload.source - source port ID
      * @param payload.target - target port ID
      */
-    DISCONNECT ({ source, target }: { source: string, target: string }) {
+    disconnect ({ source, target }: { source: string, target: string }) {
       const connection = Object
         .values(this.connections)
         .find(c => c.source === source && c.target === target)
@@ -1718,7 +1658,7 @@ export const useDocumentStore = defineStore({
      * @param this
      * @param groupId
      */
-    UNGROUP (groupId: string) {
+    destroyGroup (groupId: string) {
       const group = this.groups[groupId]
 
       // remove the groupId of all items in the group and select them
@@ -1750,7 +1690,7 @@ export const useDocumentStore = defineStore({
      * @param payload.position - the initial position of this port
      * @param payload.value - optional value of the port
      */
-    CREATE_FREEPORT_ELEMENT ({ itemId, inputPortId, outputPortId, position, value }: {
+    addFreeportItem ({ itemId, inputPortId, outputPortId, position, value }: {
       itemId: string
       position: Point
       outputPortId?: string
