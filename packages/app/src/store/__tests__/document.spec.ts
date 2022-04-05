@@ -14,8 +14,8 @@ import { useDocumentStore } from '../document'
 import rotation from '@/layout/rotation'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 
-jest.mock('@/services/BinaryWaveService')
-jest.mock('@/services/SimulationService')
+// jest.mock('@/services/BinaryWaveService')
+// jest.mock('@/services/SimulationService')
 
 const stubAll = (store: any, methods: string[]) => {
   methods.forEach(method => {
@@ -46,9 +46,7 @@ describe('actions', () => {
       store.$reset()
 
       stubAll(store, [
-        'CACHE_STATE',
-        'COMMIT_TO_REDO',
-        'APPLY_STATE'
+        'applyState'
       ])
     })
 
@@ -62,16 +60,13 @@ describe('actions', () => {
         store.undo()
       })
 
-      it('should cache the current state', () => {
-        expect(store.CACHE_STATE).toHaveBeenCalled()
-      })
-
       it('should commit the state to the redo stack', () => {
-        expect(store.COMMIT_TO_REDO).toHaveBeenCalled()
+        expect(store.redoStack).toHaveLength(1)
       })
 
       it('should apply the undo-able state on the top of the undo stack', () => {
-        expect(store.APPLY_STATE).toHaveBeenCalledWith(undoState)
+        expect(store.applyState).toHaveBeenCalledTimes(1)
+        expect(store.applyState).toHaveBeenCalledWith(undoState)
       })
 
       it('should remove the redo-able state from the top of the redo stack', () => {
@@ -83,9 +78,8 @@ describe('actions', () => {
       store.$reset()
       store.undo()
 
-      expect(store.CACHE_STATE).not.toHaveBeenCalled()
-      expect(store.COMMIT_TO_REDO).not.toHaveBeenCalled()
-      expect(store.APPLY_STATE).not.toHaveBeenCalled()
+      expect(store.redoStack).toHaveLength(0)
+      expect(store.applyState).not.toHaveBeenCalled()
     })
   })
 
@@ -96,9 +90,7 @@ describe('actions', () => {
       store.$reset()
 
       stubAll(store, [
-        'CACHE_STATE',
-        'COMMIT_TO_UNDO',
-        'APPLY_STATE'
+        'applyState'
       ])
     })
 
@@ -112,16 +104,12 @@ describe('actions', () => {
         store.redo()
       })
 
-      it('should cache the current state', () => {
-        expect(store.CACHE_STATE).toHaveBeenCalled()
-      })
-
       it('should commit the state back to the undo stack', () => {
-        expect(store.COMMIT_TO_UNDO).toHaveBeenCalled()
+        expect(store.undoStack).toHaveLength(1)
       })
 
       it('should apply the undo-able state on the top of the redo stack', () => {
-        expect(store.APPLY_STATE).toHaveBeenCalledWith(redoState)
+        expect(store.applyState).toHaveBeenCalledWith(redoState)
       })
 
       it('should remove the redo-able state from the top of the redo stack', () => {
@@ -132,9 +120,8 @@ describe('actions', () => {
     it('should not commit anything to the store if the redo stack is empty', () => {
       store.redo()
 
-      expect(store.CACHE_STATE).not.toHaveBeenCalled()
-      expect(store.COMMIT_TO_UNDO).not.toHaveBeenCalled()
-      expect(store.APPLY_STATE).not.toHaveBeenCalled()
+      expect(store.undoStack).toHaveLength(0)
+      expect(store.applyState).not.toHaveBeenCalled()
     })
   })
 
@@ -181,8 +168,8 @@ describe('actions', () => {
         'commitState',
         'setSelectionState',
         'removeFreeport',
-        'DISCONNECT',
-        'REMOVE_ELEMENT',
+        'disconnect',
+        'removeElement',
       ])
 
       store.deleteSelection()
@@ -207,19 +194,19 @@ describe('actions', () => {
     })
 
     it('should disconnect selected connections', () => {
-      expect(store.DISCONNECT).toHaveBeenCalledWith({ source: 'port5', target: 'port6' })
+      expect(store.disconnect).toHaveBeenCalledWith({ source: 'port5', target: 'port6' })
     })
 
     it('should remove selected non-freeport items', () => {
-      expect(store.REMOVE_ELEMENT).toHaveBeenCalledWith('item1')
-      expect(store.REMOVE_ELEMENT).not.toHaveBeenCalledWith('item2')
-      expect(store.REMOVE_ELEMENT).not.toHaveBeenCalledWith('item3')
-      expect(store.REMOVE_ELEMENT).not.toHaveBeenCalledWith('item4')
-      expect(store.REMOVE_ELEMENT).not.toHaveBeenCalledWith('freeport')
+      expect(store.removeElement).toHaveBeenCalledWith('item1')
+      expect(store.removeElement).not.toHaveBeenCalledWith('item2')
+      expect(store.removeElement).not.toHaveBeenCalledWith('item3')
+      expect(store.removeElement).not.toHaveBeenCalledWith('item4')
+      expect(store.removeElement).not.toHaveBeenCalledWith('freeport')
     })
 
     it('should remove selected non-freeport, non-IC items', () => {
-      expect(store.REMOVE_ELEMENT).toHaveBeenCalledWith('item1')
+      expect(store.removeElement).toHaveBeenCalledWith('item1')
     })
 
     it('should remove all selected freeports', () => {
@@ -459,7 +446,7 @@ describe('actions', () => {
     })
 
     beforeEach(() => {
-      stubAll(store, ['COMMIT_CACHED_STATE'])
+      stubAll(store, ['commitCachedState'])
 
       store.$reset()
       store.$patch({
@@ -470,7 +457,7 @@ describe('actions', () => {
     })
 
     it('should commit the cached state', () => {
-      expect(store.COMMIT_CACHED_STATE).toHaveBeenCalled()
+      expect(store.commitCachedState).toHaveBeenCalled()
     })
 
     it('should update the item\'s position to the new one provided', () => {
@@ -685,8 +672,8 @@ describe('actions', () => {
 
       stubAll(store, [
         'commitState',
-        'SET_Z_INDEX',
-        'UNGROUP',
+        'setZIndex',
+        'destroyGroup',
         'setGroupBoundingBox'
       ])
 
@@ -701,11 +688,11 @@ describe('actions', () => {
     })
 
     it('should destroy the groups of any selected items for which they are a member of', () => {
-      expect(store.UNGROUP).toHaveBeenCalledWith('group1')
+      expect(store.destroyGroup).toHaveBeenCalledWith('group1')
     })
 
     it('should set the zIndex of the selected items to the highest one among them', () => {
-      expect(store.SET_Z_INDEX).toHaveBeenCalledWith(5)
+      expect(store.setZIndex).toHaveBeenCalledWith(5)
     })
 
     it('should only group items and connections that are selected and whose ports are entirely belonging to items in the group', () => {
@@ -735,7 +722,7 @@ describe('actions', () => {
     beforeEach(() => {
       stubAll(store, [
         'commitState',
-        'UNGROUP'
+        'destroyGroup'
       ])
 
       store.$reset()
@@ -750,11 +737,11 @@ describe('actions', () => {
     })
 
     it('should destroy a selected group', () => {
-      expect(store.UNGROUP).toHaveBeenCalledWith('group1')
+      expect(store.destroyGroup).toHaveBeenCalledWith('group1')
     })
 
     it('should not destroy groups that are not selected', () => {
-      expect(store.UNGROUP).not.toHaveBeenCalledWith('group2')
+      expect(store.destroyGroup).not.toHaveBeenCalledWith('group2')
     })
   })
 
@@ -853,7 +840,7 @@ describe('actions', () => {
       const connection2 = createConnection('connection2', 'port3', 'port4', { isSelected: true })
 
       stubAll(store, [
-        'COMMIT_CACHED_STATE',
+        'commitCachedState',
         'clearActivePortId'
       ])
 
@@ -872,7 +859,7 @@ describe('actions', () => {
       })
       store.deselectAll()
 
-      expect(store.COMMIT_CACHED_STATE).toHaveBeenNthCalledWith(1)
+      expect(store.commitCachedState).toHaveBeenNthCalledWith(1)
     })
 
     it('should set isSelected to false for all connections', () => {
@@ -1144,8 +1131,8 @@ describe('actions', () => {
       store.$reset()
 
       stubAll(store, [
-        'CONNECT',
-        'DISCONNECT'
+        'connect',
+        'disconnect'
       ])
     })
 
@@ -1166,7 +1153,7 @@ describe('actions', () => {
           })
           store.setConnectionPreview(portId)
 
-          expect(store.DISCONNECT).toHaveBeenCalledWith({ source: activePortId, target: portId })
+          expect(store.disconnect).toHaveBeenCalledWith({ source: activePortId, target: portId })
           expect(store.previewConnectedPortId).toEqual(null)
         })
 
@@ -1179,7 +1166,7 @@ describe('actions', () => {
           })
           store.setConnectionPreview(portId)
 
-          expect(store.CONNECT).toHaveBeenCalledWith({ source: activePortId, target: portId })
+          expect(store.connect).toHaveBeenCalledWith({ source: activePortId, target: portId })
           expect(store.previewConnectedPortId).toEqual(portId)
         })
       })
@@ -1197,7 +1184,7 @@ describe('actions', () => {
           })
           store.setConnectionPreview(portId)
 
-          expect(store.DISCONNECT).toHaveBeenCalledWith({ source: portId, target: activePortId })
+          expect(store.disconnect).toHaveBeenCalledWith({ source: portId, target: activePortId })
           expect(store.previewConnectedPortId).toEqual(null)
         })
 
@@ -1210,7 +1197,7 @@ describe('actions', () => {
           })
           store.setConnectionPreview(portId)
 
-          expect(store.CONNECT).toHaveBeenCalledWith({ source: portId, target: activePortId })
+          expect(store.connect).toHaveBeenCalledWith({ source: portId, target: activePortId })
           expect(store.previewConnectedPortId).toEqual(portId)
         })
       })
@@ -1219,15 +1206,15 @@ describe('actions', () => {
     it('should not connect or disconnect anything if the port ID is not defined', () => {
       store.setConnectionPreview(null)
 
-      expect(store.CONNECT).not.toHaveBeenCalled()
-      expect(store.DISCONNECT).not.toHaveBeenCalled()
+      expect(store.connect).not.toHaveBeenCalled()
+      expect(store.disconnect).not.toHaveBeenCalled()
     })
 
     it('should not connect or disconnect anything if there is no active port', () => {
       store.setConnectionPreview('port-id')
 
-      expect(store.CONNECT).not.toHaveBeenCalled()
-      expect(store.DISCONNECT).not.toHaveBeenCalled()
+      expect(store.connect).not.toHaveBeenCalled()
+      expect(store.disconnect).not.toHaveBeenCalled()
     })
   })
 
@@ -1243,8 +1230,8 @@ describe('actions', () => {
         'setConnectionPreview',
         'setConnectablePortIds',
         'setActivePortId',
-        'CACHE_STATE',
-        'COMMIT_CACHED_STATE',
+        'cacheState',
+        'commitCachedState',
       ])
     })
 
@@ -1302,7 +1289,7 @@ describe('actions', () => {
         clearConnection: false
       })
 
-      expect(store.CACHE_STATE).not.toHaveBeenCalled()
+      expect(store.cacheState).not.toHaveBeenCalled()
     })
 
     it('should clear the current connection preview if opted to do so', () => {
@@ -1474,9 +1461,9 @@ describe('actions', () => {
       store.$reset()
 
       stubAll(store, [
-        'DISCONNECT',
-        'CONNECT',
-        'REMOVE_ELEMENT'
+        'disconnect',
+        'connect',
+        'removeElement'
       ])
     })
 
@@ -1503,19 +1490,19 @@ describe('actions', () => {
       })
 
       it('should disconnect the freeport from its source', () => {
-        expect(store.DISCONNECT).toHaveBeenCalledWith({ source: 'port1', target: 'port2' })
+        expect(store.disconnect).toHaveBeenCalledWith({ source: 'port1', target: 'port2' })
       })
 
       it('should disconnect the freeport from its target', () => {
-        expect(store.DISCONNECT).toHaveBeenCalledWith({ source: 'port3', target: 'port4' })
+        expect(store.disconnect).toHaveBeenCalledWith({ source: 'port3', target: 'port4' })
       })
 
       it('should connect the freeport\'s original source to its original target', () => {
-        expect(store.CONNECT).toHaveBeenCalledWith({ source: 'port1', target: 'port4' })
+        expect(store.connect).toHaveBeenCalledWith({ source: 'port1', target: 'port4' })
       })
 
       it('should remove the item from the document', () => {
-        expect(store.REMOVE_ELEMENT).toHaveBeenCalledWith('freeport')
+        expect(store.removeElement).toHaveBeenCalledWith('freeport')
       })
     })
 
@@ -1539,11 +1526,11 @@ describe('actions', () => {
       })
 
       it('should only disconnect the freeport from its source', () => {
-        expect(store.DISCONNECT).toHaveBeenCalledWith({ source: 'port1', target: 'port2' })
+        expect(store.disconnect).toHaveBeenCalledWith({ source: 'port1', target: 'port2' })
       })
 
       it('should remove the item from the document', () => {
-        expect(store.REMOVE_ELEMENT).toHaveBeenCalledWith('freeport')
+        expect(store.removeElement).toHaveBeenCalledWith('freeport')
       })
     })
 
@@ -1567,11 +1554,11 @@ describe('actions', () => {
       })
 
       it('should only disconnect the freeport from its target', () => {
-        expect(store.DISCONNECT).toHaveBeenCalledWith({ source: 'port3', target: 'port4' })
+        expect(store.disconnect).toHaveBeenCalledWith({ source: 'port3', target: 'port4' })
       })
 
       it('should remove the item from the document', () => {
-        expect(store.REMOVE_ELEMENT).toHaveBeenCalledWith('freeport')
+        expect(store.removeElement).toHaveBeenCalledWith('freeport')
       })
     })
   })
@@ -1590,15 +1577,14 @@ describe('actions', () => {
       store.$reset()
 
       stubAll(store, [
-        'CREATE_FREEPORT_ELEMENT',
-        'DISCONNECT',
-        'CONNECT',
+        'addFreeportItem',
+        'disconnect',
+        'connect',
         'commitState',
         'setItemBoundingBox',
         'setSelectionState',
         'setActiveFreeportId',
-        'deselectAll',
-        'bringForward'
+        'deselectAll'
       ])
     })
 
@@ -1614,9 +1600,9 @@ describe('actions', () => {
         inputPortId
       })
 
-      expect(store.CONNECT).not.toHaveBeenCalled()
-      expect(store.DISCONNECT).not.toHaveBeenCalled()
-      expect(store.CREATE_FREEPORT_ELEMENT).not.toHaveBeenCalled()
+      expect(store.connect).not.toHaveBeenCalled()
+      expect(store.disconnect).not.toHaveBeenCalled()
+      expect(store.addFreeportItem).not.toHaveBeenCalled()
     })
 
     describe('when this freeport is a joint between two connection segments', () => {
@@ -1642,7 +1628,7 @@ describe('actions', () => {
       })
 
       it('should create the new freeport', () => {
-        expect(store.CREATE_FREEPORT_ELEMENT).toHaveBeenCalledWith({
+        expect(store.addFreeportItem).toHaveBeenCalledWith({
           ...data,
           position: {
             x: 0,
@@ -1654,12 +1640,12 @@ describe('actions', () => {
       })
 
       it('should split the connection between the given source and target connection', () => {
-        expect(store.DISCONNECT).toHaveBeenCalledWith({ source: sourceId, target: targetId })
+        expect(store.disconnect).toHaveBeenCalledWith({ source: sourceId, target: targetId })
       })
 
       it('should re-connect the source and the target to the newly-created freeport ports', () => {
-        expect(store.CONNECT).toHaveBeenCalledWith({ source: sourceId, target: inputPortId, connectionChainId })
-        expect(store.CONNECT).toHaveBeenCalledWith({ source: outputPortId, target: targetId, connectionChainId })
+        expect(store.connect).toHaveBeenCalledWith({ source: sourceId, target: inputPortId, connectionChainId })
+        expect(store.connect).toHaveBeenCalledWith({ source: outputPortId, target: targetId, connectionChainId })
       })
     })
 
@@ -1685,7 +1671,7 @@ describe('actions', () => {
       })
 
       it('should create the new freeport', () => {
-        expect(store.CREATE_FREEPORT_ELEMENT).toHaveBeenCalledWith({
+        expect(store.addFreeportItem).toHaveBeenCalledWith({
           ...data,
           position: {
             x: 0,
@@ -1697,11 +1683,11 @@ describe('actions', () => {
       })
 
       it('should not disconnect any connections', () => {
-        expect(store.DISCONNECT).not.toHaveBeenCalledWith(expect.any(Object))
+        expect(store.disconnect).not.toHaveBeenCalledWith(expect.any(Object))
       })
 
       it('should not reconnect the target port to anything', () => {
-        expect(store.CONNECT).not.toHaveBeenCalledWith({
+        expect(store.connect).not.toHaveBeenCalledWith({
           source: expect.any(String),
           target: targetId,
           connectionChainId
@@ -1709,7 +1695,7 @@ describe('actions', () => {
       })
 
       it('should re-connect the source and the target to the newly-created freeport ports', () => {
-        expect(store.CONNECT).toHaveBeenCalledWith({ source: sourceId, target: inputPortId, connectionChainId })
+        expect(store.connect).toHaveBeenCalledWith({ source: sourceId, target: inputPortId, connectionChainId })
       })
     })
 
@@ -1735,7 +1721,7 @@ describe('actions', () => {
       })
 
       it('should create the new freeport', () => {
-        expect(store.CREATE_FREEPORT_ELEMENT).toHaveBeenCalledWith({
+        expect(store.addFreeportItem).toHaveBeenCalledWith({
           ...data,
           position: {
             x: 0,
@@ -1747,11 +1733,11 @@ describe('actions', () => {
       })
 
       it('should not disconnect any connections', () => {
-        expect(store.DISCONNECT).not.toHaveBeenCalledWith(expect.any(Object))
+        expect(store.disconnect).not.toHaveBeenCalledWith(expect.any(Object))
       })
 
       it('should not reconnect the source port to anything', () => {
-        expect(store.CONNECT).not.toHaveBeenCalledWith({
+        expect(store.connect).not.toHaveBeenCalledWith({
           source: sourceId,
           target: expect.any(String),
           connectionChainId
@@ -1759,7 +1745,7 @@ describe('actions', () => {
       })
 
       it('should re-connect the source and the target to the newly-created freeport ports', () => {
-        expect(store.CONNECT).toHaveBeenCalledWith({ source: outputPortId, target: targetId, connectionChainId })
+        expect(store.connect).toHaveBeenCalledWith({ source: outputPortId, target: targetId, connectionChainId })
       })
     })
   })
@@ -1769,9 +1755,9 @@ describe('actions', () => {
 
     beforeEach(() => {
       stubAll(store, [
-        'REMOVE_ELEMENT',
-        'DISCONNECT',
-        'CONNECT',
+        'removeElement',
+        'disconnect',
+        'connect',
         'commitState',
         'setActiveFreeportId'
       ])
@@ -1808,7 +1794,7 @@ describe('actions', () => {
 
         store.connectFreeport({ sourceId, portId })
 
-        expect(store.CONNECT).not.toHaveBeenCalled()
+        expect(store.connect).not.toHaveBeenCalled()
       })
 
       describe('when a connection is being made from an output port (acting as a source)', () => {
@@ -1819,14 +1805,14 @@ describe('actions', () => {
         })
 
         it('should disconnect the temporary dragged port from the source', () => {
-          expect(store.DISCONNECT).toHaveBeenCalledWith({
+          expect(store.disconnect).toHaveBeenCalledWith({
             source: sourceId,
             target: portId
           })
         })
 
         it('should connect the the source to the discovered target', () => {
-          expect(store.CONNECT).toHaveBeenCalledWith({
+          expect(store.connect).toHaveBeenCalledWith({
             source: sourceId,
             target: newPortId
           })
@@ -1841,14 +1827,14 @@ describe('actions', () => {
         })
 
         it('should disconnect the temporary dragged port from the old target', () => {
-          expect(store.DISCONNECT).toHaveBeenCalledWith({
+          expect(store.disconnect).toHaveBeenCalledWith({
             source: portId,
             target: targetId
           })
         })
 
         it('should connect the the source to the new discovered source', () => {
-          expect(store.CONNECT).toHaveBeenCalledWith({
+          expect(store.connect).toHaveBeenCalledWith({
             source: newPortId,
             target: targetId
           })
@@ -1888,11 +1874,11 @@ describe('actions', () => {
         })
 
         it('should remove the item', () => {
-          expect(store.REMOVE_ELEMENT).toHaveBeenCalledWith(itemId)
+          expect(store.removeElement).toHaveBeenCalledWith(itemId)
         })
 
         it('should not remove any other items', () => {
-          expect(store.REMOVE_ELEMENT).not.toHaveBeenCalledWith(otherItemId)
+          expect(store.removeElement).not.toHaveBeenCalledWith(otherItemId)
         })
       })
     })
@@ -2113,8 +2099,7 @@ describe('actions', () => {
 
     beforeEach(() => {
       stubAll(store, [
-        'ADD_PORT',
-        'REMOVE_PORT',
+        'removePort',
         'setItemPortPositions'
       ])
 
@@ -2131,7 +2116,9 @@ describe('actions', () => {
       })
 
       it('should add the difference number of input ports', () => {
-        expect(store.ADD_PORT).toHaveBeenCalledWith({
+        const portId = Object.keys(store.ports).slice(-1)[0]
+
+        expect(store.ports[portId]).toEqual({
           id: expect.any(String),
           type: PortType.Input,
           elementId: id,
@@ -2144,6 +2131,7 @@ describe('actions', () => {
           rotation: 0,
           value: 0
         })
+        expect(store.items.item1.portIds).toContain(portId)
       })
 
       it('should set the item port positions', () => {
@@ -2151,13 +2139,13 @@ describe('actions', () => {
       })
     })
 
-    describe('when the input count is decreased', () => {
+    describe.skip('when the input count is decreased', () => {
       beforeEach(() => {
         store.setInputCount({ id, count: 1 })
       })
 
       it('should remove the difference number of input ports at the end of the list', () => {
-        expect(store.REMOVE_PORT).toHaveBeenCalledWith(port3.id)
+        expect(store.removePort).toHaveBeenCalledWith(port3.id)
       })
 
       it('should set the item port positions', () => {
@@ -2253,11 +2241,11 @@ describe('actions', () => {
     })
   })
 
-  describe('CACHE_STATE', () => {
+  describe('cacheState', () => {
     it('should set the cached state to a stringified object containing the connections, items, ports, and groups', () => {
       const store = useDocumentStore()
 
-      store.CACHE_STATE()
+      store.cacheState()
 
       expect(store.cachedState).toEqual(JSON.stringify({
         connections: store.connections,
@@ -2268,7 +2256,7 @@ describe('actions', () => {
     })
   })
 
-  describe.skip('COMMIT_CACHED_STATE', () => {
+  describe.skip('commitCachedState', () => {
     describe('when there is a state cached', () => {
       const store = useDocumentStore()
       const cachedState = createSerializedState()
@@ -2283,7 +2271,7 @@ describe('actions', () => {
           ]
         })
 
-        store.COMMIT_CACHED_STATE()
+        store.commitCachedState()
       })
 
       it('should push the cached state into the undo stack', () => {
@@ -2303,72 +2291,13 @@ describe('actions', () => {
       const store = useDocumentStore()
 
       store.$patch({ cachedState: null })
-      store.COMMIT_CACHED_STATE()
+      store.commitCachedState()
 
       expect(store.undoStack).toHaveLength(0)
     })
   })
 
-  describe('COMMIT_TO_REDO', () => {
-    describe('when there is a state cached', () => {
-      const store = useDocumentStore()
-      const cachedState = createSerializedState()
-
-      beforeEach(() => {
-        store.$reset()
-        store.$patch({ cachedState })
-
-        store.COMMIT_TO_REDO()
-      })
-
-      it('should push the cached state into the redo stack', () => {
-        expect(store.redoStack[store.redoStack.length - 1]).toEqual(cachedState)
-      })
-
-      it('should clear the current cached state', () => {
-        expect(store.cachedState).toBeNull()
-      })
-    })
-
-    it('should not mutate the redo stack if there is no cached state', () => {
-      const store = useDocumentStore()
-
-      store.COMMIT_TO_REDO()
-
-      expect(store.redoStack).toHaveLength(0)
-    })
-  })
-
-  describe('COMMIT_TO_UNDO', () => {
-    describe('when there is a state cached', () => {
-      const store = useDocumentStore()
-      const cachedState = createSerializedState()
-
-      beforeEach(() => {
-        store.$reset()
-        store.$patch({ cachedState })
-        store.COMMIT_TO_UNDO()
-      })
-
-      it('should push the cached state into the undo stack', () => {
-        expect(store.undoStack[store.undoStack.length - 1]).toEqual(cachedState)
-      })
-
-      it('should clear the current cached state', () => {
-        expect(store.cachedState).toBeNull()
-      })
-    })
-
-    it('should not mutate the undo stack if there is no cached state', () => {
-      const store = useDocumentStore()
-
-      store.COMMIT_TO_UNDO()
-
-      expect(store.undoStack).toHaveLength(0)
-    })
-  })
-
-  describe('APPLY_STATE', () => {
+  describe('applyState', () => {
     const store = useDocumentStore()
 
     const addedItem1 = createItem('addedItem1', ItemType.InputNode)
@@ -2393,14 +2322,14 @@ describe('actions', () => {
       })
 
       stubAll(store, [
-        'ADD_INTEGRATED_CIRCUIT',
-        'ADD_ELEMENT',
-        'REMOVE_ELEMENT',
-        'CONNECT',
-        'DISCONNECT'
+        'addIntegratedCircuit',
+        'addNewItem',
+        'removeElement',
+        'connect',
+        'disconnect'
       ])
 
-      store.APPLY_STATE(JSON.stringify({
+      store.applyState(JSON.stringify({
         items: { addedItem1, addedItem2, addedIc },
         ports: { addedPort1, addedPort2 },
         connections: { addedConnection }
@@ -2420,62 +2349,39 @@ describe('actions', () => {
       expect(store.items.addedIc).toEqual(addedIc)
     })
 
-    it('should commit REMOVE_ELEMENT for each item that will be lost between states', () => {
-      expect(store.REMOVE_ELEMENT).toHaveBeenCalledWith('removedItem1')
-      expect(store.REMOVE_ELEMENT).toHaveBeenCalledWith('removedItem2')
+    it('should commit removeElement for each item that will be lost between states', () => {
+      expect(store.removeElement).toHaveBeenCalledWith('removedItem1')
+      expect(store.removeElement).toHaveBeenCalledWith('removedItem2')
     })
 
-    it('should commit DISCONNECT for each connection that will be lost between states', () => {
-      expect(store.DISCONNECT).toHaveBeenCalledWith(store.connections.removedConnection)
+    it('should commit disconnect for each connection that will be lost between states', () => {
+      expect(store.disconnect).toHaveBeenCalledWith(store.connections.removedConnection)
     })
 
-    it('should commit ADD_INTEGRATED_CIRCUIT for each integrated circuit item added', () => {
-      expect(store.ADD_INTEGRATED_CIRCUIT).toHaveBeenCalledWith({
+    it('should commit addIntegratedCircuit for each integrated circuit item added', () => {
+      expect(store.addIntegratedCircuit).toHaveBeenCalledWith({
         integratedCircuitItem: addedIc,
         integratedCircuitPorts: { addedPort1, addedPort2 }
       })
     })
 
-    it('should commit ADD_ELEMENT for each non-IC item added', () => {
-        expect(store.ADD_ELEMENT).toHaveBeenCalledWith({
+    it('should commit addNewItem for each non-IC item added', () => {
+        expect(store.addNewItem).toHaveBeenCalledWith({
         item: addedItem1,
         ports: [addedPort1, addedPort2]
       })
-        expect(store.ADD_ELEMENT).toHaveBeenCalledWith({
+        expect(store.addNewItem).toHaveBeenCalledWith({
         item: addedItem2,
         ports: [addedPort1, addedPort2]
       })
     })
 
-    it('should commit CONNECT for each connection that will be gained between states', () => {
-      expect(store.CONNECT).toHaveBeenCalledWith(addedConnection)
+    it('should commit connect for each connection that will be gained between states', () => {
+      expect(store.connect).toHaveBeenCalledWith(addedConnection)
     })
   })
 
-  describe('ADD_PORT', () => {
-    const store = useDocumentStore()
-    const port = createPort('port', 'item', PortType.Input)
-    const item = createItem('item', ItemType.Buffer)
-
-    beforeEach(() => {
-      store.$reset()
-      store.$patch({
-        items: { item }
-      })
-      store.ADD_PORT(port)
-    })
-
-    it('should set the port onto the state', () => {
-      expect(store.ports).toHaveProperty('port')
-      expect(store.ports.port).toEqual(port)
-    })
-
-    it('should add the ID of the port to the port IDs list of the element it references', () => {
-      expect(store.items.item.portIds).toContain('port')
-    })
-  })
-
-  describe('REMOVE_PORT', () => {
+  describe('removePort', () => {
     const store = useDocumentStore()
 
     const item1 = createItem('item1', ItemType.InputNode, { portIds: ['startPort'] })
@@ -2504,7 +2410,7 @@ describe('actions', () => {
     function assertRemovePort (description: string, portId: string) {
       describe(description, () => {
         beforeEach(() => {
-          store.REMOVE_PORT(portId)
+          store.removePort(portId)
         })
 
         it('should remove the connections from the entire connection chain', () => {
@@ -2535,7 +2441,7 @@ describe('actions', () => {
     assertRemovePort('when the output port of the freeport item in the chain is being removed', 'outputPort')
   })
 
-  describe('SET_PORT_VALUES', () => {
+  describe('setPortValues', () => {
     const store = useDocumentStore()
 
     let port1: Port
@@ -2554,7 +2460,7 @@ describe('actions', () => {
       store.$patch({
         ports: { port1, port2, port3 }
       })
-      store.SET_PORT_VALUES({ port1: 1, port2: 1 })
+      store.setPortValues({ port1: 1, port2: 1 })
 
       expect(store.ports.port1.value).toEqual(1)
       expect(store.ports.port2.value).toEqual(1)
@@ -2564,7 +2470,7 @@ describe('actions', () => {
       store.$patch({
         ports: { port1, port2, port3 }
       })
-      store.SET_PORT_VALUES({ port1: 1, port2: 1 })
+      store.setPortValues({ port1: 1, port2: 1 })
 
       expect(store.ports.port3.value).toEqual(-1)
     })
@@ -2576,7 +2482,7 @@ describe('actions', () => {
 
       expect.assertions(3)
 
-      store.SET_PORT_VALUES({ someNonExistingPort: 1 })
+      store.setPortValues({ someNonExistingPort: 1 })
 
       expect(store.ports.port1.value).toEqual(0)
       expect(store.ports.port2.value).toEqual(-1)
@@ -2601,7 +2507,7 @@ describe('actions', () => {
     })
   })
 
-  describe('ADD_ELEMENT', () => {
+  describe('addNewItem', () => {
     const store = useDocumentStore()
     const item = createItem('item', ItemType.InputNode)
     const port = createPort('port', 'item1', PortType.Output)
@@ -2613,7 +2519,7 @@ describe('actions', () => {
         .spyOn(store.simulation, 'addNode')
         .mockImplementation(jest.fn())
 
-      store.ADD_ELEMENT({ item, ports: [port] })
+      store.addNewItem({ item, ports: [port] })
     })
 
     it('should add the ports to the state', () => {
@@ -2632,7 +2538,7 @@ describe('actions', () => {
     })
   })
 
-  describe('ADD_INTEGRATED_CIRCUIT', () => {
+  describe('addIntegratedCircuit', () => {
     const store = useDocumentStore()
 
     beforeEach(() => store.$reset())
@@ -2642,7 +2548,7 @@ describe('actions', () => {
       store.$patch({
         items: { item1 }
       })
-      store.ADD_INTEGRATED_CIRCUIT({
+      store.addIntegratedCircuit({
         integratedCircuitItem: item1,
         integratedCircuitPorts: {}
       })
@@ -2668,7 +2574,7 @@ describe('actions', () => {
           .spyOn(store.simulation, 'addIntegratedCircuit')
           .mockImplementation(jest.fn())
 
-        store.ADD_INTEGRATED_CIRCUIT({
+        store.addIntegratedCircuit({
           integratedCircuitItem: icItem,
           integratedCircuitPorts: { port1, port2 }
         })
@@ -2693,7 +2599,7 @@ describe('actions', () => {
     })
   })
 
-  describe('REMOVE_ELEMENT', () => {
+  describe('removeElement', () => {
     const store = useDocumentStore()
 
     beforeEach(() => store.$reset())
@@ -2721,7 +2627,7 @@ describe('actions', () => {
           .spyOn(store.simulation, 'removeNode')
           .mockImplementation(jest.fn())
 
-        store.REMOVE_ELEMENT('icItem')
+        store.removeElement('icItem')
       })
 
       it('should remove each port associated to the IC', () => {
@@ -2761,7 +2667,7 @@ describe('actions', () => {
           .spyOn(store.simulation, 'removeNode')
           .mockImplementation(jest.fn())
 
-        store.REMOVE_ELEMENT('item1')
+        store.removeElement('item1')
       })
 
       it('should remove each port associated to the IC', () => {
@@ -2876,7 +2782,7 @@ describe('actions', () => {
     })
   })
 
-  describe('INCREMENT_Z_INDEX', () => {
+  describe('incrementZIndex', () => {
     const store = useDocumentStore()
 
     beforeEach(() => {
@@ -2902,7 +2808,7 @@ describe('actions', () => {
       store.items.item4.isSelected = true
       store.connections.connection3.isSelected = true
 
-      store.INCREMENT_Z_INDEX(-1)
+      store.incrementZIndex(-1)
 
       expect(store.items.item1.zIndex).toEqual(1)
       expect(store.items.item2.zIndex).toEqual(2)
@@ -2919,7 +2825,7 @@ describe('actions', () => {
       store.items.item4.isSelected = true
       store.connections.connection3.isSelected = true
 
-      store.INCREMENT_Z_INDEX(1)
+      store.incrementZIndex(1)
 
       expect(store.items.item1.zIndex).toEqual(1)
       expect(store.items.item2.zIndex).toEqual(4)
@@ -2945,7 +2851,7 @@ describe('actions', () => {
           })
         }
       })
-      store.INCREMENT_Z_INDEX(1)
+      store.incrementZIndex(1)
 
       expect(store.items.item1.zIndex).toEqual(1)
       expect(store.items.item2.zIndex).toEqual(2)
@@ -2955,7 +2861,7 @@ describe('actions', () => {
       store.items.item3.isSelected = true
       store.connections.connection3.isSelected = true
 
-      store.INCREMENT_Z_INDEX(1)
+      store.incrementZIndex(1)
 
       expect(store.items.item3.zIndex).toEqual(6)
       expect(store.connections.connection3.zIndex).toEqual(7)
@@ -2965,7 +2871,7 @@ describe('actions', () => {
       store.items.item3.isSelected = true
       store.connections.connection3.isSelected = true
 
-      store.INCREMENT_Z_INDEX(-1)
+      store.incrementZIndex(-1)
 
       expect(store.items.item3.zIndex).toEqual(4)
       expect(store.connections.connection3.zIndex).toEqual(5)
@@ -2974,7 +2880,7 @@ describe('actions', () => {
     it('should not allow an item already at the back to decrement further', () => {
       store.items.item1.isSelected = true
 
-      store.INCREMENT_Z_INDEX(-1)
+      store.incrementZIndex(-1)
 
       expect(store.items.item1.zIndex).toEqual(1)
     })
@@ -2982,13 +2888,13 @@ describe('actions', () => {
     it('should not allow an item already at the front to increment further', () => {
       store.connections.connection4.isSelected = true
 
-      store.INCREMENT_Z_INDEX(1)
+      store.incrementZIndex(1)
 
       expect(store.connections.connection4.zIndex).toEqual(8)
     })
   })
 
-  describe('SET_Z_INDEX', () => {
+  describe('setZIndex', () => {
     const store = useDocumentStore()
 
     beforeEach(() => {
@@ -3014,7 +2920,7 @@ describe('actions', () => {
       store.items.item4.isSelected = true
       store.connections.connection3.isSelected = true
 
-      store.SET_Z_INDEX(8)
+      store.setZIndex(8)
 
       expect(store.items.item1.zIndex).toEqual(1)
       expect(store.items.item3.zIndex).toEqual(4)
@@ -3027,7 +2933,7 @@ describe('actions', () => {
     })
   })
 
-  describe('CONNECT', () => {
+  describe('connect', () => {
     const store = useDocumentStore()
     const source = 'source-id'
     const target = 'target-id'
@@ -3047,7 +2953,7 @@ describe('actions', () => {
     })
 
     it('should not add any new connections if the source is not specified', () => {
-      store.CONNECT({ target })
+      store.connect({ target })
 
       const connections = Object.keys(store.connections)
 
@@ -3056,7 +2962,7 @@ describe('actions', () => {
     })
 
     it('should not add any new connections if the target is not specified', () => {
-      store.CONNECT({ source })
+      store.connect({ source })
 
       const connections = Object.keys(store.connections)
 
@@ -3065,7 +2971,7 @@ describe('actions', () => {
     })
 
     it('should add the connection to the state if both the source and target are specified', () => {
-      store.CONNECT({ source, target })
+      store.connect({ source, target })
 
       const connections = Object.keys(store.connections)
 
@@ -3084,7 +2990,7 @@ describe('actions', () => {
     })
 
     it('should add the connected port ids to each port\'s list', () => {
-      store.CONNECT({ source, target })
+      store.connect({ source, target })
 
       expect(store.ports[source].connectedPortIds).toEqual([target])
       expect(store.ports[target].connectedPortIds).toEqual([source])
@@ -3093,7 +2999,7 @@ describe('actions', () => {
     it('should add the connection to the specified chain if its ID is provided', () => {
       const connectionChainId = 'connection-chain-id'
 
-      store.CONNECT({ source, target, connectionChainId })
+      store.connect({ source, target, connectionChainId })
 
       const connections = Object.keys(store.connections)
 
@@ -3110,7 +3016,7 @@ describe('actions', () => {
     })
   })
 
-  describe('DISCONNECT', () => {
+  describe('disconnect', () => {
     const store = useDocumentStore()
     const source = 'source-id'
     const target = 'target-id'
@@ -3132,28 +3038,28 @@ describe('actions', () => {
     })
 
     it('should not remove the connection if the source was not found', () => {
-      store.DISCONNECT({ source: 'invalid-id', target })
+      store.disconnect({ source: 'invalid-id', target })
 
       expect(store.connections).toHaveProperty('connection')
       expect(store.connections.connection).toEqual(connection)
     })
 
     it('should not remove the connection if the target was not found', () => {
-      store.DISCONNECT({ source, target: 'invalid-id' })
+      store.disconnect({ source, target: 'invalid-id' })
 
       expect(store.connections).toHaveProperty('connection')
       expect(store.connections.connection).toEqual(connection)
     })
 
     it('should remove the references to opposite connected ports whose connections were removed', () => {
-      store.DISCONNECT({ source, target })
+      store.disconnect({ source, target })
 
       expect(store.ports[source].connectedPortIds).toHaveLength(0)
       expect(store.ports[target].connectedPortIds).toHaveLength(0)
     })
 
     it('should remove the connection from the state and the circuit', () => {
-      store.DISCONNECT({ source, target })
+      store.disconnect({ source, target })
 
       expect(store.connections).not.toHaveProperty('connection')
       expect(store.simulation.removeConnection).toHaveBeenCalledTimes(1)
@@ -3161,7 +3067,7 @@ describe('actions', () => {
     })
   })
 
-  describe('UNGROUP', () => {
+  describe('destroyGroup', () => {
     const store = useDocumentStore()
 
     let item1: Item
@@ -3188,7 +3094,7 @@ describe('actions', () => {
         groups: { [groupId]: group }
       })
 
-      store.UNGROUP(groupId)
+      store.destroyGroup(groupId)
     })
 
     it('should remove the group from the state', () => {
@@ -3206,7 +3112,7 @@ describe('actions', () => {
     })
   })
 
-  describe('CREATE_FREEPORT_ELEMENT', () => {
+  describe('addFreeportItem', () => {
     const store = useDocumentStore()
 
     const itemId = 'item-id'
@@ -3232,7 +3138,7 @@ describe('actions', () => {
     })
 
     it('should add an input port if its ID is defined', () => {
-      store.CREATE_FREEPORT_ELEMENT({ itemId, inputPortId, position })
+      store.addFreeportItem({ itemId, inputPortId, position })
 
       expect(store.ports).toHaveProperty(inputPortId)
       expect(store.ports[inputPortId]).toEqual({
@@ -3250,7 +3156,7 @@ describe('actions', () => {
     })
 
     it('should add an output port if its ID is defined', () => {
-      store.CREATE_FREEPORT_ELEMENT({ itemId, outputPortId, position })
+      store.addFreeportItem({ itemId, outputPortId, position })
 
       expect(store.ports).toHaveProperty(outputPortId)
       expect(store.ports[outputPortId]).toEqual({
@@ -3268,7 +3174,7 @@ describe('actions', () => {
     })
 
     it('should add a new freeport item with the provided port IDs', () => {
-      store.CREATE_FREEPORT_ELEMENT({ itemId, inputPortId, outputPortId, position, value })
+      store.addFreeportItem({ itemId, inputPortId, outputPortId, position, value })
 
       expect(store.items).toHaveProperty(itemId)
       expect(store.items[itemId]).toEqual({
@@ -3295,7 +3201,7 @@ describe('actions', () => {
     })
 
     it('should add the freeport to the circuit with its evaluation forced', () => {
-      store.CREATE_FREEPORT_ELEMENT({ itemId, inputPortId, outputPortId, position, value })
+      store.addFreeportItem({ itemId, inputPortId, outputPortId, position, value })
 
       expect(store.simulation.addNode).toHaveBeenCalledTimes(1)
       expect(store.simulation.addNode).toHaveBeenCalledWith(store.items[itemId], store.ports, true)

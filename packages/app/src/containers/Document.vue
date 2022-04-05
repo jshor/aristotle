@@ -145,7 +145,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useDocumentStore, [
-      'addItem',
       'clearActivePortId',
       'deselectAll',
       'loadDocument',
