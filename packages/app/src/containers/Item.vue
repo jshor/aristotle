@@ -87,8 +87,9 @@
 
 <script lang="ts">
 import ResizeObserver from 'resize-observer-polyfill'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { defineComponent, PropType } from 'vue'
+import { useDocumentStore } from '../store/document'
 import Clock from '../components/item/elements/Clock.vue'
 import Draggable from '../components/Draggable.vue'
 import LogicGate from '../components/item/elements/LogicGate.vue'
@@ -211,12 +212,10 @@ export default defineComponent({
     })
   },
   computed: {
-    ...mapState([
+    ...mapState(useDocumentStore, [
       'activePortId',
       'activeFreeportId',
-      'snapBoundaries'
-    ]),
-    ...mapGetters([
+      'snapBoundaries',
       'zoom'
     ]),
     isPropertiesEnabled () {
@@ -246,7 +245,7 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapActions([
+    ...mapActions(useDocumentStore, [
       'commitState',
       'setSelectionPosition',
       'setActiveFreeportId',
@@ -315,7 +314,7 @@ export default defineComponent({
 
     onSizeChanged ([ target ]: ResizeObserverEntry[]) {
       if (target) {
-        this.setItemSize({ id: this.id, rect: target.contentRect })
+        this.setItemSize({ id: this.id, rect: target.contentRect as DOMRectReadOnly })
       }
     }
   }

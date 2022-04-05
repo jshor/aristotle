@@ -71,8 +71,9 @@
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { defineComponent } from 'vue'
+import { useDocumentStore } from '../store/document'
 import Editor from '../components/Editor.vue'
 import Oscilloscope from '../components/Oscilloscope.vue'
 import Connection from './Connection.vue'
@@ -96,21 +97,22 @@ export default defineComponent({
     Toolbar
   },
   computed: {
-    ...mapState([
+    ...mapState(useDocumentStore, [
       'activePortId',
       'connections',
       'groups',
       'ports',
       'snapBoundaries',
       'waves',
-      'zIndex'
-    ]),
-    ...mapGetters([
+      'zIndex',
       'canUndo',
       'canRedo',
-      'items',
+      // 'items',
       'zoom'
     ]),
+    ...mapState(useDocumentStore, {
+      items: 'trueItems'
+    }),
 
     baseItems () {
       const baseItems = Object
@@ -142,7 +144,7 @@ export default defineComponent({
     window.removeEventListener('blur', this.clearKeys)
   },
   methods: {
-    ...mapActions([
+    ...mapActions(useDocumentStore, [
       'addItem',
       'clearActivePortId',
       'deselectAll',
@@ -151,7 +153,6 @@ export default defineComponent({
       'setZoom',
       'createSelection',
       'moveSelectionPosition',
-      'selectConnection',
       'buildCircuit'
     ]),
 

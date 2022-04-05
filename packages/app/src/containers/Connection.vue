@@ -15,8 +15,9 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import Wire from '../components/Wire.vue'
+import { useDocumentStore } from '../store/document'
 
 export default defineComponent({
   name: 'Connection',
@@ -74,10 +75,8 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState([
-      'items'
-    ]),
-    ...mapGetters([
+    ...mapState(useDocumentStore, [
+      'items',
       'zoom'
     ]),
     a () {
@@ -132,7 +131,7 @@ export default defineComponent({
     window.removeEventListener('mouseup', this.mouseup)
   },
   methods: {
-    ...mapActions([
+    ...mapActions(useDocumentStore, [
       'createFreeport',
       'setSnapBoundaries'
     ]),
