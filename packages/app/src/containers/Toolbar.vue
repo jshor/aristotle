@@ -19,12 +19,12 @@
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { defineComponent } from 'vue'
+import { useDocumentStore } from '../store/document'
 import ToolbarButton from '../components/toolbar/ToolbarButton.vue'
 import ItemSubtype from '../types/enums/ItemSubtype'
 import ItemType from '../types/enums/ItemType'
-import { mapState } from 'vuex'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000000000) + 5)}` // TODO: use uuid
 
@@ -50,11 +50,9 @@ export default defineComponent({
     ToolbarButton
   },
   computed: {
-    ...mapState([
+    ...mapState(useDocumentStore, [
       'selectedConnectionIds',
       'selectedItemIds',
-    ]),
-    ...mapGetters([
       'hasSelectedItems',
       'hasSelection',
       'canUngroup',
@@ -172,7 +170,7 @@ export default defineComponent({
       ])
     },
 
-    ...mapActions([
+    ...mapActions(useDocumentStore, [
       'addItem',
       'bringForward',
       'bringToFront',
@@ -186,7 +184,6 @@ export default defineComponent({
       'ungroup',
       'setZoom',
       'createSelection',
-      'selectConnection',
       'rotate',
       'buildCircuit',
       'saveIntegratedCircuit',

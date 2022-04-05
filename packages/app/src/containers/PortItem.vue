@@ -34,7 +34,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { useDocumentStore } from '../store/document'
 import Draggable from '../components/Draggable.vue'
 import PortHandle from '../components/PortHandle.vue'
 import PortPivot from '../components/PortPivot.vue'
@@ -50,7 +51,10 @@ export default defineComponent({
     /**
      * Port ID.
      */
-    id: String,
+    id: {
+      type: String,
+      default: ''
+    },
 
     /**
      * Unit circle rotation value (0, 1, 2, 3).
@@ -117,13 +121,11 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters([
-      'zoom'
-    ]),
-    ...mapState([
+    ...mapState(useDocumentStore, [
       'activePortId',
       'connectablePortIds',
-      'snapBoundaries'
+      'snapBoundaries',
+      'zoom'
     ]),
     isSelected () {
       return this.activePortId === this.id
@@ -136,7 +138,7 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapActions([
+    ...mapActions(useDocumentStore, [
       'connectFreeport',
       'createFreeport',
       'cycleDocumentPorts',

@@ -18,8 +18,9 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import { defineComponent, PropType } from 'vue'
+import { useDocumentStore } from '../store/document'
 import Draggable from '../components/Draggable.vue'
 import GroupBox from '../components/GroupBox.vue'
 import Item from './Item.vue'
@@ -50,7 +51,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters([
+    ...mapState(useDocumentStore, [
       'zoom'
     ])
   }
