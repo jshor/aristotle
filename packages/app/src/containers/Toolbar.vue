@@ -1,27 +1,27 @@
 <template>
   <div class="toolbar">
-    <toolbar-button @click="rotate(-1)" :disabled="!hasSelectedItems">Rotate 90&deg; CCW</toolbar-button>
-    <toolbar-button @click="rotate(1)" :disabled="!hasSelectedItems">Rotate 90&deg; CW</toolbar-button><br />
-    <toolbar-button @click="group" :disabled="!canGroup">Group</toolbar-button>
-    <toolbar-button @click="ungroup" :disabled="!canUngroup">Ungroup</toolbar-button>
+    <toolbar-button @click="store.rotate(-1)" :disabled="!store.hasSelectedItems">Rotate 90&deg; CCW</toolbar-button>
+    <toolbar-button @click="store.rotate(1)" :disabled="!store.hasSelectedItems">Rotate 90&deg; CW</toolbar-button><br />
+    <toolbar-button @click="store.group" :disabled="!store.canGroup">Group</toolbar-button>
+    <toolbar-button @click="store.ungroup" :disabled="!store.canUngroup">Ungroup</toolbar-button>
     <toolbar-button @click="addLogicGate">Add NOR</toolbar-button>
     <toolbar-button @click="addLightbulb">Add lightbulb</toolbar-button>
     <toolbar-button @click="addSwitch">Add switch</toolbar-button>
-    <toolbar-button @click="deleteSelection" :disabled="!hasSelection">Delete selection</toolbar-button>
-    <toolbar-button @click="saveIntegratedCircuit">Build IC</toolbar-button>
-    <toolbar-button @click="undo" :disabled="!canUndo">Undo</toolbar-button>
-    <toolbar-button @click="redo" :disabled="!canRedo">Redo</toolbar-button>
-    <toolbar-button @click="incrementZIndex(1)" :disabled="!hasSelectedItems">Bring forward</toolbar-button>
-    <toolbar-button @click="incrementZIndex(-1)" :disabled="!hasSelectedItems">Send backward</toolbar-button>
-    <toolbar-button @click="setZIndex(1)" :disabled="!hasSelectedItems">Send to back</toolbar-button>
-    <toolbar-button @click="setZIndex(zIndex)" :disabled="!hasSelectedItems">Bring to front</toolbar-button>
+    <toolbar-button @click="store.deleteSelection" :disabled="!store.hasSelection">Delete selection</toolbar-button>
+    <toolbar-button @click="store.saveIntegratedCircuit">Build IC</toolbar-button>
+    <toolbar-button @click="store.undo" :disabled="!store.canUndo">Undo</toolbar-button>
+    <toolbar-button @click="store.redo" :disabled="!store.canRedo">Redo</toolbar-button>
+    <toolbar-button @click="store.incrementZIndex(1)" :disabled="!store.hasSelectedItems">Bring forward</toolbar-button>
+    <toolbar-button @click="store.incrementZIndex(-1)" :disabled="!store.hasSelectedItems">Send backward</toolbar-button>
+    <toolbar-button @click="store.setZIndex(1)" :disabled="!store.hasSelectedItems">Send to back</toolbar-button>
+    <toolbar-button @click="store.setZIndex(store.zIndex)" :disabled="!store.hasSelectedItems">Bring to front</toolbar-button>
   </div>
 </template>
 
 <script lang="ts">
-import { mapActions, mapState } from 'pinia'
-import { defineComponent } from 'vue'
-import { useDocumentStore } from '../store/document'
+import DocumentState from '@/store/DocumentState'
+import { StoreDefinition } from 'pinia'
+import { defineComponent, PropType } from 'vue'
 import ToolbarButton from '../components/toolbar/ToolbarButton.vue'
 import ItemSubtype from '../types/enums/ItemSubtype'
 import ItemType from '../types/enums/ItemType'
@@ -49,21 +49,16 @@ export default defineComponent({
   components: {
     ToolbarButton
   },
-  computed: {
-    ...mapState(useDocumentStore, [
-      'selectedConnectionIds',
-      'selectedItemIds',
-      'hasSelectedItems',
-      'hasSelection',
-      'canUngroup',
-      'canGroup',
-      'canUndo',
-      'canRedo',
-      'zIndex'
-    ])
+  props: {
+    store: {
+      type: Function as PropType<StoreDefinition<string, DocumentState>>,
+      required: true
+    }
   },
-  methods: {
-    createItem (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports: Port[] = []) {
+  setup (props) {
+    const store = props.store()
+
+    function createItem (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports: Port[] = []) {
       const item: Item = {
         id,
         name: '',
@@ -142,60 +137,41 @@ export default defineComponent({
           break
       }
 
-      this.insertItem({ item, ports })
-    },
+      store.insertItem({ item, ports })
+    }
 
-    addLogicGate () {
+    function addLogicGate () {
       const elementId = rand()
 
-      this.createItem(elementId, ItemType.LogicGate, ItemSubtype.Nor, 100, 150, [
+      createItem(elementId, ItemType.LogicGate, ItemSubtype.Nor, 100, 150, [
         createPort(elementId, rand(), 0, 1, 'Input Port 1'),
         createPort(elementId, rand(), 0, 1, 'Input Port 2'),
         createPort(elementId, rand(), 2, 0, 'Output Port')
       ])
-    },
+    }
 
-    addLightbulb () {
+    function addLightbulb () {
       const elementId = rand()
 
-      this.createItem(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, [
+      createItem(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, [
         createPort(elementId, rand(), 0, 1, 'Input Port')
       ])
-    },
+    }
 
-    addSwitch () {
+    function addSwitch () {
       const elementId = rand()
 
-      this.createItem(elementId, ItemType.InputNode, ItemSubtype.Switch, 40, 40, [
+      createItem(elementId, ItemType.InputNode, ItemSubtype.Switch, 40, 40, [
         createPort(elementId, rand(), 2, 0, 'Output Port')
       ])
-    },
+    }
 
-    ...mapActions(useDocumentStore, [
-      'insertItem',
-      'incrementZIndex',
-      'setZIndex',
-      'selectAll',
-      'deselectAll',
-      'deleteSelection',
-      'setSelectionState',
-      'group',
-      'ungroup',
-      'setZoom',
-      'createSelection',
-      'rotate',
-      'buildCircuit',
-      'saveIntegratedCircuit',
-      'undo',
-      'redo'
-    ])
+    return {
+      store,
+      addLogicGate,
+      addLightbulb,
+      addSwitch
+    }
   }
 })
 </script>
-
-<style lang="scss">
-.toolbar {
-  max-height: 100px;
-  background-color: salmon;
-}
-</style>

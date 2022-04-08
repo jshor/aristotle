@@ -1,7 +1,7 @@
 <template>
   <draggable
     :position="position"
-    :zoom="zoom"
+    :zoom="store.zoomLevel"
     :style="{
       transform: `rotate(${90 * rotation}deg)`,
       zIndex
@@ -10,7 +10,7 @@
       'item--selected': isSelected
     }"
     :snap-mode="type === ItemType.Freeport ? 'radius' : 'outer'"
-    :snap-boundaries="snapBoundaries"
+    :snap-boundaries="store.snapBoundaries"
     :bounding-box="boundingBox"
     :force-dragging="forceDragging"
     :aria-label="name"
@@ -18,78 +18,78 @@
     :tabindex="0"
     @keydown.esc="onEscapeKey"
     @drag-start="onDragStart"
-    @drag="position => setSelectionPosition({ id, position })"
+    @drag="position => store.setSelectionPosition({ id, position })"
     @focus="onFocus"
     @blur="onBlur"
     @mousedown.stop="focus"
+    ref="root"
   >
     <properties
       v-if="isPropertiesEnabled"
+      :tabindex="0"
       :properties="properties"
       :id="id"
-      @update="setProperties"
+      @update="store.setProperties"
       @focus="onPropertiesFocus"
       @blur="onBlur"
       aria-label="Properties dialog"
     />
-    <freeport v-if="type === ItemType.Freeport" />
-    <integrated-circuit v-else-if="type === ItemType.IntegratedCircuit" />
-    <input-switch
-      v-else-if="type === ItemType.InputNode"
-      :value="ports[0].value"
-      @toggle="value => setPortValue({ id: ports[0].id, value })"
-    />
-    <clock
-      v-else-if="subtype === ItemSubtype.Clock"
-      :value="ports[0].value"
-      @toggle="value => setPortValue({ id: ports[0].id, value })"
-    />
-    <lightbulb
-      v-else-if="type === ItemType.OutputNode"
-      :value="ports[0].value"
-      :type="subtype"
-    />
-    <logic-gate
-      v-else
-      :input-count="properties.inputCount?.value"
-      :type="subtype"
-    />
-    <port-set v-if="type !== 'Freeport'">
-      <template
-        v-for="(ports, orientation) in portList"
-        v-slot:[orientation]
-      >
-        <port-item
-          v-for="port in ports"
-          :id="port.id"
-          :ref="port.id"
-          :key="port.id"
-          :type="port.type"
-          :is-freeport="port.isFreeport"
-          :position="port.position"
-          :orientation="port.orientation + rotation"
-          :connected-port-ids="port.connectedPortIds"
-          :rotation="rotation"
-          :show-helper="port.showHelper"
-          @keypress.esc="onEscapeKey"
-          @focus="$event => onPortFocus($event, port.id)"
-          @blur="$event => onPortBlur($event, port.id)"
-          @deselect="focus"
-        />
-      </template>
-    </port-set>
-    <port-handle
-      v-else
-      :active="hasFocus"
-    />
+    <div class="item__content">
+      <freeport v-if="type === ItemType.Freeport" />
+      <integrated-circuit v-else-if="type === ItemType.IntegratedCircuit" />
+      <input-switch
+        v-else-if="type === ItemType.InputNode"
+        :value="ports[0]?.value"
+        @toggle="value => store.setPortValue({ id: ports[0].id, value })"
+      />
+      <clock
+        v-else-if="subtype === ItemSubtype.Clock"
+        :value="ports[0]?.value"
+        @toggle="value => store.setPortValue({ id: ports[0].id, value })"
+      />
+      <lightbulb
+        v-else-if="type === ItemType.OutputNode"
+        :value="ports[0]?.value"
+        :type="subtype"
+      />
+      <logic-gate
+        v-else
+        :input-count="(properties.inputCount?.value as number)"
+        :type="subtype"
+      />
+      <port-set>
+        <template
+          v-for="(ports, orientation) in portList"
+          v-slot:[orientation]
+        >
+          <port-item
+            v-for="port in ports"
+            :tabindex="0"
+            :store="rawStore"
+            :id="port.id"
+            :ref="port.id"
+            :key="port.id"
+            :type="port.type"
+            :is-freeport="port.isFreeport"
+            :position="port.position"
+            :orientation="port.orientation + rotation"
+            :connected-port-ids="port.connectedPortIds"
+            :rotation="rotation"
+            @keypress.esc="onEscapeKey"
+            @focus="$event => onPortFocus($event, port.id)"
+            @blur="$event => onPortBlur($event, port.id)"
+            @deselect="focus"
+          />
+        </template>
+      </port-set>
+    </div>
   </draggable>
 </template>
 
 <script lang="ts">
 import ResizeObserver from 'resize-observer-polyfill'
-import { mapActions, mapState } from 'pinia'
-import { defineComponent, PropType } from 'vue'
-import { useDocumentStore } from '../store/document'
+import { StoreDefinition } from 'pinia'
+import { defineComponent, PropType, onMounted, reactive, ref, ComponentPublicInstance, computed } from 'vue'
 import Clock from '../components/item/elements/Clock.vue'
 import Draggable from '../components/Draggable.vue'
 import LogicGate from '../components/item/elements/LogicGate.vue'
@@ -103,6 +103,7 @@ import Properties from '../components/item/Properties.vue'
 import PortItem from './PortItem.vue'
 import ItemType from '../types/enums/ItemType'
 import ItemSubtype from '../types/enums/ItemSubtype'
+import DocumentState from '@/store/DocumentState'
 
 export default defineComponent({
   name: 'Item',
@@ -120,13 +121,6 @@ export default defineComponent({
     Properties
   },
   props: {
-    position: {
-      type: Object as PropType<Point>,
-      default: () => ({
-        x: 0,
-        y: 0
-      })
-    },
     boundingBox: {
       type: Object as PropType<BoundingBox>,
       default: () => ({
@@ -156,12 +150,16 @@ export default defineComponent({
       type: String,
       required: true
     },
+    position: {
+      type: Object as PropType<Point>,
+      required: true
+    },
     name: {
       type: String,
       default: 'Node'
     },
-    ports: {
-      type: Array,
+    portIds: {
+      type: Array as PropType<string[]>,
       default: () => []
     },
     properties: {
@@ -175,61 +173,31 @@ export default defineComponent({
     id: {
       type: String,
       required: true
-    }
-  },
-  data () {
-    return {
-      forceDragging: false,
-      showProperties: false,
-      hasFocus: false,
-      ItemSubtype,
-      ItemType
-    }
-  },
-  watch: {
-    isSelected (isSelected: boolean) {
-      if (isSelected) {
-        this.$el.focus()
-      }
-    }
-  },
-  mounted () {
-    const observer = new ResizeObserver(this.onSizeChanged)
-
-    observer.observe(this.$el)
-
-    if (this.activeFreeportId === this.id) {
-      // if the item is selected when it is created, then it is actively being drawn
-      // allow for it to be moved when the mouse moves on first creation
-      this.forceDragging = true
-      this.setActiveFreeportId(null)
-      this.$el.focus()
-    }
-
-    this.setProperties({
-      id: this.id,
-      properties: this.properties
-    })
-  },
-  computed: {
-    ...mapState(useDocumentStore, [
-      'activePortId',
-      'activeFreeportId',
-      'snapBoundaries',
-      'zoom'
-    ]),
-    isPropertiesEnabled () {
-      return this.isSelected && this.hasFocus && Object.keys(this.properties).length > 0
     },
-    portList () {
+    store: {
+      type: Function as PropType<StoreDefinition<string, DocumentState>>,
+      required: true
+    }
+  },
+  setup (props, { emit }) {
+    const store = props.store()
+    const root = ref<ComponentPublicInstance<HTMLElement>>()
+    const forceDragging = ref(false)
+    let hasFocus = false
+
+    const ports = computed(() => {
+      return props
+        .portIds
+        .map(portId => store.ports[portId])
+    })
+    const portList = computed(() => {
       const locations = ['left', 'top', 'right', 'bottom']
-      const ports = this.ports as Port[]
-      const map = ports.reduce((map: { [l: string]: Port[] }, port: Port) => ({
-          ...map,
-          [locations[port.orientation]]: [
-            ...map[locations[port.orientation]],
-            port
-          ]
+      const map = ports.value.reduce((map: Record<string, Port[]>, port: Port) => ({
+        ...map,
+        [locations[port.orientation]]: [
+          ...map[locations[port.orientation]],
+          port
+        ]
       }), locations.reduce((m, type) => ({
         ...m, [type]: []
       }), {
@@ -242,79 +210,117 @@ export default defineComponent({
       map.right = map.right.reverse()
 
       return map
+    })
+    const isPropertiesEnabled = computed(() => {
+      return props.isSelected && hasFocus && Object.keys(props.properties).length > 0
+    })
+
+    function focus () {
+      root.value?.$el.focus()
     }
-  },
-  methods: {
-    ...mapActions(useDocumentStore, [
-      'commitState',
-      'setSelectionPosition',
-      'setActiveFreeportId',
-      'setActivePortId',
-      'setSnapBoundaries',
-      'setItemSize',
-      'setPortValue',
-      'setProperties'
-    ]),
 
-    focus () {
-      this.$el.focus()
-    },
-
-    onDragStart () {
-      if (this.type !== ItemType.Freeport) {
-        this.commitState()
+    function onDragStart () {
+      if (props.type !== ItemType.Freeport) {
+        store.commitState()
       }
-      this.setSnapBoundaries(this.id)
-    },
+      store.setSnapBoundaries(props.id)
+    }
 
-    onEscapeKey ($event: KeyboardEvent) {
-      if (document.activeElement === this.$el) {
-        this.$el.blur()
+    function onEscapeKey ($event: KeyboardEvent) {
+      if (document.activeElement === root.value?.$el) {
+        root.value?.$el.blur()
       } else {
         $event.preventDefault()
       }
-    },
+    }
 
-    onBlur ($event: FocusEvent) {
-      if (!this.$el.contains($event.relatedTarget as Node)) {
-        this.hasFocus = false
+    function onBlur ($event: FocusEvent) {
+      if (!root.value?.$el?.contains($event.relatedTarget as Node)) {
+        hasFocus = false
       }
-    },
+    }
 
-    onFocus ($event: FocusEvent) {
-      if (!this.isSelected) {
-        this.$emit('select', {
-          shiftKey: false
-        })
+    function onFocus ($event: FocusEvent) {
+      if (!props.isSelected) {
+        emit('select')
       }
 
-      this.hasFocus = true
-    },
+      hasFocus = true
+    }
 
-    onPropertiesFocus () {
-      this.setActivePortId(null)
-      this.hasFocus = true
-    },
+    function onPropertiesFocus () {
+      store.setActivePortId(null)
+      hasFocus = true
+    }
 
-    onPortFocus ($event: FocusEvent, portId: string) {
-      if (!this.isSelected) {
-        this.$emit('select', {})
+    function onPortFocus ($event: FocusEvent, portId: string) {
+      if (!props.isSelected) {
+        emit('select')
       }
 
-      this.setActivePortId(portId)
-      this.hasFocus = true
-    },
+      store.setActivePortId(portId)
+      hasFocus = true
+    }
 
-    onPortBlur ($event: FocusEvent, portId: string) {
-      if (this.activePortId === portId) {
-        this.setActivePortId(null)
+    function onPortBlur ($event: FocusEvent, portId: string) {
+      if (store.activePortId === portId) {
+        store.setActivePortId(null)
       }
-      this.onBlur($event)
-    },
+      onBlur($event)
+    }
 
-    onSizeChanged ([ target ]: ResizeObserverEntry[]) {
+    function onSizeChanged ([ target ]: ResizeObserverEntry[]) {
       if (target) {
-        this.setItemSize({ id: this.id, rect: target.contentRect as DOMRectReadOnly })
+        store.setItemSize({ id: props.id, rect: target.contentRect as DOMRectReadOnly })
+      }
+    }
+
+    const observer = new ResizeObserver(onSizeChanged)
+
+    onMounted(() => {
+      if (root.value) {
+        observer.observe(root.value.$el)
+      }
+
+      if (store.activeFreeportId === props.id) {
+        // if the item is selected when it is created, then it is actively being drawn
+        // allow for it to be moved when the mouse moves on first creation
+        forceDragging.value = true
+
+        store.setActiveFreeportId(null)
+      }
+
+      store.setProperties({
+        id: props.id,
+        properties: props.properties
+      })
+    })
+
+    return {
+      root,
+      store,
+      ports,
+      rawStore: props.store,
+      portList,
+      forceDragging,
+      isPropertiesEnabled,
+      focus,
+      onDragStart,
+      onEscapeKey,
+      onBlur,
+      onFocus,
+      onPropertiesFocus,
+      onPortFocus,
+      onPortBlur,
+      onSizeChanged,
+      ItemSubtype,
+      ItemType
+    }
+  },
+  watch: {
+    isSelected (isSelected: boolean) {
+      if (isSelected) {
+        this.$el.focus()
       }
     }
   }
@@ -323,6 +329,10 @@ export default defineComponent({
 
 <style lang="scss">
 .item--selected {
-  filter: sepia(1) contrast(200%);
+  outline: none;
+}
+
+.item--selected .item__content {
+  filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .7));
 }
 </style>

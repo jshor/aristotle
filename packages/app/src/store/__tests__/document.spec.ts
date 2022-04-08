@@ -10,7 +10,7 @@ import {
   createItem,
   createPort,
 } from './__helpers__/helpers'
-import { useDocumentStore } from '../document'
+import { createDocumentStore } from '../document'
 import rotation from '@/layout/rotation'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 
@@ -40,7 +40,7 @@ describe('actions', () => {
   beforeEach(() => jest.restoreAllMocks())
 
   describe('undo', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -84,7 +84,7 @@ describe('actions', () => {
   })
 
   describe('redo', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -126,7 +126,7 @@ describe('actions', () => {
   })
 
   describe('deleteSelection', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -215,7 +215,7 @@ describe('actions', () => {
   })
 
   describe('setSnapBoundaries', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -360,7 +360,7 @@ describe('actions', () => {
   })
 
   describe('setItemPortPositions', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -435,7 +435,7 @@ describe('actions', () => {
   })
 
   describe('setItemPosition', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
     const position = { x: 210, y: 452 }
     const item1 = createItem('item1', ItemType.LogicGate, {
       portIds: ['port1'],
@@ -482,7 +482,7 @@ describe('actions', () => {
   })
 
   describe('moveSelectionPosition', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -532,7 +532,7 @@ describe('actions', () => {
   })
 
   describe('setSelectionPosition', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
     const oldPosition: Point = { x: 10, y: 24 }
     const position: Point = { x: 7, y: 49 }
     const delta: Point = {
@@ -581,7 +581,7 @@ describe('actions', () => {
   })
 
   describe('setItemBoundingBox', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -618,7 +618,7 @@ describe('actions', () => {
   })
 
   describe('setGroupBoundingBox', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -658,7 +658,7 @@ describe('actions', () => {
   })
 
   describe('group', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     let groupId: string
 
@@ -715,7 +715,7 @@ describe('actions', () => {
   })
 
   describe('ungroup', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
     const group1 = createGroup('group1', [], { isSelected: true })
     const group2 = createGroup('group2', [], { isSelected: false })
 
@@ -746,7 +746,7 @@ describe('actions', () => {
   })
 
   describe('clearActivePortId', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => store.$reset())
 
@@ -831,7 +831,7 @@ describe('actions', () => {
   })
 
   describe('deselectAll', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       const item1 = createItem('item1', ItemType.Buffer, { isSelected: true })
@@ -883,7 +883,7 @@ describe('actions', () => {
   })
 
   describe('selectAll', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       const item1 = createItem('item1', ItemType.Buffer, { isSelected: true })
@@ -923,7 +923,7 @@ describe('actions', () => {
   })
 
   describe('createSelection', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -958,6 +958,8 @@ describe('actions', () => {
           .spyOn(boundaries, 'hasIntersection')
           .mockReturnValueOnce(true) // item1 is in rect
           .mockReturnValueOnce(false) // item2 is not in rect
+        jest
+          .spyOn(boundaries, 'isLineIntersectingRectangle')
           .mockReturnValueOnce(true) // connection1 is in rect
           .mockReturnValueOnce(false) // connection2 is not in rect
 
@@ -1003,7 +1005,7 @@ describe('actions', () => {
   })
 
   describe('selectItemConnections', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
     const item1 = createItem('item1', ItemType.LogicGate, { portIds: ['port1'] })
     const item2 = createItem('item2', ItemType.LogicGate, { portIds: ['port2'] })
     const item3 = createItem('item3', ItemType.LogicGate, { portIds: ['port3'] })
@@ -1014,13 +1016,14 @@ describe('actions', () => {
     const port4 = createPort('port4', 'item4', PortType.Input)
     const connection1 = createConnection('connection1', 'port1', 'port2')
     const connection2 = createConnection('connection2', 'port3', 'port4')
+    const connection3 = createConnection('connection2', 'port3', 'port4')
 
     beforeEach(() => {
       store.$reset()
       store.$patch({
         items: { item1, item2, item3, item4 },
         ports: { port1, port2, port3, port4 },
-        connections: { connection1, connection2 }
+        connections: { connection1, connection2, connection3 }
       })
 
       stubAll(store, [
@@ -1028,16 +1031,22 @@ describe('actions', () => {
       ])
     })
 
-    it('should select a connection whose source is an item in the given list', () => {
-      store.selectItemConnections([item1.id])
+    it('should select a connection whose source and target are both attached to selected items', () => {
+      store.selectItemConnections([item4.id, item3.id])
 
-      expect(store.SET_SELECTION_STATE).toHaveBeenCalledWith({ id: connection1.id, isSelected: true })
+      expect(store.SET_SELECTION_STATE).toHaveBeenCalledWith({ id: connection3.id, isSelected: true })
     })
 
-    it('should select a connection whose target is an item in the given list', () => {
+    it('should not select a connection if only its source is among the item ports selected', () => {
+      store.selectItemConnections([item1.id])
+
+      expect(store.SET_SELECTION_STATE).not.toHaveBeenCalledWith({ id: connection1.id, isSelected: true })
+    })
+
+    it('should not select a connection if only its targt is among the item ports selected', () => {
       store.selectItemConnections([item2.id])
 
-      expect(store.SET_SELECTION_STATE).toHaveBeenCalledWith({ id: connection1.id, isSelected: true })
+      expect(store.SET_SELECTION_STATE).not.toHaveBeenCalledWith({ id: connection1.id, isSelected: true })
     })
 
     it('should not select a connection where neither its target nor its source is an item in the given list', () => {
@@ -1048,7 +1057,7 @@ describe('actions', () => {
   })
 
   describe('setSelectionState', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -1125,7 +1134,7 @@ describe('actions', () => {
   })
 
   describe('setConnectionPreview', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -1219,7 +1228,7 @@ describe('actions', () => {
   })
 
   describe('cycleDocumentPorts', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
     const portId = 'preview-port-id'
     const connectablePortIds = ['port1', 'port2', 'port3']
 
@@ -1308,7 +1317,7 @@ describe('actions', () => {
   })
 
   describe('setActivePortId', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -1353,7 +1362,7 @@ describe('actions', () => {
   })
 
   describe('rotate', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       stubAll(store, [
@@ -1455,7 +1464,7 @@ describe('actions', () => {
   })
 
   describe('removeFreeport', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -1564,7 +1573,7 @@ describe('actions', () => {
   })
 
   describe('createFreeport', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     const itemId = 'freeport'
     const sourceId = 'source-port'
@@ -1572,6 +1581,7 @@ describe('actions', () => {
     const connectionChainId = 'connection-chain'
     const inputPortId = 'freeport-input-port'
     const outputPortId = 'freeport-output-port'
+    const position: Point = { x: 0, y: 0 }
 
     beforeEach(() => {
       store.$reset()
@@ -1597,7 +1607,8 @@ describe('actions', () => {
       store.createFreeport({
         itemId,
         outputPortId,
-        inputPortId
+        inputPortId,
+        position
       })
 
       expect(store.connect).not.toHaveBeenCalled()
@@ -1612,7 +1623,8 @@ describe('actions', () => {
         targetId,
         inputPortId,
         outputPortId,
-        connectionChainId
+        connectionChainId,
+        position
       }
 
       beforeEach(() => {
@@ -1655,7 +1667,8 @@ describe('actions', () => {
         sourceId,
         inputPortId,
         outputPortId: '',
-        connectionChainId
+        connectionChainId,
+        position
       }
 
       beforeEach(() => {
@@ -1671,13 +1684,7 @@ describe('actions', () => {
       })
 
       it('should create the new freeport', () => {
-        expect(store.addFreeportItem).toHaveBeenCalledWith({
-          ...data,
-          position: {
-            x: 0,
-            y: 0
-          }
-        })
+        expect(store.addFreeportItem).toHaveBeenCalledWith(data)
         expect(store.setItemBoundingBox).toHaveBeenCalledWith(itemId)
         expect(store.activeFreeportId).toEqual(itemId)
       })
@@ -1705,7 +1712,8 @@ describe('actions', () => {
         targetId,
         inputPortId,
         outputPortId,
-        connectionChainId
+        connectionChainId,
+        position
       }
 
       beforeEach(() => {
@@ -1721,13 +1729,7 @@ describe('actions', () => {
       })
 
       it('should create the new freeport', () => {
-        expect(store.addFreeportItem).toHaveBeenCalledWith({
-          ...data,
-          position: {
-            x: 0,
-            y: 0
-          }
-        })
+        expect(store.addFreeportItem).toHaveBeenCalledWith(data)
         expect(store.setItemBoundingBox).toHaveBeenCalledWith(itemId)
         expect(store.activeFreeportId).toEqual(itemId)
       })
@@ -1751,7 +1753,7 @@ describe('actions', () => {
   })
 
   describe('connectFreeport', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       stubAll(store, [
@@ -1885,7 +1887,7 @@ describe('actions', () => {
   })
 
   describe('setConnectablePortIds', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
     const patch = (sourcePort: Port, targetPort: Port, state = {}) => store.$patch({
       ports: {
         [sourcePort.id]: sourcePort,
@@ -2016,7 +2018,7 @@ describe('actions', () => {
   })
 
   describe('setOscilloscopeVisibility', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -2080,7 +2082,7 @@ describe('actions', () => {
   })
 
   describe('setInputCount', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     const id = 'item1'
     const port1 = createPort('port1', id, PortType.Input)
@@ -2099,8 +2101,8 @@ describe('actions', () => {
 
     beforeEach(() => {
       stubAll(store, [
-        'removePort',
-        'setItemPortPositions'
+        'addPort',
+        'removePort'
       ])
 
       store.$reset()
@@ -2118,10 +2120,13 @@ describe('actions', () => {
       it('should add the difference number of input ports', () => {
         const portId = Object.keys(store.ports).slice(-1)[0]
 
-        expect(store.ports[portId]).toEqual({
+        expect(store.addPort).toHaveBeenCalledWith(id, {
           id: expect.any(String),
+          name: expect.any(String),
+          connectedPortIds: [],
           type: PortType.Input,
           elementId: id,
+          virtualElementId: id,
           orientation: Direction.Left,
           isFreeport: false,
           position: {
@@ -2132,10 +2137,6 @@ describe('actions', () => {
           value: 0
         })
         expect(store.items.item1.portIds).toContain(portId)
-      })
-
-      it('should set the item port positions', () => {
-        expect(store.setItemPortPositions).toHaveBeenCalledWith(id)
       })
     })
 
@@ -2155,7 +2156,7 @@ describe('actions', () => {
   })
 
   describe('setProperties', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     const id = 'item1'
     const createProperties = (): PropertySet => ({
@@ -2243,7 +2244,7 @@ describe('actions', () => {
 
   describe('cacheState', () => {
     it('should set the cached state to a stringified object containing the connections, items, ports, and groups', () => {
-      const store = useDocumentStore()
+      const store = createDocumentStore('document')()
 
       store.cacheState()
 
@@ -2258,7 +2259,7 @@ describe('actions', () => {
 
   describe.skip('commitCachedState', () => {
     describe('when there is a state cached', () => {
-      const store = useDocumentStore()
+      const store = createDocumentStore('document')()
       const cachedState = createSerializedState()
 
       beforeEach(() => {
@@ -2288,7 +2289,7 @@ describe('actions', () => {
     })
 
     it('should not mutate the undo stack if there is no cached state', () => {
-      const store = useDocumentStore()
+      const store = createDocumentStore('document')()
 
       store.$patch({ cachedState: null })
       store.commitCachedState()
@@ -2298,7 +2299,7 @@ describe('actions', () => {
   })
 
   describe('applyState', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     const addedItem1 = createItem('addedItem1', ItemType.InputNode)
     const addedItem2 = createItem('addedItem2', ItemType.InputNode)
@@ -2382,7 +2383,7 @@ describe('actions', () => {
   })
 
   describe('removePort', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     const item1 = createItem('item1', ItemType.InputNode, { portIds: ['startPort'] })
     const item2 = createItem('item2', ItemType.OutputNode, { portIds: ['endPort'] })
@@ -2442,7 +2443,7 @@ describe('actions', () => {
   })
 
   describe('setPortValues', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     let port1: Port
     let port2: Port
@@ -2492,7 +2493,7 @@ describe('actions', () => {
 
   describe('setPortValue', () => {
     it('should set given the port value for the given node id', () => {
-      const store = useDocumentStore()
+      const store = createDocumentStore('document')()
       const id = 'node1'
       const value = 1
 
@@ -2508,7 +2509,7 @@ describe('actions', () => {
   })
 
   describe('addNewItem', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
     const item = createItem('item', ItemType.InputNode)
     const port = createPort('port', 'item1', PortType.Output)
 
@@ -2539,7 +2540,7 @@ describe('actions', () => {
   })
 
   describe('addIntegratedCircuit', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => store.$reset())
 
@@ -2600,7 +2601,7 @@ describe('actions', () => {
   })
 
   describe('removeElement', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => store.$reset())
 
@@ -2692,7 +2693,7 @@ describe('actions', () => {
   })
 
   describe('SET_SELECTION_STATE', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => store.$reset())
 
@@ -2783,7 +2784,7 @@ describe('actions', () => {
   })
 
   describe('incrementZIndex', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -2895,7 +2896,7 @@ describe('actions', () => {
   })
 
   describe('setZIndex', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     beforeEach(() => {
       store.$reset()
@@ -2934,7 +2935,7 @@ describe('actions', () => {
   })
 
   describe('connect', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
     const source = 'source-id'
     const target = 'target-id'
 
@@ -3017,7 +3018,7 @@ describe('actions', () => {
   })
 
   describe('disconnect', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
     const source = 'source-id'
     const target = 'target-id'
     const connection = createConnection('connection', source, target)
@@ -3068,7 +3069,7 @@ describe('actions', () => {
   })
 
   describe('destroyGroup', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     let item1: Item
     let item2: Item
@@ -3113,7 +3114,7 @@ describe('actions', () => {
   })
 
   describe('addFreeportItem', () => {
-    const store = useDocumentStore()
+    const store = createDocumentStore('document')()
 
     const itemId = 'item-id'
     const inputPortId = 'input-port-id'
@@ -3192,7 +3193,7 @@ describe('actions', () => {
           bottom: position.y
         },
         properties: {},
-        isSelected: true,
+        isSelected: false,
         groupId: null,
         zIndex: 2,
         width: 1,

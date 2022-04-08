@@ -160,6 +160,7 @@ export function computeBezier (sourceDirection: number, targetDirection: number,
   const x4 = end.x
   const y4 = end.y
 
+  // TODO: change dx/dy to be more user-friendly
   const dx = Math.max(Math.abs(x1 - x4) / 2, 10)
   const dy = Math.max(Math.abs(y1 - y4) / 2, 10)
 

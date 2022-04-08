@@ -1,0 +1,148 @@
+<template>
+  <div
+    :class="{
+      'tab-item--active': active
+    }"
+    class="tab-item"
+    @mousedown="$emit('activate')"
+  >
+    <div class="tab-item__label">{{ label }}</div>
+    <div
+      class="tab-item__close"
+      @click.stop="$emit('close')"
+    >
+      ✖
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+  name: 'TabItem',
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    label: {
+      type: String,
+      required: true
+    }
+  },
+  setup (_, { emit }) {
+    function close () {
+      emit('close')
+    }
+
+    return { close }
+  }
+})
+</script>
+
+<style lang="scss">
+// TODO: move this
+// background colors
+$color-bg-primary: #1D1E25;
+$color-bg-secondary: #333641;
+$color-bg-tertiary: #3D404B;
+$color-bg-quaternary: #454857;
+
+// foreground colors
+$color-primary: #fff;
+$color-secondary: #9ca0b1;
+$color-shadow: #000;
+
+// sizes
+$border-width: 1px;
+$scrollbar-width: 3px;
+
+.tab-item {
+  display: flex;
+  max-width: 200px;
+  padding: 0.5rem;
+  background-color: $color-bg-quaternary;
+  border-style: solid;
+  border-color: $color-bg-tertiary;
+  border-width: $border-width $border-width $border-width 0;
+  color: $color-primary;
+  box-sizing: border-box;
+
+  &:first-of-type {
+    border-left: $border-width solid $color-bg-tertiary;
+  }
+
+  &__label, &__close {
+    display: inline-block;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__close {
+    padding-left: 0.5rem;
+    transition: all 0.1s;
+    cursor: pointer;
+    font-weight: bold;
+
+    &:hover {
+      color: $color-secondary;
+    }
+
+    &:active {
+      color: $color-bg-quaternary;
+    }
+  }
+
+  &--unsaved {
+    .tab__close {
+      &::before {
+        display: none;
+      }
+
+      &::after {
+        display: block;
+        content: ' ';
+        background-color: $color-primary;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+    }
+  }
+
+  &--active {
+    background-color: $color-bg-secondary;
+    color: $color-primary;
+    margin-bottom: -5px;
+    padding-bottom: 15px;
+
+    .tab__close::before {
+      display: block;
+    }
+  }
+
+  &:not(.tab--active) {
+    cursor: pointer;
+  }
+
+  &:hover {
+    .tab__close {
+      &::before {
+        display: block;
+      }
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+</style>

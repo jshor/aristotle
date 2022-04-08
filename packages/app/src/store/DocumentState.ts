@@ -13,7 +13,7 @@ export default interface DocumentState {
   taxonomyCounts: Record<string, number>
   zoomLevel: number
   simulation: SimulationService
-  waves: any // TODO
+  oscilloscope: OscilloscopeInfo
   activeFreeportId: string | null
   selectedItemIds: string[]
   selectedConnectionIds: string[]

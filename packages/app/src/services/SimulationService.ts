@@ -27,7 +27,7 @@ export default class SimulationService {
 
   isPaused: boolean = false
 
-  payload: any = {
+  payload: OscilloscopeInfo = {
     waves: {},
     secondsElapsed: 0,
     secondsOffset: 0
@@ -50,11 +50,13 @@ export default class SimulationService {
   debugMode: boolean = false
 
   pause = () => {
+    this.oscillator.stop()
     this.isPaused = true
   }
 
   unpause = () => {
     this.isPaused = false
+    this.oscillator.start()
     this.fn(this.valueMap, this.payload)
   }
 
@@ -73,7 +75,6 @@ export default class SimulationService {
 
   setOutputValue = (id: string, value: number) => {
     this.valueMap[id] = value
-    // console.log('map: ', this.valueMap)
     this.fn(this.valueMap)
   }
 
@@ -130,19 +131,10 @@ export default class SimulationService {
     const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
     const node = this.getCircuitNode(item, inputIds)
 
-    const subscribe = (portId: string) => {
-      this.nodes[portId] = node
-
-      node.on('change', (value: number) => {
-        this.setOutputValue(portId, value)
-        this.waves[portId]?.drawPulseChange(value)
-      })
-    }
-
     node.forceContinue = forceContinue
 
-    inputIds.forEach(subscribe)
-    outputIds.forEach(subscribe)
+    inputIds.forEach(portId => this.addPort(portId, node))
+    outputIds.forEach(portId => this.addPort(portId, node))
 
     if (item.type === ItemType.InputNode && item.subtype === ItemSubtype.Clock) {
       this.clocks[outputIds[0]] = new ClockService(outputIds[0], 1000)
@@ -155,20 +147,6 @@ export default class SimulationService {
     this.circuit.addNode(node)
   }
 
-  monitorPort = (portId: string, value: number) => {
-    this.waves[portId] = new BinaryWaveService(portId, value)
-    this.oscillator.add(this.waves[portId])
-  }
-
-  unmonitorPort = (portId: string) => {
-    if (this.waves[portId]) {
-      this.oscillator.remove(this.waves[portId])
-      this.oscillator.broadcast()
-
-      delete this.waves[portId]
-    }
-  }
-
   removeNode = (portIds: string[] = []) => {
     const node = portIds
       .map(portId => this.nodes[portId])
@@ -177,23 +155,33 @@ export default class SimulationService {
     if (node) {
       this.circuit.removeNode(node)
 
-      portIds.forEach(portId => {
-
-        if (this.clocks[portId]) {
-          this.oscillator.remove(this.clocks[portId])
-
-          console.log('REMOVED CLOCK')
-        }
-
-        this.unmonitorPort(portId)
-
-        delete this.nodes[portId]
-        delete this.valueMap[portId]
-        delete this.clocks[portId]
-      })
-    } else {
-      console.log('DID NOT FIND NODE FOR: ', portIds)
+      portIds.forEach(this.removePort)
     }
+  }
+
+  addPort = (portId: string, node: CircuitNode) => {
+    this.nodes[portId] = node
+
+    node.on('change', (value: number) => {
+      this.setOutputValue(portId, value)
+      this.waves[portId]?.drawPulseChange(value)
+    })
+  }
+
+  addSiblingPort = (portId: string, siblingPortId: string) => {
+    this.addPort(portId, this.nodes[siblingPortId])
+  }
+
+  removePort = (portId: string) => {
+    if (this.clocks[portId]) {
+      this.oscillator.remove(this.clocks[portId])
+    }
+
+    this.unmonitorPort(portId)
+
+    delete this.nodes[portId]
+    delete this.valueMap[portId]
+    delete this.clocks[portId]
   }
 
   addConnection = (sourceId: string, targetId: string) => {
@@ -209,6 +197,20 @@ export default class SimulationService {
       this.circuit.removeConnection(this.nodes[sourceId], this.nodes[targetId])
     } else {
       console.log('MISSING NODE FOR REMOVING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
+    }
+  }
+
+  monitorPort = (portId: string, value: number) => {
+    this.waves[portId] = new BinaryWaveService(portId, value)
+    this.oscillator.add(this.waves[portId])
+  }
+
+  unmonitorPort = (portId: string) => {
+    if (this.waves[portId]) {
+      this.oscillator.remove(this.waves[portId])
+      this.oscillator.broadcast()
+
+      delete this.waves[portId]
     }
   }
 }

@@ -36,11 +36,11 @@
         :style="{ width }"
         class="timeline">
         <div
-          v-for="second in (waves.secondsElapsed - waves.secondsOffset)"
+          v-for="second in (oscilloscope.secondsElapsed - oscilloscope.secondsOffset)"
           :style="{ width: '40px', minWidth: '40px' }"
           :key="second"
           class="timeline__second">
-          {{ waves.secondsOffset + second }}
+          {{ oscilloscope.secondsOffset + second }}
         </div>
       </div>
     </div>
@@ -57,15 +57,15 @@
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
-  name: 'Oscilloscope',
+  name: 'OscilloscopeViewer',
   data () {
     return {
       displays: {}
     }
   },
   props: {
-    waves: {
-      type: Object,
+    oscilloscope: {
+      type: Object as PropType<OscilloscopeInfo>,
       default: () => ({
         waves: {},
         secondsElapsed: 0,
@@ -75,10 +75,10 @@ export default defineComponent({
   },
   computed: {
     width () {
-      return `${40 * (this.waves.secondsElapsed - this.waves.secondsOffset)}px`
+      return `${40 * (this.oscilloscope.secondsElapsed - this.oscilloscope.secondsOffset)}px`
     },
     oscillations () {
-      return this.waves.waves
+      return this.oscilloscope.waves
     },
     hasWaves () {
       return Object.keys(this.oscillations).length > 0

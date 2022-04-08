@@ -30,8 +30,8 @@ function generateItemName (item: Item, taxonomyCount: number) {
   return name.join(' ')
 }
 
-export const useDocumentStore = defineStore({
-  id: 'document',
+export const createDocumentStore = (id: string) => defineStore({
+  id,
   state: (): DocumentState => ({
     cachedState: null,
     activeFreeportId: null,
@@ -42,7 +42,7 @@ export const useDocumentStore = defineStore({
     selectedConnectionIds: [],
     selectedItemIds: [],
     simulation: new SimulationService([], [], {}),
-    waves: {
+    oscilloscope: {
       waves: {},
       secondsElapsed: 0,
       secondsOffset: 0
@@ -62,21 +62,15 @@ export const useDocumentStore = defineStore({
 
   getters: {
 
-    zoom (state) {
-      return state.zoomLevel
+    baseItems (state) {
+      return (Object
+        .values(state.connections) as BaseItem[])
+        .concat(Object.values(state.items) as BaseItem[])
+        .sort(sortByZIndex)
     },
 
-    trueItems (state) {
-      return Object
-        .keys(state.items)
-        .map((itemId: string) => ({
-          ...state.items[itemId],
-          id: itemId,
-          ports: state
-            .items[itemId]
-            .portIds
-            .map((portId: string) => state.ports[portId])
-        }))
+    zoom (state) {
+      return state.zoomLevel
     },
 
     hasSelection (state) {
@@ -116,7 +110,6 @@ export const useDocumentStore = defineStore({
   },
 
   actions: {
-
     /**
      * Sets the zoom level for the document.
      *
@@ -125,6 +118,17 @@ export const useDocumentStore = defineStore({
      */
     setZoom (zoom) {
       this.zoomLevel = zoom
+    },
+
+    recycleSelection (backToFirstItem: boolean) {
+      const id = backToFirstItem
+        ? this.baseItems[0]
+        : this.baseItems.slice(-1)[0]
+
+      if (id) {
+        this.deselectAll()
+        this.setSelectionState({ id: id.id, value: true })
+      }
     },
 
     loadDocument (document: string) {
@@ -142,14 +146,24 @@ export const useDocumentStore = defineStore({
     buildCircuit () {
       const circuit = new SimulationService(Object.values(this.items), Object.values(this.connections), this.ports)
 
-      circuit.onChange((valueMap: any, wave: any) => {
+      circuit.onChange((valueMap: any, payload: OscilloscopeInfo) => {
         for (const portId in valueMap) {
           if (this.ports[portId]) {
             this.ports[portId].value = valueMap[portId]
           }
         }
 
-        // this.waves = waves
+
+        if (payload && Object.keys(payload.waves).length) {
+          this.oscilloscope.waves = payload.waves
+          this.$patch({
+            oscilloscope: {
+              waves: payload.waves,
+              secondsElapsed: payload.secondsElapsed,
+              secondsOffset: payload.secondsOffset,
+            }
+          })
+        }
       })
 
       this.simulation = circuit
@@ -444,6 +458,11 @@ export const useDocumentStore = defineStore({
       }
       const groupIds = new Set<string>()
 
+      if (referenceItem.type === ItemType.Freeport) {
+        // if this item is a freeport, drag only this and nothing else
+        return this.setItemPosition({ id, position })
+      }
+
       this
         .selectedItemIds
         .forEach((itemId: string) => {
@@ -663,9 +682,8 @@ export const useDocumentStore = defineStore({
             const connection = this.connections[id]
             const source = this.ports[connection.source]
             const target = this.ports[connection.target]
-            const boundary = boundaries.getBoundaryByCorners(source.position, target.position)
 
-            return boundaries.hasIntersection(selection, boundary)
+            return boundaries.isLineIntersectingRectangle(source.position, target.position, selection)
           })
 
         itemIds
@@ -696,7 +714,7 @@ export const useDocumentStore = defineStore({
       for (let id in this.connections) {
         const c = this.connections[id]
 
-        if (portIds.includes(c.source) || portIds.includes(c.target)) {
+        if (portIds.includes(c.source) && portIds.includes(c.target)) {
           this.SET_SELECTION_STATE({ id, isSelected: true })
         }
       }
@@ -932,7 +950,8 @@ export const useDocumentStore = defineStore({
       inputPortId: string,
       sourceId?: string,
       targetId?: string,
-      connectionChainId?: string
+      connectionChainId?: string,
+      position: Point
     }) {
       if (this.items[data.itemId]) return
 
@@ -941,12 +960,7 @@ export const useDocumentStore = defineStore({
       }
 
       this.deselectAll()
-      this.addFreeportItem({
-        ...data,
-        position: {
-          x: 0, y: 0
-        }
-      })
+      this.addFreeportItem(data)
       this.setItemBoundingBox(data.itemId)
       this.activeFreeportId = data.itemId
 
@@ -973,15 +987,15 @@ export const useDocumentStore = defineStore({
         })
       }
 
-      // if (data.sourceId && data.targetId) {
-      //   // bring forward the freeport item so that it is between the two new connections
-      //   this.deselectAll()
-      //   this.setSelectionState({
-      //     id: data.itemId,
-      //     value: true
-      //   })
-      //   this.bringForward()
-      // }
+      if (data.sourceId && data.targetId) {
+        // bring forward the freeport item so that it is between the two new connections
+        this.deselectAll()
+        this.setSelectionState({
+          id: data.itemId,
+          value: true
+        })
+        this.incrementZIndex(1)
+      }
     },
 
     /**
@@ -1143,10 +1157,13 @@ export const useDocumentStore = defineStore({
           const portId = rand()
 
           // add the difference of ports one by one
-          this.ports[portId] = {
-            id: rand(),
+          this.addPort(id, {
+            id: portId,
+            name: '', // TODO
+            connectedPortIds: [],
             type: PortType.Input,
             elementId: id,
+            virtualElementId: id,
             orientation: Direction.Left,
             isFreeport: false,
             position: {
@@ -1155,13 +1172,9 @@ export const useDocumentStore = defineStore({
             },
             rotation: 0,
             value: 0
-          } as Port
-
-          this.items[id].portIds.push(portId)
+          })
         }
       }
-
-      this.setItemPortPositions(id)
     },
 
     /**
@@ -1303,8 +1316,23 @@ export const useDocumentStore = defineStore({
       addedConnections.forEach(id => this.connect(connections[id]))
     },
 
+    addPort (itemId: string, port: Port) {
+      const nodeId = Object
+        .keys(this.simulation.nodes)
+        .find(id => this.items[itemId].portIds.includes(id))
+
+      this.ports[port.id] = port
+      this.items[itemId].portIds.push(port.id)
+
+      if (nodeId) {
+        this.simulation.addSiblingPort(port.id, nodeId)
+      } else {
+        this.simulation.addNode(this.items[id], this.ports)
+      }
+    },
+
     /**
-     * Removes a port from the this.
+     * Removes a port from the state.
      * This will destroy the entire connection chain that it is a part of (if any).
      *
      * @param this
@@ -1337,6 +1365,7 @@ export const useDocumentStore = defineStore({
             // delete all freeports associated with the chain
             this.items[id].portIds.forEach(portId => {
               delete this.ports[portId]
+              this.simulation.removePort(portId)
             })
 
             delete this.items[id]
@@ -1356,6 +1385,7 @@ export const useDocumentStore = defineStore({
         }
 
         delete this.ports[portId]
+        this.simulation.removePort(portId)
       }
     },
 
@@ -1452,6 +1482,7 @@ export const useDocumentStore = defineStore({
       // remove all ports associated with the item
       item.portIds.forEach(portId => {
         delete this.ports[portId]
+        this.simulation.removePort(portId)
       })
 
       // remove the item
@@ -1743,14 +1774,13 @@ export const useDocumentStore = defineStore({
           bottom: position.y
         },
         properties: {},
-        isSelected: true,
+        isSelected: false,
         groupId: null,
         zIndex: ++this.zIndex,
         width: 1,
         height: 1
       }
       this.items[itemId].name = generateItemName(this.items[itemId], ++this.taxonomyCounts[ItemType.Freeport])
-      this.selectedItemIds.push(itemId)
 
       this
         .simulation

@@ -6,39 +6,40 @@
   >
     <draggable
       v-if="!isFreeport"
-      :snap-boundaries="snapBoundaries"
-      :zoom="zoom"
+      :snap-boundaries="store.snapBoundaries"
+      :zoom="store.zoomLevel"
       :bounding-box="{
         left: position.x,
         top: position.y,
         right: position.x,
         bottom: position.y
       }"
-      :key="isDragging"
+      :lock-visual="true"
       snap-mode="radius"
       @drag-start="dragStart"
       @drag-end="dragEnd"
     >
       <port-handle
         :type="type"
-        :active="activePortId === id || connectablePortIds.includes(id)"
+        :active="store.activePortId === id || store.connectablePortIds.includes(id)"
       />
     </draggable>
     <port-handle
       v-else
       :type="type"
-      :active="activePortId === id || connectablePortIds.includes(id)"
+      :active="store.activePortId === id || store.connectablePortIds.includes(id)"
     />
   </port-pivot>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapState } from 'pinia'
-import { useDocumentStore } from '../store/document'
+import { StoreDefinition } from 'pinia'
 import Draggable from '../components/Draggable.vue'
 import PortHandle from '../components/PortHandle.vue'
 import PortPivot from '../components/PortPivot.vue'
+import DocumentState from '@/store/DocumentState'
+import PortType from '@/types/enums/PortType'
 
 export default defineComponent({
   name: 'PortItem',
@@ -105,111 +106,100 @@ export default defineComponent({
     connectedPortIds: {
       type: Object as PropType<string[]>,
       default: []
-    }
-  },
-  data () {
-    return {
-      newFreeport: {} as any,
-      isDragging: false
-    }
-  },
-  watch: {
-    activePortId (activePortId) {
-      if (activePortId === this.id && document.activeElement !== this.$el) {
-        this.$el.focus()
-      }
-    }
-  },
-  computed: {
-    ...mapState(useDocumentStore, [
-      'activePortId',
-      'connectablePortIds',
-      'snapBoundaries',
-      'zoom'
-    ]),
-    isSelected () {
-      return this.activePortId === this.id
     },
-    label () {
-      if (this.connectedPortIds.length > 0) {
-        return `${this.id} Connected to: ${this.connectedPortIds.join(', ')}`
-      }
-      return `${this.id} Not connected to anything.`
+
+    store: {
+      type: Function as PropType<StoreDefinition<string, DocumentState>>,
+      required: true
     }
   },
-  methods: {
-    ...mapActions(useDocumentStore, [
-      'connectFreeport',
-      'createFreeport',
-      'cycleDocumentPorts',
-      'setConnectablePortIds'
-    ]),
+  setup (props, { emit }) {
+    const store = props.store()
 
-    onKeyDown ($event: KeyboardEvent) {
+    let newFreeport: any = {}
+    let isDragging = false
+
+    function onKeyDown ($event: KeyboardEvent) {
       if ($event.key === 'c' || $event.key === ' ') {
-        this.cycleDocumentPorts({
-          portId: this.id,
+        store.cycleDocumentPorts({
+          portId: props.id,
           direction: 1,
           clearConnection: $event.key !== 'c'
         })
       }
-    },
+    }
 
-    onEscapeKey ($event: KeyboardEvent) {
+    function onEscapeKey ($event: KeyboardEvent) {
       $event.preventDefault()
       $event.stopPropagation()
 
-      this.$emit('deselect', $event)
-    },
+      emit('deselect', $event)
+    }
 
     /**
      * Creates a new freeport that can be moved around using the mouse.
      */
-    dragStart () {
-      this.isDragging = true
+    function dragStart () {
+      isDragging = true
 
       const rand = () => `id_${(Math.floor(Math.random() * 1000000) + 5)}` // TODO: use uuid
 
-      this.newFreeport = {
+      newFreeport = {
         itemId: rand(),
-        position: this.position
+        position: props.position
       }
 
-      if (this.type === 1) {
-        this.newFreeport.outputPortId = rand()
-        this.newFreeport.targetId = this.id
-        this.newFreeport.portType = 0
+      if (props.type === PortType.Input) {
+        newFreeport.outputPortId = rand()
+        newFreeport.targetId = props.id
+        newFreeport.portType = 0
       } else {
-        this.newFreeport.inputPortId = rand()
-        this.newFreeport.sourceId = this.id
-        this.newFreeport.portType = 1
+        newFreeport.inputPortId = rand()
+        newFreeport.sourceId = props.id
+        newFreeport.portType = 1
       }
 
-      this.createFreeport(this.newFreeport)
-      this.setConnectablePortIds({ portId: this.id })
-    },
+      store.createFreeport(newFreeport)
+      store.setConnectablePortIds({ portId: props.id, isDragging: true })
+    }
 
     /**
      * Handles terminating the temporary active port, and connects the port to the one at its dragged location.
      * This method handles all results of a user-driven port-dragging interaction.
      */
-    dragEnd () {
-      if (!this.isDragging) return
+    function dragEnd () {
+      if (!isDragging) return
 
-      this.isDragging = false
+      isDragging = false
 
-      if (this.type === 0) {
-        this.connectFreeport({
-          portId: this.newFreeport.inputPortId,
-          sourceId: this.id
+      if (props.type === PortType.Output) {
+        store.connectFreeport({
+          portId: newFreeport.inputPortId,
+          sourceId: props.id
         })
       } else {
-        this.connectFreeport({
-          portId: this.newFreeport.outputPortId,
-          targetId: this.id
+        store.connectFreeport({
+          portId: newFreeport.outputPortId,
+          targetId: props.id
         })
       }
     }
-  }
+
+    return {
+      store,
+      isDragging,
+      onKeyDown,
+      onEscapeKey,
+      dragStart,
+      dragEnd
+    }
+  },
+  // watch: {
+  //   activePortId (activePortId) {
+  //     if (activePortId === this.id && document.activeElement !== this.$el) {
+  //       this.$el.focus()
+  //     }
+  //   }
+  // },
 })
 </script>
