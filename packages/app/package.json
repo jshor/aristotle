@@ -22,25 +22,28 @@
     "vuex": "^4.0.0-0"
   },
   "devDependencies": {
+    "@pinia/testing": "^0.0.11",
     "@types/jest": "^27.4.0",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-plugin-typescript": "~4.5.0",
-    "@vue/cli-plugin-unit-jest": "~4.5.0",
+    "@vue/cli-plugin-unit-jest": "^5.0.4",
     "@vue/cli-plugin-vuex": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
     "@vue/eslint-config-airbnb": "^5.0.2",
     "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "^2.0.0-0",
+    "@vue/vue3-jest": "^27.0.0-alpha.4",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-vue": "^7.0.0",
     "node-sass": "^5",
     "resize-observer-polyfill": "^1.5.1",
     "sass-loader": "^10",
+    "ts-jest": "^27.1.4",
     "typescript": "~4.1.5",
     "vue-jest": "^5.0.0-0"
   },
@@ -83,12 +86,13 @@
       "<rootDir>/src/.*/__tests__"
     ],
     "preset": "@vue/cli-plugin-unit-jest/presets/typescript-and-babel",
+    "setupFiles": ["<rootDir>/test/setup.ts"],
     "testMatch": [
       "<rootDir>/src/**/*.spec.(js|jsx|ts|tsx)"
     ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest",
-      "^.+\\.vue$": "vue-jest"
+      "^.+\\.vue$": "@vue/vue3-jest"
     }
   }
 }

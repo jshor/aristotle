@@ -7,9 +7,9 @@ describe('Item.vue', () => {
   it('renders props.msg when passed', () => {
     const store = createDocumentStore('document')
     const wrapper = mount(Item, {
-      // global: {
-      //   plugins: [createTestingPinia],
-      // },
+      global: {
+        plugins: [createTestingPinia()],
+      },
       props: {
         store
       }
