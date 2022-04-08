@@ -13,24 +13,23 @@
     :zoom="zoom"
     :bounding-box="boundingBox"
   >
-    <group-box :is-selected="isSelected" />
+    <div
+      :class="{
+        'group--is-selected': isSelected
+      }"
+      class="group"
+    />
   </draggable>
 </template>
 
 <script lang="ts">
-import { mapState } from 'pinia'
 import { defineComponent, PropType } from 'vue'
-import { useDocumentStore } from '../store/document'
-import Draggable from '../components/Draggable.vue'
-import GroupBox from '../components/GroupBox.vue'
-import Item from './Item.vue'
+import Draggable from './Draggable.vue'
 
 export default defineComponent({
   name: 'Group',
   components: {
-    Draggable,
-    GroupBox,
-    Item
+    Draggable
   },
   props: {
     boundingBox: {
@@ -48,13 +47,29 @@ export default defineComponent({
     zIndex: {
       type: Number,
       default: 0
+    },
+    zoom: {
+      type: Number,
+      default: 1
     }
-  },
-  computed: {
-    ...mapState(useDocumentStore, [
-      'zoom'
-    ])
   }
 })
 </script>
+
+<style lang="scss">
+.group {
+  border: 2px dashed #808080;
+  box-sizing: border-box;
+  position: absolute;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+
+  &--is-selected {
+    display: block;
+    border-color: #000;
+    cursor: move;
+  }
+}
+</style>
 

@@ -7,33 +7,14 @@
     top: `${topLeft.y + wire.minY}px`,
     left: `${topLeft.x + wire.minX}px`
   }"
-  @mousedown="mousedown"
   >
     <title>{{ label }}</title>
-    <defs>
-      <filter id='inset' x='-50%' y='-50%' width='200%' height='200%'>
-        <!--outside-stroke-->
-        <feFlood flood-color="transparent" result="outside-color"/>
-        <feMorphology in="SourceAlpha" operator="dilate" radius="2"/>
-        <feComposite in="outside-color" operator="in" result="outside-stroke"/>
-        <!--inside-stroke-->
-        <feFlood flood-color="transparent" result="inside-color"/>
-        <feComposite in2="SourceAlpha" operator="in" result="inside-stroke"/>
-        <!--fill-area-->
-        <feMorphology in="SourceAlpha" operator="erode" radius="2"/>
-        <feComposite in="SourceGraphic" operator="in" result="fill-area"/>
-        <!--merge graphics-->
-        <feMerge>
-          <feMergeNode in="outside-stroke"/>
-          <feMergeNode in="inside-stroke"/>
-          <feMergeNode in="fill-area"/>
-        </feMerge>
-      </filter>
-      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%"   stop-color="#05a"/>
-        <stop offset="100%" stop-color="#0a5"/>
-      </linearGradient>
-    </defs>
+    <path
+      class="wire__outline"
+      fill="none"
+      :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
+      :d="wire.path"
+    />
     <path
       class="wire__display"
       :class="{
@@ -41,7 +22,6 @@
         'wire__display--off': source.value === -1
       }"
       fill="none"
-      stroke="#868686"
       :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
       :d="wire.path"
     />
@@ -100,6 +80,7 @@ export default defineComponent({
   top: 0;
   left: 0;
   pointer-events: none;
+  outline: none;
 
   &__clickable {
     animation: none;
@@ -108,12 +89,18 @@ export default defineComponent({
     cursor: pointer;
   }
 
+  &__outline {
+    stroke-width: 8;
+    pointer-events: all;
+    stroke-linecap: square;
+    stroke: pink;
+  }
+
   &__display {
     stroke-width: 6;
     pointer-events: all;
-    stroke-dasharray: 14;
+    stroke-dasharray: 20;
     animation: animate1 300s infinite linear;
-    stroke-linecap: square;
     stroke: darkred;
 
     &--on {
@@ -130,7 +117,7 @@ export default defineComponent({
   }
 
   &--selected {
-    filter: sepia(1) contrast(200%);
+    filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .7));
   }
 }
 

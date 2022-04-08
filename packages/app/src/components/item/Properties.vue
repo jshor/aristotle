@@ -46,7 +46,7 @@
       </select>
       <input
         v-else-if="data.type === 'boolean'"
-        v-model="data.value"
+        v-model="(data.value as boolean)"
         :id="`${id}_${propertyName}`"
         type="checkbox"
         class="properties__input"
@@ -129,6 +129,7 @@ export default defineComponent({
   height: 16px;
   background-color: red;
   pointer-events: all;
+  z-index: 9999;
 
   &__dialog {
     pointer-events: all;

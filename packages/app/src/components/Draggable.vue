@@ -48,6 +48,10 @@ export default defineComponent({
     forceDragging: {
       type: Boolean,
       default: false
+    },
+    lockVisual: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -108,6 +112,10 @@ export default defineComponent({
   },
   computed: {
     style () {
+      if (this.lockVisual) {
+        return {}
+      }
+
       return {
         position: 'absolute',
         pointerEvents: 'none',

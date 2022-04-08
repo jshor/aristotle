@@ -5,6 +5,39 @@ function isInNeighborhood (a: Point, b: Point, radius: number): boolean {
   return Math.sqrt(distX + distY) <= radius
 }
 
+/**
+ * Returns true if line a intersects with line B.
+ *
+ * @param a1 - first point of a
+ * @param a2 - second point of a
+ * @param b1 - first point of b
+ * @param b2 - second point of b
+ */
+function hasLinearIntersection (a1: Point, a2: Point, b1: Point, b2: Point): boolean {
+  const ccw = (a: Point, b: Point, c: Point) => {
+    return (c.y-a.y) * (b.x-a.x) > (b.y-a.y) * (c.x-a.x)
+  }
+
+  return ccw(a1, b1, b2) !== ccw(a2, b1, b2) && ccw(a1, a2, b1) !== ccw(a1, a2, b2)
+}
+
+function isLineIntersectingRectangle (a1: Point, a2: Point, boundingBox: BoundingBox): boolean {
+  const b1 = { x: boundingBox.left, y: boundingBox.top }
+  const b2 = { x: boundingBox.right, y: boundingBox.top }
+  const b3 = { x: boundingBox.right, y: boundingBox.bottom }
+  const b4 = { x: boundingBox.left, y: boundingBox.bottom }
+
+  console.log(hasLinearIntersection(a1, a2, b1, b2)
+  , hasLinearIntersection(a1, a2, b2, b3)
+  ,hasLinearIntersection(a1, a2, b3, b4)
+  , hasLinearIntersection(a1, a2, b4, b1))
+
+  return hasLinearIntersection(a1, a2, b1, b2)
+    || hasLinearIntersection(a1, a2, b2, b3)
+    || hasLinearIntersection(a1, a2, b3, b4)
+    || hasLinearIntersection(a1, a2, b4, b1)
+}
+
 function scaleBoundingBox (box: BoundingBox, scale: number): BoundingBox {
   return {
     left: box.left * scale,
@@ -53,15 +86,6 @@ function getPointBoundary (point: Point): BoundingBox {
     top: point.y,
     right: point.x,
     bottom: point.y
-  }
-}
-
-function getBoundaryByCorners (a: Point, b: Point): BoundingBox {
-  return {
-    left: Math.min(a.x, b.x),
-    right: Math.max(a.x, b.x),
-    top: Math.min(a.y, b.y),
-    bottom: Math.max(a.y, b.y)
   }
 }
 
@@ -137,11 +161,11 @@ function getGroupBoundingBox (boundingBoxes: BoundingBox[]): BoundingBox {
 
 export default {
   isInNeighborhood,
+  isLineIntersectingRectangle,
   scaleBoundingBox,
   isTwoDimensional,
   getLinearBoundaries,
   getPointBoundary,
-  getBoundaryByCorners,
   hasIntersection,
   getItemBoundingBox,
   getGroupBoundingBox

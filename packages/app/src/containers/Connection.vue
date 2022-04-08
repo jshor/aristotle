@@ -7,17 +7,20 @@
     :bottom-right="bottomRight"
     :is-selected="isSelected"
     :aria-selected="isSelected"
-    :label="label"
+    :label="'TODO'"
     :tabindex="0"
-    @mousedown="mousedown"
+    @mousedown="onMouseDown"
+    @focus="onFocus"
+    ref="root"
   />
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { mapActions, mapState } from 'pinia'
+import { ComponentPublicInstance, defineComponent, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
+import { StoreDefinition } from 'pinia'
 import Wire from '../components/Wire.vue'
-import { useDocumentStore } from '../store/document'
+import DocumentState from '@/store/DocumentState'
+import { computed } from '@vue/reactivity'
 
 export default defineComponent({
   name: 'Connection',
@@ -25,12 +28,12 @@ export default defineComponent({
     Wire
   },
   props: {
-    source: {
-      type: Object as PropType<Port>,
+    sourceId: {
+      type: String,
       required: true
     },
-    target: {
-      type: Object as PropType<Port>,
+    targetId: {
+      type: String,
       required: true
     },
     groupId: {
@@ -52,72 +55,11 @@ export default defineComponent({
     zIndex: {
       type: Number,
       default: 0
+    },
+    store: {
+      type: Function as PropType<StoreDefinition<string, DocumentState>>,
+      required: true
     }
-  },
-  data () {
-    return {
-      newFreeport: {
-        itemId: '',
-        inputPortId: '',
-        outputPortId: '',
-        connectionChainId: this.id,
-        value: 0,
-        sourceId: '',
-        targetId: '',
-        position: {}
-      },
-      originalPosition: {
-        x: 0,
-        y: 0
-      } as Point,
-      portCreated: false,
-      isMouseDown: false
-    }
-  },
-  computed: {
-    ...mapState(useDocumentStore, [
-      'items',
-      'zoom'
-    ]),
-    a () {
-      return this.source.position
-    },
-    b () {
-      return this.target.position
-    },
-    topLeft () {
-      const x = Math.min(this.a.x, this.b.x)
-      const y = Math.min(this.a.y, this.b.y)
-
-      return { x, y }
-    },
-    bottomRight () {
-      const x = Math.max(this.a.x, this.b.x)
-      const y = Math.max(this.a.y, this.b.y)
-
-      return { x, y }
-    },
-    label () {
-      const from = this.items[this.source.elementId]
-      const to = this.items[this.target.elementId]
-
-      if (from) {
-        if (to) {
-          return `Connection from ${from.name} ${this.source.name} to ${to.name} ${this.target.name}.`
-        }
-        return `New connection from ${from.name} ${this.source.name}.`
-      }
-
-      if (to) {
-        return `New connection to ${to.name} ${this.target.name}.`
-      }
-
-      return 'Empty connection.'
-    }
-  },
-  mounted () {
-    window.addEventListener('mousemove', this.mousemove)
-    window.addEventListener('mouseup', this.mouseup)
   },
   watch: {
     isSelected (value: boolean) {
@@ -126,74 +68,133 @@ export default defineComponent({
       }
     }
   },
-  destroy () {
-    window.removeEventListener('mousemove', this.mousemove)
-    window.removeEventListener('mouseup', this.mouseup)
-  },
-  methods: {
-    ...mapActions(useDocumentStore, [
-      'createFreeport',
-      'setSnapBoundaries'
-    ]),
+  setup (props, { emit }) {
+    const store = props.store()
+    const root = ref<ComponentPublicInstance<HTMLElement>>()
 
-    mousedown ($event: MouseEvent) {
-      if (this.groupId !== null) {
+    const source = computed(() => store.ports[props.sourceId])
+    const target = computed(() => store.ports[props.targetId])
+    const topLeft = computed((): Point => {
+      const a = source.value.position
+      const b = target.value.position
+
+      const x = Math.min(a.x, b.x)
+      const y = Math.min(a.y, b.y)
+
+      return { x, y }
+    })
+    const bottomRight = computed((): Point => {
+      const a = source.value.position
+      const b = target.value.position
+
+      const x = Math.max(a.x, b.x)
+      const y = Math.max(a.y, b.y)
+
+      return { x, y }
+    })
+
+    onMounted(() => {
+      window.addEventListener('mousemove', onMouseMove)
+      window.addEventListener('mouseup', onMouseUp)
+    })
+
+    onBeforeUnmount(() => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    })
+
+    let newFreeport = {
+      itemId: '',
+      inputPortId: '',
+      outputPortId: '',
+      connectionChainId: props.id,
+      value: 0,
+      sourceId: '',
+      targetId: '',
+      position: {}
+    }
+    let originalPosition: Point = {
+      x: 0,
+      y: 0
+    }
+    let portCreated = false
+    let isMouseDown = false
+
+    function onMouseDown ($event: MouseEvent) {
+      if (props.groupId !== null) {
         // this wire is part of a group, so do not allow the creation of a new freeport
         return
       }
 
-      this.portCreated = false
-      this.isMouseDown = true
-      this.originalPosition = {
+      portCreated = false
+      isMouseDown = true
+      originalPosition = {
         x: $event.clientX,
         y: $event.clientY
       }
-      this.$emit('select', $event)
-    },
+      emit('select')
+    }
 
-    mousemove ($event: MouseEvent) {
-      if (this.originalPosition.x === $event.clientX && this.originalPosition.y === $event.clientY) return
-      if (!this.isMouseDown) return
+    function onMouseMove ($event: MouseEvent) {
+      if (originalPosition.x === $event.clientX && originalPosition.y === $event.clientY) return
+      if (!isMouseDown) return
 
-      this.originalPosition = {
+      originalPosition = {
         x: $event.clientX,
         y: $event.clientY
       }
 
-      if (!this.portCreated) {
+      if (!portCreated && root.value?.$el) {
         const rand = () => `id_${(Math.floor(Math.random() * 1000000) + 5)}` // TODO: use uuid
-        const { top, left } = this.$el.getBoundingClientRect() as DOMRectReadOnly
+        const { top, left } = root.value.$el.getBoundingClientRect()
         const relativePosition: Point = {
           x: $event.clientX - left,
           y: $event.clientY - top
         }
         const absolutePosition: Point = {
-          x: this.topLeft.x + relativePosition.x,
-          y: this.topLeft.y + relativePosition.y
+          x: topLeft.value.x + relativePosition.x,
+          y: topLeft.value.y + relativePosition.y
         }
 
-        this.newFreeport = {
+        newFreeport = {
           itemId: rand(),
           inputPortId: rand(),
           outputPortId: rand(),
-          connectionChainId: this.connectionChainId,
-          value: this.source.value,
-          sourceId: this.source.id,
-          targetId: this.target.id,
+          connectionChainId: props.connectionChainId,
+          value: source.value.value,
+          sourceId: source.value.id,
+          targetId: target.value.id,
           position: absolutePosition
         }
 
-        this.createFreeport(this.newFreeport)
-        this.setSnapBoundaries(this.newFreeport.itemId)
-        this.portCreated = true
+        store.createFreeport(newFreeport)
+        store.setSnapBoundaries(newFreeport.itemId)
+
+        portCreated = true
       }
-    },
+    }
 
-    mouseup ($event: MouseEvent) {
-      if (!this.isMouseDown) return
+    function onMouseUp () {
+      if (!isMouseDown) return
 
-      this.isMouseDown = false
-      this.$emit('select', $event)
+      isMouseDown = false
+      emit('select')
+    }
+
+    function onFocus () {
+      if (!props.isSelected) {
+        emit('select')
+      }
+    }
+
+    return {
+      root,
+      topLeft,
+      bottomRight,
+      onMouseDown,
+      onFocus,
+      source,
+      target
     }
   }
 })
