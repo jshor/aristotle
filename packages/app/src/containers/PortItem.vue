@@ -1,8 +1,10 @@
 <template>
   <port-pivot
     :rotation="rotation"
-    @keydown="onKeyDown"
+    @blur="onBlur"
     @keydown.esc="onEscapeKey"
+    @keydown.space="store.cycleConnectionPreviews(id)"
+    @keydown.enter="store.commitPreviewedConnection"
   >
     <draggable
       v-if="!isFreeport"
@@ -119,21 +121,16 @@ export default defineComponent({
     let newFreeport: any = {}
     let isDragging = false
 
-    function onKeyDown ($event: KeyboardEvent) {
-      if ($event.key === 'c' || $event.key === ' ') {
-        store.cycleDocumentPorts({
-          portId: props.id,
-          direction: 1,
-          clearConnection: $event.key !== 'c'
-        })
-      }
-    }
-
     function onEscapeKey ($event: KeyboardEvent) {
       $event.preventDefault()
       $event.stopPropagation()
 
       emit('deselect', $event)
+    }
+
+    function onBlur () {
+      store.unsetConnectionPreview()
+      store.cachedState = null
     }
 
     /**
@@ -188,18 +185,11 @@ export default defineComponent({
     return {
       store,
       isDragging,
-      onKeyDown,
       onEscapeKey,
+      onBlur,
       dragStart,
       dragEnd
     }
-  },
-  // watch: {
-  //   activePortId (activePortId) {
-  //     if (activePortId === this.id && document.activeElement !== this.$el) {
-  //       this.$el.focus()
-  //     }
-  //   }
-  // },
+  }
 })
 </script>

@@ -7,6 +7,7 @@
     :bottom-right="bottomRight"
     :is-selected="isSelected"
     :aria-selected="isSelected"
+    :is-preview="isPreview"
     :label="'TODO'"
     :tabindex="0"
     @mousedown="onMouseDown"
@@ -45,6 +46,10 @@ export default defineComponent({
       default: null
     },
     isSelected: {
+      type: Boolean,
+      default: false
+    },
+    isPreview: {
       type: Boolean,
       default: false
     },

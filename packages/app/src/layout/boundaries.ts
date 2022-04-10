@@ -27,11 +27,6 @@ function isLineIntersectingRectangle (a1: Point, a2: Point, boundingBox: Boundin
   const b3 = { x: boundingBox.right, y: boundingBox.bottom }
   const b4 = { x: boundingBox.left, y: boundingBox.bottom }
 
-  console.log(hasLinearIntersection(a1, a2, b1, b2)
-  , hasLinearIntersection(a1, a2, b2, b3)
-  ,hasLinearIntersection(a1, a2, b3, b4)
-  , hasLinearIntersection(a1, a2, b4, b1))
-
   return hasLinearIntersection(a1, a2, b1, b2)
     || hasLinearIntersection(a1, a2, b2, b3)
     || hasLinearIntersection(a1, a2, b3, b4)

@@ -540,7 +540,7 @@ describe('actions', () => {
       y: position.y - oldPosition.y
     }
     const item1 = createItem('item1', ItemType.LogicGate, { position: oldPosition, isSelected: true })
-    const item2 = createItem('item2', ItemType.LogicGate, { groupId: 'group1', isSelected: true })
+    const item2 = createItem('item2', ItemType.Freeport, { groupId: 'group1', isSelected: true })
     const group1 = createGroup('group1', ['item1', 'item2'])
 
     beforeEach(() => {
@@ -548,20 +548,46 @@ describe('actions', () => {
       store.$patch({
         items: { item1, item2 },
         groups: { group1 },
-        selectedItemIds: ['item1', 'item2']
       })
 
       stubAll(store, [
         'setItemPosition'
       ])
+    })
 
+    it('should move only the freeport if it is the reference item', () => {
+      const newPosition: Point = {
+        x: 10,
+        y: 22
+      }
+
+      store.$patch({
+        selectedItemIds: ['item1', 'item2']
+      })
       store.setSelectionPosition({
-        id: 'item1',
-        position
+        id: 'item2',
+        position: newPosition
+      })
+
+      expect(store.setItemPosition).toHaveBeenCalledTimes(1)
+      expect(store.setItemPosition).toHaveBeenCalledWith({
+        id: 'item2',
+        position: {
+          x: item2.position.x + newPosition.x,
+          y: item2.position.y + newPosition.y
+        }
       })
     })
 
     it('should set the position of each item according to the delta moved', () => {
+      store.$patch({
+        selectedItemIds: ['item1', 'item2']
+      })
+      store.setSelectionPosition({
+        id: 'item1',
+        position
+      })
+
       expect(store.setItemPosition).toHaveBeenCalledTimes(2)
       expect(store.setItemPosition).toHaveBeenCalledWith({
         id: 'item1',
@@ -745,91 +771,6 @@ describe('actions', () => {
     })
   })
 
-  describe('clearActivePortId', () => {
-    const store = createDocumentStore('document')()
-
-    beforeEach(() => store.$reset())
-
-    describe('when a port is active', () => {
-      beforeEach(() => {
-        const elementId = 'element-id'
-        const activePortId = 'port-id'
-
-        store.$patch({
-          activePortId,
-          items: {
-            [elementId]: createItem(elementId, ItemType.InputNode, { portIds: [activePortId] })
-          },
-          ports: {
-            [activePortId]: createPort(activePortId, elementId, PortType.Output)
-          }
-        })
-        store.clearActivePortId()
-      })
-
-      it('should clear the currently-connected port id', () => {
-        expect(store.previewConnectedPortId).toEqual(null)
-      })
-
-      it('should clear the currently-active port id', () => {
-        expect(store.activePortId).toEqual(null)
-      })
-
-      it('should clear the currently-selected port index', () => {
-        expect(store.selectedPortIndex).toEqual(-1)
-      })
-
-      it('should clear the connectable port IDs list', () => {
-        expect(store.connectablePortIds).toEqual([])
-      })
-    })
-
-    it('should not set the active port id if the item the port references does not exist', () => {
-      const elementId = 'element-id'
-      const activePortId = 'port-id'
-
-      store.$patch({
-        activePortId,
-        ports: {
-          [activePortId]: createPort(activePortId, elementId, PortType.Output)
-        }
-      })
-      store.clearActivePortId()
-
-      expect(store.activePortId).toEqual(null)
-    })
-
-    it('should not commit anything if the active port is not defined', () => {
-      const activePortId = null
-
-      store.$patch({ activePortId })
-      store.clearActivePortId()
-
-      expect(store.activePortId).toEqual(activePortId)
-    })
-
-    it('should not commit anything if the item is currently selected', () => {
-      const elementId = 'element-id'
-      const activePortId = 'port-id'
-
-      store.$patch({
-        activePortId,
-        items: {
-          [elementId]: createItem(elementId, ItemType.InputNode, {
-            portIds: [activePortId],
-            isSelected: true
-          })
-        },
-        ports: {
-          [activePortId]: createPort(activePortId, elementId, PortType.Output)
-        }
-       })
-      store.clearActivePortId()
-
-      expect(store.activePortId).toEqual(activePortId)
-    })
-  })
-
   describe('deselectAll', () => {
     const store = createDocumentStore('document')()
 
@@ -840,8 +781,7 @@ describe('actions', () => {
       const connection2 = createConnection('connection2', 'port3', 'port4', { isSelected: true })
 
       stubAll(store, [
-        'commitCachedState',
-        'clearActivePortId'
+        'clearStatelessInfo'
       ])
 
       store.$reset()
@@ -852,14 +792,10 @@ describe('actions', () => {
       store.deselectAll()
     })
 
-    it('should commit the cached state when a connection is currently previewed', () => {
-      store.$reset()
-      store.$patch({
-        previewConnectedPortId: 'port-id'
-      })
+    it('should clear all stateless info', () => {
       store.deselectAll()
 
-      expect(store.commitCachedState).toHaveBeenNthCalledWith(1)
+      expect(store.clearStatelessInfo).toHaveBeenCalled()
     })
 
     it('should set isSelected to false for all connections', () => {
@@ -875,10 +811,6 @@ describe('actions', () => {
     it('should empty the lists of selected connection and item ids', () => {
       expect(store.selectedItemIds).toHaveLength(0)
       expect(store.selectedConnectionIds).toHaveLength(0)
-    })
-
-    it('should clear any active port id', () => {
-      expect(store.clearActivePortId).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -1141,7 +1073,7 @@ describe('actions', () => {
 
       stubAll(store, [
         'connect',
-        'disconnect'
+        'unsetConnectionPreview'
       ])
     })
 
@@ -1152,20 +1084,6 @@ describe('actions', () => {
       describe('when the port is an output port', () => {
         const port = createPort(activePortId, 'element-id', PortType.Output)
 
-        it('should clear the connection preview the port if it is already being previewed', () => {
-          store.$patch({
-            activePortId,
-            previewConnectedPortId: portId,
-            ports: {
-              [activePortId]: port
-            }
-          })
-          store.setConnectionPreview(portId)
-
-          expect(store.disconnect).toHaveBeenCalledWith({ source: activePortId, target: portId })
-          expect(store.previewConnectedPortId).toEqual(null)
-        })
-
         it('should establish a preview connection if the port is not currently connected', () => {
           store.$patch({
             activePortId,
@@ -1175,28 +1093,14 @@ describe('actions', () => {
           })
           store.setConnectionPreview(portId)
 
-          expect(store.connect).toHaveBeenCalledWith({ source: activePortId, target: portId })
-          expect(store.previewConnectedPortId).toEqual(portId)
+          expect(store.connect).toHaveBeenCalledTimes(1)
+          expect(store.connect).toHaveBeenCalledWith({ source: activePortId, target: portId, isPreview: true })
         })
       })
 
       describe('when the port is an input port', () => {
         const port = createPort(activePortId, 'element-id', PortType.Input)
 
-        it('should clear the connection preview the port if it is already being previewed', () => {
-          store.$patch({
-            activePortId,
-            previewConnectedPortId: portId,
-            ports: {
-              [activePortId]: port
-            }
-          })
-          store.setConnectionPreview(portId)
-
-          expect(store.disconnect).toHaveBeenCalledWith({ source: portId, target: activePortId })
-          expect(store.previewConnectedPortId).toEqual(null)
-        })
-
         it('should establish a preview connection if the port is not currently connected', () => {
           store.$patch({
             activePortId,
@@ -1206,8 +1110,8 @@ describe('actions', () => {
           })
           store.setConnectionPreview(portId)
 
-          expect(store.connect).toHaveBeenCalledWith({ source: portId, target: activePortId })
-          expect(store.previewConnectedPortId).toEqual(portId)
+          expect(store.connect).toHaveBeenCalledTimes(1)
+          expect(store.connect).toHaveBeenCalledWith({ source: portId, target: activePortId, isPreview: true })
         })
       })
     })
@@ -1216,45 +1120,121 @@ describe('actions', () => {
       store.setConnectionPreview(null)
 
       expect(store.connect).not.toHaveBeenCalled()
-      expect(store.disconnect).not.toHaveBeenCalled()
     })
 
     it('should not connect or disconnect anything if there is no active port', () => {
       store.setConnectionPreview('port-id')
 
       expect(store.connect).not.toHaveBeenCalled()
-      expect(store.disconnect).not.toHaveBeenCalled()
     })
   })
 
-  describe('cycleDocumentPorts', () => {
+  describe('unsetConnectionPreview ', () => {
     const store = createDocumentStore('document')()
-    const portId = 'preview-port-id'
+
+    describe('when there is a connection preview set', () => {
+      const connection = createConnection('connection', 'source-id', 'target-id')
+
+      beforeEach(() => {
+        stubAll(store, [
+          'disconnect'
+        ])
+
+        store.$patch({
+          connectionPreviewId: connection.id,
+          connections: { connection }
+        })
+        store.unsetConnectionPreview()
+      })
+
+      it('should disconnect the active connection', () => {
+        expect(store.disconnect).toHaveBeenCalledTimes(1)
+        expect(store.disconnect).toHaveBeenCalledWith(connection)
+      })
+
+      it('should clear the connection preview id', () => {
+        expect(store.connectionPreviewId).toBeNull()
+      })
+    })
+
+    it('should clear the connection preview id', () => {
+      store.unsetConnectionPreview()
+
+      expect(store.connectionPreviewId).toBeNull()
+    })
+  })
+
+  describe('commitPreviewedConnection ', () => {
+    const store = createDocumentStore('document')()
+
+    describe('when there is a connection preview set', () => {
+      const connection = createConnection('connection', 'source-id', 'target-id')
+
+      beforeEach(() => {
+        stubAll(store, [
+          'commitCachedState'
+        ])
+
+        store.$patch({
+          connectionPreviewId: connection.id,
+          connections: { connection }
+        })
+        store.commitPreviewedConnection()
+      })
+
+      it('should commit the cached state', () => {
+        expect(store.commitCachedState).toHaveBeenCalledTimes(1)
+      })
+
+      it('should clear the connection preview id', () => {
+        expect(store.connectionPreviewId).toBeNull()
+      })
+    })
+
+    it('should clear the connection preview id', () => {
+      store.commitPreviewedConnection()
+
+      expect(store.connectionPreviewId).toBeNull()
+    })
+  })
+
+  describe('cycleConnectionPreviews', () => {
+    const store = createDocumentStore('document')()
+    const portId = 'port1'
     const connectablePortIds = ['port1', 'port2', 'port3']
 
     beforeEach(() => {
       store.$reset()
+      store.$patch({
+        ports: {
+          port1: createPort('port1', 'element-id', PortType.Input),
+          port2: createPort('port2', 'element-id', PortType.Input),
+          port3: createPort('port3', 'element-id', PortType.Input)
+        }
+      })
+
+      jest
+        .spyOn(console, 'log')
+        .mockImplementation(jest.fn())
 
       stubAll(store, [
         'setConnectionPreview',
+        'unsetConnectionPreview',
         'setConnectablePortIds',
         'setActivePortId',
-        'cacheState',
-        'commitCachedState',
+        'cacheState'
       ])
     })
 
-    it('should set the active port ID to the one provided if its port is not already active', () => {
-      const portId = 'new-port-id'
-
-      store.$patch({ activePortId: 'old-port-id' })
-      store.cycleDocumentPorts({
-        portId,
-        direction: 0,
-        clearConnection: false
+    it('should set the active port ID to the one provided if not already active', () => {
+      store.$patch({
+        activePortId: 'port2',
+        cachedState: createSerializedState()
       })
+      store.cycleConnectionPreviews(portId)
 
-      expect(store.setConnectablePortIds).toHaveBeenCalledWith({ portId })
+      expect(store.setActivePortId).toHaveBeenCalledTimes(1)
+      expect(store.setActivePortId).toHaveBeenCalledWith(portId)
     })
 
     it('should start cycling at index 0 if an index is not defined', () => {
@@ -1263,12 +1243,9 @@ describe('actions', () => {
         connectablePortIds,
         selectedPortIndex: -1
       })
-      store.cycleDocumentPorts({
-        portId,
-        direction: 1,
-        clearConnection: false
-      })
+      store.cycleConnectionPreviews(portId)
 
+      expect(store.setConnectionPreview).toHaveBeenCalledTimes(1)
       expect(store.setConnectionPreview).toHaveBeenCalledWith(connectablePortIds[0])
     })
 
@@ -1278,13 +1255,9 @@ describe('actions', () => {
         connectablePortIds,
         selectedPortIndex: 2
       })
-      store.cycleDocumentPorts({
-        portId,
-        direction: 1,
-        clearConnection: false
-      })
+      store.cycleConnectionPreviews(portId)
 
-      expect(store.setConnectionPreview).toHaveBeenCalledWith(undefined)
+      expect(store.unsetConnectionPreview).toHaveBeenCalledTimes(1)
     })
 
     it('should not cache the state if a state is already cached', () => {
@@ -1292,27 +1265,9 @@ describe('actions', () => {
         activePortId: portId,
         cachedState: createSerializedState()
       })
-      store.cycleDocumentPorts({
-        portId,
-        direction: 1,
-        clearConnection: false
-      })
+      store.cycleConnectionPreviews(portId)
 
       expect(store.cacheState).not.toHaveBeenCalled()
-    })
-
-    it('should clear the current connection preview if opted to do so', () => {
-      store.$patch({
-        activePortId: portId,
-        previewConnectedPortId: portId
-      })
-      store.cycleDocumentPorts({
-        portId,
-        direction: 1,
-        clearConnection: true
-      })
-
-      expect(store.setConnectionPreview).toHaveBeenCalledWith(portId)
     })
   })
 
@@ -1326,12 +1281,15 @@ describe('actions', () => {
     })
 
     describe('when the port ID differs from the currently-active one', () => {
-      it('should define the connectable port IDs if the port ID is defined', () => {
-        const portId = 'port-id'
-
+      beforeEach(() => {
         store.$patch({
           activePortId: 'active-port-id'
         })
+      })
+
+      it('should define the connectable port IDs if the port ID is defined', () => {
+        const portId = 'port-id'
+
         store.setActivePortId(portId)
 
         expect(store.setConnectablePortIds).toHaveBeenCalledWith({ portId })
@@ -1593,7 +1551,6 @@ describe('actions', () => {
         'commitState',
         'setItemBoundingBox',
         'setSelectionState',
-        'setActiveFreeportId',
         'deselectAll'
       ])
     })
@@ -1760,8 +1717,7 @@ describe('actions', () => {
         'removeElement',
         'disconnect',
         'connect',
-        'commitState',
-        'setActiveFreeportId'
+        'commitState'
       ])
 
       store.$reset()
@@ -2988,6 +2944,12 @@ describe('actions', () => {
       })
       expect(store.simulation.addConnection).toHaveBeenCalledTimes(1)
       expect(store.simulation.addConnection).toHaveBeenCalledWith(source, target)
+    })
+
+    it('should set the connection preview ID if isPreview is true', () => {
+      store.connect({ source, target, isPreview: true })
+
+      expect(store.connectionPreviewId).toEqual(Object.keys(store.connections)[0])
     })
 
     it('should add the connected port ids to each port\'s list', () => {
