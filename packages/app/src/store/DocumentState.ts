@@ -20,5 +20,5 @@ export default interface DocumentState {
   selectedPortIndex: number
   zIndex: number
   activePortId: string | null
-  previewConnectedPortId: string | null
+  connectionPreviewId: string | null
 }

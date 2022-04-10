@@ -46,6 +46,7 @@
         :group-id="baseItem.groupId"
         :connection-chain-id="baseItem.connectionChainId"
         :is-selected="baseItem.isSelected"
+        :is-preview="store.connectionPreviewId === baseItem.id"
         :z-index="baseItem.zIndex"
         @select="selectItem(baseItem.id)"
         @deselect="deselectItem(baseItem.id)"
@@ -114,10 +115,19 @@ export default defineComponent({
 
     function onKeyDown ($event: KeyboardEvent) {
       keys[$event.key] = true
-      moveItemsByArrowKey($event)
 
-      if ($event.key === 'Escape') {
-        store.deselectAll()
+      switch ($event.key) {
+        case 'Escape':
+          return store.deselectAll()
+        case 'Delete':
+          return store.deleteSelection()
+        case 'z':
+        case 'Z':
+          if (keys.Control) {
+            return (keys.Shift ? store.redo() : store.undo())
+          }
+        default:
+          return moveItemsByArrowKey($event)
       }
     }
 
@@ -164,7 +174,6 @@ export default defineComponent({
         store.deselectAll()
       }
 
-      store.clearActivePortId()
       store.setSelectionState({ id, value: true })
     }
 

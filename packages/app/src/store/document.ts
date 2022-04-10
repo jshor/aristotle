@@ -33,14 +33,8 @@ function generateItemName (item: Item, taxonomyCount: number) {
 export const createDocumentStore = (id: string) => defineStore({
   id,
   state: (): DocumentState => ({
-    cachedState: null,
-    activeFreeportId: null,
     undoStack: [],
     redoStack: [],
-    snapBoundaries: [],
-    connectablePortIds: [],
-    selectedConnectionIds: [],
-    selectedItemIds: [],
     simulation: new SimulationService([], [], {}),
     oscilloscope: {
       waves: {},
@@ -53,15 +47,20 @@ export const createDocumentStore = (id: string) => defineStore({
     groups: {},
     taxonomyCounts: {},
     zoomLevel: 1,
-    selectedPortIndex: -1,
     zIndex: 1,
+    /* the following variables are 'temporary' information */
+    snapBoundaries: [],
+    connectablePortIds: [],
+    selectedConnectionIds: [],
+    selectedItemIds: [],
+    selectedPortIndex: -1,
+    cachedState: null,
+    activeFreeportId: null,
     activePortId: null,
-    previewConnectedPortId: null
+    connectionPreviewId: null
   }),
 
-
   getters: {
-
     baseItems (state) {
       return (Object
         .values(state.connections) as BaseItem[])
@@ -113,7 +112,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Sets the zoom level for the document.
      *
-     * @param store
      * @param zoom - percentage of zoom by decimal (e.g., 1.0 = 100%)
      */
     setZoom (zoom) {
@@ -177,8 +175,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
     /**
      * Reverts to the most-recently committed document this.
-     *
-     * @param store
      */
     undo () {
       const undoState = this.undoStack.slice(-1).pop()
@@ -197,8 +193,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
     /**
      * Reverts to the most-recently-reverted this.
-     *
-     * @param store
      */
     redo () {
       const redoState = this.redoStack.slice(-1).pop()
@@ -269,7 +263,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Sets the computed boundaries that an actively-dragged item to snap to.
      *
-     * @param store
      * @param id - ID of the item being dragged
      */
     setSnapBoundaries (id: string) {
@@ -346,7 +339,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Sets the absolute positions for all ports that belong to the given item.
      *
-     * @param store
      * @param id - ID of the item containing the ports
      */
     setItemPortPositions (id: string) {
@@ -388,7 +380,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Sets the position of an item.
      *
-     * @param store
      * @param payload
      * @param payload.id - ID of the item
      * @param payload.position - new position to move to
@@ -424,7 +415,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Moves all selected items according to the delta provided.
      *
-     * @param store
      * @param delta - delta to move the items by
      */
     moveSelectionPosition (delta: Point) {
@@ -445,7 +435,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Moves all selected items according to the delta that the given item has moved by.
      *
-     * @param store
      * @param payload
      * @param payload.id - ID of the reference item moving
      * @param payload.position - new position that the reference item has moved to
@@ -494,7 +483,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Sets the bounding box of an item.
      *
-     * @param store
      * @param id - ID of the item
      */
     setItemBoundingBox (id: string) {
@@ -508,7 +496,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Sets the bounding box of a group.
      *
-     * @param store
      * @param id - ID of the group
      */
     setGroupBoundingBox (id: string) {
@@ -526,7 +513,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Groups together all selected items and connections.
      * If any of those selected elements are a member of a group, that group will be destroyed.
      *
-     * @param store
      */
     group () {
       this.commitState()
@@ -591,7 +577,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Destroys all selected groups.
      *
-     * @param store
      */
     ungroup () {
       this.commitState()
@@ -604,30 +589,11 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     /**
-     * Clears the editor's actively-selected port ID.
-     *
-     * @param store
-     */
-    clearActivePortId () {
-      const elementId = this.ports[this.activePortId || '']?.elementId
-
-      if (elementId && !this.items[elementId]?.isSelected) {
-        this.previewConnectedPortId = null
-        this.activePortId = null
-        this.selectedPortIndex = -1
-        this.connectablePortIds = []
-      }
-    },
-
-    /**
      * Deselects all elements.
      *
-     * @param store
      */
     deselectAll () {
-      if (this.previewConnectedPortId) {
-        this.commitCachedState()
-      }
+      this.clearStatelessInfo()
 
       for (let id in this.connections) {
         this.connections[id].isSelected = false
@@ -639,18 +605,14 @@ export const createDocumentStore = (id: string) => defineStore({
         this.selectedItemIds.push(id)
         this.selectedItemIds = []
       }
-
-      this.clearActivePortId()
     },
 
     /**
      * Selects all items and connections.
      *
-     * @param store
      */
     selectAll () {
-      this.selectedConnectionIds = []
-      this.selectedItemIds = []
+      this.clearStatelessInfo()
 
       for (let id in this.connections) {
         this.connections[id].isSelected = true
@@ -663,10 +625,21 @@ export const createDocumentStore = (id: string) => defineStore({
       }
     },
 
+    clearStatelessInfo () {
+      this.unsetConnectionPreview()
+      this.snapBoundaries = []
+      this.connectablePortIds = []
+      this.selectedConnectionIds = []
+      this.selectedItemIds = []
+      this.selectedPortIndex = -1
+      this.cachedState = null
+      this.activePortId = null
+      this.connectionPreviewId = null
+    },
+
     /**
      * Selects all connections and items (and its connections) that live within the given boundary.
      *
-     * @param store
      * @param selection - two-dimensional boundary
      */
     createSelection (selection: BoundingBox) {
@@ -703,7 +676,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Selects all connections that are connected to any of the items in the given list.
      *
-     * @param store
      * @param itemIds - list of items to select their connections for
      */
     selectItemConnections (itemIds: string[]) {
@@ -724,7 +696,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Inverts the selection this of the element having the given ID, or forces it to the value provided.
      * If the element is a member of a group, every item in that group will be selected.
      *
-     * @param store
      * @param payload.id - the ID of the element to toggle its selection
      * @param payload.value - new selection this value to set to
      */
@@ -755,8 +726,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Establishes a 'preview' of a connection (i.e., not saved in the current document this).
      * This is so that the user can press a keyboard shortcut to quickly navigate/preview possible connections.
      *
-     * @note Unlike {@link `cycleDocumentPorts`}, this will NOT commit the connection to the this.
-     * @param store
      * @param portId - the ID of the port previewing connections for
      */
     setConnectionPreview (portId: string | null) {
@@ -769,58 +738,66 @@ export const createDocumentStore = (id: string) => defineStore({
           target = this.activePortId
         }
 
-        if (portId === this.previewConnectedPortId) {
-          this.disconnect({ source, target })
-          this.previewConnectedPortId = null
-        } else {
-          this.connect({ source, target })
-          this.previewConnectedPortId = portId
-        }
+        this.unsetConnectionPreview()
+        this.connect({ source, target, isPreview: true })
       }
+    },
+
+    /**
+     * Clears the active connection preview.
+     */
+    unsetConnectionPreview () {
+      if (this.connectionPreviewId) {
+        this.disconnect(this.connections[this.connectionPreviewId])
+      }
+      this.connectionPreviewId = null
+    },
+
+    /**
+     * Commits the previewed connection action as an undo-able state.
+     */
+    commitPreviewedConnection () {
+      if (this.connectionPreviewId) {
+        this.commitCachedState()
+      }
+      this.connectionPreviewId = null
     },
 
     /**
      * Establishes a 'preview' of a connection (i.e., not saved in the current document this).
      * This is so that the user can press a keyboard shortcut to quickly navigate/preview possible connections.
      *
-     * @note Unlike {@link `setConnectionPreview`}, this WILL commit the connection to the this.
-     * @param store
      * @param portId - the ID of the port previewing connections for
      */
-    cycleDocumentPorts ({ portId, direction, clearConnection }: {
-      portId: string,
-      direction: number,
-      clearConnection: boolean
-    }) {
+    cycleConnectionPreviews (portId: string) {
       if (portId && portId !== this.activePortId) {
         this.setActivePortId(portId)
       }
 
-      let index = this.selectedPortIndex + direction
+      let index = this.selectedPortIndex + 1
 
-      if (index < 0) index = 0
+      if (index <= 0) index = 0
       if (index >= this.connectablePortIds.length) index = -1
 
       if (!this.cachedState) {
         this.cacheState()
       }
 
-      if (clearConnection) {
-        this.setConnectionPreview(this.previewConnectedPortId)
+      const previewPortId = this.connectablePortIds[index]
+
+      if (previewPortId && !this.ports[portId]?.connectedPortIds.includes(previewPortId)) {
+        this.setConnectionPreview(previewPortId)
       } else {
-        this.commitCachedState()
-        this.setConnectablePortIds({ portId })
+        // TODO: use electron system beep
+        console.log('🛑')
+        this.unsetConnectionPreview()
       }
-
-      this.setConnectionPreview(this.connectablePortIds[index])
-
       this.selectedPortIndex = index
     },
 
     /**
      * Sets the ID of the active (i.e., 'previewed'/'enlarged') port.
      *
-     * @param store
      * @param portId - ID of the port to activate, or null to remove it
      */
     setActivePortId (portId: string | null) {
@@ -839,7 +816,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Rotates all selected elements by 90 degrees.
      *
-     * @param store
      * @param direction - direction of rotation (1 = CW, -1 = CCW)
      */
     rotate (direction: number) {
@@ -906,7 +882,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Removes a Freeport from the document.
      * This can remove either a dragged freeport or a connector between two wire segments.
      *
-     * @param store
      * @param id - ID of the freeport item
      */
     removeFreeport (id: string) {
@@ -941,7 +916,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * For a joint, include all required params, including the IDs of the destination ports and the freeport ports.
      * For a dragged port, include the source IDs (if dragged from an output) or the target IDs (if dragged from an input).
      *
-     * @param store
      * @param data - IDs for apply the new freeport
      */
     createFreeport (data: {
@@ -1002,7 +976,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Establishes a connection after a user drags a port to connect it to an item.
      * This will disconnect the temporary wire and port being dragged, and establish a new connection between the two items.
      *
-     * @param store
      * @param payload
      * @param payload.sourceId - the ID of the source port (if being dragged from one)
      * @param payload.targetId - the ID of the target port (if being dragged from one)
@@ -1055,15 +1028,13 @@ export const createDocumentStore = (id: string) => defineStore({
         this.removeElement(item.id)
       }
 
-      this.activeFreeportId = null
-      this.connectablePortIds = []
+      this.clearStatelessInfo()
     },
 
     /**
      * Sets the list of connectable port IDs.
      * This should be invoked whenever a user starts dragging a port.
      *
-     * @param store
      * @param portId - the ID of the port being dragged
      */
     setConnectablePortIds ({ portId, isDragging }: { portId: string, isDragging?: boolean }) {
@@ -1097,7 +1068,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Adds the item having the given ID to the oscilloscope if the value is true, or removes it otherwise.
      *
-     * @param store
      * @param payload
      * @param payload.id - item ID
      * @param payload.value
@@ -1137,7 +1107,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Sets the number of input ports that a LogicGate should have.
      * If the number is less than the current number of ports, take away the difference number of existing ports.
      *
-     * @param store
      * @param payload
      * @param payload.id - LogicGate ID
      * @param payload.count - new number of input ports
@@ -1181,7 +1150,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Updates the properties values. If no properties have changed, then no changes will take effect.
      * This will perform any actions necessary to occur when a property value changes.
      *
-     * @param store
      * @param payload
      * @param payload.id - item ID
      * @param payload.properties - new version of the properties
@@ -1207,10 +1175,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
         this.items[id].properties[propertyName].value = property.value
       }
-    },
-
-    setActiveFreeportId (id: string | null) {
-      this.activeFreeportId = id
     },
 
     /**
@@ -1252,10 +1216,7 @@ export const createDocumentStore = (id: string) => defineStore({
       if (this.cachedState) {
         this.undoStack.push(this.cachedState.toString())
         this.cachedState = null
-
-        while (this.redoStack.length > 0) {
-          this.redoStack.pop()
-        }
+        this.redoStack = []
       }
     },
 
@@ -1327,7 +1288,7 @@ export const createDocumentStore = (id: string) => defineStore({
       if (nodeId) {
         this.simulation.addSiblingPort(port.id, nodeId)
       } else {
-        this.simulation.addNode(this.items[id], this.ports)
+        this.simulation.addNode(this.items[itemId], this.ports)
       }
     },
 
@@ -1632,7 +1593,7 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param payload.target - target port ID
      * @param payload.connectionChainId - optional connection chain ID to add the connection segment to
      */
-    connect ({ source, target, connectionChainId }: { source?: string, target?: string, connectionChainId?: string }) {
+    connect ({ source, target, connectionChainId, isPreview }: { source?: string, target?: string, connectionChainId?: string, isPreview?: boolean }) {
       const id = `conn_${rand()}`
 
       if (source && target) {
@@ -1644,6 +1605,10 @@ export const createDocumentStore = (id: string) => defineStore({
           groupId: null,
           zIndex: ++this.zIndex,
           isSelected: false
+        }
+
+        if (isPreview) {
+          this.connectionPreviewId = id
         }
 
         this.ports[source].connectedPortIds.push(target)
@@ -1673,8 +1638,8 @@ export const createDocumentStore = (id: string) => defineStore({
           .simulation
           .removeConnection(source, target)
 
-        const sourceIndex = this.ports[source].connectedPortIds.findIndex(id => id === source)
-        const targetIndex = this.ports[target].connectedPortIds.findIndex(id => id === target)
+        const sourceIndex = this.ports[source].connectedPortIds.findIndex(id => id === target)
+        const targetIndex = this.ports[target].connectedPortIds.findIndex(id => id === source)
 
         this.ports[source].connectedPortIds.splice(sourceIndex, 1)
         this.ports[target].connectedPortIds.splice(targetIndex, 1)

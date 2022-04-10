@@ -4,10 +4,8 @@
     :zoom="store.zoomLevel"
     :style="{
       transform: `rotate(${90 * rotation}deg)`,
+      outline: 'none',
       zIndex
-    }"
-    :class="{
-      'item--selected': isSelected
     }"
     :snap-mode="type === ItemType.Freeport ? 'radius' : 'outer'"
     :snap-boundaries="store.snapBoundaries"
@@ -16,13 +14,15 @@
     :aria-label="name"
     :title="name"
     :tabindex="0"
-    @keydown.esc="onEscapeKey"
     @drag-start="onDragStart"
-    @drag="position => store.setSelectionPosition({ id, position })"
+    @drag="onDrag"
+    @drag-end="onDragEnd"
     @focus="onFocus"
     @blur="onBlur"
+    @keydown.esc="onEscapeKey"
     @mousedown.stop="focus"
-    ref="root"
+    ref="selectable"
+    data-test="selectable"
   >
     <properties
       v-if="isPropertiesEnabled"
@@ -33,8 +33,9 @@
       @focus="onPropertiesFocus"
       @blur="onBlur"
       aria-label="Properties dialog"
+      data-test="properties"
     />
-    <div class="item__content">
+    <selectable :is-selected="isSelected">
       <freeport v-if="type === ItemType.Freeport" />
       <integrated-circuit v-else-if="type === ItemType.IntegratedCircuit" />
       <input-switch
@@ -76,35 +77,42 @@
             :connected-port-ids="port.connectedPortIds"
             :rotation="rotation"
             @keypress.esc="onEscapeKey"
-            @focus="$event => onPortFocus($event, port.id)"
-            @blur="$event => onPortBlur($event, port.id)"
+            @focus="onPortFocus(port.id)"
+            @blur="$event => onPortBlur(port.id, $event)"
             @deselect="focus"
+            data-test="port-item"
           />
         </template>
       </port-set>
-    </div>
+    </selectable>
   </draggable>
 </template>
 
 <script lang="ts">
 import ResizeObserver from 'resize-observer-polyfill'
 import { StoreDefinition } from 'pinia'
-import { defineComponent, PropType, onMounted, reactive, ref, ComponentPublicInstance, computed } from 'vue'
-import Clock from '../components/item/elements/Clock.vue'
-import Draggable from '../components/Draggable.vue'
-import LogicGate from '../components/item/elements/LogicGate.vue'
-import InputSwitch from '../components/item/elements/InputSwitch.vue'
-import IntegratedCircuit from '../components/item/elements/IntegratedCircuit.vue'
-import Lightbulb from '../components/item/elements/Lightbulb.vue'
-import Freeport from '../components/item/Freeport.vue'
-import PortHandle from '../components/PortHandle.vue'
-import PortSet from '../components/item/PortSet.vue'
-import Properties from '../components/item/Properties.vue'
+import { defineComponent, PropType, onMounted, ref, ComponentPublicInstance, computed } from 'vue'
+import Clock from '@/components/item/elements/Clock.vue'
+import Draggable from '@/components/Draggable.vue'
+import LogicGate from '@/components/item/elements/LogicGate.vue'
+import InputSwitch from '@/components/item/elements/InputSwitch.vue'
+import IntegratedCircuit from '@/components/item/elements/IntegratedCircuit.vue'
+import Lightbulb from '@/components/item/elements/Lightbulb.vue'
+import Freeport from '@/components/item/Freeport.vue'
+import PortHandle from '@/components/PortHandle.vue'
+import PortSet from '@/components/item/PortSet.vue'
+import Properties from '@/components/item/Properties.vue'
+import Selectable from '@/components/Selectable.vue'
 import PortItem from './PortItem.vue'
-import ItemType from '../types/enums/ItemType'
-import ItemSubtype from '../types/enums/ItemSubtype'
+import ItemType from '@/types/enums/ItemType'
+import ItemSubtype from '@/types/enums/ItemSubtype'
 import DocumentState from '@/store/DocumentState'
 
+/**
+ * This component represents a two-dimensional item in the editor.
+ * This can take on the form of a logic gate, input switch, lightbulb, user label, and more.
+ * Items also contain ports, which are the circles that wires attach to to provide or send signals.
+ */
 export default defineComponent({
   name: 'Item',
   components: {
@@ -118,9 +126,13 @@ export default defineComponent({
     PortHandle,
     PortSet,
     PortItem,
-    Properties
+    Properties,
+    Selectable
   },
   props: {
+    /**
+     * Bounding box of the item.
+     */
     boundingBox: {
       type: Object as PropType<BoundingBox>,
       default: () => ({
@@ -130,50 +142,100 @@ export default defineComponent({
         bottom: 0
       })
     },
+
+    /**
+     * The directional rotation of the item.
+     *
+     * @values 0 = Left, 1, 2, 3
+     */
     rotation: {
       type: Number,
       default: 0
     },
+
+    /**
+     * CSS z-index value.
+     */
     zIndex: {
       type: Number,
-      default: 0
+      default: 1
     },
+
+    /**
+     * Whether or not the item is selected.
+     */
     isSelected: {
       type: Boolean,
       default: false
     },
+
+    /**
+     * High-level taxonomy of the item.
+     */
     type: {
       type: String as PropType<ItemType>,
       required: true
     },
+
+    /**
+     * More specific taxnommy of the item.
+     */
     subtype: {
       type: String,
       required: true
     },
+
+    /**
+     * x-y position of the item in the editor.
+     */
     position: {
       type: Object as PropType<Point>,
       required: true
     },
+
+    /**
+     * Optional user-friendly name of the item.
+     */
     name: {
       type: String,
       default: 'Node'
     },
+
+    /**
+     * List of port IDs associated with the item.
+     */
     portIds: {
       type: Array as PropType<string[]>,
       default: () => []
     },
+
+    /**
+     * Optional editable properties.
+     */
     properties: {
       type: Object as PropType<PropertySet>,
       default: () => ({})
     },
+
+    /**
+     * ID of the group the item is associated to (if any).
+     */
     groupId: {
       type: String,
       default: null
     },
+
+    /**
+     * Item ID.
+     */
     id: {
       type: String,
       required: true
     },
+
+    /**
+     * Document store instance.
+     */
     store: {
       type: Function as PropType<StoreDefinition<string, DocumentState>>,
       required: true
@@ -181,15 +243,20 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const store = props.store()
-    const root = ref<ComponentPublicInstance<HTMLElement>>()
+    const selectable = ref<ComponentPublicInstance<HTMLElement>>()
     const forceDragging = ref(false)
-    let hasFocus = false
 
+    let hasFocus = false
+    let isDragging = false
+
+    /* list of all ports that belong to this item */
     const ports = computed(() => {
       return props
         .portIds
         .map(portId => store.ports[portId])
     })
+
+    /* slot-to-port-list map for displaying port-item elements */
     const portList = computed(() => {
       const locations = ['left', 'top', 'right', 'bottom']
       const map = ports.value.reduce((map: Record<string, Port[]>, port: Port) => ({
@@ -211,36 +278,84 @@ export default defineComponent({
 
       return map
     })
+
+    /* whether or not the properties trigger button should be visible */
     const isPropertiesEnabled = computed(() => {
       return props.isSelected && hasFocus && Object.keys(props.properties).length > 0
     })
 
+    /**
+     * Places the window focus on the item element.
+     */
     function focus () {
-      root.value?.$el.focus()
+      selectable.value?.$el.focus()
+      hasFocus = true
     }
 
+    /**
+     * Item drag start event handler.
+     * This will compute the snappable boundaries on the editor.
+     */
     function onDragStart () {
-      if (props.type !== ItemType.Freeport) {
-        store.commitState()
-      }
       store.setSnapBoundaries(props.id)
     }
 
+    /**
+     * Item drag event handler.
+     * This will cache the undo-able state if dragged for the first time.
+     *
+     * @param position - new position that item has moved to
+     */
+    function onDrag (position: Point) {
+      if (!isDragging) {
+        isDragging = true
+        store.cacheState() // cache the undo-able state in case a drag completes
+      }
+
+      store.setSelectionPosition({ id: props.id, position })
+    }
+
+    /**
+     * Item drag end event handler.
+     * This will commit the cached undo-able state.
+     */
+    function onDragEnd () {
+      if (isDragging) {
+        store.commitCachedState()
+        isDragging = false
+      }
+    }
+
+    /**
+     * Escape keydown event handler.
+     * This will blur the element if neither it nor any of its children are focused.
+     *
+     * @param $event
+     */
     function onEscapeKey ($event: KeyboardEvent) {
-      if (document.activeElement === root.value?.$el) {
-        root.value?.$el.blur()
+      if (document.activeElement === selectable.value?.$el) {
+        selectable.value?.$el.blur()
       } else {
         $event.preventDefault()
       }
     }
 
+    /**
+     * Item blur event handler.
+     * Updates `hasFocus` to false if the selection has left the item and any of its children.
+     */
     function onBlur ($event: FocusEvent) {
-      if (!root.value?.$el?.contains($event.relatedTarget as Node)) {
+      if (!selectable.value?.$el.contains($event.relatedTarget as Node)) {
         hasFocus = false
       }
     }
 
-    function onFocus ($event: FocusEvent) {
+    /**
+     * Item focus event handler.
+     *
+     * @emits select if item not already selected
+     */
+    function onFocus () {
       if (!props.isSelected) {
         emit('select')
       }
@@ -248,46 +363,62 @@ export default defineComponent({
       hasFocus = true
     }
 
+    /**
+     * Properties dialog trigger button focus event handler.
+     */
     function onPropertiesFocus () {
       store.setActivePortId(null)
       hasFocus = true
     }
 
-    function onPortFocus ($event: FocusEvent, portId: string) {
-      if (!props.isSelected) {
-        emit('select')
-      }
-
+    /**
+     * Port focus event handler.
+     *
+     * @param portId - ID of the port focused
+     */
+    function onPortFocus (portId: string) {
+      onFocus()
       store.setActivePortId(portId)
-      hasFocus = true
     }
 
-    function onPortBlur ($event: FocusEvent, portId: string) {
+    /**
+     * Port blur event handler.
+     *
+     * @param portId - ID of the port blurred
+     * @param $event - focus event
+     */
+    function onPortBlur (portId: string, $event: FocusEvent) {
       if (store.activePortId === portId) {
         store.setActivePortId(null)
       }
       onBlur($event)
     }
 
+    /**
+     * Item resize event handler. This will inform the store of the new size of the item.
+     *
+     * @param targets - target element that has been resized
+     */
     function onSizeChanged ([ target ]: ResizeObserverEntry[]) {
-      if (target) {
-        store.setItemSize({ id: props.id, rect: target.contentRect as DOMRectReadOnly })
-      }
+      store.setItemSize({
+        id: props.id,
+        rect: target.contentRect
+      })
     }
 
     const observer = new ResizeObserver(onSizeChanged)
 
     onMounted(() => {
-      if (root.value) {
-        observer.observe(root.value.$el)
+      if (selectable.value) {
+        observer.observe(selectable.value.$el)
       }
 
       if (store.activeFreeportId === props.id) {
-        // if the item is selected when it is created, then it is actively being drawn
+        // if the item is an active freeport, then it is actively being drawn
         // allow for it to be moved when the mouse moves on first creation
         forceDragging.value = true
-
-        store.setActiveFreeportId(null)
+        store.activeFreeportId = null
+        isDragging = true
       }
 
       store.setProperties({
@@ -297,7 +428,7 @@ export default defineComponent({
     })
 
     return {
-      root,
+      selectable,
       store,
       ports,
       rawStore: props.store,
@@ -306,6 +437,8 @@ export default defineComponent({
       isPropertiesEnabled,
       focus,
       onDragStart,
+      onDrag,
+      onDragEnd,
       onEscapeKey,
       onBlur,
       onFocus,
@@ -326,13 +459,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-.item--selected {
-  outline: none;
-}
-
-.item--selected .item__content {
-  filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .7));
-}
-</style>

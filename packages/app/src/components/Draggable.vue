@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, StyleValue } from 'vue'
 
 export default defineComponent({
   name: 'Draggable',
@@ -111,7 +111,7 @@ export default defineComponent({
     }
   },
   computed: {
-    style () {
+    style (): StyleValue {
       if (this.lockVisual) {
         return {}
       }

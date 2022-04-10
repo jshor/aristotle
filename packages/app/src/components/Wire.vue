@@ -1,7 +1,8 @@
 <template>
   <svg class="wire"
     :class="{
-      'wire--selected': isSelected
+      'wire--selected': isSelected,
+      'wire--preview': isPreview
     }"
   :width="wire.width" :height="wire.height" :style="{
     top: `${topLeft.y + wire.minY}px`,
@@ -61,6 +62,10 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    isPreview: {
+      type: Boolean,
+      default: false
+    },
     isSelected: {
       type: Boolean,
       default: false
@@ -118,6 +123,10 @@ export default defineComponent({
 
   &--selected {
     filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .7));
+  }
+
+  &--preview {
+    opacity: 0.5;
   }
 }
 
