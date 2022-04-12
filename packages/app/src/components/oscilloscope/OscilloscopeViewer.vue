@@ -1,66 +1,85 @@
 <template>
-  <div
-    v-if="hasWaves"
-    class="oscilloscope"
-  >
-    <div class="oscilloscope-list">
-      <div
-        v-for="(v, key) in oscillations"
-        :key="key"
-        class="oscilloscope-list__item">
-        {{ key }}
-      </div>
-      <div class="oscilloscope-list__item">Elapsed (s)</div>
-    </div>
-    <div class="binary-wave" ref="timeline"
-        :style="{ width }">
-      <div
-        v-for="(value, key) in oscillations"
-        :key="key"
-        :style="{ width }"
-        class="binary-wave__svg">
-        <svg
-          :width="value.width"
-          :viewBox="`0 0 ${value.width} 2`"
-          preserveAspectRatio="none">
-          <polyline
-            :points="value.points"
-            stroke="#ffffff"
-            stroke-width="2"
-            fill="none"
-            vector-effect="non-scaling-stroke"
-          />
-        </svg>
-      </div>
-      <div
-        :style="{ width }"
-        class="timeline">
+  <div class="oscilloscope-outer">
+
+    <div class="oscilloscope-action-bar">
+      <div class="oscilloscope-action-bar__title">Oscilloscope</div>
+      <div class="oscilloscope-action-bar__actions">
         <div
-          v-for="second in (oscilloscope.secondsElapsed - oscilloscope.secondsOffset)"
-          :style="{ width: '40px', minWidth: '40px' }"
-          :key="second"
-          class="timeline__second">
-          {{ oscilloscope.secondsOffset + second }}
+          role="button"
+          class="oscilloscope-action-bar__button"
+        >
+          <icon :icon="faBan" />
+        </div>
+        <div
+          role="button"
+          class="oscilloscope-action-bar__button"
+        >
+          <icon :icon="faClose" />
         </div>
       </div>
     </div>
-  </div>
-  <div
-    v-else
-    class="oscilloscope"
-  >
-    No elements to observe.
+
+
+    <div
+      v-if="hasWaves"
+      class="oscilloscope"
+    >
+      <div class="oscilloscope-list" ref="list">
+        <div
+          v-for="(v, key) in oscillations"
+          :key="key"
+          :style="{ color: `hsla(${v.hue},70%,70%,0.8)` }"
+          class="oscilloscope-list__item">
+          {{ key }}
+        </div>
+      </div>
+      <div class="binary-wave" ref="timeline"
+          :style="{ width }">
+        <div
+          v-for="(value, key) in oscillations"
+          :key="key"
+          :style="{ width }"
+          class="binary-wave__svg">
+          <svg
+            :width="value.width"
+            :viewBox="`0 0 ${value.width} 2`"
+            preserveAspectRatio="none">
+            <polyline
+              :points="value.points"
+              :stroke="`hsla(${value.hue},70%,70%,0.8)`"
+              stroke-width="2"
+              fill="none"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div
+      v-else
+      class="oscilloscope"
+    >
+      No elements to observe.
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
+import { faArrowRightToBracket, faBan, faClose } from '@fortawesome/free-solid-svg-icons'
+import Icon from '@/components/Icon.vue'
 
 export default defineComponent({
   name: 'OscilloscopeViewer',
+  components: {
+    Icon
+  },
   data () {
     return {
-      displays: {}
+      displays: {},
+      faArrowRightToBracket,
+      faBan,
+      faClose
     }
   },
   props: {
@@ -87,26 +106,38 @@ export default defineComponent({
   mounted () {
     if (!this.hasWaves) return
     const timeline = this.$refs.timeline as HTMLElement
-    timeline.scrollLeft = timeline.scrollWidth
+    const list = this.$refs.list as HTMLElement
+
     this.scrollToNextInterval()
+
+    list.addEventListener('scroll', this.onTimelineScroll)
+    timeline.addEventListener('scroll', this.onTimelineScroll)
+  },
+  beforeDestroy () {
+    const timeline = this.$refs.timeline as HTMLElement
+    const list = this.$refs.list as HTMLElement
+
+    list.removeEventListener('scroll', this.onTimelineScroll)
+    timeline.removeEventListener('scroll', this.onTimelineScroll)
   },
   methods: {
     scrollToNextInterval () {
-      setTimeout(() => {
-        (this.$refs.timeline as HTMLElement).scrollLeft += 40
-      })
+      const timeline = this.$refs.timeline as HTMLElement
+
+      timeline.scrollLeft = timeline.scrollWidth
+    },
+    onTimelineScroll () {
+      const list = this.$refs.list as HTMLElement
+      const timeline = this.$refs.timeline as HTMLElement
+
+      list.scrollTop = timeline.scrollTop
+      timeline.scrollTop = list.scrollTop
     }
   },
   watch: {
-    waves: {
+    oscilloscope: {
       handler () {
-        if (!this.hasWaves) return
-
-        const { scrollLeft, offsetWidth, scrollWidth } = this.$refs.timeline as HTMLElement
-
-        if (Math.abs(scrollLeft + offsetWidth - scrollWidth) <= 40) {
-          this.scrollToNextInterval()
-        }
+        this.scrollToNextInterval()
       },
       deep: true
     }
@@ -115,10 +146,54 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-$color-bg-primary: #000;
-$color-bg-tertiary: #808080;
-$color-bg-secondary: #e8e8e8;
-$color-secondary: #c0c0c0;
+// background colors
+$color-bg-primary: #1D1E25;
+$color-bg-secondary: #333641;
+$color-bg-tertiary: #3D404B;
+$color-bg-quaternary: #454857;
+
+// foreground colors
+$color-primary: #fff;
+$color-secondary: #9ca0b1;
+$color-shadow: #000;
+
+.oscilloscope-outer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+}
+
+.oscilloscope-action-bar {
+  display: flex;
+  box-sizing: border-box;
+  height: 2.5em;
+
+  &__actions {
+    flex: 1;
+    justify-content: flex-end;
+    display: flex;
+  }
+
+  &__title {
+    padding: 0.5em;
+  }
+
+  &__button {
+    color: $color-primary;
+    background-color: transparent;
+    border-radius: 2px;
+    padding: 0.5em;
+    box-sizing: border-box;
+    height: 2.5em;
+    width: 2.5em;
+    text-align: center;
+
+    &:hover {
+      background-color: $color-bg-quaternary;
+    }
+  }
+}
 
 .oscilloscope {
   background-color: $color-bg-primary;
@@ -127,52 +202,60 @@ $color-secondary: #c0c0c0;
   text-align: right;
   display: flex;
   color: #fff;
+  box-sizing: border-box;
+  height: calc(100% - 2.5em);
+}
+
+.oscilloscope-list, .binary-wave {
+  overflow: overlay;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .oscilloscope-list {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 0 0.5em;
+  box-sizing: border-box;
 
   &__item {
+    padding: 0 0.5em;
+    border-top: 1px solid $color-bg-tertiary;
+    box-sizing: border-box;
     text-align: right;
     flex: 1;
     display: flex;
     align-items: center;
+    min-height: 40px;
+  }
 
-    &:last-of-type {
-      color: $color-secondary;
-      text-align: right;
-      justify-content: flex-end;
-      flex: 0;
-    }
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
 .binary-wave {
   flex: 1;
-  // overflow-x: scroll;
-  position: relative;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 
   &__svg {
+    background-size: 40px 3px;
+    background-image: linear-gradient(to right, $color-bg-tertiary 1px, transparent 0px);
+    border-top: 1px solid $color-bg-tertiary;
+    min-width: 100%;
+    text-align: left;
+    min-height: 40px;
     flex: 1;
     background-attachment: scroll;
-    background-size: 40px 40px;
-    background-image: linear-gradient(to right, $color-bg-tertiary 1px, transparent 1px);
     padding: 5px 0;
+    box-sizing: border-box;
 
     svg {
       height: 100%;
     }
   }
-}
-
-body, html {
-
-    height: auto;
 }
 
 .timeline {

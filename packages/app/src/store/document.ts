@@ -48,6 +48,9 @@ export const createDocumentStore = (id: string) => defineStore({
     taxonomyCounts: {},
     zoomLevel: 1,
     zIndex: 1,
+    isOscilloscopeEnabled: true,
+    isCircuitEvaluated: false,
+
     /* the following variables are 'temporary' information */
     snapBoundaries: [],
     connectablePortIds: [],
@@ -136,12 +139,26 @@ export const createDocumentStore = (id: string) => defineStore({
 
     saveIntegratedCircuit () {
       const { integratedCircuitItem, integratedCircuitPorts } = createIntegratedCircuit(this.ports, this.items, this.connections)
+      const id = idMapper.mapIntegratedCircuitIds(integratedCircuitItem, integratedCircuitPorts)
 
       // TODO: typescript broken
-      // this.addIntegratedCircuit(idMapper.mapIntegratedCircuitIds(integratedCircuitItem, integratedCircuitPorts))
+      // this.addIntegratedCircuit({
+      //   integratedCircuitItem: id.integratedCircuitItem,
+      //   integratedCircuitPorts: id.integratedCircuitPorts
+      // })
+      console.log(JSON.stringify({
+        items: id.integratedCircuitItem,
+        ports: id.integratedCircuitPorts,
+        groups: {},
+        connections: {}
+      }, null, 2))
     },
 
     buildCircuit () {
+      if (this.simulation.oscillator) {
+        this.simulation.oscillator.stop()
+      }
+
       const circuit = new SimulationService(Object.values(this.items), Object.values(this.connections), this.ports)
 
       circuit.onChange((valueMap: any, payload: OscilloscopeInfo) => {
@@ -876,6 +893,10 @@ export const createDocumentStore = (id: string) => defineStore({
       this
         .simulation
         .setPortValue(id, value)
+
+      if (!this.simulation.circuit.isComplete()) {
+        this.isCircuitEvaluated = false
+      }
     },
 
     /**
@@ -1065,6 +1086,32 @@ export const createDocumentStore = (id: string) => defineStore({
         .map(({ id }) => id)
     },
 
+    toggleOscilloscope () {
+      if (this.isOscilloscopeEnabled) {
+        this.disableOscilloscope()
+      } else {
+        this.enableOscilloscope()
+      }
+    },
+
+    enableOscilloscope () {
+      Object
+        .values(this.items)
+        .forEach(item => this.simulation.monitorNode(item, this.ports))
+
+      this.isOscilloscopeEnabled = true
+    },
+
+    disableOscilloscope () {
+      Object
+        .values(this.items)
+        .forEach(({ portIds }) => {
+          portIds.forEach(this.simulation.unmonitorPort)
+        })
+
+      this.isOscilloscopeEnabled = false
+    },
+
     /**
      * Adds the item having the given ID to the oscilloscope if the value is true, or removes it otherwise.
      *
@@ -1177,13 +1224,18 @@ export const createDocumentStore = (id: string) => defineStore({
       }
     },
 
+    stepThroughCircuit () {
+      this.simulation.circuit.next()
+      this.isCircuitEvaluated = this.simulation.circuit.isComplete()
+    },
+
     /**
      * Assigns values to the ports in the this according to the given map.
      *
      * @param this
      * @param valueMap - Port-ID-to-value mapping
      */
-     setPortValues (valueMap: { [id: string]: number }) {
+    setPortValues (valueMap: { [id: string]: number }) {
       for (const portId in valueMap) {
         if (this.ports[portId]) {
           this.ports[portId].value = valueMap[portId]
@@ -1412,7 +1464,7 @@ export const createDocumentStore = (id: string) => defineStore({
 
       this
         .simulation
-        .addIntegratedCircuit(integratedCircuitItem, integratedCircuitPorts)
+        .addNode(integratedCircuitItem, integratedCircuitPorts)
     },
 
     /**

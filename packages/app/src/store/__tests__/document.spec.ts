@@ -2528,7 +2528,7 @@ describe('actions', () => {
 
       beforeEach(() => {
         jest
-          .spyOn(store.simulation, 'addIntegratedCircuit')
+          .spyOn(store.simulation, 'addNode')
           .mockImplementation(jest.fn())
 
         store.addIntegratedCircuit({
@@ -2550,8 +2550,8 @@ describe('actions', () => {
       })
 
       it('should install the integrated circuit onto the active circuit', () => {
-        expect(store.simulation.addIntegratedCircuit).toHaveBeenCalledTimes(1)
-        expect(store.simulation.addIntegratedCircuit).toHaveBeenCalledWith(icItem, { port1, port2 })
+        expect(store.simulation.addNode).toHaveBeenCalledTimes(1)
+        expect(store.simulation.addNode).toHaveBeenCalledWith(icItem, { port1, port2 })
       })
     })
   })

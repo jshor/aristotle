@@ -14,6 +14,8 @@ export default interface DocumentState {
   zoomLevel: number
   simulation: SimulationService
   oscilloscope: OscilloscopeInfo
+  isOscilloscopeEnabled: boolean
+  isCircuitEvaluated: boolean
   activeFreeportId: string | null
   selectedItemIds: string[]
   selectedConnectionIds: string[]

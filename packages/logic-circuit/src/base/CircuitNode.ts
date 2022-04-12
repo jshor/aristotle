@@ -185,7 +185,7 @@ class CircuitNode {
    * @returns {Number}
    */
   public getProjectedValue = (): number => {
-    return this.newValue || this.value
+    return this.eval() || this.newValue || this.value
   }
 }
 

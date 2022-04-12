@@ -9,7 +9,7 @@ const BASE_REFRESH_RATE = 100
  * to determine when a period (defined in `BASE_REFRESH_RATE`) has passed.
  */
 export default class OscillationService {
-  private interval: number = 0
+  private isPaused: boolean = false
 
   private waves: { [id: string]: Pulse } = {}
 
@@ -29,14 +29,16 @@ export default class OscillationService {
    * Starts the oscillator.
    */
   start = (): void => {
-    this.interval = window.setInterval(this.tick.bind(this))
+    // this.interval = window.setInterval(this.tick.bind(this))
+    this.isPaused = false
+    requestAnimationFrame(this.tick)
   }
 
   /**
    * Stops the oscillator.
    */
   stop = (): void => {
-    clearInterval(this.interval)
+    this.isPaused = true
   }
 
   clear = () => {
@@ -64,7 +66,8 @@ export default class OscillationService {
       if (waves[name].hasGeometry) {
         displays[name] = {
           points: getPoints(waves[name].segments),
-          width: waves[name].width
+          width: waves[name].width,
+          hue: waves[name].hue
         }
       }
     }
@@ -79,7 +82,7 @@ export default class OscillationService {
   }
 
   broadcast = () => {
-    const MAX_HISTORY_COUNT = 40 // TODO: should be user-configurable
+    const MAX_HISTORY_COUNT = 400 // TODO: should be user-configurable
 
     if (this.secondsElapsed - this.secondsOffset >= MAX_HISTORY_COUNT) {
       this.secondsOffset += MAX_HISTORY_COUNT / 2
@@ -95,8 +98,8 @@ export default class OscillationService {
 
     this.fn({
       waves: this.computeWaveGeometry(this.waves),
-      secondsElapsed: Math.ceil(this.secondsElapsed),
-      secondsOffset: Math.ceil(this.secondsOffset)
+      secondsElapsed: this.secondsElapsed,
+      secondsOffset: this.secondsOffset
     })
   }
 
@@ -104,6 +107,8 @@ export default class OscillationService {
    * Triggers all oscillation update events.
    */
   tick = (): void => {
+    if (this.isPaused) return
+
     const now = Date.now()
 
     if (now >= this.lastUpdateTime + this.refreshRate) {
@@ -112,10 +117,13 @@ export default class OscillationService {
       this.incrementElapsed()
     }
 
-    if (this.secondsElapsed % 1 === 0 && this.lastSignalTime !== this.secondsElapsed) {
+    // if (this.secondsElapsed % 1 === 0 && this.lastSignalTime !== this.secondsElapsed) { // use this line instead if laggy
+    if (this.lastSignalTime !== this.secondsElapsed) {
       this.lastSignalTime = this.secondsElapsed
       this.broadcast()
     }
+
+    requestAnimationFrame(this.tick)
   }
 
   /**
@@ -139,7 +147,6 @@ export default class OscillationService {
       this.waves[wave.id] = wave
 
       if (this.ticks === 0) {
-        this.start()
         this.broadcast()
       }
     }
