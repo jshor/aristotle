@@ -41,6 +41,7 @@ export default class SimulationService {
       this.payload = payload
       this.fn(this.valueMap, payload)
     })
+    this.oscillator.start()
   }
 
   onChange = (fn: Function) => {
@@ -60,16 +61,22 @@ export default class SimulationService {
     this.fn(this.valueMap, this.payload)
   }
 
-  step = (force = false) => {
+  step = (iteration: number = 0) => {
     if (this.isPaused) return
 
-    if (!this.circuit.isComplete() || force) {
-      this.circuit.next()
+    this.circuit.next()
 
-      if (!this.debugMode) { // TODO: check for infinite loops
-        return this.step()
-      }
+    const shouldContinue = this.circuit.queue.length > 0
+
+    if (iteration > 10000) {
+      // TODO: configure this to detect infinite loops...
+      throw new Error('An infinite loop detected!')
     }
+
+    if (shouldContinue) {
+      this.step(++iteration)
+    }
+
     this.fn(this.valueMap, this.payload)
   }
 
@@ -79,10 +86,12 @@ export default class SimulationService {
   }
 
   setPortValue = (portId: string, value: number) => {
-    this.nodes[portId].setValue(value)
-    this.circuit.enqueue(this.nodes[portId])
-    this.waves[portId]?.drawPulseChange(value)
-    this.step()
+    if (this.nodes[portId].value !== value) {
+      this.nodes[portId].setValue(value)
+      this.circuit.enqueue(this.nodes[portId])
+      this.waves[portId]?.drawPulseChange(value)
+      this.step()
+    }
   }
 
   getLogicGateNode = (subtype: string, id: string, inputIds: string[]): CircuitNode => {
@@ -122,10 +131,16 @@ export default class SimulationService {
     Object
       .values(connections)
       .forEach(c => this.addConnection(c.source, c.target))
+
+    // this.monitorNode(item, ports)
   }
 
   addNode = (item: Item, ports: { [id: string]: Port }, forceContinue: boolean = false) => {
     if (item.portIds.length === 0) return // if there are no ports, then there is nothing to add
+
+    if (item.integratedCircuit) {
+      return this.addIntegratedCircuit(item, ports)
+    }
 
     const inputIds = item.portIds.filter(portId => ports[portId].type === PortType.Input)
     const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
@@ -137,26 +152,50 @@ export default class SimulationService {
     outputIds.forEach(portId => this.addPort(portId, node))
 
     if (item.type === ItemType.InputNode && item.subtype === ItemSubtype.Clock) {
-      this.clocks[outputIds[0]] = new ClockService(outputIds[0], 1000)
-      this.clocks[outputIds[0]].onUpdate((value: number) => {
-        this.setPortValue(outputIds[0], value)
-      })
-      this.oscillator.add(this.clocks[outputIds[0]])
+      this.addClock(outputIds[0])
     }
 
     this.circuit.addNode(node)
+
+    if (!forceContinue) {
+      this.monitorNode(item, ports) // TODO: comment back in to get initial oscilloscope
+    }
   }
 
   removeNode = (portIds: string[] = []) => {
-    const node = portIds
-      .map(portId => this.nodes[portId])
-      .find(node => !!node)
+    const node = this.nodes[portIds[0]]
 
     if (node) {
       this.circuit.removeNode(node)
 
       portIds.forEach(this.removePort)
     }
+  }
+
+  monitorNode = (item: Item, ports: Record<string, Port>) => {
+    if (item.properties?.showInOscilloscope?.value) {
+      const inputIds = item.portIds.filter(portId => ports[portId].type === PortType.Input)
+      const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
+      const portIds = item.type == ItemType.OutputNode
+      ? inputIds // for output nodes, all incoming signals should be monitored
+      : outputIds // for all other nodes, only its output signal should be monitored
+
+      portIds.forEach(portId => {
+        this.monitorPort(portId, this.nodes[portId].value)
+      })
+    }
+  }
+
+  addClock = (portId: string) => {
+    this.clocks[portId] = new ClockService(portId, 1000)
+    this.clocks[portId].onUpdate((value: number) => {
+      this.setPortValue(portId, value)
+    })
+    this.oscillator.add(this.clocks[portId])
+  }
+
+  addSiblingPort = (portId: string, siblingPortId: string) => {
+    this.addPort(portId, this.nodes[siblingPortId])
   }
 
   addPort = (portId: string, node: CircuitNode) => {
@@ -168,11 +207,7 @@ export default class SimulationService {
     })
   }
 
-  addSiblingPort = (portId: string, siblingPortId: string) => {
-    this.addPort(portId, this.nodes[siblingPortId])
-  }
-
-  removePort = (portId: string) => {
+  removePort = (portId: string) => { // TODO: need to remove wave from oscillation
     if (this.clocks[portId]) {
       this.oscillator.remove(this.clocks[portId])
     }
@@ -201,8 +236,10 @@ export default class SimulationService {
   }
 
   monitorPort = (portId: string, value: number) => {
-    this.waves[portId] = new BinaryWaveService(portId, value)
-    this.oscillator.add(this.waves[portId])
+    if (!this.waves[portId]) {
+      this.waves[portId] = new BinaryWaveService(portId, value)
+      this.oscillator.add(this.waves[portId])
+    }
   }
 
   unmonitorPort = (portId: string) => {

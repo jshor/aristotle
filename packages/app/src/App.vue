@@ -138,13 +138,11 @@ body {
 
   &__toolbar {
     width: 100%;
-    background: red;
     height: 50px;
   }
 
   &__bottom {
     max-height: calc(100% - 50px);
-    background: blue;
     flex: 1;
     display: flex;
   }

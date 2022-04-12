@@ -239,7 +239,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -278,7 +278,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -324,7 +324,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -370,7 +370,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -406,7 +406,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -442,7 +442,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },

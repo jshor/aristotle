@@ -3,19 +3,23 @@ import { LogicValue } from '@aristotle/logic-circuit'
 const SIGNAL_HEIGHT = 2
 const SEGMENT_WIDTH = 4 // px per refresh rate
 
+const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
+
 export default class BinaryWaveService implements Pulse {
-  public id: string
+  public id: string = rand()
+  public name: string
   public width: number = 0
   private lastY: number = 0
-  public segments: Point[] = [{ x: 0, y: SIGNAL_HEIGHT }]
+  public segments: Point[] = [{ x: SEGMENT_WIDTH, y: SIGNAL_HEIGHT }]
   private segmentWidth: number = SEGMENT_WIDTH
   public hasGeometry: boolean = true
+  public hue: number = ~~(360 * Math.random())
 
-  constructor (id: string, value: number = 1) {
-    this.id = id
+  constructor (name: string, value: number = 1) {
+    this.name = name
 
     if (value === 1) {
-      this.segments[0] = { x: 0, y: 0 }
+      this.segments[0] = { x: SEGMENT_WIDTH, y: 0 }
       this.lastY = SIGNAL_HEIGHT
     }
   }

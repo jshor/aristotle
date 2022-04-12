@@ -66,7 +66,7 @@
         },
         "startValue": {
           "label": "Start value",
-          "value": -1,
+          "value": 0,
           "type": "number",
           "options": {
             "True": 1,
@@ -76,7 +76,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -112,7 +112,7 @@
         },
         "startValue": {
           "label": "Start value",
-          "value": -1,
+          "value": 0,
           "type": "number",
           "options": {
             "True": 1,
@@ -122,7 +122,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -158,7 +158,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -194,7 +194,7 @@
         },
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -228,7 +228,7 @@
       "properties": {
         "showInOscilloscope": {
           "label": "Show in oscilloscope",
-          "value": false,
+          "value": true,
           "type": "boolean"
         }
       },
@@ -268,7 +268,7 @@
               },
               "showInOscilloscope": {
                 "label": "Show in oscilloscope",
-                "value": false,
+                "value": true,
                 "type": "boolean"
               }
             },
@@ -307,7 +307,7 @@
               },
               "showInOscilloscope": {
                 "label": "Show in oscilloscope",
-                "value": false,
+                "value": true,
                 "type": "boolean"
               }
             },
@@ -318,7 +318,7 @@
           },
           "switch1": {
             "id": "switch1",
-            "type": "CircuitNode",
+            "type": "Buffer",
             "subtype": "Clock",
             "portIds": [
               "inputNode_id_7904088",
@@ -344,7 +344,7 @@
               },
               "startValue": {
                 "label": "Start value",
-                "value": -1,
+                "value": 0,
                 "type": "number",
                 "options": {
                   "True": 1,
@@ -354,7 +354,7 @@
               },
               "showInOscilloscope": {
                 "label": "Show in oscilloscope",
-                "value": false,
+                "value": true,
                 "type": "boolean"
               }
             },
@@ -365,7 +365,7 @@
           },
           "switch2": {
             "id": "switch2",
-            "type": "CircuitNode",
+            "type": "Buffer",
             "subtype": "Switch",
             "portIds": [
               "inputNode_id_1034915",
@@ -391,7 +391,7 @@
               },
               "startValue": {
                 "label": "Start value",
-                "value": -1,
+                "value": 0,
                 "type": "number",
                 "options": {
                   "True": 1,
@@ -401,7 +401,7 @@
               },
               "showInOscilloscope": {
                 "label": "Show in oscilloscope",
-                "value": false,
+                "value": true,
                 "type": "boolean"
               }
             },
@@ -412,7 +412,7 @@
           },
           "lightbulb1": {
             "id": "lightbulb1",
-            "type": "CircuitNode",
+            "type": "Buffer",
             "subtype": "Lightbulb",
             "portIds": [
               "lightbulbInputPort1",
@@ -438,7 +438,7 @@
               },
               "showInOscilloscope": {
                 "label": "Show in oscilloscope",
-                "value": false,
+                "value": true,
                 "type": "boolean"
               }
             },
@@ -449,7 +449,7 @@
           },
           "lightbulb2": {
             "id": "lightbulb2",
-            "type": "CircuitNode",
+            "type": "Buffer",
             "subtype": "Lightbulb",
             "portIds": [
               "lightbulbInputPort2",
@@ -475,7 +475,7 @@
               },
               "showInOscilloscope": {
                 "label": "Show in oscilloscope",
-                "value": false,
+                "value": true,
                 "type": "boolean"
               }
             },
@@ -552,7 +552,7 @@
             "type": 1,
             "rotation": 0,
             "orientation": 0,
-            "value": -1,
+            "value": 0,
             "isFreeport": false
           },
           "nor1InputPort2": {
@@ -565,7 +565,7 @@
             "type": 1,
             "rotation": 0,
             "orientation": 0,
-            "value": -1,
+            "value": 0,
             "isFreeport": false
           },
           "nor1OutputPort1": {
@@ -578,7 +578,7 @@
             "type": 0,
             "rotation": 0,
             "orientation": 2,
-            "value": -1,
+            "value": 0,
             "isFreeport": false
           },
           "nor2InputPort1": {
@@ -656,7 +656,7 @@
             "type": 1,
             "rotation": 0,
             "orientation": 0,
-            "value": -1,
+            "value": 0,
             "isFreeport": false
           },
           "lightbulbInputPort2": {
@@ -732,6 +732,7 @@
     "inputNode_id_7904088": {
       "id": "inputNode_id_7904088",
       "elementId": "id_4364941",
+      "connectedPortIds": [],
       "position": {
         "x": 0,
         "y": 0
@@ -745,6 +746,7 @@
     "id_2927435": {
       "id": "id_2927435",
       "elementId": "switch1",
+      "connectedPortIds": [],
       "position": {
         "x": 151,
         "y": 320
@@ -758,6 +760,7 @@
     "inputNode_id_1034915": {
       "id": "inputNode_id_1034915",
       "elementId": "id_4364941",
+      "connectedPortIds": [],
       "position": {
         "x": 0,
         "y": 0
@@ -771,6 +774,7 @@
     "id_3101897": {
       "id": "id_3101897",
       "elementId": "switch2",
+      "connectedPortIds": [],
       "position": {
         "x": 151,
         "y": 520
@@ -784,6 +788,7 @@
     "outputNode_id_1091115": {
       "id": "outputNode_id_1091115",
       "elementId": "id_4364941",
+      "connectedPortIds": [],
       "position": {
         "x": 0,
         "y": 0
@@ -797,6 +802,7 @@
     "id_6740252": {
       "id": "id_6740252",
       "elementId": "lightbulb1",
+      "connectedPortIds": [],
       "position": {
         "x": 699,
         "y": 320
@@ -804,12 +810,13 @@
       "type": 1,
       "rotation": 0,
       "orientation": 0,
-      "value": -1,
+      "value": 0,
       "isFreeport": false
     },
     "outputNode_id_2891768": {
       "id": "outputNode_id_2891768",
       "elementId": "id_4364941",
+      "connectedPortIds": [],
       "position": {
         "x": 0,
         "y": 0
@@ -823,6 +830,7 @@
     "id_8342081": {
       "id": "id_8342081",
       "elementId": "lightbulb2",
+      "connectedPortIds": [],
       "position": {
         "x": 699,
         "y": 520

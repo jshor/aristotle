@@ -113,32 +113,44 @@ export default defineComponent({
 
 <style lang="scss">
 $divider-width: 20px;
+$color-bg-primary: #1D1E25;
+$color-bg-secondary: #333641;
+$color-bg-tertiary: #3D404B;
+$color-bg-quaternary: #454857;
+
+// foreground colors
+$color-primary: #fff;
+$color-secondary: #9ca0b1;
+$color-shadow: #000;
 
 .resizable-panes {
   width: 100%;
   height: 100%;
   max-width: 100%;
   max-height: 100%;
-  background: blue;
   flex: 1;
   display: flex;
+  background-color: $color-bg-primary;
+  color: $color-secondary;
 
   &--vertical {
     flex-direction: column;
   }
 
   &__first {
-    background: orange;
     display: flex;
+    border-right: 1px solid $color-bg-quaternary;
 
     &--vertical {
       flex-direction: column;
+      border: 0;
+      border-bottom: 1px solid $color-bg-quaternary;
     }
   }
 
   &__second {
-    background: green;
     flex: 1;
+    overflow: hidden;
   }
 
   &__content {

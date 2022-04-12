@@ -77,11 +77,17 @@ export default function createIntegratedCircuit (statePorts: Record<string, Port
         })
     })
 
+  // TODO: must convert all input nodes to Buffer type
+  // when converting from IC to regular file, then convert Buffer back to InputNode
+
   integratedCircuitItem.integratedCircuit = {
     items,
     connections,
     ports
   }
 
-  return { integratedCircuitItem, integratedCircuitPorts }
+  return {
+    integratedCircuitItem,
+    integratedCircuitPorts
+  }
 }

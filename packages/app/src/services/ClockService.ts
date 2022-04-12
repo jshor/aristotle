@@ -1,8 +1,12 @@
 const BASE_REFRESH_RATE = 100
 
+const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
+
 // TODO: rename to ClockService
 export default class ClockService implements Pulse {
-  public id: string
+  public id: string = rand()
+
+  public name: string
 
   private lastUpdate: number
 
@@ -16,8 +20,8 @@ export default class ClockService implements Pulse {
 
   public hasGeometry: boolean = false
 
-  constructor (id, interval) {
-    this.id = id
+  constructor (name: string, interval) {
+    this.name = name
     this.lastUpdate = Date.now()
     this.setInterval(interval)
   }

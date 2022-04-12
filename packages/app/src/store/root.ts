@@ -18,7 +18,7 @@ import DocumentState from './DocumentState'
 
 import basic from '../containers/fixtures/basic.json'
 import flipFlop from '../containers/fixtures/flipflop.json'
-// import basic from '../containers/fixtures/ic.json'
+import integratedCircuit from '../containers/fixtures/ic.json'
 
 import { createDocumentStore } from './document'
 
@@ -87,9 +87,8 @@ export const useRootStore = defineStore({
     },
     openTestDocuments () {
       // this.openDocument('basic.alfx', JSON.stringify(basic))
-      this.openDocument('flip-ee.alfx', JSON.stringify(flipFlop))
-      this.openDocument('flip-aa.alfx', JSON.stringify(flipFlop))
-      this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop))
+      this.openDocument('integrated-circuit.alfx', JSON.stringify(integratedCircuit))
+      // this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop))
     },
 
     navigateDocumentList (direction: number) {

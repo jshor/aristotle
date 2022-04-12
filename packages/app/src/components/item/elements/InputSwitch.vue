@@ -5,14 +5,14 @@
       class="input-switch__flipper"
       :tabindex="0"
       :class="{
-        'input-switch__flipper--on': value === 1,
-        'input-switch__flipper--off': value === -1,
-        'input-switch__flipper--high-z': value === 0
+        'input-switch__flipper--on': model === 1,
+        'input-switch__flipper--off': model === -1,
+        'input-switch__flipper--high-z': model === 0
       }"
-      @click="click"
+      @mousedown.stop="click"
     >
-      <span v-if="value === 1">ON</span>
-      <span v-else-if="value === -1">OFF</span>
+      <span v-if="model === 1">ON</span>
+      <span v-else-if="model === -1">OFF</span>
       <span v-else>?</span>
     </button>
   </div>
@@ -29,12 +29,26 @@ export default defineComponent({
       default: 0
     }
   },
+  data () {
+    return {
+      model: 0
+    }
+  },
+  watch: {
+    value: {
+      handler (value) {
+        this.model = value
+      }
+    }
+  },
   methods: {
     click ($event: MouseEvent) {
       $event.preventDefault()
       $event.stopPropagation()
 
-      this.$emit('toggle', this.value === 1 ? -1 : 1)
+      this.model = this.model === 1 ? -1 : 1
+
+      this.$emit('toggle', this.model)
 
       return false
     }

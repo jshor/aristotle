@@ -5,6 +5,7 @@ declare global {
     hasGeometry: boolean
     segments?: Point[]
     width?: number
+    hue?: number
   }
 }
 

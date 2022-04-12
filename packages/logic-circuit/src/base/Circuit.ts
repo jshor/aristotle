@@ -2,6 +2,7 @@ import CircuitNode from '../base/CircuitNode'
 import Connection from '../types/Connection'
 import LogicValue from '../types/LogicValue'
 import InputNode from './InputNode'
+import OutputNode from './OutputNode'
 
 class Circuit {
   /**
@@ -144,11 +145,13 @@ class Circuit {
   public next = (): void => {
     let isValueChanged = false
     let forceContinue = false
+    let localQueue = []
 
     while (this.queue.length > 0) {
       const node = this.queue.shift()
 
-      this.enqueue(...node.propagate())
+      localQueue = localQueue.concat(node.propagate())
+
       this.dequeue(node)
 
       if (node.isValueChanged) {
@@ -158,12 +161,13 @@ class Circuit {
 
       if (node.forceContinue) {
         forceContinue = true
+        this.enqueue(...localQueue)
+        localQueue = []
       }
     }
 
-    if (!this.isComplete() && (!isValueChanged || forceContinue)) {
-      // queue is not finished and the node determined we should step again
-      return this.next()
+    if (isValueChanged) {
+      this.enqueue(...localQueue)
     }
   }
 
@@ -173,13 +177,25 @@ class Circuit {
    * @returns {Boolean}
    */
   public isComplete = (): boolean => {
-    return this.queue.length === 0
-  }
+    let isComplete = true
 
-  debug (): void { // TODO: delete this
-    this.nodes.forEach(({ name, value, newValue }) => {
-      console.log(`${name}:`, value, newValue)
+    if (this.queue.length === 0) {
+      return true
+    }
+
+    this.queue.forEach(node => {
+      const nextValue = node.getProjectedValue()
+
+      if (nextValue !== node.value && !(node instanceof OutputNode)) {
+        isComplete = false
+      }
     })
+
+    if (isComplete) {
+      this.queue = []
+    }
+
+    return isComplete
   }
 }
 

@@ -81,7 +81,10 @@ function mapPorts (ports: { [id: string]: Port }, idMap: IdMap) {
 
 
 function mapIntegratedCircuitIds (integratedCircuitItem: Item, integratedCircuitPorts: { [id: string]: Port }) {
-  if (!integratedCircuitItem.integratedCircuit) return
+  if (!integratedCircuitItem.integratedCircuit) return {
+    integratedCircuitItem,
+    integratedCircuitPorts
+  }
 
   const idMap: IdMap = {}
   let { items, connections, ports } = integratedCircuitItem.integratedCircuit
