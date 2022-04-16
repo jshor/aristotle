@@ -8,9 +8,9 @@ import Direction from '@/types/enums/Direction'
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
 export default function createIntegratedCircuit (statePorts: Record<string, Port>, stateItems: Record<string, Item>, stateConnections: Record<string, Connection>) {
-  const ports = cloneDeep<{ [id: string]: Port }>(statePorts)
-  const items = cloneDeep<{ [id: string]: Item }>(stateItems)
-  const connections = cloneDeep<{ [id: string]: Connection }>(stateConnections)
+  const ports = cloneDeep<Record<string, Port>>(statePorts)
+  const items = cloneDeep<Record<string, Item>>(stateItems)
+  const connections = cloneDeep<Record<string, Connection>>(stateConnections)
 
   const integratedCircuitItem: Item = {
     id: rand(),

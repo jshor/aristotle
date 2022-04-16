@@ -1,8 +1,7 @@
 declare global {
   interface Pulse {
     id: string
-    update: (ticks: number) => void
-    hasGeometry: boolean
+    update: (elapsed: number) => void
     segments?: Point[]
     width?: number
     hue?: number

@@ -3,9 +3,9 @@ import { cloneDeep } from 'lodash' // TODO
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
-type IdMap = { [id: string]: string }
+type IdMap = Record<string, string>
 
-function mapConnections (connections: { [id: string]: Connection }, idMap: IdMap) {
+function mapConnections (connections: Record<string, Connection>, idMap: IdMap) {
   Object
     .values(connections)
     .forEach(connection => {
@@ -24,7 +24,7 @@ function mapConnections (connections: { [id: string]: Connection }, idMap: IdMap
     return connections
 }
 
-function mapConnectionChainIds (connections: { [id: string]: Connection }, idMap: IdMap) {
+function mapConnectionChainIds (connections: Record<string, Connection>, idMap: IdMap) {
   Object
     .values(connections)
     .forEach(connection => {
@@ -34,7 +34,7 @@ function mapConnectionChainIds (connections: { [id: string]: Connection }, idMap
   return connections
 }
 
-function mapItems (items: { [id: string]: Item }, idMap: IdMap) {
+function mapItems (items: Record<string, Item>, idMap: IdMap) {
   Object
     .values(items)
     .forEach(item => {
@@ -52,7 +52,7 @@ function mapItems (items: { [id: string]: Item }, idMap: IdMap) {
     return items
 }
 
-function mapItemIds (ports: { [id: string]: Port }, idMap: IdMap) {
+function mapItemIds (ports: Record<string, Port>, idMap: IdMap) {
   Object
     .values(ports)
     .forEach(port => {
@@ -62,7 +62,7 @@ function mapItemIds (ports: { [id: string]: Port }, idMap: IdMap) {
   return ports
 }
 
-function mapPorts (ports: { [id: string]: Port }, idMap: IdMap) {
+function mapPorts (ports: Record<string, Port>, idMap: IdMap) {
   Object
     .values(ports)
     .forEach(port => {
@@ -80,7 +80,7 @@ function mapPorts (ports: { [id: string]: Port }, idMap: IdMap) {
 }
 
 
-function mapIntegratedCircuitIds (integratedCircuitItem: Item, integratedCircuitPorts: { [id: string]: Port }) {
+function mapIntegratedCircuitIds (integratedCircuitItem: Item, integratedCircuitPorts: Record<string, Port>) {
   if (!integratedCircuitItem.integratedCircuit) return {
     integratedCircuitItem,
     integratedCircuitPorts

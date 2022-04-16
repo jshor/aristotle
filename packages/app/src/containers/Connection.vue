@@ -13,15 +13,15 @@
     @mousedown="onMouseDown"
     @focus="onFocus"
     ref="root"
+    data-test="wire"
   />
 </template>
 
 <script lang="ts">
-import { ComponentPublicInstance, defineComponent, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
+import { ComponentPublicInstance, defineComponent, onBeforeUnmount, onMounted, PropType, ref, computed } from 'vue'
 import { StoreDefinition } from 'pinia'
-import Wire from '../components/Wire.vue'
+import Wire from '@/components/Wire.vue'
 import DocumentState from '@/store/DocumentState'
-import { computed } from '@vue/reactivity'
 
 export default defineComponent({
   name: 'Connection',
@@ -29,38 +29,73 @@ export default defineComponent({
     Wire
   },
   props: {
+    /**
+     * ID of the source port.
+     */
     sourceId: {
       type: String,
       required: true
     },
+
+    /**
+     * ID of the target port.
+     */
     targetId: {
       type: String,
       required: true
     },
+
+    /**
+     * ID of the group, if applicable.
+     */
     groupId: {
       type: String,
       default: null
     },
+
+    /**
+     * ID of the connection chain.
+     */
     connectionChainId: {
       type: String,
       default: null
     },
+
+    /**
+     * Whether or not this connection is selected.
+     */
     isSelected: {
       type: Boolean,
       default: false
     },
+
+    /**
+     * Whether or not this connection is just for previewing.
+     */
     isPreview: {
       type: Boolean,
       default: false
     },
+
+    /**
+     * ID of the connection.
+     */
     id: {
       type: String,
       required: true
     },
+
+    /**
+     * CSS z-index value.
+     */
     zIndex: {
       type: Number,
       default: 0
     },
+
+    /**
+     * Document store instance.
+     */
     store: {
       type: Function as PropType<StoreDefinition<string, DocumentState>>,
       required: true
@@ -125,6 +160,13 @@ export default defineComponent({
     let portCreated = false
     let isMouseDown = false
 
+    /**
+     * Mouse button down event handler.
+     *
+     * This will inform the component that the mouse is down and ready to create a new freeport, if it moves.
+     *
+     * @emits select if not part of a group
+     */
     function onMouseDown ($event: MouseEvent) {
       if (props.groupId !== null) {
         // this wire is part of a group, so do not allow the creation of a new freeport
@@ -137,9 +179,18 @@ export default defineComponent({
         x: $event.clientX,
         y: $event.clientY
       }
+
       emit('select')
     }
 
+    /**
+     * Mouse move event handler.
+     *
+     * If the mouse is held down on the wire, then movement in both the x and y directions
+     * will cause a new freeport to be created in that position.
+     *
+     * This will only create a new freeport once per mousedown-move cycle.
+     */
     function onMouseMove ($event: MouseEvent) {
       if (originalPosition.x === $event.clientX && originalPosition.y === $event.clientY) return
       if (!isMouseDown) return
@@ -179,6 +230,11 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Mouse up event handler.
+     *
+     * @emits select if the mouse is down
+     */
     function onMouseUp () {
       if (!isMouseDown) return
 
@@ -186,6 +242,11 @@ export default defineComponent({
       emit('select')
     }
 
+    /**
+     * Focus event handler.
+     *
+     * @emits select if not already selected
+     */
     function onFocus () {
       if (!props.isSelected) {
         emit('select')

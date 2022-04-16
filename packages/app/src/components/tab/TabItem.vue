@@ -22,21 +22,16 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'TabItem',
   props: {
+    /** Whether or not the tab is currently displayed as active. */
     active: {
       type: Boolean,
       default: false
     },
+    /** The tab title. */
     label: {
       type: String,
       required: true
     }
-  },
-  setup (_, { emit }) {
-    function close () {
-      emit('close')
-    }
-
-    return { close }
   }
 })
 </script>

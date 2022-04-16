@@ -65,7 +65,7 @@
 <script lang="ts">
 /// <reference path="./types/index.d.ts" />
 import { storeToRefs } from 'pinia'
-import { defineComponent } from 'vue'
+import { defineComponent, onBeforeUnmount, onMounted } from 'vue'
 import Document from './containers/Document.vue'
 import Toolbar from './containers/Toolbar.vue'
 import ResizablePanes from '@/components/ResizablePanes.vue'
@@ -83,7 +83,7 @@ export default defineComponent({
     TabItem,
     TabHost,
     Oscilloscope
-},
+  },
   setup () {
     const store = useRootStore()
     const {

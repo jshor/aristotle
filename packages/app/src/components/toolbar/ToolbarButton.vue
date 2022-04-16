@@ -72,7 +72,6 @@ $color-shadow: #000;
   outline: none;
   cursor: pointer;
 
-
   &__icon {
     height: 90%;
     width: 90%;

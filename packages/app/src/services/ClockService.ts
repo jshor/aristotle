@@ -1,46 +1,64 @@
-const BASE_REFRESH_RATE = 100
+import { TinyEmitter } from 'tiny-emitter'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
-// TODO: rename to ClockService
+/**
+ * @class ClockService
+ * @description This provides an oscillating clock wave. It oscillates between TRUE and FALSE.
+ */
 export default class ClockService implements Pulse {
+  /** Wave ID. */
   public id: string = rand()
 
+  /** User-friendly label for this wave. */
   public name: string
 
+  /** Current signal value. */
+  public signal: number = 0
+
+  /** Last update time, in milliseconds. */
   private lastUpdate: number
 
-  private signal: boolean = false
-
-  private refreshRate: number = BASE_REFRESH_RATE
-
-  private updateCallbacks: Function[] = []
-
+  /** Interval, in milliseconds, to oscillate at. */
   private interval: number = 0
 
-  public hasGeometry: boolean = false
+  /** Event emitter. */
+  private emitter: TinyEmitter = new TinyEmitter()
 
-  constructor (name: string, interval) {
+  /**
+   * Constructor.
+   *
+   * @param name - user-friendly label for this wave
+   * @param interval - time, in milliseconds, to oscillate at
+   * @param signal - current signal value to initialize at
+   */
+  constructor (name: string, interval: number, signal: number) {
     this.name = name
-    this.lastUpdate = Date.now()
-    this.setInterval(interval)
+    this.lastUpdate = 0
+    this.signal = signal
+    this.interval = interval
   }
 
-  onUpdate = (event: (signal: number) => void) => {
-    this.updateCallbacks.push(event)
+  /**
+   * Event listener.
+   *
+   * @param event - available values: `change`
+   * @param fn - callback function, taking the oscillogram data as its sole argument
+   */
+  on = (event: string, fn: (signal: number) => void) => {
+    this.emitter.on(event, fn)
   }
 
-  public update = (ticks: number): void => {
-    if (ticks % this.interval === 0) {
-      this.signal = !this.signal
-      this.lastUpdate = Date.now()
-      this.updateCallbacks.forEach((callback) => {
-        callback(this.signal ? 1 : -1)
-      })
+  /**
+   * Updates all waves with the given time elapsed.
+   *
+   * @param elapsed - time elapsed during simulation
+   */
+  public update = (elapsed: number): void => {
+    if (elapsed >= this.lastUpdate + this.interval) {
+      this.signal = this.signal === 1 ? -1 : 1
+      this.lastUpdate = elapsed
+      this.emitter.emit('change', this.signal)
     }
-  }
-
-  setInterval = (interval) => {
-    this.interval = parseInt(interval) / this.refreshRate
   }
 }
