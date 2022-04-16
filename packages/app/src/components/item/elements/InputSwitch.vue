@@ -38,7 +38,8 @@ export default defineComponent({
     value: {
       handler (value) {
         this.model = value
-      }
+      },
+      immediate: true
     }
   },
   methods: {

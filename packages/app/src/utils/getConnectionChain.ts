@@ -6,7 +6,7 @@
  * @param connectionChainId - ID of the connection chain to explore
  * @returns the IDs of the connections and the freeports discovered in the chain
  */
-export default function getConnectionChain (connections: Connection[], portMap: { [id: string]: Port }, connectionChainId: string) {
+export default function getConnectionChain (connections: Connection[], portMap: Record<string, Port>, connectionChainId: string) {
   const { connectionIds, freeportIds } = Object
     .values(connections)
     .reduce(({ connectionIds, freeportIds }, connection) => {

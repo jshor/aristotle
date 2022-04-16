@@ -43,11 +43,6 @@
         :value="ports[0]?.value"
         @toggle="value => store.setPortValue({ id: ports[0].id, value })"
       />
-      <clock
-        v-else-if="subtype === ItemSubtype.Clock"
-        :value="ports[0]?.value"
-        @toggle="value => store.setPortValue({ id: ports[0].id, value })"
-      />
       <lightbulb
         v-else-if="type === ItemType.OutputNode"
         :value="ports[0]?.value"
@@ -92,7 +87,6 @@
 import ResizeObserver from 'resize-observer-polyfill'
 import { StoreDefinition } from 'pinia'
 import { defineComponent, PropType, onMounted, ref, ComponentPublicInstance, computed } from 'vue'
-import Clock from '@/components/item/elements/Clock.vue'
 import Draggable from '@/components/Draggable.vue'
 import LogicGate from '@/components/item/elements/LogicGate.vue'
 import InputSwitch from '@/components/item/elements/InputSwitch.vue'
@@ -116,7 +110,6 @@ import DocumentState from '@/store/DocumentState'
 export default defineComponent({
   name: 'Item',
   components: {
-    Clock,
     Draggable,
     LogicGate,
     Freeport,

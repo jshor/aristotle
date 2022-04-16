@@ -1,3 +1,4 @@
+import BinaryWaveService from '@/services/BinaryWaveService'
 import SimulationService from '@/services/SimulationService'
 
 export default interface DocumentState {
@@ -13,9 +14,10 @@ export default interface DocumentState {
   taxonomyCounts: Record<string, number>
   zoomLevel: number
   simulation: SimulationService
-  oscilloscope: OscilloscopeInfo
+  oscillogram: Oscillogram
   isOscilloscopeEnabled: boolean
   isCircuitEvaluated: boolean
+  isDebugging: boolean
   activeFreeportId: string | null
   selectedItemIds: string[]
   selectedConnectionIds: string[]

@@ -1,50 +1,115 @@
 import { LogicValue } from '@aristotle/logic-circuit'
 
-const SIGNAL_HEIGHT = 2
-const SEGMENT_WIDTH = 4 // px per refresh rate
-
-const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
-
+/**
+ * @class BinaryWaveService
+ * @description this service provides functionality for a graphical illustration of a wave in the oscilloscope.
+ * Instances of these waves are the values of the active oscillogram.
+ */
 export default class BinaryWaveService implements Pulse {
-  public id: string = rand()
+  /** Wave ID. */
+  public id: string
+
+  /** User-friendly label for this wave. */
   public name: string
+
+  /** Width (in pixels) of the wave. */
   public width: number = 0
+
+  /** The y value for the last segment. */
   private lastY: number = 0
-  public segments: Point[] = [{ x: SEGMENT_WIDTH, y: SIGNAL_HEIGHT }]
-  private segmentWidth: number = SEGMENT_WIDTH
-  public hasGeometry: boolean = true
+
+  /** Cartesian point values for each pixel segment. */
+  public segments: Point[] = []
+
+  /** Random hue color value for the wave. */
   public hue: number = ~~(360 * Math.random())
 
-  constructor (name: string, value: number = 1) {
+  /**
+   * Constructor.
+   *
+   * @param name - user-friendly label for this wave
+   * @param signal - current signal value to initialize at
+   */
+  constructor (id: string, name: string, signal: number) {
+    this.id = id
     this.name = name
-
-    if (value === 1) {
-      this.segments[0] = { x: SEGMENT_WIDTH, y: 0 }
-      this.lastY = SIGNAL_HEIGHT
-    }
+    this.initialize(signal)
   }
 
-  public update = (ticks: number): void => {
-    this.width += this.segmentWidth
+  /**
+   * Creates an initial segment based on the given signal.
+   *
+   * @param signal
+   */
+  public initialize = (signal: number) => {
+    const segment = { x: 1, y: 1 }
 
+    if (signal === 1) {
+      segment.y = 0 // draw a vertical line from 0 up to 1
+      this.lastY = 1
+    } else {
+      segment.y = 1 // draw a vertical line from 1 down to 0
+      this.lastY = 0
+    }
+
+    this.addSegment(segment)
+  }
+
+  /**
+   * Clears out the existing wave data.
+   */
+  public reset = () => {
+    this.segments = []
+    this.width = 0
+    this.initialize(this.lastY === 1 ? 0 : 1)
+  }
+
+  /**
+   * Periodic update function.
+   *
+   * @param elapsed - (no value necessary)
+   */
+  public update = (elapsed: number): void => {
     this.drawPulseConstant()
   }
 
-  getLastSegment = () => {
-    return this.segments[this.segments.length - 1]
+  /**
+   * Adds a new segment.
+   * This will correct for any mismatches between the segment and the previous one (if any).
+   *
+   * @param segment - new segment to add
+   */
+  addSegment = (segment: Point) => {
+    const previous = this.segments[this.segments.length - 1]
+
+    if (!previous && segment.x > 0) {
+      this.segments.push({ x: 0, y: 0 })
+      this.width++
+    } else if (previous && previous.x !== segment.x && previous.y !== segment.y) {
+      // if a previous segment exists, and both its x and y values mismatch, then remove it
+      this.segments.pop()
+      this.width--
+    }
+
+    this.segments.push(segment)
+    this.width++
   }
 
-  addSegments = (segments) => {
-    this.segments = this.segments.concat(segments)
+  /**
+   * Draws the next segment of the wave with an inverted signal line.
+   *
+   * @param signal - incoming signal change value
+   */
+  drawPulseChange = (signal: number) => {
+    const { x } = this.segments[this.segments.length - 1]
+    const y = signal === LogicValue.TRUE ? 0 : 1
+
+    this.addSegment({ x, y })
   }
 
-  drawPulseChange = (signal) => {
-    const { x } = this.getLastSegment()
-    const y = signal === LogicValue.TRUE ? 0 : SIGNAL_HEIGHT
-
-    this.addSegments({ x, y })
-  }
-
+  /**
+   * Draws the next segment of the wave, continued from the current signal line.
+   */
   drawPulseConstant = () => {
     const previous = this.segments[this.segments.length - 1]
     // if the y value from the previous segment is unchanged, just extend its x value
@@ -52,24 +117,28 @@ export default class BinaryWaveService implements Pulse {
       ? previous
       : this.segments.pop()
 
-    this.lastY = previous.y
 
     if (pos) {
-      this.addSegments({
-        x: pos.x + this.segmentWidth,
+      this.addSegment({
+        x: pos.x + 1,
         y: pos.y
       })
     }
+    this.lastY = previous.y
   }
 
-  truncateSegments = (seconds) => {
-    const widthToKeep = seconds * 40
-    const widthToTruncate = this.width - widthToKeep
-    let foundLastSegment = false
-
-    if (widthToTruncate > this.width) {
+  /**
+   * Truncates the wave from the back such that the resulting wave is no wider than the given value.
+   *
+   * @param widthToKeep - the width, in pixels, to keep from the wave
+   */
+  truncateSegments = (widthToKeep: number) => {
+    if (widthToKeep > this.width) {
       return
     }
+
+    const widthToTruncate = this.width - widthToKeep
+    let foundLastSegment = false
 
     this.segments = this.segments
       .reverse()
@@ -83,6 +152,7 @@ export default class BinaryWaveService implements Pulse {
 
         return { x, y }
       })
+      .filter(({ x }) => x >= 0)
       .reverse()
 
     this.width = widthToKeep

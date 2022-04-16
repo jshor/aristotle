@@ -30,12 +30,12 @@
     <toolbar-button @click="store.setZIndex(store.zIndex)" :disabled="!store.hasSelectedItems">Bring to front</toolbar-button>
 
     <toolbar-separator />
-    <toolbar-button :icon="faBug" :active="store.simulation.isPaused" @click="triggerDebugger" />
+    <toolbar-button :icon="faBug" :active="store.isDebugging" @click="store.toggleDebugger" />
     <toolbar-separator />
-    <toolbar-button :icon="faArrowsRotate" />
+    <toolbar-button :icon="faArrowsRotate" @click="store.reset" />
     <toolbar-button :icon="faForwardStep" :disabled="store.isCircuitEvaluated" @click="store.stepThroughCircuit" />
     <toolbar-separator />
-    <toolbar-button :icon="faWaveSquare" :active="store.isOscilloscopeEnabled" @click="store.toggleOscilloscope" />
+    <toolbar-button :icon="faWaveSquare" :disabled="store.isDebugging" :active="!store.isDebugging && store.isOscilloscopeEnabled" @click="store.toggleOscilloscope" />
   </div>
 </template>
 
@@ -238,19 +238,9 @@ export default defineComponent({
       ])
     }
 
-    function triggerDebugger () {
-      if (store.simulation.isPaused) {
-        store.simulation.unpause()
-      } else {
-        console.log('PAUSINGNOW')
-        store.simulation.pause()
-      }
-    }
-
     return {
       store,
       isComplete,
-      triggerDebugger,
       addLogicGate,
       addLightbulb,
       addSwitch

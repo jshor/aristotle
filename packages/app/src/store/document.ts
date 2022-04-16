@@ -15,6 +15,7 @@ import getConnectionChain from '@/utils/getConnectionChain'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import sortByZIndex from '@/utils/sortByZIndex'
 import DocumentState from './DocumentState'
+import { LogicValue } from '@aristotle/logic-circuit'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
@@ -36,11 +37,7 @@ export const createDocumentStore = (id: string) => defineStore({
     undoStack: [],
     redoStack: [],
     simulation: new SimulationService([], [], {}),
-    oscilloscope: {
-      waves: {},
-      secondsElapsed: 0,
-      secondsOffset: 0
-    },
+    oscillogram: {},
     items: {},
     connections: {},
     ports: {},
@@ -50,6 +47,7 @@ export const createDocumentStore = (id: string) => defineStore({
     zIndex: 1,
     isOscilloscopeEnabled: true,
     isCircuitEvaluated: false,
+    isDebugging: false,
 
     /* the following variables are 'temporary' information */
     snapBoundaries: [],
@@ -159,29 +157,19 @@ export const createDocumentStore = (id: string) => defineStore({
         this.simulation.oscillator.stop()
       }
 
-      const circuit = new SimulationService(Object.values(this.items), Object.values(this.connections), this.ports)
+      const simulation = new SimulationService(Object.values(this.items), Object.values(this.connections), this.ports)
 
-      circuit.onChange((valueMap: any, payload: OscilloscopeInfo) => {
+      simulation.on('change', (valueMap: Record<string, number>, oscillogram: Oscillogram) => {
         for (const portId in valueMap) {
           if (this.ports[portId]) {
             this.ports[portId].value = valueMap[portId]
           }
         }
 
-
-        if (payload && Object.keys(payload.waves).length) {
-          this.oscilloscope.waves = payload.waves
-          this.$patch({
-            oscilloscope: {
-              waves: payload.waves,
-              secondsElapsed: payload.secondsElapsed,
-              secondsOffset: payload.secondsOffset,
-            }
-          })
-        }
+        this.oscillogram = oscillogram
       })
 
-      this.simulation = circuit
+      this.simulation = simulation
     },
 
     insertItem ({ item, ports }: { item: Item, ports: Port[] }) {
@@ -463,6 +451,8 @@ export const createDocumentStore = (id: string) => defineStore({
         y: position.y - referenceItem.position.y
       }
       const groupIds = new Set<string>()
+
+      this.setSelectionState({ id, value: true })
 
       if (referenceItem.type === ItemType.Freeport) {
         // if this item is a freeport, drag only this and nothing else
@@ -1086,6 +1076,49 @@ export const createDocumentStore = (id: string) => defineStore({
         .map(({ id }) => id)
     },
 
+    stop () {
+      this.simulation.pause()
+    },
+
+    start () {
+      if (!this.isDebugging) {
+        this.simulation.unpause()
+      }
+    },
+
+    reset () {
+      this.buildCircuit()
+      this.simulation.isPaused = this.isDebugging
+      this.oscillogram = {}
+      this.simulation.oscillogram = {}
+
+      Object
+        .values(this.items)
+        .forEach(item => {
+          item.portIds.forEach(id => {
+            this.ports[id].value = LogicValue.UNKNOWN
+
+            if (item.properties?.startValue && this.ports[id].type === PortType.Output) {
+              this.setPortValue({
+                id,
+                value: item.properties?.startValue.value as number
+              })
+            }
+          })
+        })
+
+      this.simulation.unpause()
+    },
+
+    toggleDebugger () {
+      if (this.isDebugging) {
+        this.simulation.unpause()
+      } else {
+        this.simulation.pause()
+      }
+      this.isDebugging = !this.isDebugging
+    },
+
     toggleOscilloscope () {
       if (this.isOscilloscopeEnabled) {
         this.disableOscilloscope()
@@ -1109,7 +1142,13 @@ export const createDocumentStore = (id: string) => defineStore({
           portIds.forEach(this.simulation.unmonitorPort)
         })
 
+      this.oscillogram = {}
+      this.simulation.oscillogram = {}
       this.isOscilloscopeEnabled = false
+    },
+
+    clearOscilloscope () {
+      this.simulation.oscillator.clear()
     },
 
     /**
@@ -1235,7 +1274,7 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param this
      * @param valueMap - Port-ID-to-value mapping
      */
-    setPortValues (valueMap: { [id: string]: number }) {
+    setPortValues (valueMap: Record<string, number>) {
       for (const portId in valueMap) {
         if (this.ports[portId]) {
           this.ports[portId].value = valueMap[portId]
@@ -1283,14 +1322,14 @@ export const createDocumentStore = (id: string) => defineStore({
      */
     applyState (savedState: string) {
       const { items, connections, ports, groups } = JSON.parse(savedState) as {
-        items: { [id: string]: Item },
-        connections: { [id: string]: Connection },
-        ports: { [id: string]: Port },
-        groups: { [id: string]: Group },
+        items: Record<string, Item>,
+        connections: Record<string, Connection>,
+        ports: Record<string, Port>,
+        groups: Record<string, Group>,
       }
 
       /* returns everything in a that is not in b */
-      function getExcludedMembers (a: { [id: string]: BaseItem }, b: { [id: string]: BaseItem }) {
+      function getExcludedMembers (a: Record<string, BaseItem>, b: Record<string, BaseItem>) {
         const aIds = Object.keys(a)
         const bIds = Object.keys(b)
 
@@ -1441,7 +1480,7 @@ export const createDocumentStore = (id: string) => defineStore({
      */
     addIntegratedCircuit ({ integratedCircuitItem, integratedCircuitPorts }: {
       integratedCircuitItem: Item,
-      integratedCircuitPorts: { [id: string]: Port }
+      integratedCircuitPorts: Record<string, Port>
     }) {
       if (!integratedCircuitItem.integratedCircuit) return
 

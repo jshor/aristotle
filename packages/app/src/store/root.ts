@@ -1,19 +1,5 @@
 // @ts-check
 import { defineStore, acceptHMRUpdate, Store, StoreDefinition } from 'pinia'
-
-
-import Direction from '@/types/enums/Direction'
-import PortType from '@/types/enums/PortType'
-import SimulationService from '@/services/SimulationService'
-import boundaries from '@/layout/boundaries'
-import rotation from '@/layout/rotation'
-import createIntegratedCircuit from '@/utils/createIntegratedCircuit'
-import ItemType from '@/types/enums/ItemType'
-import idMapper from '@/utils/idMapper'
-
-import getConnectionChain from '@/utils/getConnectionChain'
-import ItemSubtype from '@/types/enums/ItemSubtype'
-import sortByZIndex from '@/utils/sortByZIndex'
 import DocumentState from './DocumentState'
 
 import basic from '../containers/fixtures/basic.json'
@@ -67,28 +53,32 @@ export const useRootStore = defineStore({
       this.documents[id] = { fileName, store }
       this.activeDocumentId = id
     },
-    activateDocument (id: string) {
+    pauseActivity () {
       if (this.activeDocument) {
-        console.log('HAS ACTIVE DOC')
         this
           .activeDocument
           .store()
-          .simulation
-          .pause()
+          .stop()
       }
-
+    },
+    resumeActivity () {
+      if (this.activeDocument) {
+        this
+          .activeDocument
+          .store()
+          .start()
+      }
+    },
+    activateDocument (id: string) {
+      this.pauseActivity()
       this.activeDocumentId = id
-      this
-        .documents[id]
-        ?.store()
-        .simulation
-        .unpause()
-        console.log('WILL UNPAUSE')
+      this.resumeActivity()
     },
     openTestDocuments () {
       // this.openDocument('basic.alfx', JSON.stringify(basic))
       this.openDocument('integrated-circuit.alfx', JSON.stringify(integratedCircuit))
-      // this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop))
+      this.pauseActivity()
+      this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop))
     },
 
     navigateDocumentList (direction: number) {
