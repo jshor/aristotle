@@ -20,23 +20,28 @@
     >
       <div
         v-for="(value, key) in oscillogram"
+        :style="{ width: `${totalWidth}px` }"
         :key="key"
-        :style="{ width: `${value.width}px` }"
-        class="oscilloscope-timeline__svg"
+        class="oscilloscope-timeline__item"
       >
-        <svg
-          :width="value.width"
-          :viewBox="`0 0 ${value.width} 1`"
-          preserveAspectRatio="none"
+        <div
+          :style="{ width: `${value.width}px` }"
+          class="oscilloscope-timeline__svg"
         >
-          <polyline
-            :points="value.points"
-            :stroke="`hsla(${value.hue},70%,70%,0.8)`"
-            stroke-width="2"
-            fill="none"
-            vector-effect="non-scaling-stroke"
-          />
-        </svg>
+          <svg
+            :width="value.width"
+            :viewBox="`0 0 ${value.width} 1`"
+            preserveAspectRatio="none"
+          >
+            <polyline
+              :points="value.points"
+              :stroke="`hsla(${value.hue},70%,70%,0.8)`"
+              stroke-width="2"
+              fill="none"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
+        </div>
       </div>
     </div>
   </div>
@@ -52,6 +57,11 @@ export default defineComponent({
     oscillogram: {
       type: Object as PropType<Oscillogram>,
       required: true
+    }
+  },
+  computed: {
+    totalWidth () {
+      return Object.values(this.oscillogram).reduce((w, { width }) => Math.max(width, w), 0)
     }
   },
   mounted () {
@@ -105,17 +115,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-// background colors
-$color-bg-primary: #1D1E25;
-$color-bg-secondary: #333641;
-$color-bg-tertiary: #3D404B;
-$color-bg-quaternary: #454857;
-
-// foreground colors
-$color-primary: #fff;
-$color-secondary: #9ca0b1;
-$color-shadow: #000;
-
 .oscilloscope-timeline {
   background-color: $color-bg-primary;
   height: 100%;
@@ -159,18 +158,27 @@ $color-shadow: #000;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    text-align: right;
+  }
+
+  &__item {
+    border-top: 1px solid $color-bg-tertiary;
+    min-width: 100%;
+    min-height: 40px;
+    height: 100%;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
   }
 
   &__svg {
-    border-top: 1px solid $color-bg-tertiary;
-    min-width: 100%;
-    text-align: left;
-    min-height: 40px;
+    height: 100%;
     flex: 1;
     background-attachment: scroll;
     padding: 5px 0;
     box-sizing: border-box;
-    margin-left: -2px;
+    text-align: right;
 
     svg {
       height: 100%;

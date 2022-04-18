@@ -1,0 +1,76 @@
+File
+- New Circuit
+---
+- Open Circuit
+- Open Integrated Circuit
+---
+- Save
+- Save As...
+- Save All
+---
+- Export
+  - Integrated Circuit
+---
+- Preferences
+  - Global Preferences
+  - Document Preferences
+---
+- Close Document
+- Close Saved
+- Close All
+---
+- Exit
+
+
+Edit
+- Redo *disable-able
+- Undo *disable-able
+---
+- Cut (has selection) *disable-able
+- Copy (has selection) *disable-able
+- Paste (has clipboard content) *disable-able
+- Delete (has selection) *disable-able
+---
+- Select All
+---
+- Rotate (items > 0)
+  - 90* Clockwise
+  - 90* Counter-Clockwise
+---
+- Send to Back (has selection)
+  - Send to Back
+  - Send Backward
+- Bring to Front (has selection)
+  - Bring to Front
+  - Bring Forward
+- Group (items > 1)
+  - Group
+  - Ungroup
+
+View
+- Zoom In
+- Zoom Out
+- Zoom...
+---
+- Pan to Center
+---
+- Grid
+  - Show Grid
+  ---
+  - Snap to Grid
+  - Snap to Elements
+---
+- Oscilloscope *disable-able
+- Toolbox
+---
+Fullscreen
+
+Circuit
+- Reset Simulation
+---
+- Start Debugging
+- Stop Debugging *disable-able
+- Step Over
+---
+- Reset Oscillograms
+- Clear Oscilloscope

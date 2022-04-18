@@ -1,5 +1,5 @@
 // @ts-check
-import { defineStore, acceptHMRUpdate } from 'pinia'
+import { defineStore } from 'pinia'
 
 
 import Direction from '@/types/enums/Direction'
@@ -16,6 +16,7 @@ import ItemSubtype from '@/types/enums/ItemSubtype'
 import sortByZIndex from '@/utils/sortByZIndex'
 import DocumentState from './DocumentState'
 import { LogicValue } from '@aristotle/logic-circuit'
+import RemoteService from '@/services/RemoteService'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
@@ -135,11 +136,17 @@ export const createDocumentStore = (id: string) => defineStore({
       this.deselectAll()
     },
 
-    saveIntegratedCircuit () {
+    async saveIntegratedCircuit () {
+      // window.open('https://github.com', '_blank', 'top=500,left=200,nodeIntegration=no,modal=true')
+      const result = await RemoteService.openModal()
+
+      console.log('result: ', result)
+    },
+
+    logIntegratedCircuit () {
       const { integratedCircuitItem, integratedCircuitPorts } = createIntegratedCircuit(this.ports, this.items, this.connections)
       const id = idMapper.mapIntegratedCircuitIds(integratedCircuitItem, integratedCircuitPorts)
 
-      // TODO: typescript broken
       // this.addIntegratedCircuit({
       //   integratedCircuitItem: id.integratedCircuitItem,
       //   integratedCircuitPorts: id.integratedCircuitPorts

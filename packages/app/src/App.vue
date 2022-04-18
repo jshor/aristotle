@@ -40,6 +40,7 @@
                     v-if="activeDocumentId && activeDocument"
                     :key="activeDocumentId"
                     :store="activeDocument.store"
+                    @switch="switchDocument"
                   />
                 </template>
               </tab-host>
@@ -65,7 +66,7 @@
 <script lang="ts">
 /// <reference path="./types/index.d.ts" />
 import { storeToRefs } from 'pinia'
-import { defineComponent, onBeforeUnmount, onMounted } from 'vue'
+import { defineComponent, onBeforeUnmount, onMounted, watchEffect } from 'vue'
 import Document from './containers/Document.vue'
 import Toolbar from './containers/Toolbar.vue'
 import ResizablePanes from '@/components/ResizablePanes.vue'
@@ -73,6 +74,7 @@ import { useRootStore } from './store/root'
 import TabItem from './components/tab/TabItem.vue'
 import TabHost from './components/tab/TabHost.vue'
 import Oscilloscope from './containers/Oscilloscope.vue'
+import RemoteService from './services/RemoteService'
 
 export default defineComponent({
   name: 'App',
@@ -97,13 +99,57 @@ export default defineComponent({
       store.openTestDocuments()
     }
 
+    // update the app menu when any of the store variables it depends on to show/hide menu items change
+    watchEffect(() => RemoteService.setApplicationMenu(store))
+
+    watchEffect(() => {
+      if (store.activeDocumentId) {
+        document.title = `${store.activeDocument?.fileName} - Aristotle`
+      }
+    })
+
+    onMounted(() => {
+      document.addEventListener('keydown', onKeyDown)
+      RemoteService.on('close', store.closeApplication)
+    })
+
+    onBeforeUnmount(() => {
+      document.removeEventListener('keydown', onKeyDown)
+      // RemoteService.off('close', store.closeApplication) // TODO
+    })
+
+    function onKeyDown ($event: KeyboardEvent) {
+      if ($event.ctrlKey && $event.key === 'Tab') {
+        store.switchDocument($event.shiftKey ? -1 : 1)
+        $event.preventDefault()
+      }
+
+      if ($event.ctrlKey && $event.key.toUpperCase() === 'R') {
+        // refresh command
+        // TODO: in development only, this will refresh the page; otherwise, reset active circuit
+        RemoteService.canCloseWindow = true
+      }
+
+      if ($event.ctrlKey && $event.key.toUpperCase() === 'Q') {
+        store.closeApplication()
+      }
+
+      if ($event.ctrlKey && $event.key.toUpperCase() === 'W') {
+        if (store.activeDocumentId) {
+          store.closeDocument(store.activeDocumentId)
+          $event.preventDefault()
+        }
+      }
+    }
+
     return {
       activeDocument,
       activeDocumentId,
       documents,
       hasOpenDocuments,
       activateDocument: store.activateDocument,
-      closeDocument: store.closeDocument
+      closeDocument: store.closeDocument,
+      switchDocument: store.switchDocument
     }
   },
   data () {

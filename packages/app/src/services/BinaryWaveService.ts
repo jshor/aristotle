@@ -52,6 +52,7 @@ export default class BinaryWaveService implements Pulse {
       this.lastY = 0
     }
 
+    this.width++
     this.addSegment(segment)
   }
 
@@ -83,7 +84,7 @@ export default class BinaryWaveService implements Pulse {
     const previous = this.segments[this.segments.length - 1]
 
     if (!previous && segment.x > 0) {
-      this.segments.push({ x: 0, y: 0 })
+      this.segments.push({ x: 0, y: segment.y })
       this.width++
     } else if (previous && previous.x !== segment.x && previous.y !== segment.y) {
       // if a previous segment exists, and both its x and y values mismatch, then remove it
@@ -92,7 +93,6 @@ export default class BinaryWaveService implements Pulse {
     }
 
     this.segments.push(segment)
-    this.width++
   }
 
   /**
@@ -103,6 +103,7 @@ export default class BinaryWaveService implements Pulse {
   drawPulseChange = (signal: number) => {
     const { x } = this.segments[this.segments.length - 1]
     const y = signal === LogicValue.TRUE ? 0 : 1
+    this.width++
 
     this.addSegment({ x, y })
   }
@@ -119,6 +120,7 @@ export default class BinaryWaveService implements Pulse {
 
 
     if (pos) {
+      this.width++
       this.addSegment({
         x: pos.x + 1,
         y: pos.y

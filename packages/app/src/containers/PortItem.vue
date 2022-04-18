@@ -5,6 +5,7 @@
     @keydown.esc="onEscapeKey"
     @keydown.space="store.cycleConnectionPreviews(id)"
     @keydown.enter="store.commitPreviewedConnection"
+    @contextmenu="store.setActivePortId(id)"
   >
     <draggable
       v-if="!isFreeport"
@@ -42,6 +43,7 @@ import PortHandle from '../components/PortHandle.vue'
 import PortPivot from '../components/PortPivot.vue'
 import DocumentState from '@/store/DocumentState'
 import PortType from '@/types/enums/PortType'
+import showContextMenu from '@/utils/showContextMenu'
 
 export default defineComponent({
   name: 'PortItem',
@@ -182,13 +184,20 @@ export default defineComponent({
       }
     }
 
+    function onContextMenu () {
+      if (store.activePortId !== props.id) {
+        store.setActivePortId(props.id)
+      }
+    }
+
     return {
       store,
       isDragging,
       onEscapeKey,
       onBlur,
       dragStart,
-      dragEnd
+      dragEnd,
+      showContextMenu
     }
   }
 })
