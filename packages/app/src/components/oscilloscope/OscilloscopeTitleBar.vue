@@ -48,18 +48,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-// background colors
-$color-bg-primary: #1D1E25;
-$color-bg-secondary: #333641;
-$color-bg-tertiary: #3D404B;
-$color-bg-quaternary: #454857;
-
-// foreground colors
-$color-primary: #fff;
-$color-secondary: #9ca0b1;
-$color-shadow: #000;
-
-
 .oscilloscope-title-bar {
   display: flex;
   box-sizing: border-box;

@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Oscilloscope Viewer should match the snapshot 1`] = `<div class="oscilloscope-viewer"></div>`;

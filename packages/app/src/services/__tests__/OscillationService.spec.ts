@@ -83,14 +83,14 @@ describe('Oscillation Service', () => {
       const clock = new ClockService('clock', 1000, 1)
 
       wave.segments = [{ x: 0, y: 0 }, { x: 10, y: 20 }]
-      wave.width = 40
+      wave.width = 0
 
       const oscillogram = service.computeWaveGeometry({ wave, clock })
 
       expect(oscillogram).toHaveProperty('wave')
       expect(oscillogram.wave).toEqual(expect.objectContaining({
         points: '0,0 10,20',
-        width: 40,
+        width: 10,
         hue: expect.any(Number)
       }))
       expect(oscillogram).not.toHaveProperty('clock')

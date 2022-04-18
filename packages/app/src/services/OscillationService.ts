@@ -71,17 +71,16 @@ export default class OscillationService {
    */
   computeWaveGeometry = (waves: Record<string, Pulse>) => {
     const displays: Oscillogram = {}
-    const getPoints = (segments: Point[]): string => segments
-      .map(({ x, y }) => `${x},${y}`)
-      .join(' ')
+    const getPoints = (segments: Point[]) => segments.map(({ x, y }) => `${x},${y}`)
 
     for (const name in waves) {
       if (waves[name] instanceof BinaryWaveService) {
         const wave = waves[name] as BinaryWaveService
+        const points = getPoints(wave.segments)
 
         displays[name] = {
-          points: getPoints(wave.segments),
-          width: wave.width,
+          points: points.join(' '),
+          width: wave.segments.slice(-1)[0].x,
           hue: wave.hue
         }
       }

@@ -27,6 +27,13 @@
       :d="wire.path"
     />
     <path
+      v-if="isAnimated"
+      class="wire__animation"
+      fill="none"
+      :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
+      :d="wire.path"
+    />
+    <path
       class="wire__clickable"
       fill="none"
       :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
@@ -42,6 +49,10 @@ import renderLayout from '../layout/wire'
 export default defineComponent({
   name: 'Wire',
   props: {
+    isAnimated: {
+      type: Boolean,
+      default: false
+    },
     source: {
       type: Object as PropType<Port>,
       required: true
@@ -98,14 +109,20 @@ export default defineComponent({
     stroke-width: 8;
     pointer-events: all;
     stroke-linecap: square;
-    stroke: pink;
+    stroke: black;
+  }
+
+  &__animation {
+    stroke-width: 1;
+    pointer-events: all;
+    stroke-dasharray: 5;
+    animation: animate1 500s infinite linear;
+    stroke: #fff;
   }
 
   &__display {
     stroke-width: 6;
     pointer-events: all;
-    stroke-dasharray: 20;
-    animation: animate1 300s infinite linear;
     stroke: darkred;
 
     &--on {
@@ -114,10 +131,6 @@ export default defineComponent({
 
     &--off {
       stroke: gray;
-    }
-
-    &--forward {
-      animation: animate2 30s infinite linear;
     }
   }
 

@@ -1,7 +1,7 @@
 // @ts-check
 import { defineStore, acceptHMRUpdate, Store, StoreDefinition } from 'pinia'
 import DocumentState from './DocumentState'
-
+import RemoteService from '@/services/RemoteService'
 import basic from '../containers/fixtures/basic.json'
 import flipFlop from '../containers/fixtures/flipflop.json'
 import integratedCircuit from '../containers/fixtures/ic.json'
@@ -10,7 +10,7 @@ import { createDocumentStore } from './document'
 
 const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
 
-type RootStore = {
+export type RootStore = {
   documents: {
     [id: string]: {
       fileName: string
@@ -41,6 +41,69 @@ export const useRootStore = defineStore({
     }
   },
   actions: {
+    async closeApplication () {
+      const documentIds = Object.keys(this.documents)
+
+      for (let i = documentIds.length - 1; i >= 0; i--) {
+        const id = documentIds[i]
+
+        await this.closeDocument(id)
+
+        if (this.documents[id]) {
+          break // the document refused to close, so break out of the loop
+        }
+      }
+
+      if (!this.hasOpenDocuments) {
+        // if there are no more documents open, then go on to close the app
+        RemoteService.quit()
+      }
+    },
+    async closeDocument (id: string): Promise<void> {
+      const document = this.documents[id]
+
+      if (!document) return Promise.resolve()
+
+      const store = document.store()
+
+      this.activateDocument(id)
+
+      if (store.canUndo || store.canRedo || true) { // TODO: remove 'true' after done testing
+        const result = RemoteService.showMessageBox({
+          message: `Save changes to ${document.fileName}?`,
+          title: 'Confirm',
+          buttons: ['Yes', 'No', 'Cancel']
+        })
+        const close = async () => {
+          delete this.documents[id]
+
+          const remainingId = Object.keys(this.documents).pop()
+
+          if (remainingId) {
+            this.activateDocument(remainingId)
+          }
+
+          // wait for the next window frame to show the next active document
+          await new Promise(resolve => setTimeout(resolve))
+        }
+
+        switch (result) {
+          case 0:
+            console.log('NEED TO SAVE DOCUMENT')
+            await close()
+            break
+          case 1:
+            await close()
+            break
+          default:
+            console.log('DID NOT WANT TO CLOSE')
+            break
+        }
+      }
+    },
+    selectDocument () {
+      console.log('will open file dialog')
+    },
     openDocument (fileName: string, content: string) {
       const id = rand()
       const store = createDocumentStore(id)
@@ -51,7 +114,20 @@ export const useRootStore = defineStore({
       document.loadDocument(content)
 
       this.documents[id] = { fileName, store }
-      this.activeDocumentId = id
+
+      this.activateDocument(id)
+    },
+    switchDocument (direction: number) {
+      const documentIds = Object.keys(this.documents)
+      const currentIndex = documentIds.findIndex(id => this.activeDocumentId === id)
+
+      let nextIndex = currentIndex + direction
+
+      if (documentIds.length === 0) return
+      if (currentIndex === -1 || nextIndex >= documentIds.length) nextIndex = 0
+      else if (nextIndex < 0) nextIndex = documentIds.length - 1
+
+      this.activateDocument(documentIds[nextIndex])
     },
     pauseActivity () {
       if (this.activeDocument) {
@@ -75,7 +151,6 @@ export const useRootStore = defineStore({
       this.resumeActivity()
     },
     openTestDocuments () {
-      // this.openDocument('basic.alfx', JSON.stringify(basic))
       this.openDocument('integrated-circuit.alfx', JSON.stringify(integratedCircuit))
       this.pauseActivity()
       this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop))
@@ -90,11 +165,6 @@ export const useRootStore = defineStore({
       if (nextIndex >= documentIds.length) nextIndex = 0
 
       this.activateDocument(documentIds[nextIndex])
-    },
-
-    closeDocument (documentId: string) {
-      delete this.documents[documentId]
-      this.navigateDocumentList(-1)
     }
   }
 })

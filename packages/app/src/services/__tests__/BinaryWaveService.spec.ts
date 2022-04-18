@@ -88,7 +88,7 @@ describe('Binary Wave Service', () => {
 
       expect(service.segments).toHaveLength(1)
       expect(service.segments).toEqual([segment])
-      expect(service.width).toEqual(1)
+      expect(service.width).toEqual(0)
     })
   })
 

@@ -7,6 +7,8 @@
     @deselect="store.deselectAll"
     @selection="store.createSelection"
     @zoom="store.setZoom"
+    @contextmenu="onContextMenu"
+    @mousedown="store.deselectAll"
   >
     <!-- when tabbed into, this resets the selection back to the last item -->
     <div
@@ -33,6 +35,7 @@
         :z-index="baseItem.zIndex + 1000"
         @select="selectItem(baseItem.id)"
         @deselect="deselectItem(baseItem.id)"
+        @contextmenu="onContextMenu"
       />
       <!-- Note: z-index of items will be offset by +1000 to ensure it always overlaps wires -->
 
@@ -50,6 +53,7 @@
         :z-index="baseItem.zIndex"
         @select="selectItem(baseItem.id)"
         @deselect="deselectItem(baseItem.id)"
+        @contextmenu="onContextMenu"
       />
     </template>
 
@@ -72,13 +76,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance } from 'vue'
+import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance, watchEffect } from 'vue'
 import { StoreDefinition } from 'pinia'
 import DocumentState from '@/store/DocumentState'
 import Editor from '@/components/Editor.vue'
 import Group from '@/components/Group.vue'
 import Connection from './Connection.vue'
 import Item from './Item.vue'
+import RemoteService from '@/services/RemoteService'
+import editorContextMenu from '@/menus/context/editor'
 
 export default defineComponent({
   name: 'Document',
@@ -94,7 +100,7 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const store = props.store()
     const editor = ref<ComponentPublicInstance<HTMLElement>>()
 
@@ -126,6 +132,21 @@ export default defineComponent({
           if (keys.Control) {
             return (keys.Shift ? store.redo() : store.undo())
           }
+        case 'a':
+        case 'A':
+          if (keys.Control) {
+            console.log('SEL ALL')
+            store.selectAll()
+            $event.preventDefault()
+            return
+          }
+        // case 'R':
+        //   return // TODO: remove this when done debugging all the time, since this overrides refresh
+        //   if (keys.Control) {
+        //     store.reset()
+        //     $event.preventDefault()
+        //     return
+        //   }
         default:
           return moveItemsByArrowKey($event)
       }
@@ -134,6 +155,13 @@ export default defineComponent({
     function onKeyUp ($event: KeyboardEvent) {
       keys[$event.key] = false
       acceleration = 1
+    }
+
+    function onContextMenu ($event: Event) {
+      RemoteService.showContextMenu(editorContextMenu(store))
+
+      $event.preventDefault()
+      $event.stopPropagation()
     }
 
     function moveItemsByArrowKey ($event: KeyboardEvent) {
@@ -189,6 +217,7 @@ export default defineComponent({
       storeDefinition: props.store,
       onKeyDown,
       onKeyUp,
+      onContextMenu,
       clearKeys,
       selectItem,
       deselectItem,
