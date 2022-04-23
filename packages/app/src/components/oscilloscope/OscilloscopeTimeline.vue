@@ -163,6 +163,7 @@ export default defineComponent({
 
   &__item {
     border-top: 1px solid $color-bg-tertiary;
+    box-sizing: border-box;
     min-width: 100%;
     min-height: 40px;
     height: 100%;

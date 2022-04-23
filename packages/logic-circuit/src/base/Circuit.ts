@@ -46,11 +46,21 @@ class Circuit {
    */
   public removeNode = (node: CircuitNode): void => {
     if (node instanceof InputNode) {
-      this.inputNodes.splice(this.inputNodes.indexOf(node), 1)
+      const inputIndex = this.inputNodes.findIndex(({ name }) => name === node.name)
+
+      if (inputIndex !== -1) {
+        this.inputNodes.splice(inputIndex, 1)
+      }
       this.reset()
     }
-    this.nodes.splice(this.nodes.indexOf(node), 1)
-    this.removeNodeOutputs(node)
+
+    const index = this.nodes.findIndex(({ name }) => name === node.name)
+
+    if (index !== -1) {
+      this.removeNodeOutputs(node)
+      this.nodes.splice(index, 1)
+    }
+
     this.next()
   }
 

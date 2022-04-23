@@ -130,7 +130,9 @@ class RemoteService {
 
     const remote = window.require('@electron/remote')
 
-    remote.getCurrentWindow().on('close', () => {
+    remote.getCurrentWindow().on('close', (e) => {
+      console.log('E: ', e)
+
       if (!this.canCloseWindow) {
         this.emitter.emit('close')
       } else {

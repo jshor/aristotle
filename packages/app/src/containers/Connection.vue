@@ -18,6 +18,7 @@
 </template>
 
 <script lang="ts">
+import { v4 as uuid } from 'uuid'
 import { ComponentPublicInstance, defineComponent, onBeforeUnmount, onMounted, PropType, ref, computed } from 'vue'
 import { StoreDefinition } from 'pinia'
 import Wire from '@/components/Wire.vue'
@@ -213,9 +214,9 @@ export default defineComponent({
         }
 
         newFreeport = {
-          itemId: rand(),
-          inputPortId: rand(),
-          outputPortId: rand(),
+          itemId: uuid(),
+          inputPortId: uuid(),
+          outputPortId: uuid(),
           connectionChainId: props.connectionChainId,
           value: source.value.value,
           sourceId: source.value.id,

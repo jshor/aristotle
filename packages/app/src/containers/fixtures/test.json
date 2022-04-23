@@ -1,0 +1,525 @@
+{
+  "groups": {},
+  "connections": {},
+  "ports": {
+    "17ea0e0b-12bf-41d7-aa52-8a7835c0164b": {
+      "id": "17ea0e0b-12bf-41d7-aa52-8a7835c0164b",
+      "orientation": 2,
+      "name": "Input Port",
+      "position": {
+        "x": 824,
+        "y": 412
+      },
+      "type": 0,
+      "rotation": 0,
+      "elementId": "06bbeeb6-246c-4760-a713-ae76ef633a69",
+      "value": -1,
+      "isFreeport": false,
+      "connectedPortIds": [
+        "719201ae-8eba-4ed2-a160-124e84cdcff7"
+      ],
+      "virtualElementId": "edb310ac-daa1-4719-8832-335fa529a4de"
+    },
+    "05cb3c99-bc53-49fb-a0e7-ada6c60ab073": {
+      "id": "05cb3c99-bc53-49fb-a0e7-ada6c60ab073",
+      "orientation": 0,
+      "name": "Output Port",
+      "position": {
+        "x": 416,
+        "y": 331
+      },
+      "type": 1,
+      "rotation": 0,
+      "elementId": "06bbeeb6-246c-4760-a713-ae76ef633a69",
+      "value": -1,
+      "isFreeport": false,
+      "connectedPortIds": [
+        "6fe625d3-fe3b-41a1-bff8-05d6e43e96a4"
+      ],
+      "virtualElementId": "8f819497-4f48-4860-8ede-6b26c3d1ab3b"
+    }
+  },
+  "items": {
+    "06bbeeb6-246c-4760-a713-ae76ef633a69": {
+      "id": "06bbeeb6-246c-4760-a713-ae76ef633a69",
+      "name": "",
+      "type": "IntegratedCircuit",
+      "subtype": "Flip flop",
+      "portIds": [
+        "17ea0e0b-12bf-41d7-aa52-8a7835c0164b",
+        "05cb3c99-bc53-49fb-a0e7-ada6c60ab073"
+      ],
+      "groupId": null,
+      "rotation": 0,
+      "boundingBox": {
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "zIndex": 0,
+      "width": 0,
+      "height": 0,
+      "isSelected": false,
+      "properties": {},
+      "integratedCircuit": {
+        "items": {
+          "4a9392ae-dee0-4f59-94dd-e7d16691ae80": {
+            "id": "300277b4-a365-4525-b11c-6e6374377893",
+            "name": "IntegratedCircuit Flip flop 1",
+            "type": "IntegratedCircuit",
+            "subtype": "Flip flop",
+            "portIds": [
+              "b8021dcb-c300-4410-96ef-e36fac52d9c3",
+              "d271e593-0fec-4c95-bed8-4beaa1c41a04"
+            ],
+            "groupId": null,
+            "rotation": 0,
+            "boundingBox": {
+              "left": 499,
+              "top": 284,
+              "bottom": 436,
+              "right": 701
+            },
+            "position": {
+              "x": 499,
+              "y": 284
+            },
+            "zIndex": 0,
+            "width": 202,
+            "height": 152,
+            "isSelected": false,
+            "properties": {},
+            "integratedCircuit": {
+              "items": {
+                "ca6e528a-3b75-44b1-bde4-74152cd9f2a4": {
+                  "id": "ca6e528a-3b75-44b1-bde4-74152cd9f2a4",
+                  "name": "InputNode Switch 1",
+                  "type": "InputNode",
+                  "subtype": "Switch",
+                  "portIds": [
+                    "ec136b4b-4df8-4ffd-864b-c7606d8334eb"
+                  ],
+                  "position": {
+                    "x": 389,
+                    "y": 389
+                  },
+                  "rotation": 0,
+                  "isSelected": false,
+                  "boundingBox": {
+                    "left": 389,
+                    "top": 389,
+                    "bottom": 451,
+                    "right": 451
+                  },
+                  "properties": {
+                    "name": {
+                      "label": "Name",
+                      "value": "",
+                      "type": "text"
+                    },
+                    "startValue": {
+                      "label": "Start value",
+                      "value": -1,
+                      "type": "number",
+                      "options": {
+                        "True": 1,
+                        "Hi-Z": 0,
+                        "False": -1
+                      }
+                    },
+                    "showInOscilloscope": {
+                      "label": "Show in oscilloscope",
+                      "value": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "groupId": null,
+                  "zIndex": 2,
+                  "width": 62,
+                  "height": 62
+                },
+                "ab4e9811-d11c-44ed-afc6-b15a09faebcb": {
+                  "id": "ab4e9811-d11c-44ed-afc6-b15a09faebcb",
+                  "name": "OutputNode Lightbulb 1",
+                  "type": "OutputNode",
+                  "subtype": "Lightbulb",
+                  "portIds": [
+                    "ece58dac-3544-4992-9951-17380a9cb8ad"
+                  ],
+                  "position": {
+                    "x": 587,
+                    "y": 390
+                  },
+                  "rotation": 0,
+                  "isSelected": false,
+                  "boundingBox": {
+                    "left": 587,
+                    "top": 390,
+                    "bottom": 432,
+                    "right": 629
+                  },
+                  "properties": {
+                    "name": {
+                      "label": "Name",
+                      "value": "",
+                      "type": "text"
+                    },
+                    "showInOscilloscope": {
+                      "label": "Show in oscilloscope",
+                      "value": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "groupId": null,
+                  "zIndex": 3,
+                  "width": 42,
+                  "height": 42
+                }
+              },
+              "connections": {
+                "177b33ff-5000-45f3-91af-0e72eb2e6d31": {
+                  "id": "177b33ff-5000-45f3-91af-0e72eb2e6d31",
+                  "source": "ec136b4b-4df8-4ffd-864b-c7606d8334eb",
+                  "target": "ece58dac-3544-4992-9951-17380a9cb8ad",
+                  "connectionChainId": "177b33ff-5000-45f3-91af-0e72eb2e6d31",
+                  "groupId": null,
+                  "zIndex": 6,
+                  "isSelected": false
+                }
+              },
+              "ports": {
+                "ec136b4b-4df8-4ffd-864b-c7606d8334eb": {
+                  "id": "ec136b4b-4df8-4ffd-864b-c7606d8334eb",
+                  "orientation": 2,
+                  "name": "Output Port",
+                  "position": {
+                    "x": 451,
+                    "y": 420
+                  },
+                  "type": 0,
+                  "rotation": 0,
+                  "elementId": "ca6e528a-3b75-44b1-bde4-74152cd9f2a4",
+                  "value": 0,
+                  "isFreeport": false,
+                  "connectedPortIds": [
+                    "b529878a-4806-4d51-b60a-8c235b2fc75f"
+                  ]
+                },
+                "ece58dac-3544-4992-9951-17380a9cb8ad": {
+                  "id": "ece58dac-3544-4992-9951-17380a9cb8ad",
+                  "orientation": 0,
+                  "name": "Input Port",
+                  "position": {
+                    "x": 587,
+                    "y": 411
+                  },
+                  "type": 1,
+                  "rotation": 0,
+                  "elementId": "ab4e9811-d11c-44ed-afc6-b15a09faebcb",
+                  "value": 0,
+                  "isFreeport": false,
+                  "connectedPortIds": [
+                    "5bd2c82c-127a-4b18-9abf-4a7531893e68"
+                  ]
+                }
+              },
+              "embeddedPorts": {
+                "b8021dcb-c300-4410-96ef-e36fac52d9c3": {
+                  "id": "b8021dcb-c300-4410-96ef-e36fac52d9c3",
+                  "orientation": 0,
+                  "name": "Output Port",
+                  "position": {
+                    "x": 499,
+                    "y": 360
+                  },
+                  "type": 1,
+                  "rotation": 0,
+                  "elementId": "300277b4-a365-4525-b11c-6e6374377893",
+                  "value": -1,
+                  "isFreeport": false,
+                  "connectedPortIds": [
+                    "b529878a-4806-4d51-b60a-8c235b2fc75f",
+                    "574884e3-b617-4309-9a8f-4e92c6477317"
+                  ],
+                  "virtualElementId": "ca6e528a-3b75-44b1-bde4-74152cd9f2a4"
+                },
+                "d271e593-0fec-4c95-bed8-4beaa1c41a04": {
+                  "id": "d271e593-0fec-4c95-bed8-4beaa1c41a04",
+                  "orientation": 2,
+                  "name": "Input Port",
+                  "position": {
+                    "x": 701,
+                    "y": 360
+                  },
+                  "type": 0,
+                  "rotation": 0,
+                  "elementId": "300277b4-a365-4525-b11c-6e6374377893",
+                  "value": -1,
+                  "isFreeport": false,
+                  "connectedPortIds": [
+                    "5bd2c82c-127a-4b18-9abf-4a7531893e68",
+                    "24abf832-697a-4911-b366-6e6f0af3e519"
+                  ],
+                  "virtualElementId": "ab4e9811-d11c-44ed-afc6-b15a09faebcb"
+                }
+              }
+            }
+          },
+          "edb310ac-daa1-4719-8832-335fa529a4de": {
+            "id": "edb310ac-daa1-4719-8832-335fa529a4de",
+            "name": "OutputNode Lightbulb 2",
+            "type": "OutputNode",
+            "subtype": "Lightbulb",
+            "portIds": [
+              "a89e575a-7962-45c4-b92a-cb44b4e5d363"
+            ],
+            "position": {
+              "x": 824,
+              "y": 391
+            },
+            "rotation": 0,
+            "isSelected": true,
+            "boundingBox": {
+              "left": 824,
+              "top": 391,
+              "bottom": 433,
+              "right": 866
+            },
+            "properties": {
+              "name": {
+                "label": "Name",
+                "value": "",
+                "type": "text"
+              },
+              "showInOscilloscope": {
+                "label": "Show in oscilloscope",
+                "value": true,
+                "type": "boolean"
+              }
+            },
+            "groupId": null,
+            "zIndex": 7,
+            "width": 42,
+            "height": 42
+          },
+          "8f819497-4f48-4860-8ede-6b26c3d1ab3b": {
+            "id": "8f819497-4f48-4860-8ede-6b26c3d1ab3b",
+            "name": "InputNode Switch 2",
+            "type": "InputNode",
+            "subtype": "Switch",
+            "portIds": [
+              "6630a795-b808-4807-ade8-7547ab41e3c0"
+            ],
+            "position": {
+              "x": 354,
+              "y": 300
+            },
+            "rotation": 0,
+            "isSelected": false,
+            "boundingBox": {
+              "left": 354,
+              "top": 300,
+              "bottom": 362,
+              "right": 416
+            },
+            "properties": {
+              "name": {
+                "label": "Name",
+                "value": "",
+                "type": "text"
+              },
+              "startValue": {
+                "label": "Start value",
+                "value": -1,
+                "type": "number",
+                "options": {
+                  "True": 1,
+                  "Hi-Z": 0,
+                  "False": -1
+                }
+              },
+              "showInOscilloscope": {
+                "label": "Show in oscilloscope",
+                "value": true,
+                "type": "boolean"
+              }
+            },
+            "groupId": null,
+            "zIndex": 11,
+            "width": 62,
+            "height": 62
+          }
+        },
+        "connections": {
+          "e4eb3d6f-13b5-437c-bb98-fa7d522e33cd": {
+            "id": "e4eb3d6f-13b5-437c-bb98-fa7d522e33cd",
+            "source": "2babbba3-7ac6-4e06-baf1-8064ee9f40ca",
+            "target": "a89e575a-7962-45c4-b92a-cb44b4e5d363",
+            "connectionChainId": "e4eb3d6f-13b5-437c-bb98-fa7d522e33cd",
+            "groupId": null,
+            "zIndex": 10,
+            "isSelected": false
+          },
+          "c0392929-3f4e-4b41-bf5a-961c9b6628a6": {
+            "id": "c0392929-3f4e-4b41-bf5a-961c9b6628a6",
+            "source": "6630a795-b808-4807-ade8-7547ab41e3c0",
+            "target": "62d9d881-adba-4fea-95c3-f83844cdfa76",
+            "connectionChainId": "c0392929-3f4e-4b41-bf5a-961c9b6628a6",
+            "groupId": null,
+            "zIndex": 14,
+            "isSelected": false
+          }
+        },
+        "ports": {
+          "62d9d881-adba-4fea-95c3-f83844cdfa76": {
+            "id": "62d9d881-adba-4fea-95c3-f83844cdfa76",
+            "orientation": 0,
+            "name": "Output Port",
+            "position": {
+              "x": 499,
+              "y": 360
+            },
+            "type": 1,
+            "rotation": 0,
+            "elementId": "4a9392ae-dee0-4f59-94dd-e7d16691ae80",
+            "value": -1,
+            "isFreeport": false,
+            "connectedPortIds": [
+              "b529878a-4806-4d51-b60a-8c235b2fc75f",
+              "574884e3-b617-4309-9a8f-4e92c6477317"
+            ],
+            "virtualElementId": "d486da70-53f3-4a09-ad69-c19e81d28d03"
+          },
+          "2babbba3-7ac6-4e06-baf1-8064ee9f40ca": {
+            "id": "2babbba3-7ac6-4e06-baf1-8064ee9f40ca",
+            "orientation": 2,
+            "name": "Input Port",
+            "position": {
+              "x": 701,
+              "y": 360
+            },
+            "type": 0,
+            "rotation": 0,
+            "elementId": "4a9392ae-dee0-4f59-94dd-e7d16691ae80",
+            "value": -1,
+            "isFreeport": false,
+            "connectedPortIds": [
+              "5bd2c82c-127a-4b18-9abf-4a7531893e68",
+              "24abf832-697a-4911-b366-6e6f0af3e519"
+            ],
+            "virtualElementId": "503a0a5a-adb3-4514-b11c-d0a08a8b580a"
+          },
+          "a89e575a-7962-45c4-b92a-cb44b4e5d363": {
+            "id": "a89e575a-7962-45c4-b92a-cb44b4e5d363",
+            "orientation": 0,
+            "name": "Input Port",
+            "position": {
+              "x": 824,
+              "y": 412
+            },
+            "type": 1,
+            "rotation": 0,
+            "elementId": "edb310ac-daa1-4719-8832-335fa529a4de",
+            "value": -1,
+            "isFreeport": false,
+            "connectedPortIds": [
+              "719201ae-8eba-4ed2-a160-124e84cdcff7"
+            ]
+          },
+          "6630a795-b808-4807-ade8-7547ab41e3c0": {
+            "id": "6630a795-b808-4807-ade8-7547ab41e3c0",
+            "orientation": 2,
+            "name": "Output Port",
+            "position": {
+              "x": 416,
+              "y": 331
+            },
+            "type": 0,
+            "rotation": 0,
+            "elementId": "8f819497-4f48-4860-8ede-6b26c3d1ab3b",
+            "value": -1,
+            "isFreeport": false,
+            "connectedPortIds": [
+              "6fe625d3-fe3b-41a1-bff8-05d6e43e96a4"
+            ]
+          },
+          "9577078e-2cee-47c0-a5c8-2463bfaf6862": {
+            "id": "9577078e-2cee-47c0-a5c8-2463bfaf6862",
+            "orientation": 2,
+            "name": "Output Port",
+            "position": {
+              "x": 451,
+              "y": 420
+            },
+            "type": 0,
+            "rotation": 0,
+            "value": 0,
+            "isFreeport": false,
+            "connectedPortIds": [
+              "b529878a-4806-4d51-b60a-8c235b2fc75f"
+            ]
+          },
+          "171e4783-1591-4af9-a024-721e6cd2e7e6": {
+            "id": "171e4783-1591-4af9-a024-721e6cd2e7e6",
+            "orientation": 0,
+            "name": "Input Port",
+            "position": {
+              "x": 587,
+              "y": 411
+            },
+            "type": 1,
+            "rotation": 0,
+            "value": 0,
+            "isFreeport": false,
+            "connectedPortIds": [
+              "5bd2c82c-127a-4b18-9abf-4a7531893e68"
+            ]
+          }
+        },
+        "embeddedPorts": {
+          "17ea0e0b-12bf-41d7-aa52-8a7835c0164b": {
+            "id": "17ea0e0b-12bf-41d7-aa52-8a7835c0164b",
+            "orientation": 2,
+            "name": "Input Port",
+            "position": {
+              "x": 824,
+              "y": 412
+            },
+            "type": 0,
+            "rotation": 0,
+            "elementId": "06bbeeb6-246c-4760-a713-ae76ef633a69",
+            "value": -1,
+            "isFreeport": false,
+            "connectedPortIds": [
+              "719201ae-8eba-4ed2-a160-124e84cdcff7"
+            ],
+            "virtualElementId": "edb310ac-daa1-4719-8832-335fa529a4de"
+          },
+          "05cb3c99-bc53-49fb-a0e7-ada6c60ab073": {
+            "id": "05cb3c99-bc53-49fb-a0e7-ada6c60ab073",
+            "orientation": 0,
+            "name": "Output Port",
+            "position": {
+              "x": 416,
+              "y": 331
+            },
+            "type": 1,
+            "rotation": 0,
+            "elementId": "06bbeeb6-246c-4760-a713-ae76ef633a69",
+            "value": -1,
+            "isFreeport": false,
+            "connectedPortIds": [
+              "6fe625d3-fe3b-41a1-bff8-05d6e43e96a4"
+            ],
+            "virtualElementId": "8f819497-4f48-4860-8ede-6b26c3d1ab3b"
+          }
+        }
+      }
+    }
+  }
+}
