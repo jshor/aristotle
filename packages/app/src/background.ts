@@ -1,6 +1,5 @@
 import { app, protocol, nativeImage, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
-import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import path from 'path'
 const remote = require('@electron/remote/main')
 // import remote from '@electron/remote/main'
@@ -15,7 +14,7 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 async function createWindow() {
-  const p = path.join(__dirname, '../public/icon.png')
+  const p = path.join(__dirname, '../public/icon32x32.png')
   const image = nativeImage.createFromPath(p)
 
   image.setTemplateImage(true)

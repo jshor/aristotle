@@ -11,6 +11,10 @@ import circuitNodeMapper from '@/utils/circuitNodeMapper'
 /**
  * The SimulationService ties together all aspects of a running simulation, including clock pulses, oscilloscope
  * wave management, and circuit component I/O. Effectively serves as an oracle for all circuit computations.
+ *
+ * It is important that the simulation maintains the state of the circuit separately from the editor state, as
+ * components may be removed/added/changed in the editor by the user at any time. Maintaining them separate allows
+ * the state of components present in the editor to be persisted.
  */
 export default class SimulationService {
   /** Mapping of port IDs to their respective circuit nodes. */
@@ -28,6 +32,8 @@ export default class SimulationService {
   /** Logical circuit instance. */
   circuit: Circuit = new Circuit()
 
+  integratedCircuits: Record<string, Circuit> = {}
+
   /** Circuit oscillator. */
   oscillator: OscillationService = new OscillationService()
 
@@ -39,6 +45,8 @@ export default class SimulationService {
 
   /** Oscillogram data, containing each BinaryWave instance observed in the oscilloscope. */
   oscillogram: Oscillogram = {}
+
+  integratedCircuitGroups: Record<string, string[]> = {}
 
   /**
    * Constructor.
@@ -165,20 +173,24 @@ export default class SimulationService {
    * @param item - the high-level integrated circuit item
    * @param embeddedPorts - the high-level ports associated with the item (ones visible to the user)
    */
-  addIntegratedCircuit = (item: Item, embeddedPorts: Record<string, Port>) => {
-    if (!item.integratedCircuit) return
+  addIntegratedCircuit = (icItem: Item, e: Record<string, Port>) => {
+    if (!icItem.integratedCircuit) return
 
-    const { items, connections, ports } = item.integratedCircuit
+    const { items, connections, ports } = icItem.integratedCircuit
 
     Object
       .values(items)
-      .forEach(item => this.addNode(item, { ...ports, ...embeddedPorts }, true))
+      .forEach(item => {
+        this.addNode(item, ports, true)
+      })
 
     Object
       .values(connections)
-      .forEach(c => this.addConnection(c.source, c.target))
+      .forEach(c => {
+        this.addConnection(c.source, c.target)
+      })
 
-    this.monitorNode(item, ports)
+    // this.monitorNode(icItem, ports)
   }
 
   /**
@@ -201,8 +213,7 @@ export default class SimulationService {
 
     node.forceContinue = forceContinue
 
-    inputIds.forEach(portId => this.addPort(portId, node))
-    outputIds.forEach(portId => this.addPort(portId, node))
+    item.portIds.forEach(portId => this.addPort(portId, node))
 
     if (item.type === ItemType.InputNode && item.subtype === ItemSubtype.Clock) {
       this.addClock(outputIds[0])
@@ -220,16 +231,33 @@ export default class SimulationService {
    *
    * @param portIds - list of IDs of ports associated with the node (at least one matching is required)
    */
-  removeNode = (portIds: string[] = []) => {
-    const node = portIds
-      .map(portId => this.nodes[portId])
-      .find(node => !!node)
+  removeNode = (item: Item) => {
+    const getIntegratedCircuitPortIds = (ic: Item): string[] => {
+      if (!ic.integratedCircuit) return []
 
-    if (node) {
-      this.circuit.removeNode(node)
-
-      portIds.forEach(portId => this.removePort(portId))
+      return Object
+        .values(ic.integratedCircuit.items)
+        .reduce((portIds, i) => {
+          if (i.integratedCircuit) {
+            return portIds
+              .concat(getIntegratedCircuitPortIds(i))
+              .concat(i.portIds)
+          }
+          return portIds.concat(i.portIds)
+        }, [] as string[])
     }
+
+    item
+      .portIds
+      .concat(getIntegratedCircuitPortIds(item))
+      .forEach(portId => {
+        const node = this.nodes[portId]
+
+        if (node) {
+          this.circuit.removeNode(node)
+          this.removePort(portId)
+        }
+      })
   }
 
   /**
@@ -320,7 +348,11 @@ export default class SimulationService {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
       this.circuit.addConnection(this.nodes[sourceId], this.nodes[targetId], targetId)
     } else {
-      console.log('MISSING NODE FOR ADDING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
+      if (!this.nodes[sourceId]) {
+        console.log('MISSING SOURCE: ', sourceId, ' TRIED TO CONNECT TO ---', targetId)
+      } else {
+        console.log('MISSING TARGET: ', targetId, ' TRIED TO CONNECT TO ---', sourceId)
+      }
     }
   }
 

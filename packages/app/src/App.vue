@@ -41,6 +41,7 @@
                     :key="activeDocumentId"
                     :store="activeDocument.store"
                     @switch="switchDocument"
+                    @open-integrated-circuit="openIntegratedCircuit"
                   />
                 </template>
               </tab-host>
@@ -149,7 +150,8 @@ export default defineComponent({
       hasOpenDocuments,
       activateDocument: store.activateDocument,
       closeDocument: store.closeDocument,
-      switchDocument: store.switchDocument
+      switchDocument: store.switchDocument,
+      openIntegratedCircuit: store.openIntegratedCircuit
     }
   },
   data () {

@@ -1,6 +1,5 @@
 import { TinyEmitter } from 'tiny-emitter'
-
-const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
+import { v4 as uuid } from 'uuid'
 
 /**
  * @class ClockService
@@ -8,7 +7,7 @@ const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: u
  */
 export default class ClockService implements Pulse {
   /** Wave ID. */
-  public id: string = rand()
+  public id: string = uuid()
 
   /** User-friendly label for this wave. */
   public name: string

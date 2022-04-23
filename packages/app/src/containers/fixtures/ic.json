@@ -318,7 +318,7 @@
           },
           "switch1": {
             "id": "switch1",
-            "type": "Buffer",
+            "type": "InputNode",
             "subtype": "Clock",
             "portIds": [
               "inputNode_id_7904088",
@@ -365,7 +365,7 @@
           },
           "switch2": {
             "id": "switch2",
-            "type": "Buffer",
+            "type": "InputNode",
             "subtype": "Switch",
             "portIds": [
               "inputNode_id_1034915",
@@ -412,7 +412,7 @@
           },
           "lightbulb1": {
             "id": "lightbulb1",
-            "type": "Buffer",
+            "type": "OutputNode",
             "subtype": "Lightbulb",
             "portIds": [
               "lightbulbInputPort1",
@@ -449,7 +449,7 @@
           },
           "lightbulb2": {
             "id": "lightbulb2",
-            "type": "Buffer",
+            "type": "OutputNode",
             "subtype": "Lightbulb",
             "portIds": [
               "lightbulbInputPort2",
@@ -544,6 +544,7 @@
         "ports": {
           "nor1InputPort1": {
             "id": "nor1InputPort1",
+            "connectedPortIds": [],
             "elementId": "nor1",
             "position": {
               "x": 280,
@@ -557,6 +558,7 @@
           },
           "nor1InputPort2": {
             "id": "nor1InputPort2",
+            "connectedPortIds": [],
             "elementId": "nor1",
             "position": {
               "x": 280,
@@ -570,6 +572,7 @@
           },
           "nor1OutputPort1": {
             "id": "nor1OutputPort1",
+            "connectedPortIds": [],
             "elementId": "nor1",
             "position": {
               "x": 420,
@@ -583,6 +586,7 @@
           },
           "nor2InputPort1": {
             "id": "nor2InputPort1",
+            "connectedPortIds": [],
             "elementId": "nor2",
             "position": {
               "x": 290,
@@ -596,6 +600,7 @@
           },
           "nor2InputPort2": {
             "id": "nor2InputPort2",
+            "connectedPortIds": [],
             "elementId": "nor2",
             "position": {
               "x": 290,
@@ -609,6 +614,7 @@
           },
           "nor2OutputPort1": {
             "id": "nor2OutputPort1",
+            "connectedPortIds": [],
             "elementId": "nor2",
             "position": {
               "x": 430,
@@ -622,6 +628,7 @@
           },
           "switchOutputPort1": {
             "id": "switchOutputPort1",
+            "connectedPortIds": [],
             "elementId": "switch1",
             "position": {
               "x": 151,
@@ -635,6 +642,7 @@
           },
           "switchOutputPort2": {
             "id": "switchOutputPort2",
+            "connectedPortIds": [],
             "elementId": "switch2",
             "position": {
               "x": 151,
@@ -648,6 +656,7 @@
           },
           "lightbulbInputPort1": {
             "id": "lightbulbInputPort1",
+            "connectedPortIds": [],
             "elementId": "lightbulb1",
             "position": {
               "x": 699,
@@ -661,6 +670,7 @@
           },
           "lightbulbInputPort2": {
             "id": "lightbulbInputPort2",
+            "connectedPortIds": [],
             "elementId": "lightbulb2",
             "position": {
               "x": 699,
@@ -674,6 +684,7 @@
           },
           "inputNode_id_7904088": {
             "id": "inputNode_id_7904088",
+            "connectedPortIds": [],
             "elementId": "id_4364941",
             "position": {
               "x": 0,
@@ -687,6 +698,7 @@
           },
           "inputNode_id_1034915": {
             "id": "inputNode_id_1034915",
+            "connectedPortIds": [],
             "elementId": "id_4364941",
             "position": {
               "x": 0,
@@ -700,6 +712,7 @@
           },
           "outputNode_id_1091115": {
             "id": "outputNode_id_1091115",
+            "connectedPortIds": [],
             "elementId": "id_4364941",
             "position": {
               "x": 0,
@@ -713,6 +726,7 @@
           },
           "outputNode_id_2891768": {
             "id": "outputNode_id_2891768",
+            "connectedPortIds": [],
             "elementId": "id_4364941",
             "position": {
               "x": 0,

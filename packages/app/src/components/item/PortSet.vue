@@ -40,11 +40,6 @@ export default defineComponent({
       justify-content: space-around;
     }
 
-    &--right {
-      left: 50%;
-      align-items: flex-end;
-    }
-
     &--bottom, &--top {
       flex: 1;
       top: 0;
@@ -57,9 +52,17 @@ export default defineComponent({
       justify-content: space-around;
     }
 
+    &--right {
+      left: 50%;
+    }
+
     &--bottom {
       top: 50%;
+    }
+
+    &--bottom, &--right {
       align-items: flex-end;
+      flex-direction: column-reverse;
     }
 
     &--top {

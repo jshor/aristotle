@@ -36,6 +36,7 @@
         @select="selectItem(baseItem.id)"
         @deselect="deselectItem(baseItem.id)"
         @contextmenu="onContextMenu"
+        @open-integrated-circuit="$emit('openIntegratedCircuit', baseItem)"
       />
       <!-- Note: z-index of items will be offset by +1000 to ensure it always overlaps wires -->
 
@@ -140,13 +141,14 @@ export default defineComponent({
             $event.preventDefault()
             return
           }
-        // case 'R':
-        //   return // TODO: remove this when done debugging all the time, since this overrides refresh
-        //   if (keys.Control) {
-        //     store.reset()
-        //     $event.preventDefault()
-        //     return
-        //   }
+        case 'r':
+        case 'R':
+          if (keys.Control) {
+            window.location.reload()  // TODO: remove this when done debugging all the time, since this overrides refresh
+            // store.reset()
+            $event.preventDefault()
+            return
+          }
         default:
           return moveItemsByArrowKey($event)
       }
@@ -162,6 +164,18 @@ export default defineComponent({
 
       $event.preventDefault()
       $event.stopPropagation()
+    }
+
+    function onOpenIntegratedCircuit ({ id, ports }: { id: string, ports: Port[] }) {
+      emit('openIntegratedCircuit', {
+        items: {
+          [id]: store.items[id]
+        },
+        ports: ports.reduce((map: Record<string, Port>, port) => ({
+          ...map,
+          [port.id]: port
+        }), {})
+      })
     }
 
     function moveItemsByArrowKey ($event: KeyboardEvent) {
@@ -218,6 +232,7 @@ export default defineComponent({
       onKeyDown,
       onKeyUp,
       onContextMenu,
+      onOpenIntegratedCircuit,
       clearKeys,
       selectItem,
       deselectItem,

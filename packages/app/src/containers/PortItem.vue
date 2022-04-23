@@ -38,6 +38,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { StoreDefinition } from 'pinia'
+import { v4 as uuid } from 'uuid'
 import Draggable from '../components/Draggable.vue'
 import PortHandle from '../components/PortHandle.vue'
 import PortPivot from '../components/PortPivot.vue'
@@ -144,16 +145,16 @@ export default defineComponent({
       const rand = () => `id_${(Math.floor(Math.random() * 1000000) + 5)}` // TODO: use uuid
 
       newFreeport = {
-        itemId: rand(),
+        itemId: uuid(),
         position: props.position
       }
 
       if (props.type === PortType.Input) {
-        newFreeport.outputPortId = rand()
+        newFreeport.outputPortId = uuid()
         newFreeport.targetId = props.id
         newFreeport.portType = 0
       } else {
-        newFreeport.inputPortId = rand()
+        newFreeport.inputPortId = uuid()
         newFreeport.sourceId = props.id
         newFreeport.portType = 1
       }

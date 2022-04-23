@@ -1,10 +1,12 @@
 // @ts-check
-import { defineStore, acceptHMRUpdate, Store, StoreDefinition } from 'pinia'
+import { defineStore, StoreDefinition } from 'pinia'
+import { v4 as uuid } from 'uuid'
 import DocumentState from './DocumentState'
 import RemoteService from '@/services/RemoteService'
 import basic from '../containers/fixtures/basic.json'
 import flipFlop from '../containers/fixtures/flipflop.json'
 import integratedCircuit from '../containers/fixtures/ic.json'
+import testIc from '../containers/fixtures/test.json'
 
 import { createDocumentStore } from './document'
 
@@ -41,6 +43,9 @@ export const useRootStore = defineStore({
     }
   },
   actions: {
+    openIntegratedCircuit (baseItem: Item) {
+      this.openDocument('test-ic.alcx', JSON.stringify(baseItem.integratedCircuit))
+    },
     async closeApplication () {
       const documentIds = Object.keys(this.documents)
 
@@ -105,7 +110,7 @@ export const useRootStore = defineStore({
       console.log('will open file dialog')
     },
     openDocument (fileName: string, content: string) {
-      const id = rand()
+      const id = uuid()
       const store = createDocumentStore(id)
 
       const document = store()
@@ -151,9 +156,16 @@ export const useRootStore = defineStore({
       this.resumeActivity()
     },
     openTestDocuments () {
-      this.openDocument('integrated-circuit.alfx', JSON.stringify(integratedCircuit))
-      this.pauseActivity()
-      this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop))
+      this.openDocument('integrated-circuit.alfx', JSON.stringify({
+        connections: {},
+        items: {},
+        ports: {},
+        groups: {}
+      }))
+      // this.openDocument('test.alfx', JSON.stringify(testIc))
+      // this.openDocument('integrated-circuit.alfx', JSON.stringify(integratedCircuit))
+      // this.pauseActivity()
+      // this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop))
     },
 
     navigateDocumentList (direction: number) {

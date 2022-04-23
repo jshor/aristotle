@@ -37,7 +37,10 @@
     />
     <selectable :is-selected="isSelected">
       <freeport v-if="type === ItemType.Freeport" />
-      <integrated-circuit v-else-if="type === ItemType.IntegratedCircuit" />
+      <integrated-circuit
+        v-else-if="type === ItemType.IntegratedCircuit"
+        @dblclick="$emit('openIntegratedCircuit', baseItem)"
+      />
       <input-switch
         v-else-if="type === ItemType.InputNode"
         :value="ports[0]?.value"
@@ -252,7 +255,8 @@ export default defineComponent({
     /* slot-to-port-list map for displaying port-item elements */
     const portList = computed(() => {
       const locations = ['left', 'top', 'right', 'bottom']
-      const map = ports.value.reduce((map: Record<string, Port[]>, port: Port) => ({
+
+      return ports.value.reduce((map: Record<string, Port[]>, port: Port) => ({
         ...map,
         [locations[port.orientation]]: [
           ...map[locations[port.orientation]],
@@ -266,10 +270,6 @@ export default defineComponent({
         right: [],
         bottom: []
       }))
-
-      map.right = map.right.reverse()
-
-      return map
     })
 
     /* whether or not the properties trigger button should be visible */

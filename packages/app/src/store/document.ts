@@ -1,24 +1,21 @@
 // @ts-check
 import { defineStore } from 'pinia'
-
+import { v4 as uuid } from 'uuid'
+import { LogicValue } from '@aristotle/logic-circuit'
 
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
 import SimulationService from '@/services/SimulationService'
 import boundaries from '@/layout/boundaries'
 import rotation from '@/layout/rotation'
-import createIntegratedCircuit from '@/utils/createIntegratedCircuit'
 import ItemType from '@/types/enums/ItemType'
-import idMapper from '@/utils/idMapper'
+import ItemSubtype from '@/types/enums/ItemSubtype'
 
 import getConnectionChain from '@/utils/getConnectionChain'
-import ItemSubtype from '@/types/enums/ItemSubtype'
 import sortByZIndex from '@/utils/sortByZIndex'
+import idMapper from '@/utils/idMapper'
 import DocumentState from './DocumentState'
-import { LogicValue } from '@aristotle/logic-circuit'
-import RemoteService from '@/services/RemoteService'
-
-const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
+import integratedCircuitFactory from '@/factories/integratedCircuitFactory'
 
 function generateItemName (item: Item, taxonomyCount: number) {
   const name: string[] = [item.type]
@@ -132,31 +129,78 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     loadDocument (document: string) {
-      this.applyState(document)
-      this.deselectAll()
+      const { integratedCircuit } = JSON.parse(document)
+
+      if (integratedCircuit) {
+        this.loadIntegratedCircuit(document)
+      } else {
+        this.applyState(document)
+      }
+
+      this.reset()
+    },
+
+    loadIntegratedCircuit (document: string) {
+      const documentItem: Item = JSON.parse(document)
+
+      if (!documentItem.integratedCircuit) throw new Error('Invalid file') // TODO
+
+      const state = JSON.stringify({
+        ...documentItem.integratedCircuit,
+        items: Object
+          .values(documentItem.integratedCircuit.items)
+          .reduce((items: Record<string, Item>, item) => ({
+            ...items,
+            [item.id]: {
+              ...item,
+              // exclude any ports that belong to the parent IC item
+              portIds: item.portIds.filter(i => !documentItem.portIds.includes(i))
+            }
+          }), {}),
+        ports: Object
+          .values(documentItem.integratedCircuit.ports)
+          .reduce((ports: Record<string, Port>, port) => {
+            // exclude any ports that belong to the parent IC item
+            // those ports are only proxy ports and would not be part of the overall circuit
+            if (!documentItem.portIds.includes(port.id)) {
+              ports[port.id] = port
+            }
+            return ports
+          }, {})
+      }, null, 2)
+
+      this.applyState(state)
     },
 
     async saveIntegratedCircuit () {
-      // window.open('https://github.com', '_blank', 'top=500,left=200,nodeIntegration=no,modal=true')
-      const result = await RemoteService.openModal()
+      // TODO: if an autonomous node (e.g., clock) is present, ask user if they wish to convert it to a switch
+      const {
+        integratedCircuitItem
+      } = integratedCircuitFactory(this.ports, this.items, this.connections)
 
-      console.log('result: ', result)
-    },
+      // console.log('RES: ', JSON.stringify(integratedCircuitItem, null, 2))
 
-    logIntegratedCircuit () {
-      const { integratedCircuitItem, integratedCircuitPorts } = createIntegratedCircuit(this.ports, this.items, this.connections)
-      const id = idMapper.mapIntegratedCircuitIds(integratedCircuitItem, integratedCircuitPorts)
+      integratedCircuitItem.id = uuid()
 
-      // this.addIntegratedCircuit({
-      //   integratedCircuitItem: id.integratedCircuitItem,
-      //   integratedCircuitPorts: id.integratedCircuitPorts
-      // })
-      console.log(JSON.stringify({
-        items: id.integratedCircuitItem,
-        ports: id.integratedCircuitPorts,
-        groups: {},
+
+      const id = idMapper({
+        items: {
+          [integratedCircuitItem.id]: integratedCircuitItem
+        },
+        ports: {},
         connections: {}
-      }, null, 2))
+      })
+
+      const item = Object.values(id.items)[0]
+
+      // console.log('*************************** AFTER', JSON.stringify(item, null, 2))
+
+
+      // console.log('created IC: ', JSON.stringify(id.integratedCircuitItem, null, 2))
+
+      this.addIntegratedCircuit({
+        integratedCircuitItem: item
+      })
     },
 
     buildCircuit () {
@@ -531,7 +575,7 @@ export const createDocumentStore = (id: string) => defineStore({
     group () {
       this.commitState()
 
-      const id = rand()
+      const id = uuid()
       const items = Object
         .values(this.items)
         .filter(({ isSelected }) => isSelected)
@@ -1216,7 +1260,7 @@ export const createDocumentStore = (id: string) => defineStore({
           .forEach(portId => this.removePort(portId))
       } else {
         for (let i = oldCount; i < count; i++) {
-          const portId = rand()
+          const portId = uuid()
 
           // add the difference of ports one by one
           this.addPort(id, {
@@ -1361,8 +1405,7 @@ export const createDocumentStore = (id: string) => defineStore({
       addedItems.forEach(id => {
         if (items[id].integratedCircuit) {
           this.addIntegratedCircuit({
-            integratedCircuitItem: items[id],
-            integratedCircuitPorts: ports
+            integratedCircuitItem: items[id]
           })
         } else {
           this.addNewItem({
@@ -1436,6 +1479,8 @@ export const createDocumentStore = (id: string) => defineStore({
       if (port) {
         const item = this.items[port.elementId]
 
+        if (!item) return
+
         // remove the reference to the port from the element
         const portIndex = item.portIds.findIndex(i => i === portId)
 
@@ -1444,7 +1489,10 @@ export const createDocumentStore = (id: string) => defineStore({
         }
 
         delete this.ports[portId]
+        console.log('DELETING: ', portId)
         this.simulation.removePort(portId)
+      } else {
+        console.log('CANT DELETE')
       }
     },
 
@@ -1485,17 +1533,23 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param payload.integratedCircuitItem - the IC to add
      * @param payload.integratedCircuitPorts - ID-to-Port map of visibile IC ports to add
      */
-    addIntegratedCircuit ({ integratedCircuitItem, integratedCircuitPorts }: {
-      integratedCircuitItem: Item,
-      integratedCircuitPorts: Record<string, Port>
+    addIntegratedCircuit ({ integratedCircuitItem }: {
+      integratedCircuitItem: Item
     }) {
       if (!integratedCircuitItem.integratedCircuit) return
 
+      const integratedCircuitPorts: Record<string, Port> = {}
+
       // assign the visible IC ports
-      Object
-        .values(integratedCircuitPorts)
-        .forEach(port => {
-          this.ports[port.id] = port
+      integratedCircuitItem
+        .portIds
+        .forEach(portId => {
+          if (integratedCircuitItem.integratedCircuit?.ports[portId]) {
+            this.ports[portId] = integratedCircuitItem.integratedCircuit.ports[portId]
+
+            integratedCircuitPorts[portId] = integratedCircuitItem.integratedCircuit.ports[portId]
+            // this.ports[portId].elementId = integratedCircuitItem.id
+          }
         })
 
       const taxonomy = `${integratedCircuitItem.type}_${integratedCircuitItem.subtype}`
@@ -1506,7 +1560,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
       this.items[integratedCircuitItem.id] = integratedCircuitItem
       this.items[integratedCircuitItem.id].name = generateItemName(integratedCircuitItem, ++this.taxonomyCounts[taxonomy])
-
 
       this
         .simulation
@@ -1522,27 +1575,12 @@ export const createDocumentStore = (id: string) => defineStore({
     removeElement (id: string) {
       const item = this.items[id]
 
-      if (item.integratedCircuit) {
-        // remove all circuit nodes associated with the integrated circuit
-        Object
-          .values(item.integratedCircuit.items)
-          .forEach(({ portIds }) => {
-            this
-              .simulation
-              .removeNode(portIds)
-          })
-      } else {
-        // remove the sole circuit node
-        this
-          .simulation
-          .removeNode(item.portIds)
-      }
+      this
+        .simulation
+        .removeNode(item)
 
       // remove all ports associated with the item
-      item.portIds.forEach(portId => {
-        delete this.ports[portId]
-        this.simulation.removePort(portId)
-      })
+      item.portIds.forEach(portId => this.removePort(portId))
 
       // remove the item
       delete this.items[id]
@@ -1692,7 +1730,7 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param payload.connectionChainId - optional connection chain ID to add the connection segment to
      */
     connect ({ source, target, connectionChainId, isPreview }: { source?: string, target?: string, connectionChainId?: string, isPreview?: boolean }) {
-      const id = `conn_${rand()}`
+      const id = `conn_${uuid()}`
 
       if (source && target) {
         this.connections[id] = {
@@ -1851,3 +1889,4 @@ export const createDocumentStore = (id: string) => defineStore({
     }
   }
 })
+// TODO: when debugger is turned off, make sure all elements take on values defined in valueMap

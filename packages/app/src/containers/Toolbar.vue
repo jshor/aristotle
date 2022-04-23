@@ -40,6 +40,7 @@
 </template>
 
 <script lang="ts">
+import { v4 as uuid } from 'uuid'
 import {
   faFolderOpen,
   faFile,
@@ -70,8 +71,6 @@ import ToolbarButton from '../components/toolbar/ToolbarButton.vue'
 import ToolbarSeparator from '../components/toolbar/ToolbarSeparator.vue'
 import ItemSubtype from '../types/enums/ItemSubtype'
 import ItemType from '../types/enums/ItemType'
-
-const rand = () => `id_${(Math.floor(Math.random() * 10000000000000) + 5)}` // TODO: use uuid
 
 const createPort = (elementId, id, orientation, type, name): Port => ({
   id,
@@ -213,28 +212,28 @@ export default defineComponent({
     }
 
     function addLogicGate () {
-      const elementId = rand()
+      const elementId = uuid()
 
       createItem(elementId, ItemType.LogicGate, ItemSubtype.Nor, 100, 150, [
-        createPort(elementId, rand(), 0, 1, 'Input Port 1'),
-        createPort(elementId, rand(), 0, 1, 'Input Port 2'),
-        createPort(elementId, rand(), 2, 0, 'Output Port')
+        createPort(elementId, uuid(), 0, 1, 'Input Port 1'),
+        createPort(elementId, uuid(), 0, 1, 'Input Port 2'),
+        createPort(elementId, uuid(), 2, 0, 'Output Port')
       ])
     }
 
     function addLightbulb () {
-      const elementId = rand()
+      const elementId = uuid()
 
       createItem(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, [
-        createPort(elementId, rand(), 0, 1, 'Input Port')
+        createPort(elementId, uuid(), 0, 1, 'Input Port')
       ])
     }
 
     function addSwitch () {
-      const elementId = rand()
+      const elementId = uuid()
 
       createItem(elementId, ItemType.InputNode, ItemSubtype.Switch, 40, 40, [
-        createPort(elementId, rand(), 2, 0, 'Output Port')
+        createPort(elementId, uuid(), 2, 0, 'Output Port')
       ])
     }
 
