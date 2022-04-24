@@ -1,3 +1,4 @@
+import path from 'path'
 import { TinyEmitter } from 'tiny-emitter'
 import createApplicationMenu from '@/menus'
 import { Store } from 'pinia'
@@ -44,6 +45,14 @@ class RemoteService {
     menu.popup()
   }
 
+  static beep () {
+    if (!window.require) return
+
+    const { shell } = window.require('@electron/remote')
+
+    shell.beep()
+  }
+
   /**
    * Opens a modal window with the given path.
    *
@@ -68,10 +77,28 @@ class RemoteService {
     win.setMenu(null)
   }
 
+  static showOpenFileDialog (filters: FileFilter[]) {
+    if (!window.require) return
+
+    const { dialog, app } = window.require('@electron/remote')
+    const defaultPath = path.resolve(app.getPath('desktop'))
+
+    return dialog.showOpenDialogSync({ defaultPath, filters }) || []
+  }
+
+  static showSaveFileDialog (filters: FileFilter[], fileName: string) {
+    if (!window.require) return
+
+    const { dialog, app } = window.require('@electron/remote')
+    const defaultPath = path.resolve(app.getPath('desktop'), fileName)
+
+    return dialog.showSaveDialogSync({ defaultPath, filters })
+  }
+
   /**
    * Shows a message box to the user.
    *
-   * See [Electron dialogs]{@link https://www.electronjs.org/docs/latest/api/dialog/} for info on available types.
+   * @see {@link https://www.electronjs.org/docs/latest/api/dialog/} for info on available types.
    *
    * @param params
    * @param params.message - message content to display in the box

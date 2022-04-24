@@ -1,12 +1,47 @@
-import ItemType from '@/types/enums/ItemType'
 import { cloneDeep } from 'lodash' // TODO
 import { v4 as uuid } from 'uuid'
 
 type IdMap = Record<string, string>
 
-function mapCircuit (circuit: { connections: Record<string, Connection>, items: Record<string, Item>, ports: Record<string, Port> }, idMap: IdMap = {}) {
+function mapStandardCircuitIds (circuit: { connections: Record<string, Connection>, items: Record<string, Item>, ports: Record<string, Port>, groups: Record<string, Group> }, idMap: IdMap = {}) {
 
-  let { items, connections, ports } = cloneDeep(circuit)
+  let { items, connections, ports, groups } = cloneDeep(circuit)
+
+  function mapGroups (groups: Record<string, Group>) {
+    Object
+      .values(groups)
+      .forEach(group => {
+        const oldId = group.id
+        const newId = uuid()
+
+        idMap[oldId] = newId
+        groups[newId] = cloneDeep(group)
+
+        delete groups[oldId]
+      })
+
+    return groups
+  }
+
+  function mapGroupIds (connections: Record<string, Connection>, items: Record<string, Item>) {
+    Object
+      .values(connections)
+      .forEach(connection => {
+        connection.groupId = connection.groupId !== null
+          ? idMap[connection.groupId]
+          : null
+      })
+
+    Object
+      .values(items)
+      .forEach(item => {
+        item.groupId = item.groupId !== null
+          ? idMap[item.groupId]
+          : null
+      })
+
+    return { connections, items }
+  }
 
   function mapConnections (connections: Record<string, Connection>) {
     Object
@@ -44,14 +79,15 @@ function mapCircuit (circuit: { connections: Record<string, Connection>, items: 
         const oldId = item.id
         const newId = uuid()
 
+        idMap[oldId] = newId
+        items[newId] = cloneDeep<Item>(item)
+
         if (item.integratedCircuit) {
-          idMap[oldId] = newId
-          items[newId] = item
-          items[newId].integratedCircuit = cloneDeep(mapCircuit(cloneDeep(item.integratedCircuit), idMap))
-          // items[newId].portIds = items[newId].portIds.map(oldId => idMap[oldId])
+          items[newId].integratedCircuit = {
+            serializedState: item.integratedCircuit.serializedState,
+            ...mapStandardCircuitIds(cloneDeep(item.integratedCircuit), idMap)
+          }
         } else {
-          idMap[oldId] = newId
-          items[newId] = cloneDeep<Item>(item)
           items[newId].id = newId
         }
 
@@ -95,18 +131,31 @@ function mapCircuit (circuit: { connections: Record<string, Connection>, items: 
   ports = mapItemIds(ports)
   connections = mapConnections(connections)
   connections = mapConnectionChainIds(connections)
-
-  Object
-    .values(items)
-    .forEach(item => {
-      // item.portIds = item.portIds.map(oldId => idMap[oldId])
-    })
+  groups = mapGroups(groups)
 
   return {
-    items,
-    connections,
-    ports
+    ...mapGroupIds(connections, items),
+    ports,
+    groups
   }
 }
 
-export default mapCircuit
+function mapIntegratedCircuitIds (item: Item) {
+  if (!item.integratedCircuit) return item
+
+  const { items } = mapStandardCircuitIds({
+    items: {
+      [item.id]: item
+    },
+    connections: {},
+    ports: {},
+    groups: {}
+  })
+
+  return Object.values(items)[0]
+}
+
+export default {
+  mapStandardCircuitIds,
+  mapIntegratedCircuitIds
+}

@@ -13,9 +13,10 @@ import ItemSubtype from '@/types/enums/ItemSubtype'
 
 import getConnectionChain from '@/utils/getConnectionChain'
 import sortByZIndex from '@/utils/sortByZIndex'
-import idMapper from '@/utils/idMapper'
 import DocumentState from './DocumentState'
 import integratedCircuitFactory from '@/factories/integratedCircuitFactory'
+import idMapper from '@/utils/idMapper'
+import RemoteService from '@/services/RemoteService'
 
 function generateItemName (item: Item, taxonomyCount: number) {
   const name: string[] = [item.type]
@@ -36,16 +37,13 @@ export const createDocumentStore = (id: string) => defineStore({
     redoStack: [],
     simulation: new SimulationService([], [], {}),
     oscillogram: {},
-    items: {},
-    connections: {},
-    ports: {},
-    groups: {},
     taxonomyCounts: {},
     zoomLevel: 1,
     zIndex: 1,
     isOscilloscopeEnabled: true,
     isCircuitEvaluated: false,
     isDebugging: false,
+    isDirty: false,
 
     /* the following variables are 'temporary' information */
     snapBoundaries: [],
@@ -56,7 +54,13 @@ export const createDocumentStore = (id: string) => defineStore({
     cachedState: null,
     activeFreeportId: null,
     activePortId: null,
-    connectionPreviewId: null
+    connectionPreviewId: null,
+
+    /* serializable state items */
+    items: {},
+    connections: {},
+    ports: {},
+    groups: {},
   }),
 
   getters: {
@@ -129,78 +133,23 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     loadDocument (document: string) {
-      const { integratedCircuit } = JSON.parse(document)
-
-      if (integratedCircuit) {
-        this.loadIntegratedCircuit(document)
-      } else {
-        this.applyState(document)
-      }
-
+      this.buildCircuit()
+      this.applyState(document)
       this.reset()
     },
 
-    loadIntegratedCircuit (document: string) {
-      const documentItem: Item = JSON.parse(document)
-
-      if (!documentItem.integratedCircuit) throw new Error('Invalid file') // TODO
-
-      const state = JSON.stringify({
-        ...documentItem.integratedCircuit,
-        items: Object
-          .values(documentItem.integratedCircuit.items)
-          .reduce((items: Record<string, Item>, item) => ({
-            ...items,
-            [item.id]: {
-              ...item,
-              // exclude any ports that belong to the parent IC item
-              portIds: item.portIds.filter(i => !documentItem.portIds.includes(i))
-            }
-          }), {}),
-        ports: Object
-          .values(documentItem.integratedCircuit.ports)
-          .reduce((ports: Record<string, Port>, port) => {
-            // exclude any ports that belong to the parent IC item
-            // those ports are only proxy ports and would not be part of the overall circuit
-            if (!documentItem.portIds.includes(port.id)) {
-              ports[port.id] = port
-            }
-            return ports
-          }, {})
-      }, null, 2)
-
-      this.applyState(state)
-    },
-
     async saveIntegratedCircuit () {
-      // TODO: if an autonomous node (e.g., clock) is present, ask user if they wish to convert it to a switch
-      const {
-        integratedCircuitItem
-      } = integratedCircuitFactory(this.ports, this.items, this.connections)
+      const originalIcItem = integratedCircuitFactory(this.$state as DocumentState)
+      const idMappedIcItem = idMapper.mapIntegratedCircuitIds(originalIcItem)
 
-      // console.log('RES: ', JSON.stringify(integratedCircuitItem, null, 2))
+      // TODO: the remainder here should be called by the root state
+      // RemoteService.showMessageBox({ message: 'Integrated circuit saved!', type: 'info' })
 
-      integratedCircuitItem.id = uuid()
-
-
-      const id = idMapper({
-        items: {
-          [integratedCircuitItem.id]: integratedCircuitItem
-        },
-        ports: {},
-        connections: {}
-      })
-
-      const item = Object.values(id.items)[0]
-
-      // console.log('*************************** AFTER', JSON.stringify(item, null, 2))
+      // save file
+      // const file = JSON.stringify(this.$state)
+      this.addIntegratedCircuit(idMappedIcItem)
 
 
-      // console.log('created IC: ', JSON.stringify(id.integratedCircuitItem, null, 2))
-
-      this.addIntegratedCircuit({
-        integratedCircuitItem: item
-      })
     },
 
     buildCircuit () {
@@ -244,6 +193,7 @@ export const createDocumentStore = (id: string) => defineStore({
         }))
         this.applyState(undoState)
         this.undoStack.pop()
+        this.isDirty = true
       }
     },
 
@@ -262,6 +212,7 @@ export const createDocumentStore = (id: string) => defineStore({
         }))
         this.applyState(redoState)
         this.redoStack.pop()
+        this.isDirty = true
       }
     },
 
@@ -846,8 +797,9 @@ export const createDocumentStore = (id: string) => defineStore({
       if (previewPortId && !this.ports[portId]?.connectedPortIds.includes(previewPortId)) {
         this.setConnectionPreview(previewPortId)
       } else {
-        // TODO: use electron system beep
-        console.log('🛑')
+        if (this.connectablePortIds.length === 0) {
+          RemoteService.beep() // audibly inform the user they can't connect to anything
+        }
         this.unsetConnectionPreview()
       }
       this.selectedPortIndex = index
@@ -926,7 +878,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Sets the value of the port in the circuit.
      *
-     * @param this
      * @param payload.id - ID of the port
      * @param payload.value - new port value
      */
@@ -1322,7 +1273,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Assigns values to the ports in the this according to the given map.
      *
-     * @param this
      * @param valueMap - Port-ID-to-value mapping
      */
     setPortValues (valueMap: Record<string, number>) {
@@ -1337,7 +1287,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Stringifies and caches the current document this.
      * This will save all connections, items, ports, and groups.
      *
-     * @param this
      */
     cacheState (this) {
       this.cachedState = JSON.stringify({
@@ -1352,13 +1301,13 @@ export const createDocumentStore = (id: string) => defineStore({
      * Commits the actively-cached this to the undo stack.
      * This will clear the redo stack.
      *
-     * @param this
      */
     commitCachedState () {
       if (this.cachedState) {
         this.undoStack.push(this.cachedState.toString())
         this.cachedState = null
         this.redoStack = []
+        this.isDirty = true
       }
     },
 
@@ -1368,16 +1317,11 @@ export const createDocumentStore = (id: string) => defineStore({
      * This this must contain exactly these maps: `items`, `connections`, `ports`, `groups`.
      * Any other properties will not be applied.
      *
-     * @param this
      * @param savedState - JSON-serialized this string
      */
     applyState (savedState: string) {
-      const { items, connections, ports, groups } = JSON.parse(savedState) as {
-        items: Record<string, Item>,
-        connections: Record<string, Connection>,
-        ports: Record<string, Port>,
-        groups: Record<string, Group>,
-      }
+      const parsedState = JSON.parse(savedState) as DocumentState
+      const { items, connections, ports, groups } = idMapper.mapStandardCircuitIds(parsedState)
 
       /* returns everything in a that is not in b */
       function getExcludedMembers (a: Record<string, BaseItem>, b: Record<string, BaseItem>) {
@@ -1404,9 +1348,7 @@ export const createDocumentStore = (id: string) => defineStore({
 
       addedItems.forEach(id => {
         if (items[id].integratedCircuit) {
-          this.addIntegratedCircuit({
-            integratedCircuitItem: items[id]
-          })
+          this.addIntegratedCircuit(items[id])
         } else {
           this.addNewItem({
             item: items[id],
@@ -1437,7 +1379,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Removes a port from the state.
      * This will destroy the entire connection chain that it is a part of (if any).
      *
-     * @param this
      * @param portId - ID of the port to destroy
      */
     removePort (portId: string) {
@@ -1499,7 +1440,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Adds any non-IC component to the this.
      *
-     * @param this
      * @param payload
      * @param payload.item - new item to add
      * @param payload.ports - list of ports associated to the item
@@ -1528,14 +1468,9 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Adds the given integrated circuit component to the this.
      *
-     * @param this
-     * @param payload
-     * @param payload.integratedCircuitItem - the IC to add
-     * @param payload.integratedCircuitPorts - ID-to-Port map of visibile IC ports to add
+     * @param {Item} integratedCircuitItem
      */
-    addIntegratedCircuit ({ integratedCircuitItem }: {
-      integratedCircuitItem: Item
-    }) {
+    addIntegratedCircuit (integratedCircuitItem: Item) {
       if (!integratedCircuitItem.integratedCircuit) return
 
       const integratedCircuitPorts: Record<string, Port> = {}
@@ -1569,7 +1504,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Removes an element and all its associated ports and circuit nodes from the this.
      *
-     * @param this
      * @param id - ID of the item to remove
      */
     removeElement (id: string) {
@@ -1590,7 +1524,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Sets the selection this of the given element to the value provided.
      * If the item is a connection segment, then its entire connection chain will take on the same value.
      *
-     * @param this
      * @param payload
      * @param payload.id - ID of the item, group, or connection to select
      * @param payload.isSelected - selection this to change to
@@ -1643,7 +1576,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Increments the zIndex of all items selected.
      * If an item's movement collides with another item's movement, or it becomes out of bounds, its zIndex will not change.
      *
-     * @param this
      * @param direction - 1 to increment, -1 to decrement
      */
     incrementZIndex (direction: number) {
@@ -1694,7 +1626,6 @@ export const createDocumentStore = (id: string) => defineStore({
      * Moves all selected items to the given zIndex values.
      * If those items aren't siblings already, they will be when this is invoked.
      *
-     * @param this
      * @param zIndex - new zIndex to move items to
      */
     setZIndex (zIndex: number) {
@@ -1723,7 +1654,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Establishes a new connection between two ports.
      *
-     * @param this
      * @param payload
      * @param payload.source - source port ID
      * @param payload.target - target port ID
@@ -1759,7 +1689,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Disconnects two ports.
      *
-     * @param this
      * @param payload
      * @param payload.source - source port ID
      * @param payload.target - target port ID
@@ -1787,7 +1716,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Destroys the group having the given ID.
      *
-     * @param this
      * @param groupId
      */
     destroyGroup (groupId: string) {
@@ -1814,7 +1742,6 @@ export const createDocumentStore = (id: string) => defineStore({
      *  1. when a user is dragging a port to establish a connection to another port
      *  2. when a user drags on a connection to create a new "pivot point" on the wire
      *
-     * @param this
      * @param payload
      * @param payload.itemId - desired ID for the new freeport
      * @param payload.inputPortId - the ID of the input port (omit for a wire drag from an output port)

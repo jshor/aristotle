@@ -18,6 +18,7 @@ export default interface DocumentState {
   isOscilloscopeEnabled: boolean
   isCircuitEvaluated: boolean
   isDebugging: boolean
+  isDirty: boolean
   activeFreeportId: string | null
   selectedItemIds: string[]
   selectedConnectionIds: string[]

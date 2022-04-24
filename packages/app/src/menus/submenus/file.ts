@@ -8,36 +8,36 @@ export default function file (store: Store<string, RootStore, any>): MenuEntry[]
     {
       label: '&New Circuit',
       accelerator: 'CommandOrControl+N',
-      click: store.selectDocument
+      click: store.newDocument
     },
     { type: 'separator' },
     {
       label: '&Open Circuit',
       accelerator: 'CommandOrControl+O',
-      click: () => console.log('open circuit')
+      click: store.selectDocument
     },
     {
       label: 'Open &Integrated Circuit',
-      accelerator: 'CommandOrControl+O',
-      click: () => console.log('open IC')
+      accelerator: 'CommandOrControl+Shift+O',
+      click: store.selectDocument
     },
     { type: 'separator' },
     {
       label: 'Save',
       enabled: hasDocument,
-      accelerator: 'CommandOrControl+K',
-      click: () => console.log('root store save')
+      accelerator: 'CommandOrControl+S',
+      click: store.saveActiveDocument
     },
     {
       label: 'Save As...',
       enabled: hasDocument,
-      accelerator: 'CommandOrControl+K',
-      click: () => console.log('root store save as')
+      accelerator: 'CommandOrControl+Shift+S',
+      click: () => store.saveActiveDocument(true)
     },
     {
       label: 'Save All',
       enabled: hasDocument,
-      accelerator: 'CommandOrControl+K',
+      accelerator: 'CommandOrControl+Shift+A',
       click: () => console.log('root store save all')
     },
     { type: 'separator' },
