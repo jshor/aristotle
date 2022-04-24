@@ -1,3 +1,4 @@
+import DocumentState from '@/store/DocumentState'
 import ItemSubtype from '../enums/ItemSubtype'
 import ItemType from '../enums/ItemType'
 
@@ -21,6 +22,8 @@ declare global {
       items: Record<string, Item>
       connections: Record<string, Connection>
       ports: Record<string, Port>
+      groups: Record<string, Group>
+      serializedState: string
     }
   }
 }

@@ -39,6 +39,7 @@
       <freeport v-if="type === ItemType.Freeport" />
       <integrated-circuit
         v-else-if="type === ItemType.IntegratedCircuit"
+        :port-list="portList"
         @dblclick="$emit('openIntegratedCircuit', baseItem)"
       />
       <input-switch

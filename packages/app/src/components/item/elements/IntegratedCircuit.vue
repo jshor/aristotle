@@ -2,12 +2,18 @@
   <div class="integrated-circuit">
     <div class="integrated-circuit__wires">
       <div class="integrated-circuit__wires-divider">
-        <div class="integrated-circuit__wire" />
-        <div class="integrated-circuit__wire" />
+        <div
+          v-for="port in portList.left"
+          :key="port.id"
+          class="integrated-circuit__wire"
+        />
       </div>
       <div class="integrated-circuit__wires-divider">
-        <div class="integrated-circuit__wire" />
-        <div class="integrated-circuit__wire" />
+        <div
+          v-for="port in portList.right"
+          :key="port.id"
+          class="integrated-circuit__wire"
+        />
       </div>
     </div>
     <div class="integrated-circuit__box">
@@ -18,11 +24,26 @@
   </div>
 </template>
 
-<script type="ts">
-import { defineComponent } from 'vue'
+<script lang="ts">
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
-  name: 'IntegratedCircuit'
+  name: 'IntegratedCircuit',
+  props: {
+
+    /**
+     * Bounding box of the item.
+     */
+    portList: {
+      type: Object as PropType<{
+        left?: Port[]
+        top?: Port[]
+        right?: Port[]
+        bottom?: Port[]
+      }>,
+      required: true
+    }
+  }
 })
 </script>
 

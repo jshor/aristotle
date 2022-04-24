@@ -4,6 +4,7 @@ import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'
 import Direction from '@/types/enums/Direction'
 import itemFactory from './itemFactory'
+import DocumentState from '@/store/DocumentState'
 
 /**
  * Creates an integrated circuit item.
@@ -13,10 +14,8 @@ import itemFactory from './itemFactory'
  * @param stateItems - items to embed
  * @param stateConnections - connections between items to embed
  */
-export default function integratedCircuitFactory (statePorts: Record<string, Port>, stateItems: Record<string, Item>, stateConnections: Record<string, Connection>) {
-  const ports = cloneDeep<Record<string, Port>>(statePorts)
-  const items = cloneDeep<Record<string, Item>>(stateItems)
-  const connections = cloneDeep<Record<string, Connection>>(stateConnections)
+export default function integratedCircuitFactory (state: DocumentState) {
+  const { ports, items, connections, groups } = cloneDeep(state)
   const integratedCircuitItem = itemFactory(ItemType.IntegratedCircuit, 'Flip flop')
 
   Object
@@ -63,15 +62,18 @@ export default function integratedCircuitFactory (statePorts: Record<string, Por
       item.type = ItemType.Buffer
     })
 
-  console.log('GENERATED IC -------------------- ', integratedCircuitItem)
-
   integratedCircuitItem.integratedCircuit = {
     items,
     connections,
-    ports
+    ports,
+    groups,
+    serializedState: JSON.stringify({
+      items: state.items,
+      connections: state.connections,
+      ports: state.ports,
+      groups: state.groups
+    })
   }
 
-  return {
-    integratedCircuitItem
-  }
+  return integratedCircuitItem
 }

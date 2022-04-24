@@ -1,12 +1,15 @@
 <template>
   <div
     :class="{
-      'tab-item--active': active
+      'tab-item--active': active,
+      'tab-item--dirty': dirty
     }"
     class="tab-item"
     @mousedown="$emit('activate')"
   >
-    <div class="tab-item__label">{{ label }}</div>
+    <div class="tab-item__label">
+      {{ label }}{{ dirty ? '*' : '' }}
+    </div>
     <div
       class="tab-item__close"
       @click.stop="$emit('close')"
@@ -31,6 +34,10 @@ export default defineComponent({
     label: {
       type: String,
       required: true
+    },
+    dirty: {
+      type: Boolean,
+      default: false
     }
   }
 })
@@ -80,32 +87,19 @@ export default defineComponent({
     }
   }
 
-  &--unsaved {
-    .tab__close {
-      &::before {
-        display: none;
-      }
-
-      &::after {
-        display: block;
-        content: ' ';
-        background-color: $color-primary;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-      }
-    }
-  }
-
   &--active {
     background-color: $color-bg-secondary;
     color: $color-primary;
     margin-bottom: -5px;
     padding-bottom: 15px;
 
-    .tab__close::before {
+    .tab-item__close::before {
       display: block;
     }
+  }
+
+  &--dirty {
+    color: #E2C070; // TODO: brand-primary?
   }
 
   &:not(.tab--active) {
