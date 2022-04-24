@@ -100,7 +100,7 @@ export default defineComponent({
       if (!timeline) return
 
       list.scrollTop = timeline.scrollTop
-      timeline.scrollTop = list.scrollTop
+      // timeline.scrollTop = list.scrollTop
     }
   },
   watch: {

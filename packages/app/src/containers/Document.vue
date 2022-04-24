@@ -77,7 +77,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance, watchEffect } from 'vue'
+import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance } from 'vue'
 import { StoreDefinition } from 'pinia'
 import DocumentState from '@/store/DocumentState'
 import Editor from '@/components/Editor.vue'

@@ -9,16 +9,18 @@ import integratedCircuit from '../containers/fixtures/ic.json'
 import testIc from '../containers/fixtures/test.json'
 
 import { createDocumentStore } from './document'
-
-const rand = () => `id_${(Math.floor(Math.random() * 10000000) + 5)}` // TODO: use uuid
+import FileService from '@/services/FileService'
+import getFileName from '@/utils/getFileName'
 
 export type RootStore = {
   documents: {
     [id: string]: {
       fileName: string
+      filePath: string
+      displayName: string
       store: StoreDefinition<string, DocumentState>
     }
-  },
+  }
   activeDocumentId: string | null
 }
 
@@ -43,83 +45,160 @@ export const useRootStore = defineStore({
     }
   },
   actions: {
-    openIntegratedCircuit (baseItem: Item) {
-      this.openDocument('test-ic.alcx', JSON.stringify(baseItem.integratedCircuit))
+    openIntegratedCircuit (item: Item) {
+      if (item.integratedCircuit) {
+        this.openDocument('', item.integratedCircuit.serializedState, item.id, item.name)
+      }
+    },
+    newDocument () {
+      console.log('will create new doc')
     },
     async closeApplication () {
-      const documentIds = Object.keys(this.documents)
+      const canClose = await this.closeAll()
 
-      for (let i = documentIds.length - 1; i >= 0; i--) {
-        const id = documentIds[i]
-
-        await this.closeDocument(id)
-
-        if (this.documents[id]) {
-          break // the document refused to close, so break out of the loop
-        }
-      }
-
-      if (!this.hasOpenDocuments) {
-        // if there are no more documents open, then go on to close the app
+      if (canClose) {
         RemoteService.quit()
       }
     },
-    async closeDocument (id: string): Promise<void> {
+    async closeAll (): Promise<boolean> {
+      if (this.activeDocumentId) {
+        const closedSuccessfully = await this.closeDocument(this.activeDocumentId)
+
+        // wait for the next window frame to show the next active document
+        await new Promise(resolve => setTimeout(resolve))
+
+        if (closedSuccessfully) {
+          return this.closeAll()
+        }
+
+        return false // a document refused to close
+      }
+
+      return true // all documents successfully closed
+    },
+    async closeDocument (id: string): Promise<boolean> {
       const document = this.documents[id]
-
-      if (!document) return Promise.resolve()
-
       const store = document.store()
+      let isSuccessful = true
 
       this.activateDocument(id)
 
-      if (store.canUndo || store.canRedo || true) { // TODO: remove 'true' after done testing
-        const result = RemoteService.showMessageBox({
+      if (store.isDirty) {
+        const dialogResult = RemoteService.showMessageBox({
           message: `Save changes to ${document.fileName}?`,
           title: 'Confirm',
           buttons: ['Yes', 'No', 'Cancel']
         })
-        const close = async () => {
-          delete this.documents[id]
 
-          const remainingId = Object.keys(this.documents).pop()
-
-          if (remainingId) {
-            this.activateDocument(remainingId)
-          }
-
-          // wait for the next window frame to show the next active document
-          await new Promise(resolve => setTimeout(resolve))
+        if (dialogResult === 0) {
+          // user selected 'Yes' (to save the active document)
+          isSuccessful = await this.saveActiveDocument()
         }
 
-        switch (result) {
-          case 0:
-            console.log('NEED TO SAVE DOCUMENT')
-            await close()
-            break
-          case 1:
-            await close()
-            break
-          default:
-            console.log('DID NOT WANT TO CLOSE')
-            break
+        if (dialogResult === 2) {
+          // user selected 'Cancel' to continue editing their document
+          return false
+        }
+      }
+
+      // TODO: call some sort of teardown/$dispose() function of document
+      delete this.documents[id]
+      this.activeDocumentId = null
+
+      const remainingId = Object.keys(this.documents).pop()
+
+      if (remainingId) {
+        this.activateDocument(remainingId)
+      }
+
+      return isSuccessful
+    },
+    async saveActiveDocument (setFileName: boolean = false): Promise<boolean> {
+      try {
+        if (!this.activeDocument) return true
+        if (!this.activeDocument.filePath || setFileName) {
+          // if no file name is defined yet, ask the user for the location to save it
+          const fileName = this.activeDocument.fileName || `${this.activeDocument.fileName}.alfx`
+          const filePath = RemoteService.showSaveFileDialog([
+            {
+              name: 'Aristotle Logic Circuit (*.alfx)',
+              extensions: ['alfx']
+            }
+          ], fileName)
+
+          if (!filePath) return true
+          if (filePath) {
+            const fileName = getFileName(filePath)
+
+            this.activeDocument.filePath = filePath
+            this.activeDocument.fileName = fileName
+            this.activeDocument.displayName = fileName
+          }
+        }
+
+        const store = this.activeDocument.store()
+
+        FileService.save(this.activeDocument.filePath, {
+          items: store.items,
+          connections: store.connections,
+          groups: store.groups,
+          ports: store.ports
+        })
+
+        store.isDirty = false
+
+        return true
+      } catch (error) {
+        RemoteService.showMessageBox({
+          message: 'An error occurred while trying to save the file.',
+          title: 'Error',
+          type: 'error'
+        })
+
+        return false
+      }
+    },
+    async selectDocument () {
+      const files = RemoteService.showOpenFileDialog([
+        {
+          name: 'Aristotle Logic Circuit (*.alfx)',
+          extensions: ['alfx']
+        }
+      ])
+
+      for (let i = 0; i < files.length; i++) {
+        try {
+          const content = await FileService.open(files[i])
+
+          if (content) {
+            this.openDocument(files[i], content, uuid())
+          }
+        } catch (error) {
+          RemoteService.showMessageBox({
+            message: 'An error occurred while trying to read the file.',
+            title: 'Error',
+            type: 'error'
+          })
         }
       }
     },
-    selectDocument () {
-      console.log('will open file dialog')
-    },
-    openDocument (fileName: string, content: string) {
-      const id = uuid()
+    openDocument (filePath: string, content: string, id: string, displayName: string = '') {
+      if (this.documents[id]) {
+        return this.activateDocument(id)
+      }
+
       const store = createDocumentStore(id)
-
       const document = store()
+      const fileName = getFileName(filePath)
 
-      document.buildCircuit()
       document.loadDocument(content)
 
-      this.documents[id] = { fileName, store }
-
+      this.documents[id] = {
+        fileName,
+        filePath,
+        displayName: displayName || fileName,
+        store
+      }
       this.activateDocument(id)
     },
     switchDocument (direction: number) {
@@ -135,20 +214,10 @@ export const useRootStore = defineStore({
       this.activateDocument(documentIds[nextIndex])
     },
     pauseActivity () {
-      if (this.activeDocument) {
-        this
-          .activeDocument
-          .store()
-          .stop()
-      }
+      this.activeDocument?.store().stop()
     },
     resumeActivity () {
-      if (this.activeDocument) {
-        this
-          .activeDocument
-          .store()
-          .start()
-      }
+      this.activeDocument?.store().start()
     },
     activateDocument (id: string) {
       this.pauseActivity()
@@ -156,16 +225,16 @@ export const useRootStore = defineStore({
       this.resumeActivity()
     },
     openTestDocuments () {
-      this.openDocument('integrated-circuit.alfx', JSON.stringify({
-        connections: {},
-        items: {},
-        ports: {},
-        groups: {}
-      }))
+      // this.openDocument('integrated-circuit.alfx', JSON.stringify({
+      //   connections: {},
+      //   items: {},
+      //   ports: {},
+      //   groups: {}
+      // }))
       // this.openDocument('test.alfx', JSON.stringify(testIc))
       // this.openDocument('integrated-circuit.alfx', JSON.stringify(integratedCircuit))
       // this.pauseActivity()
-      // this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop))
+      this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop), uuid(), 'flip-flop.alfx')
     },
 
     navigateDocumentList (direction: number) {

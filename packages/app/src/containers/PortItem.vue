@@ -44,7 +44,6 @@ import PortHandle from '../components/PortHandle.vue'
 import PortPivot from '../components/PortPivot.vue'
 import DocumentState from '@/store/DocumentState'
 import PortType from '@/types/enums/PortType'
-import showContextMenu from '@/utils/showContextMenu'
 
 export default defineComponent({
   name: 'PortItem',
@@ -197,8 +196,7 @@ export default defineComponent({
       onEscapeKey,
       onBlur,
       dragStart,
-      dragEnd,
-      showContextMenu
+      dragEnd
     }
   }
 })

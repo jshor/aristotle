@@ -29,8 +29,9 @@
                   <tab-item
                     v-for="(document, id) in documents"
                     :key="id"
-                    :label="document.fileName"
+                    :label="document.displayName"
                     :active="activeDocumentId === id"
+                    :dirty="document.store().isDirty"
                     @activate="activateDocument(id.toString())"
                     @close="closeDocument(id.toString())"
                   />
@@ -104,9 +105,9 @@ export default defineComponent({
     watchEffect(() => RemoteService.setApplicationMenu(store))
 
     watchEffect(() => {
-      if (store.activeDocumentId) {
-        document.title = `${store.activeDocument?.fileName} - Aristotle`
-      }
+      document.title = store.activeDocument
+        ? `${store.activeDocument.displayName} - Aristotle`
+        : 'Aristotle'
     })
 
     onMounted(() => {
