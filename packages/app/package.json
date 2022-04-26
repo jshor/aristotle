@@ -46,7 +46,7 @@
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-vue": "^7.0.0",
-    "node-sass": "^5",
+    "node-sass": "^7.0.0",
     "resize-observer-polyfill": "^1.5.1",
     "sass-loader": "^10",
     "ts-jest": "^27.1.4",
