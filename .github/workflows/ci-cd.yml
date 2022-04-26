@@ -1,0 +1,47 @@
+name: CI/CD
+
+on: push
+
+env:
+  NODE_VERSION: '14.x'
+
+  # Git release bot credentials
+  GIT_USER: 'GitHub Actions'
+  GIT_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com'
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build-and-deploy:
+    needs: test-and-release
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Install npm dependencies
+      run: yarn
+
+    # - name: Run tests
+    #   run: yarn test
+
+    - name: Build application
+      run: yarn build
+
+    - name: Create CNAME Record
+      run: echo "aristotle.dev" > build/docs/CNAME
+
+    - name: Deploy docs to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GIT_CONFIG_NAME: ${{ env.GIT_USER }}
+        GIT_CONFIG_EMAIL: ${{ env.GIT_EMAIL }}
+        BRANCH: gh-pages
+        FOLDER: build
+        CLEAN: true
+
