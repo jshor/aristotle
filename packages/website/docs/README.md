@@ -1,8 +1,10 @@
-# Aristotle
+---
+home: true
+pageClass: homepage
+footer: © 2022 Aristotle.
+---
 
-The digital logic simulator.
-
-## Quick start
+<landing />
 
 ```bash
 # 1. Clone the repository.
