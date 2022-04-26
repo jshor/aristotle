@@ -1,6 +1,6 @@
 <template>
   <div class="downloads">
-    <a href="/app/index.html" class="downloads__button">
+    <a href="/alpha/" class="downloads__button">
       <span>Try online</span>
       <span v-if="version"> v{{ version }}</span>
     </a>
