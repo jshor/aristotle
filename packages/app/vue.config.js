@@ -11,6 +11,11 @@ module.exports = {
   configureWebpack: config => {
     config.output.filename = `${filename}.js`
   },
+  chainWebpack: config => {
+    config.performance
+      .maxEntrypointSize(1000000)
+      .maxAssetSize(500000)
+  },
   pluginOptions: {
     electronBuilder: {
       // list all node_modules paths so that electron builder can find them in this monorepo

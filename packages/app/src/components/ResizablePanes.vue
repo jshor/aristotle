@@ -151,8 +151,8 @@ $divider-width: 20px;
 
   &__divider {
     display: block;
-    margin-right: -$divider-width / 4;
-    width: $divider-width / 2;
+    margin-right: calc($divider-width / -4);
+    width: calc($divider-width / 2);
     height: 100%;
     background: #fff;
     opacity: 0;
@@ -166,7 +166,7 @@ $divider-width: 20px;
 
     &--vertical {
       margin-right: 0;
-      margin-bottom: -$divider-width / 2;
+      margin-bottom: calc($divider-width / -2);
       width: 100%;
       height: $divider-width;
       cursor: ns-resize;
