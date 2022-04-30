@@ -2,6 +2,7 @@
   <svg class="wire"
     :class="{
       'wire--selected': isSelected,
+      'wire--flash': flash,
       'wire--preview': isPreview
     }"
   :width="wire.width" :height="wire.height" :style="{
@@ -80,6 +81,11 @@ export default defineComponent({
     isSelected: {
       type: Boolean,
       default: false
+    },
+    /** Whether or not the item should show a flash once to the user. */
+    flash: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -124,6 +130,7 @@ export default defineComponent({
     stroke-width: 6;
     pointer-events: all;
     stroke: darkred;
+    transition: 0.25s stroke; // TODO
 
     &--on {
       stroke: green;
@@ -135,11 +142,15 @@ export default defineComponent({
   }
 
   &--selected {
-    filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .7));
+    filter: drop-shadow(0 0 6px #000); // TODO: make this a mixin
   }
 
   &--preview {
     opacity: 0.5;
+  }
+
+  &--flash {
+    animation: flash 1s normal ease-out; // TODO: make this a mixin
   }
 }
 
@@ -158,6 +169,18 @@ export default defineComponent({
   }
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+@keyframes flash { // TODO: make this a mixin
+  0% {
+    filter: inherit;
+  }
+  50% {
+    filter: drop-shadow(0px 0px 20px #000);
+  }
+  100% {
+    filter: inherit;
   }
 }
 </style>

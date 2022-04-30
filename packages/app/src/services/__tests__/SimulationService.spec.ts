@@ -409,53 +409,6 @@ describe('Simulation Service', () => {
     })
   })
 
-  describe('removeNode()', () => {
-    beforeEach(() => {
-      jest
-        .spyOn(service, 'removePort')
-        .mockImplementation(jest.fn())
-      jest
-        .spyOn(service.circuit, 'removeNode')
-        .mockImplementation(jest.fn())
-    })
-
-    describe('when the given node exists', () => {
-      const circuitNode = new CircuitNode('test')
-      const portId = 'port-id'
-      const fakePortId = 'fake-port-id'
-
-      beforeEach(() => {
-        service.nodes[portId] = circuitNode
-        service.removeNode([fakePortId, portId])
-      })
-
-      it('should remove the node from the circuit', () => {
-        expect(service.circuit.removeNode).toHaveBeenCalledTimes(1)
-        expect(service.circuit.removeNode).toHaveBeenCalledWith(circuitNode)
-      })
-
-      it('should remove the port from the simulation', () => {
-        expect(service.removePort).toHaveBeenCalledTimes(2)
-        expect(service.removePort).toHaveBeenCalledWith(fakePortId)
-        expect(service.removePort).toHaveBeenCalledWith(portId)
-      })
-    })
-
-    it('should not remove nodes or ports for a node that does not exist', () => {
-      service.removeNode(['port-id'])
-
-      expect(service.circuit.removeNode).not.toHaveBeenCalled()
-      expect(service.removePort).not.toHaveBeenCalled()
-    })
-
-    it('should not remove nodes or ports if no ports were passed in', () => {
-      service.removeNode()
-
-      expect(service.circuit.removeNode).not.toHaveBeenCalled()
-      expect(service.removePort).not.toHaveBeenCalled()
-    })
-  })
-
   describe('monitorNode()', () => {
     const circuitNode = new CircuitNode('test')
     const inputPort = createPort('inputPort', 'item-id', PortType.Input)
@@ -599,7 +552,7 @@ describe('Simulation Service', () => {
           .mockImplementation(jest.fn())
         jest
           .spyOn(circuitNode, 'on')
-          .mockImplementation((a, fn) => fn(value))
+          .mockImplementation((a, fn: any) => fn(value))
       })
 
       it('should set the output value', () => {

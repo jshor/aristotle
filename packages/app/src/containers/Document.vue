@@ -32,6 +32,7 @@
         :bounding-box="baseItem.boundingBox"
         :properties="baseItem.properties"
         :is-selected="baseItem.isSelected"
+        :flash="store.isDebugging && store.isCircuitEvaluated"
         :z-index="baseItem.zIndex + 1000"
         @select="selectItem(baseItem.id)"
         @deselect="deselectItem(baseItem.id)"
@@ -51,6 +52,7 @@
         :connection-chain-id="baseItem.connectionChainId"
         :is-selected="baseItem.isSelected"
         :is-preview="store.connectionPreviewId === baseItem.id"
+        :flash="store.isDebugging && store.isCircuitEvaluated"
         :z-index="baseItem.zIndex"
         @select="selectItem(baseItem.id)"
         @deselect="deselectItem(baseItem.id)"
@@ -126,17 +128,30 @@ export default defineComponent({
       switch ($event.key) {
         case 'Escape':
           return store.deselectAll()
-        case 'Delete':
-          return store.deleteSelection()
-        case 'z':
-        case 'Z':
+        // case 'Delete':
+        //   return store.deleteSelection()
+        // case 'z':
+        // case 'Z':
+        //   if (keys.Control) {
+        //     return (keys.Shift ? store.redo() : store.undo())
+        //   }
+        case 'v':
+        case 'V':
           if (keys.Control) {
-            return (keys.Shift ? store.redo() : store.undo())
+            store.paste()
+            $event.preventDefault()
+            return
+          }
+        case 'c':
+        case 'C':
+          if (keys.Control) {
+            store.copy()
+            $event.preventDefault()
+            return
           }
         case 'a':
         case 'A':
           if (keys.Control) {
-            console.log('SEL ALL')
             store.selectAll()
             $event.preventDefault()
             return

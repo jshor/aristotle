@@ -2505,10 +2505,7 @@ describe('actions', () => {
       store.$patch({
         items: { item1 }
       })
-      store.addIntegratedCircuit({
-        integratedCircuitItem: item1,
-        integratedCircuitPorts: {}
-      })
+      store.addIntegratedCircuit(item1)
 
       expect(store).not.toHaveProperty('item1')
     })
@@ -2531,10 +2528,7 @@ describe('actions', () => {
           .spyOn(store.simulation, 'addNode')
           .mockImplementation(jest.fn())
 
-        store.addIntegratedCircuit({
-          integratedCircuitItem: icItem,
-          integratedCircuitPorts: { port1, port2 }
-        })
+        store.addIntegratedCircuit(icItem)
       })
 
       it('should add each port to the state', () => {

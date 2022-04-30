@@ -8,6 +8,7 @@
     :is-selected="isSelected"
     :aria-selected="isSelected"
     :is-preview="isPreview"
+    :flash="flash"
     :label="'TODO'"
     :tabindex="0"
     @mousedown="onMouseDown"
@@ -92,6 +93,12 @@ export default defineComponent({
     zIndex: {
       type: Number,
       default: 0
+    },
+
+    /** Whether or not the item should show a flash once to the user. */
+    flash: {
+      type: Boolean,
+      default: false
     },
 
     /**
@@ -202,7 +209,6 @@ export default defineComponent({
       }
 
       if (!portCreated && root.value?.$el) {
-        const rand = () => `id_${(Math.floor(Math.random() * 1000000) + 5)}` // TODO: use uuid
         const { top, left } = root.value.$el.getBoundingClientRect()
         const relativePosition: Point = {
           x: $event.clientX - left,

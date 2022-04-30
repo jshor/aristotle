@@ -79,6 +79,7 @@ export default defineComponent({
         bottom: 0
       } as BoundingBox,
       isDragging: false,
+      hasEmittedDrag: false,
       isRadialSnap: false
     }
   },
@@ -127,10 +128,12 @@ export default defineComponent({
   mounted () {
     document.addEventListener('mousemove', this.mousemove)
     document.addEventListener('mouseup', this.mouseup)
+    document.addEventListener('keydown', this.keydown)
   },
   beforeUnmount () {
     document.removeEventListener('mousemove', this.mousemove)
     document.removeEventListener('mouseup', this.mouseup)
+    document.removeEventListener('keydown', this.keydown)
   },
   methods: {
     initDragging (x: number, y: number) {
@@ -148,13 +151,20 @@ export default defineComponent({
         y: this.truePosition.y
       }
       this.isDragging = true
-      this.$emit('dragStart')
+      this.hasEmittedDrag = false
     },
 
     getScaledDelta ($event: MouseEvent) {
       return {
         x: ($event.x - this.mousePosition.x) / this.zoom,
         y: ($event.y - this.mousePosition.y) / this.zoom
+      }
+    },
+
+    keydown ($event: KeyboardEvent) {
+      if ($event.key.toUpperCase() === 'Z' && $event.ctrlKey && this.isDragging) {
+        this.isDragging = false
+        this.truePosition = this.realPositionFromStore
       }
     },
 
@@ -167,6 +177,11 @@ export default defineComponent({
 
     mousemove ($event: MouseEvent) {
       if (!this.isDragging || !this.isDraggable) return
+
+      if (!this.hasEmittedDrag) {
+        this.hasEmittedDrag = true
+        this.$emit('dragStart')
+      }
 
       const delta = this.getScaledDelta($event)
 

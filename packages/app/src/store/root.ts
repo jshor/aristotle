@@ -21,6 +21,7 @@ export type RootStore = {
       store: StoreDefinition<string, DocumentState>
     }
   }
+  clipboard: string | null
   activeDocumentId: string | null
 }
 
@@ -28,6 +29,7 @@ export const useRootStore = defineStore({
   id: 'root',
   state: (): RootStore => ({
     documents: {},
+    clipboard: null,
     activeDocumentId: null
   }),
   getters: {
