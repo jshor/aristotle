@@ -33,7 +33,7 @@
     <toolbar-button :icon="faBug" :active="store.isDebugging" @click="store.toggleDebugger" />
     <toolbar-separator />
     <toolbar-button :icon="faArrowsRotate" @click="store.reset" />
-    <toolbar-button :icon="faForwardStep" :disabled="store.isCircuitEvaluated" @click="store.stepThroughCircuit" />
+    <toolbar-button :icon="faForwardStep" :disabled="!store.isDebugging || store.isCircuitEvaluated" @click="store.stepThroughCircuit" />
     <toolbar-separator />
     <toolbar-button :icon="faWaveSquare" :disabled="store.isDebugging" :active="!store.isDebugging && store.isOscilloscopeEnabled" @click="store.toggleOscilloscope" />
   </div>

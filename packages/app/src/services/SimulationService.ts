@@ -1,4 +1,5 @@
-import { Circuit, CircuitNode } from '@aristotle/logic-circuit'
+import { cloneDeep } from 'lodash'
+import { Circuit, CircuitNode, OutputNode } from '@aristotle/logic-circuit'
 import { TinyEmitter } from 'tiny-emitter'
 import BinaryWaveService from './BinaryWaveService'
 import ClockService from './ClockService'
@@ -135,6 +136,58 @@ export default class SimulationService {
     this.emit()
   }
 
+  canContinue: boolean = false
+
+  nextState: string | null = null
+
+  isDebug: boolean = false
+
+  nextValueMap: Record<string, number> = {}
+
+  startDebugging = () => {
+    this.isDebug = true
+    this.pause()
+    this.computeNextState()
+  }
+
+  stopDebugging = () => {
+    this.isDebug = false
+    this.nextState = null
+    this.unpause()
+  }
+
+  advance = () => {
+    const nextValues = Object.keys(this.nextValueMap)
+
+    if (nextValues.length > 0) {
+      // at least one value change was triggered by the editor since last advance
+      nextValues.forEach(portId => this.updatePortValue(portId, this.nextValueMap[portId]))
+    } else if (this.nextState) {
+      // no inputs are pending updates, and there is a new state to advance to
+      this.valueMap = JSON.parse(this.nextState) as Record<string, number>
+    }
+
+    this.nextValueMap = {}
+    this.computeNextState()
+    this.emit()
+  }
+
+  computeNextState = () => {
+    const currentState = JSON.stringify(this.valueMap)
+
+    this.circuit.next()
+
+    const nextState = JSON.stringify(this.valueMap)
+
+    if (currentState !== nextState) {
+      this.nextState = nextState
+    } else {
+      this.nextState = null
+    }
+
+    this.canContinue = this.nextState !== null
+  }
+
   /**
    * Sets the output value of a given target node.
    *
@@ -146,18 +199,40 @@ export default class SimulationService {
     this.emit()
   }
 
+  updatePortValue = (portId: string, value: number) => {
+    this.nodes[portId].setValue(value)
+    this.circuit.enqueue(this.nodes[portId])
+    this.waves[portId]?.drawPulseChange(value)
+  }
+
+  enqueuePortValueChange = (portId: string, value: number) => {
+    this.nextValueMap[portId] = value
+
+    // circuit can continue only if one or more port values have changed
+    this.canContinue = Object
+      .keys(this.nextValueMap)
+      .reduce((anyValueChanged: boolean, portId) => {
+        return anyValueChanged || this.valueMap[portId] !== this.nextValueMap[portId]
+      }, false)
+
+    this.emit()
+  }
+
   /**
-   * Sets a port's value logical value.
-   * This performs all necessary operations that result from such an action.
+   * Sets a port's value logical value, performing all necessary simulation operations that result from such an action.
+   *
+   * This should be invoked by the document.
    *
    * @param portId
    * @param value - new logical value
    */
   setPortValue = (portId: string, value: number) => {
+    if (this.isDebug) {
+      return this.enqueuePortValueChange(portId, value)
+    }
+
     if (this.nodes[portId] && this.nodes[portId].value !== value) {
-      this.nodes[portId].setValue(value)
-      this.circuit.enqueue(this.nodes[portId])
-      this.waves[portId]?.drawPulseChange(value)
+      this.updatePortValue(portId, value)
       this.step()
     }
   }
@@ -258,6 +333,8 @@ export default class SimulationService {
           this.removePort(portId)
         }
       })
+
+    this.emit()
   }
 
   /**

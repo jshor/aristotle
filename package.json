@@ -5,7 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "start:app": "yarn workspace @aristotle/app start",
+    "start": "yarn workspace @aristotle/app start",
     "build:app": "yarn workspace @aristotle/app build",
     "build:circuit": "yarn workspace @aristotle/logic-circuit build",
     "build:website": "yarn workspace @aristotle/website build",
@@ -13,7 +13,7 @@
   },
   "devDependencies": {},
   "engines": {
-    "node": ">=10",
-    "yarn": ">=1.5.1"
+    "node": ">=14",
+    "yarn": ">=1.22.0"
   }
 }

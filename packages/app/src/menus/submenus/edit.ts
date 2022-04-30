@@ -11,21 +11,20 @@ export default function edit (store: Store<string, DocumentState, any>, submenus
     },
     { type: 'separator' },
     {
-      label: 'Cut',
+      role: 'cut',
       enabled: store.hasSelection,
-      accelerator: 'CommandOrControl+X',
       click: () => console.log('cut')
     },
     {
       label: 'Copy',
       enabled: store.hasSelection,
       accelerator: 'CommandOrControl+C',
-      click: () => console.log('copy')
+      click: store.copy
     },
     {
       label: 'Paste',
       accelerator: 'CommandOrControl+V',
-      click: () => console.log('paste')
+      click: store.paste
     },
     {
       label: 'Delete',
@@ -35,8 +34,7 @@ export default function edit (store: Store<string, DocumentState, any>, submenus
     },
     { type: 'separator' },
     {
-      label: 'Select all',
-      accelerator: 'CommandOrControl+A',
+      role: 'selectAll',
       click: store.selectAll
     }
   ]

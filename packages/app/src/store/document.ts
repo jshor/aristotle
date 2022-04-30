@@ -139,17 +139,15 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     async saveIntegratedCircuit () {
+      // TODO: this action should live in the root state, not here
       const originalIcItem = integratedCircuitFactory(this.$state as DocumentState)
       const idMappedIcItem = idMapper.mapIntegratedCircuitIds(originalIcItem)
 
-      // TODO: the remainder here should be called by the root state
       // RemoteService.showMessageBox({ message: 'Integrated circuit saved!', type: 'info' })
 
       // save file
       // const file = JSON.stringify(this.$state)
       this.addIntegratedCircuit(idMappedIcItem)
-
-
     },
 
     buildCircuit () {
@@ -166,6 +164,7 @@ export const createDocumentStore = (id: string) => defineStore({
           }
         }
 
+        this.isCircuitEvaluated = !this.simulation.canContinue
         this.oscillogram = oscillogram
       })
 
@@ -398,7 +397,6 @@ export const createDocumentStore = (id: string) => defineStore({
         y: position.y - item.position.y
       }
 
-      this.commitCachedState()
       this.items[id].position = position
       this.items[id].boundingBox = {
         left: item.boundingBox.left + delta.x,
@@ -521,7 +519,6 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Groups together all selected items and connections.
      * If any of those selected elements are a member of a group, that group will be destroyed.
-     *
      */
     group () {
       this.commitState()
@@ -585,7 +582,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
     /**
      * Destroys all selected groups.
-     *
      */
     ungroup () {
       this.commitState()
@@ -747,8 +743,11 @@ export const createDocumentStore = (id: string) => defineStore({
           target = this.activePortId
         }
 
+        const id = uuid()
+
         this.unsetConnectionPreview()
-        this.connect({ source, target, isPreview: true })
+        this.connect({ source, target, id })
+        this.connectionPreviewId = id
       }
     },
 
@@ -767,9 +766,13 @@ export const createDocumentStore = (id: string) => defineStore({
      */
     commitPreviewedConnection () {
       if (this.connectionPreviewId) {
-        this.commitCachedState()
+        const { source, target } = this.connections[this.connectionPreviewId]
+
+        this.disconnect({ source, target })
+        this.commitState()
+        this.connect({ source, target })
+        this.connectionPreviewId = null
       }
-      this.connectionPreviewId = null
     },
 
     /**
@@ -787,10 +790,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
       if (index <= 0) index = 0
       if (index >= this.connectablePortIds.length) index = -1
-
-      if (!this.cachedState) {
-        this.cacheState()
-      }
 
       const previewPortId = this.connectablePortIds[index]
 
@@ -885,10 +884,6 @@ export const createDocumentStore = (id: string) => defineStore({
       this
         .simulation
         .setPortValue(id, value)
-
-      if (!this.simulation.circuit.isComplete()) {
-        this.isCircuitEvaluated = false
-      }
     },
 
     /**
@@ -1004,8 +999,6 @@ export const createDocumentStore = (id: string) => defineStore({
         })
 
       if (newPort) {
-        this.commitState()
-
         if (sourceId) {
           this.disconnect({
             source: sourceId,
@@ -1114,11 +1107,17 @@ export const createDocumentStore = (id: string) => defineStore({
 
     toggleDebugger () {
       if (this.isDebugging) {
-        this.simulation.unpause()
+        this.simulation.stopDebugging()
       } else {
-        this.simulation.pause()
+        this.simulation.startDebugging()
       }
+
       this.isDebugging = !this.isDebugging
+    },
+
+    stepThroughCircuit () {
+      this.simulation.advance()
+      this.isCircuitEvaluated = !this.simulation.canContinue
     },
 
     toggleOscilloscope () {
@@ -1265,11 +1264,6 @@ export const createDocumentStore = (id: string) => defineStore({
       }
     },
 
-    stepThroughCircuit () {
-      this.simulation.circuit.next()
-      this.isCircuitEvaluated = this.simulation.circuit.isComplete()
-    },
-
     /**
      * Assigns values to the ports in the this according to the given map.
      *
@@ -1321,7 +1315,7 @@ export const createDocumentStore = (id: string) => defineStore({
      */
     applyState (savedState: string) {
       const parsedState = JSON.parse(savedState) as DocumentState
-      const { items, connections, ports, groups } = idMapper.mapStandardCircuitIds(parsedState)
+      const { items, connections, ports, groups } = parsedState
 
       /* returns everything in a that is not in b */
       function getExcludedMembers (a: Record<string, BaseItem>, b: Record<string, BaseItem>) {
@@ -1358,6 +1352,8 @@ export const createDocumentStore = (id: string) => defineStore({
       })
 
       addedConnections.forEach(id => this.connect(connections[id]))
+
+      this.simulation.step()
     },
 
     addPort (itemId: string, port: Port) {
@@ -1463,6 +1459,18 @@ export const createDocumentStore = (id: string) => defineStore({
       this
         .simulation
         .addNode(item, this.ports)
+
+      this.resetItemValue(item)
+    },
+
+    resetItemValue (item: Item) {
+      const property = item.properties?.startValue
+
+      if (!property) return
+
+      const value = property.value as number
+
+      item.portIds.forEach(id => this.setPortValue({ id, value }))
     },
 
     /**
@@ -1572,6 +1580,26 @@ export const createDocumentStore = (id: string) => defineStore({
       }
     },
 
+    sendBackward () {
+      this.commitState()
+      this.incrementZIndex(-1)
+    },
+
+    bringForward () {
+      this.commitState()
+      this.incrementZIndex(1)
+    },
+
+    sendToBack () {
+      this.commitState()
+      this.setZIndex(1)
+    },
+
+    bringToFront () {
+      this.commitState()
+      this.setZIndex(this.zIndex)
+    },
+
     /**
      * Increments the zIndex of all items selected.
      * If an item's movement collides with another item's movement, or it becomes out of bounds, its zIndex will not change.
@@ -1659,9 +1687,7 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param payload.target - target port ID
      * @param payload.connectionChainId - optional connection chain ID to add the connection segment to
      */
-    connect ({ source, target, connectionChainId, isPreview }: { source?: string, target?: string, connectionChainId?: string, isPreview?: boolean }) {
-      const id = `conn_${uuid()}`
-
+    connect ({ source, target, connectionChainId, id = uuid() }: { source?: string, target?: string, connectionChainId?: string, id?: string }) {
       if (source && target) {
         this.connections[id] = {
           id,
@@ -1671,10 +1697,6 @@ export const createDocumentStore = (id: string) => defineStore({
           groupId: null,
           zIndex: ++this.zIndex,
           isSelected: false
-        }
-
-        if (isPreview) {
-          this.connectionPreviewId = id
         }
 
         this.ports[source].connectedPortIds.push(target)
@@ -1813,6 +1835,97 @@ export const createDocumentStore = (id: string) => defineStore({
       this
         .simulation
         .addNode(this.items[itemId], this.ports, true)
+    },
+
+    copy () {
+      const items: Record<string, Item> = {}
+      const ports: Record<string, Port> = {}
+
+      this.selectedItemIds.forEach(id => {
+        items[id] = this.items[id]
+        items[id].portIds.forEach(portId => {
+          ports[portId] = this.ports[portId]
+        })
+      })
+
+      const connections = Object
+        .values(this.connections)
+        .reduce((map, connection) => {
+          if (ports[connection.source] && ports[connection.target]) {
+            map[connection.id] = connection
+          }
+
+          return map
+        }, {})
+
+      const groups = Object
+        .values(this.groups)
+        .filter(({ isSelected }) => isSelected)
+        .reduce((map, group) => ({ ...map, [group.id]: group }), {})
+
+      const clipboard = JSON.stringify({
+        items,
+        ports,
+        connections,
+        groups
+      })
+
+      RemoteService.copy(clipboard)
+    },
+
+    paste () {
+      try {
+        const state = RemoteService.paste()
+        const parsed = JSON.parse(state as string) as {
+          items: Record<string, Item>
+          connections: Record<string, Connection>
+          groups: Record<string, Group>
+          ports: Record<string, Port>
+        }
+        const mapped = idMapper.mapStandardCircuitIds(parsed)
+
+        this.commitState()
+        this.deselectAll()
+
+        Object
+          .keys(mapped.ports)
+          .forEach(portId => {
+            mapped.ports[portId].value = 0
+          })
+
+        Object
+          .values(mapped.items)
+          .forEach(item => {
+            item.position.x += 20
+            item.position.y += 20
+            item.isSelected = false
+
+            this.addNewItem({
+              item,
+              ports: item.portIds.map(portId => mapped.ports[portId])
+            })
+
+            this.setItemBoundingBox(item.id)
+            this.setItemPortPositions(item.id)
+            this.setSelectionState({ id: item.id, value: true })
+            this.resetItemValue(item)
+          })
+
+        Object
+          .values(mapped.connections)
+          .forEach(connection => this.connect(connection))
+
+        Object
+          .values(mapped.groups)
+          .forEach(group => {
+            this.groups[group.id] = group
+
+            this.setGroupBoundingBox(group.id)
+            this.setSelectionState({ id: group.id, value: true })
+          })
+      } catch (error) {
+        console.log('ERROR: ', error)
+      }
     }
   }
 })

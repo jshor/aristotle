@@ -141,8 +141,6 @@ export default defineComponent({
     function dragStart () {
       isDragging = true
 
-      const rand = () => `id_${(Math.floor(Math.random() * 1000000) + 5)}` // TODO: use uuid
-
       newFreeport = {
         itemId: uuid(),
         position: props.position
@@ -196,7 +194,8 @@ export default defineComponent({
       onEscapeKey,
       onBlur,
       dragStart,
-      dragEnd
+      dragEnd,
+      PortType
     }
   }
 })

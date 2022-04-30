@@ -16,6 +16,20 @@ class RemoteService {
   /** Event emitter. */
   static emitter = new TinyEmitter()
 
+  static clipboard: string | null = null
+
+  static copy (data: string) {
+    if (!window.require) return
+
+    this.clipboard = data
+  }
+
+  static paste () {
+    if (!window.require) return
+
+    return this.clipboard
+  }
+
   /**
    * Sets the main application menu, building the app menu from the data in the given store.
    * This method should be called as the result of a watchEffect() on the root store.

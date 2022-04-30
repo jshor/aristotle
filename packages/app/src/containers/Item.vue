@@ -35,12 +35,15 @@
       aria-label="Properties dialog"
       data-test="properties"
     />
-    <selectable :is-selected="isSelected">
+    <selectable
+      :is-selected="isSelected"
+      :flash="flash"
+    >
       <freeport v-if="type === ItemType.Freeport" />
       <integrated-circuit
         v-else-if="type === ItemType.IntegratedCircuit"
         :port-list="portList"
-        @dblclick="$emit('openIntegratedCircuit', baseItem)"
+        @dblclick="$emit('openIntegratedCircuit')"
       />
       <input-switch
         v-else-if="type === ItemType.InputNode"
@@ -228,6 +231,12 @@ export default defineComponent({
     id: {
       type: String,
       required: true
+    },
+
+    /** Whether or not the item should show a flash once to the user. */
+    flash: {
+      type: Boolean,
+      default: false
     },
 
     /**
