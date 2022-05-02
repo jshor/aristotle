@@ -16,7 +16,7 @@ import DocumentState from '@/store/DocumentState'
  */
 export default function integratedCircuitFactory (state: DocumentState) {
   const { ports, items, connections, groups } = cloneDeep(state)
-  const integratedCircuitItem = itemFactory(ItemType.IntegratedCircuit, 'Flip flop')
+  const integratedCircuitItem = itemFactory(uuid(), ItemType.IntegratedCircuit, 'Flip flop', 400, 400)
 
   Object
     .values(items)

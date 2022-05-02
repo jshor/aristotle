@@ -154,6 +154,35 @@ function getGroupBoundingBox (boundingBoxes: BoundingBox[]): BoundingBox {
   })
 }
 
+function getBoundingBoxMidpoint (boundingBox: BoundingBox): Point {
+  const width = boundingBox.right - boundingBox.left
+  const height = boundingBox.bottom - boundingBox.top
+
+  return {
+    x: width / 2,
+    y: height / 2
+  }
+}
+
+/**
+ * Given parent and child bounding boxes, determines the screen point (top left) of the child centered in the parent.
+ *
+ * @param parentBox
+ * @param childBox
+ * @param factor - any factor to round by
+ */
+function getCenteredScreenPoint (parentBox: BoundingBox, childBox: BoundingBox, factor: number = 1): Point {
+  const parentMidpoint = getBoundingBoxMidpoint(parentBox)
+  const childWidth = childBox.right - childBox.left
+  const childHeight = childBox.bottom - childBox.top
+  const roundToGrid = (n: number) => Math.round(n / factor) * factor
+
+  return {
+    x: roundToGrid(parentMidpoint.x - (childWidth / 2)),
+    y: roundToGrid(parentMidpoint.y - (childHeight / 2))
+  }
+}
+
 export default {
   isInNeighborhood,
   isLineIntersectingRectangle,
@@ -163,5 +192,7 @@ export default {
   getPointBoundary,
   hasIntersection,
   getItemBoundingBox,
-  getGroupBoundingBox
+  getGroupBoundingBox,
+  getBoundingBoxMidpoint,
+  getCenteredScreenPoint
 }

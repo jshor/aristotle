@@ -1,13 +1,11 @@
 <template>
   <div
-    @contextmenu="contextMenu($event)"
     @mousewheel="mousewheel"
     @mousedown.right="startPanning"
     class="editor"
   >
     <div
       :style="style"
-      ref="editor"
       class="editor__grid"
     >
       <selector
@@ -21,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import Selector from './Selector.vue'
 
 export default defineComponent({
@@ -37,6 +35,18 @@ export default defineComponent({
     gridSize: {
       type: Number,
       default: 0
+    },
+    width: {
+      type: Number,
+      default: 0
+    },
+    height: {
+      type: Number,
+      default: 0
+    },
+    offset: {
+      type: Object as PropType<Point>,
+      default: () => ({ x: 0, y: 0 })
     }
   },
   computed: {
@@ -45,19 +55,21 @@ export default defineComponent({
         backgroundSize: `${this.gridSize}px ${this.gridSize}px`,
         transform: `scale(${this.zoom})`,
         left: `${this.offset.x}px`,
-        top: `${this.offset.y}px`
+        top: `${this.offset.y}px`,
+        width: `${this.width}px`,
+        height: `${this.height}px`,
       }
     }
   },
   data () {
     return {
-      offset: {
-        x: 0,
-        y: 0
-      } as Point,
       panStartPosition: {
         x: 0,
         y: 0
+      } as Point,
+      originalMousePosition: {
+        y: 0,
+        x: 0
       } as Point,
       panning: false,
       preventContextMenu: false
@@ -73,17 +85,6 @@ export default defineComponent({
   },
   methods: {
     /**
-     * Right-click context menu handler.
-     */
-    contextMenu ($event: MouseEvent) {
-      if (this.preventContextMenu) {
-        this.preventContextMenu = false
-        $event.preventDefault()
-        $event.stopPropagation()
-      }
-    },
-
-    /**
      * Begins panning the canvas.
      */
     startPanning ($event: MouseEvent) {
@@ -92,6 +93,13 @@ export default defineComponent({
         x: $event.x - this.offset.x,
         y: $event.y - this.offset.y
       }
+      this.originalMousePosition = {
+        x: $event.x,
+        y: $event.y
+      }
+
+      $event.preventDefault()
+      $event.stopPropagation()
     },
 
     /**
@@ -99,10 +107,10 @@ export default defineComponent({
      */
     mousemove ($event: MouseEvent) {
       if (this.panning) {
-        this.offset = {
+        this.$emit('pan', {
           x: Math.min($event.x - this.panStartPosition.x, 0),
           y: Math.min($event.y - this.panStartPosition.y, 0)
-        }
+        })
       }
     },
 
@@ -110,12 +118,17 @@ export default defineComponent({
      * Terminates panning mode, if panning. This will suppress the context menu if so.
      */
     mouseup ($event: MouseEvent) {
-      if ($event.button === 2 && (this.panStartPosition.x !== $event.x || this.panStartPosition.y !== $event.y)) {
-        this.preventContextMenu = true
+      if ($event.button === 2) {
+        const deltaX = Math.abs(this.originalMousePosition.x - $event.x)
+        const deltaY = Math.abs(this.originalMousePosition.y - $event.y)
+
+        if (deltaX + deltaY < 2) {
+          // if the mouse moved less than 2 pixels in any direction, show the context menu
+          this.$emit('onContextMenu', $event)
+        }
       }
 
       this.panning = false
-      this.panStartPosition = { x: 0, y: 0 }
     },
 
     /**
@@ -126,22 +139,11 @@ export default defineComponent({
     mousewheel ($event: WheelEvent) {
       if (!$event.shiftKey) return
 
-      const zoom = this.zoom + ($event.deltaY / 1000)
-      const point = this.fromDocumentToEditorCoordinates({
-        x: $event.x,
-        y: $event.y
-      })
-      const scaledPoint = {
-        x: point.x * zoom,
-        y: point.y * zoom
-      }
+    // Normalize mouse wheel movement to +1 or -1 to avoid unusual jumps.
+    const wheel = $event.deltaY < 0 ? 1 : -1;
+      const zoom = this.zoom + (wheel/ 10)
 
-      this.offset = {
-        x: Math.min(point.x - scaledPoint.x, 0),
-        y: Math.min(point.y - scaledPoint.y, 0)
-      }
-
-      this.$emit('zoom', zoom)
+      this.$emit('zoom', { zoom, point: $event })
     },
 
     /**
@@ -162,19 +164,6 @@ export default defineComponent({
      */
     selectionEnd (boundary: BoundingBox) {
       this.$emit('selection', boundary)
-    },
-
-    /**
-     * Converts the given point from document coordinates to editor ones.
-     */
-    fromDocumentToEditorCoordinates (point: Point) {
-      const editor = this.$refs.editor as HTMLElement
-      const { x, y } = editor.getBoundingClientRect()
-
-      return {
-        x: (point.x - x) / this.zoom,
-        y: (point.y - y) / this.zoom
-      }
     }
   }
 })
@@ -191,12 +180,10 @@ export default defineComponent({
   &__grid {
     position: relative;
     box-sizing: border-box;
-    width: 300vw;
-    height: 300vh;
     background-image:
-      linear-gradient(to right, #c0c0c0 1px, transparent 1px),
-      linear-gradient(to bottom, #c0c0c0 1px, transparent 1px);
-    background-color: #e8e8e8;
+      linear-gradient(to right, $color-bg-secondary 1px, transparent 1px),
+      linear-gradient(to bottom, $color-bg-secondary 1px, transparent 1px);
+    background-color: $color-bg-primary;
     transform-origin: top left;
   }
 }

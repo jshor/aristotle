@@ -36,7 +36,7 @@ export default defineComponent({
   outline: none;
 
   &--selected {
-    filter: drop-shadow(0 0 6px #000);
+    filter: drop-shadow(0 0 6px $color-secondary);
   }
 
   &--flash {
@@ -49,7 +49,7 @@ export default defineComponent({
     filter: inherit;
   }
   50% {
-    filter: drop-shadow(0px 0px 20px #000);
+    filter: drop-shadow(0px 0px 20px $color-secondary);
   }
   100% {
     filter: inherit;

@@ -6,7 +6,6 @@
     <div
       v-if="selection"
       :style="style"
-      ref="selection"
       class="selector__selection"
     />
   </div>

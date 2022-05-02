@@ -4,10 +4,17 @@
     :zoom="store.zoomLevel"
     :grid-size="gridSize"
     :tabindex="0"
+    :offset="{
+      x: store.canvas.left,
+      y: store.canvas.top
+    }"
+    :width="store.canvas.right - store.canvas.left"
+    :height="store.canvas.bottom - store.canvas.top"
+    @pan="store.panTo"
     @deselect="store.deselectAll"
     @selection="store.createSelection"
     @zoom="store.setZoom"
-    @contextmenu="onContextMenu"
+    @on-context-menu="onContextMenu"
     @mousedown="store.deselectAll"
   >
     <!-- when tabbed into, this resets the selection back to the last item -->
@@ -80,6 +87,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance } from 'vue'
+import ResizeObserver from 'resize-observer-polyfill'
 import { StoreDefinition } from 'pinia'
 import DocumentState from '@/store/DocumentState'
 import Editor from '@/components/Editor.vue'
@@ -239,6 +247,18 @@ export default defineComponent({
         store.setSelectionState({ id, value: false })
       }
     }
+
+    function onSizeChanged ([ target ]: ResizeObserverEntry[]) {
+      store.setViewerSize(target.target.getBoundingClientRect())
+    }
+
+    const observer = new ResizeObserver(onSizeChanged)
+
+    onMounted(() => {
+      if (editor.value) {
+        observer.observe(editor.value.$el)
+      }
+    })
 
     return {
       store,

@@ -21,9 +21,9 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const width = computed(() => props.icon.icon[0]);
-    const height = computed(() => props.icon.icon[1]);
-    const svgPath = computed(() => props.icon.icon[4]);
+    const width = computed(() => props.icon.icon[0])
+    const height = computed(() => props.icon.icon[1])
+    const svgPath = computed(() => props.icon.icon[4])
 
     return { width, height, svgPath }
   }

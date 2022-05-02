@@ -49,11 +49,11 @@ export default defineComponent({
 .or {
   &__element, &__negation, &__tail {
     stroke-width: 2;
-    stroke: #000;
+    stroke: $color-secondary;
   }
 
   &__element, &__negation {
-    fill: #fff;
+    fill: $color-bg-secondary;
     pointer-events: all;
   }
 }

@@ -16,7 +16,7 @@
     >
       <resizable-panes v-model="toolboxWidth">
         <template v-slot:first>
-          toolbox {{ toolboxWidth }}% wide
+          <toolbox v-if="activeDocument" :store="activeDocument.store" />
         </template>
         <template v-slot:second>
           <resizable-panes
@@ -71,6 +71,7 @@ import { storeToRefs } from 'pinia'
 import { defineComponent, onBeforeUnmount, onMounted, watchEffect } from 'vue'
 import Document from './containers/Document.vue'
 import Toolbar from './containers/Toolbar.vue'
+import Toolbox from './containers/Toolbox.vue'
 import ResizablePanes from '@/components/ResizablePanes.vue'
 import { useRootStore } from './store/root'
 import TabItem from './components/tab/TabItem.vue'
@@ -86,6 +87,7 @@ export default defineComponent({
     Toolbar,
     TabItem,
     TabHost,
+    Toolbox,
     Oscilloscope
   },
   setup () {

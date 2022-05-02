@@ -58,7 +58,7 @@ export default defineComponent({
 
 <style lang="scss">
 .group {
-  border: 2px dashed #808080;
+  border: 2px dashed transparent;
   box-sizing: border-box;
   position: absolute;
   pointer-events: none;
@@ -67,9 +67,8 @@ export default defineComponent({
 
   &--is-selected {
     display: block;
-    border-color: #000;
+    border-color: $color-secondary;
     cursor: move;
   }
 }
 </style>
-

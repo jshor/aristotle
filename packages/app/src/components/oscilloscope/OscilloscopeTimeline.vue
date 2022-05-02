@@ -17,6 +17,7 @@
     <div
       class="oscilloscope-timeline__display"
       ref="timeline"
+      @wheel="onWheel"
     >
       <div
         v-for="(value, key) in oscillogram"
@@ -81,6 +82,14 @@ export default defineComponent({
     timeline.removeEventListener('scroll', this.onTimelineScroll)
   },
   methods: {
+    onWheel ($event: WheelEvent) {
+      const timeline = this.$refs.timeline as HTMLElement
+
+      timeline.scrollTop += $event.deltaY / 10
+
+      $event.preventDefault()
+    },
+
     /**
      * Scrolls the timeline to the maximum x value.
      */
