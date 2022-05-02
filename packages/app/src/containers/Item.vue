@@ -70,7 +70,6 @@
             :tabindex="0"
             :store="rawStore"
             :id="port.id"
-            :ref="port.id"
             :key="port.id"
             :type="port.type"
             :is-freeport="port.isFreeport"

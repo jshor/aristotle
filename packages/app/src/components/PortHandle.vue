@@ -2,9 +2,7 @@
   <div
     class="port-handle"
     :class="{
-      'port-handle--active': active,
-      'port-handle--output': type === 0,
-      'port-handle--input': type === 1
+      'port-handle--active': active
     }"
     @mousedown="mousedown"
     @mouseup="mouseup"
@@ -53,13 +51,13 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid black;
+  border: 1px solid $color-secondary;
   box-sizing: border-box;
   top: -8px;
   left: -8px;
   width: 16px;
   height: 16px;
-  background-color: red;
+  background-color: $color-bg-secondary;
   border-radius: 50%;
   cursor: move;
   pointer-events: all;
@@ -71,10 +69,6 @@ export default defineComponent({
     height: 24px;
     top: -12px;
     left: -12px;
-  }
-
-  &--input {
-    background-color: blue;
   }
 }
 </style>

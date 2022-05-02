@@ -30,6 +30,15 @@ function generateItemName (item: Item, taxonomyCount: number) {
   return name.join(' ')
 }
 
+function fromDocumentToEditorCoordinates (canvas: BoundingBox, viewport: DOMRect, point: Point, z: number) {
+  return {
+    x: (point.x - viewport.x - canvas.left) / z,
+    y: (point.y - viewport.y - canvas.top) / z
+  }
+}
+
+const MIN_SCALE = 0.25
+
 export const createDocumentStore = (id: string) => defineStore({
   id,
   state: (): DocumentState => ({
@@ -44,6 +53,16 @@ export const createDocumentStore = (id: string) => defineStore({
     isCircuitEvaluated: false,
     isDebugging: false,
     isDirty: false,
+    hasLoaded: false,
+
+    /* canvas dimensions */
+    viewport: new DOMRect(),
+    canvas: {
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0
+    },
 
     /* the following variables are 'temporary' information */
     snapBoundaries: [],
@@ -112,30 +131,93 @@ export const createDocumentStore = (id: string) => defineStore({
   },
 
   actions: {
-    /**
-     * Sets the zoom level for the document.
-     *
-     * @param zoom - percentage of zoom by decimal (e.g., 1.0 = 100%)
-     */
-    setZoom (zoom) {
-      this.zoomLevel = zoom
-    },
-
-    recycleSelection (backToFirstItem: boolean) {
-      const id = backToFirstItem
-        ? this.baseItems[0]
-        : this.baseItems.slice(-1)[0]
-
-      if (id) {
-        this.deselectAll()
-        this.setSelectionState({ id: id.id, value: true })
-      }
-    },
 
     loadDocument (document: string) {
       this.buildCircuit()
       this.applyState(document)
       this.reset()
+    },
+
+    /**
+     * Sets the zoom level for the document.
+     *
+     * @param zoom - percentage of zoom by decimal (e.g., 1.0 = 100%)
+     */
+    setZoom ({ zoom, point }: { zoom: number, point: Point }) {
+      if (zoom < MIN_SCALE || zoom > 5) return
+
+      const zoomedPoint = fromDocumentToEditorCoordinates(this.canvas, this.viewport, point, this.zoomLevel)
+      const scaledPoint = { // the canvas coordinate, scaled by the new zoom factor
+        x: zoomedPoint.x * zoom,
+        y: zoomedPoint.y * zoom
+      }
+      const viewportPoint = { // the point w.r.t. the top left offset of the viewport
+        x: point.x - this.viewport.x,
+        y: point.y - this.viewport.y
+      }
+
+      this.panTo({
+        x: Math.min(viewportPoint.x - scaledPoint.x, 0),
+        y: Math.min(viewportPoint.y - scaledPoint.y, 0)
+      })
+
+      this.zoomLevel = zoom
+    },
+
+    setViewerSize (rect: DOMRect) {
+      this.viewport = rect
+
+      this.canvas.bottom = screen.height / MIN_SCALE
+      this.canvas.right = screen.width / MIN_SCALE
+
+      if (!this.hasLoaded && rect.width > 0 && rect.height > 0) {
+        this.hasLoaded = true
+        this.centerAll()
+        this.panToCenter()
+      }
+    },
+
+    panTo (pan: Point) {
+      const deltaX = pan.x - this.canvas.left
+      const deltaY = pan.y - this.canvas.top
+
+      this.canvas.left += deltaX
+      this.canvas.right += deltaX
+      this.canvas.top += deltaY
+      this.canvas.bottom += deltaY
+    },
+
+    panToCenter () {
+      const midpoint = boundaries.getBoundingBoxMidpoint(this.canvas)
+
+      this.panTo({
+        x: (this.viewport.width / 2) - midpoint.x,
+        y: (this.viewport.height / 2) - midpoint.y
+      })
+    },
+
+    centerAll () {
+      const boundingBoxes = Object
+        .values(this.items)
+        .map(({ boundingBox }) => boundingBox)
+      const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
+      const { x, y } = boundaries.getCenteredScreenPoint(this.canvas, boundingBox, 20) // TODO: make this configurable
+
+      const deltaX = x - boundingBox.left
+      const deltaY = y - boundingBox.top
+
+      Object
+        .values(this.items)
+        .forEach(item => {
+          this.setItemPosition({
+            id: item.id,
+            position: {
+              x: item.position.x + deltaX,
+              y: item.position.y + deltaY
+            }
+          })
+          this.setItemPortPositions(item.id)
+        })
     },
 
     async saveIntegratedCircuit () {
@@ -171,10 +253,33 @@ export const createDocumentStore = (id: string) => defineStore({
       this.simulation = simulation
     },
 
-    insertItem ({ item, ports }: { item: Item, ports: Port[] }) {
+    recycleSelection (backToFirstItem: boolean) {
+      const id = backToFirstItem
+        ? this.baseItems[0]
+        : this.baseItems.slice(-1)[0]
+
+      if (id) {
+        this.deselectAll()
+        this.setSelectionState({ id: id.id, value: true })
+      }
+    },
+
+    insertItem ({ item, ports }: { item: Item, ports: Port[] }, documentPosition: Point | null = null) {
+      if (!documentPosition) {
+        const viewportMidpoint = boundaries.getBoundingBoxMidpoint(this.viewport)
+
+        documentPosition = fromDocumentToEditorCoordinates(this.canvas, this.viewport, viewportMidpoint, this.zoomLevel)
+        console.log('item.boundingBox: ', documentPosition, this.viewport)
+      }
+
       this.commitState()
       this.addNewItem({ item, ports })
+
+      const position = fromDocumentToEditorCoordinates(this.canvas, this.viewport, documentPosition, this.zoomLevel)
+
+      this.setItemPosition({ id: item.id, position })
       this.setItemPortPositions(item.id)
+      this.setSelectionState({ id: item.id, value: true })
     },
 
     /**
@@ -1426,7 +1531,6 @@ export const createDocumentStore = (id: string) => defineStore({
         }
 
         delete this.ports[portId]
-        console.log('DELETING: ', portId)
         this.simulation.removePort(portId)
       } else {
         console.log('CANT DELETE')

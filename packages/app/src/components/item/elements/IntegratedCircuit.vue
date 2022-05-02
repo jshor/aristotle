@@ -51,7 +51,6 @@ export default defineComponent({
 .integrated-circuit {
   height: 150px;
   width: 200px;
-  border: 1px solid red;
   pointer-events: none;
   cursor: pointer;
   display: flex;
@@ -73,8 +72,8 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #FFF0DC;
-    border: 2px solid #000;
+    background-color: $color-bg-secondary;
+    border: 2px solid $color-secondary;
     height: 100%;
     width: 150px;
     pointer-events: all;
@@ -82,7 +81,7 @@ export default defineComponent({
 
   &__wire {
     height: 3px;
-    background-color: black;
+    background-color: $color-secondary;
   }
 
   &__wires {

@@ -1,7 +1,9 @@
-import BinaryWaveService from '@/services/BinaryWaveService'
 import SimulationService from '@/services/SimulationService'
 
 export default interface DocumentState {
+  viewport: DOMRect
+  canvas: BoundingBox
+  hasLoaded: boolean
   cachedState: string | null
   undoStack: string[]
   redoStack: string[]

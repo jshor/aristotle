@@ -28,7 +28,7 @@ export default defineComponent({
   props: {
     isNegated: {
       type: Boolean,
-      default: true
+      default: false
     }
   }
 })
@@ -38,8 +38,8 @@ export default defineComponent({
 .and {
   &__element, &__negation {
     stroke-width: 2;
-    stroke: #000;
-    fill: #fff;
+    stroke: $color-secondary;
+    fill: $color-bg-secondary;
     pointer-events: all;
   }
 }

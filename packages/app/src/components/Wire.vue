@@ -115,7 +115,7 @@ export default defineComponent({
     stroke-width: 8;
     pointer-events: all;
     stroke-linecap: square;
-    stroke: black;
+    stroke: $color-secondary;
   }
 
   &__animation {
@@ -142,7 +142,7 @@ export default defineComponent({
   }
 
   &--selected {
-    filter: drop-shadow(0 0 6px #000); // TODO: make this a mixin
+    filter: drop-shadow(0 0 6px $color-secondary); // TODO: make this a mixin
   }
 
   &--preview {
@@ -177,7 +177,7 @@ export default defineComponent({
     filter: inherit;
   }
   50% {
-    filter: drop-shadow(0px 0px 20px #000);
+    filter: drop-shadow(0px 0px 20px $color-primary);
   }
   100% {
     filter: inherit;

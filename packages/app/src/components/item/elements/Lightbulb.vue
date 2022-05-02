@@ -27,8 +27,8 @@ export default defineComponent({
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid #000;
-  background-color: gray;
+  border: 1px solid $color-secondary;
+  background-color: rgba(67, 67, 67, 0.5);
   cursor: move;
   pointer-events: all;
 

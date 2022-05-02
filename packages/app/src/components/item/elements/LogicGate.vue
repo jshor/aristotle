@@ -5,13 +5,13 @@
   >
     <div
       :style="{
-        width: (inputCount > 2 ? 30 : 100) + '%'
+        width: (inputCount > 2 ? 100 : 100) + '%'
       }"
       class="logic-gate__wires"
     >
       <div
         :class="{
-          'gate__wires-divider--multiwire': inputCount > 2
+          'logic-gate__wires-divider--multiwire': inputCount > 2
         }"
         class="logic-gate__wires-divider"
       >
@@ -43,6 +43,7 @@
 import { defineComponent, PropType } from 'vue'
 import And from './gates/And.vue'
 import Or from './gates/Or.vue'
+import Nor from './gates/Nor.vue'
 import Nand from './gates/Nand.vue'
 import Xnor from './gates/Xnor.vue'
 import Xor from './gates/Xor.vue'
@@ -71,6 +72,8 @@ export default defineComponent({
           return Xnor
         case ItemSubtype.Xor:
           return Xor
+        case ItemSubtype.Nor:
+          return Nor
         default:
           return Or
       }
@@ -95,7 +98,7 @@ export default defineComponent({
 
   &__wire {
     height: 2px;
-    background-color: black;
+    background-color: $color-secondary;
   }
 
   &__wires {
@@ -107,7 +110,7 @@ export default defineComponent({
     display: flex;
 
     &--multiwire {
-      background-color: #000;
+      background-color: $color-secondary;
       width: 2px;
       height: calc(100% - 22px);
       margin-top: 11px;
@@ -120,9 +123,11 @@ export default defineComponent({
     display: flex;
     justify-content: space-around;
     flex-direction: column;
+    flex: 1;
 
     &--multiwire {
-      width: 20%;
+      flex: initial;
+      width: 15%;
     }
   }
 }

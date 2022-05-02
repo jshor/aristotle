@@ -4,10 +4,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Nor from './Nor.vue'
+import Or from './Or.vue'
 
 export default defineComponent({
-  name: 'Xor',
-  components: { Nor }
+  name: 'Nor',
+  components: { Or }
 })
 </script>

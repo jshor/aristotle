@@ -64,8 +64,8 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #000;
-  background-color: peachpuff;
+  border: 1px solid $color-secondary;
+  background-color: $color-bg-secondary;
   pointer-events: all;
   cursor: move;
 
@@ -76,7 +76,7 @@ export default defineComponent({
     width: 30px;
     height: 30px;
     cursor: pointer;
-    border: 1px solid #000;
+    border: 1px solid $color-secondary;
     color: #fff;
     box-sizing: border-box;
     font-family: 'Courier New', Courier, monospace;
