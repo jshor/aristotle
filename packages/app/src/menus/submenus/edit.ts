@@ -1,8 +1,9 @@
+import { MenuItemConstructorOptions } from 'electron/main'
 import { Store } from 'pinia'
 import DocumentState from '@/store/DocumentState'
 
-export default function edit (store: Store<string, DocumentState, any>, submenus: MenuEntry[] = []): MenuEntry[] {
-  let menu: MenuEntry[] = [
+export default function edit (store: Store<string, DocumentState, any>, submenus: MenuItemConstructorOptions[] = []): MenuItemConstructorOptions[] {
+  let menu: MenuItemConstructorOptions[] = [
     {
       label: '&Undo',
       enabled: store.canUndo,
@@ -12,19 +13,15 @@ export default function edit (store: Store<string, DocumentState, any>, submenus
     { type: 'separator' },
     {
       role: 'cut',
-      enabled: store.hasSelection,
-      click: () => console.log('cut')
+      enabled: store.hasSelection
     },
     {
-      label: 'Copy',
-      enabled: store.hasSelection,
-      accelerator: 'CommandOrControl+C',
-      click: store.copy
+      role: 'copy',
+      enabled: store.hasSelection
     },
     {
-      label: 'Paste',
-      accelerator: 'CommandOrControl+V',
-      click: store.paste
+      role: 'paste',
+      enabled: store.hasSelection
     },
     {
       label: 'Delete',
@@ -35,7 +32,7 @@ export default function edit (store: Store<string, DocumentState, any>, submenus
     { type: 'separator' },
     {
       role: 'selectAll',
-      click: store.selectAll
+      enabled: store.baseItems.length > 0
     }
   ]
 
@@ -46,10 +43,12 @@ export default function edit (store: Store<string, DocumentState, any>, submenus
       submenu: [
         {
           label: 'Rotate 90° &CW',
+          accelerator: 'CmdOrCtrl+R',
           click: () => store.rotate(1)
         },
         {
           label: 'Rotate 90° CC&W',
+          accelerator: 'CmdOrCtrl+Shift+R',
           click: () => store.rotate(-1)
         }
       ]

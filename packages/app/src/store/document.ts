@@ -16,7 +16,7 @@ import sortByZIndex from '@/utils/sortByZIndex'
 import DocumentState from './DocumentState'
 import integratedCircuitFactory from '@/factories/integratedCircuitFactory'
 import idMapper from '@/utils/idMapper'
-import RemoteService from '@/services/RemoteService'
+// import RemoteService from '@/services/RemoteService'
 
 function generateItemName (item: Item, taxonomyCount: number) {
   const name: string[] = [item.type]
@@ -902,7 +902,7 @@ export const createDocumentStore = (id: string) => defineStore({
         this.setConnectionPreview(previewPortId)
       } else {
         if (this.connectablePortIds.length === 0) {
-          RemoteService.beep() // audibly inform the user they can't connect to anything
+          window.api.beep() // audibly inform the user they can't connect to anything
         }
         this.unsetConnectionPreview()
       }
@@ -1941,7 +1941,14 @@ export const createDocumentStore = (id: string) => defineStore({
         .addNode(this.items[itemId], this.ports, true)
     },
 
+    cut () {
+      this.copy()
+      this.deleteSelection()
+    },
+
     copy () {
+      if (!this.hasSelection) return
+
       const items: Record<string, Item> = {}
       const ports: Record<string, Port> = {}
 
@@ -1971,20 +1978,23 @@ export const createDocumentStore = (id: string) => defineStore({
         items,
         ports,
         connections,
-        groups
+        groups,
+        pasteCount: 1
       })
 
-      RemoteService.copy(clipboard)
+      window.api.copy(clipboard)
     },
 
     paste () {
+      console.log('PASTING...')
       try {
-        const state = RemoteService.paste()
+        const state = window.api.paste()
         const parsed = JSON.parse(state as string) as {
           items: Record<string, Item>
           connections: Record<string, Connection>
           groups: Record<string, Group>
-          ports: Record<string, Port>
+          ports: Record<string, Port>,
+          pasteCount: number
         }
         const mapped = idMapper.mapStandardCircuitIds(parsed)
 
@@ -2000,8 +2010,8 @@ export const createDocumentStore = (id: string) => defineStore({
         Object
           .values(mapped.items)
           .forEach(item => {
-            item.position.x += 20
-            item.position.y += 20
+            item.position.x += 20 * parsed.pasteCount
+            item.position.y += 20 * parsed.pasteCount
             item.isSelected = false
 
             this.addNewItem({
@@ -2027,8 +2037,16 @@ export const createDocumentStore = (id: string) => defineStore({
             this.setGroupBoundingBox(group.id)
             this.setSelectionState({ id: group.id, value: true })
           })
+
+        const clipboard = JSON.stringify({
+          ...JSON.parse(state),
+          pasteCount: parsed.pasteCount + 1
+        })
+
+        window.api.copy(clipboard)
       } catch (error) {
         console.log('ERROR: ', error)
+        // TODO: clear clipboard?
       }
     }
   }

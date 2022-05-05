@@ -1,6 +1,6 @@
 <template>
   <button
-    :tabindex="-1"
+    :tabindex="0"
     :disabled="disabled"
     :class="{
       'toolbar-button--active': active

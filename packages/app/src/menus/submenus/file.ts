@@ -1,10 +1,11 @@
+import { MenuItemConstructorOptions } from 'electron/main'
 import { Store } from 'pinia'
 import { RootStore } from '@/store/root'
 
-export default function file (store: Store<string, RootStore, any>): MenuEntry[] {
+export default function file (store: Store<string, RootStore, any>): MenuItemConstructorOptions[] {
   const hasDocument = store.activeDocumentId !== null
-
-  return [
+  const documentList = Object.keys(store.documents)
+  const items: MenuItemConstructorOptions[] = [
     {
       label: '&New Circuit',
       accelerator: 'CommandOrControl+N',
@@ -65,12 +66,53 @@ export default function file (store: Store<string, RootStore, any>): MenuEntry[]
           click: () => console.log('doc prefs')
         }
       ]
-    },
-    { type: 'separator' },
-    // close document, close saved, close all
-    {
-      label: 'Exit',
-      click: () => window.close()
     }
   ]
+
+  if (Object.keys(store.documents).length > 1) {
+    const submenu: MenuItemConstructorOptions[] = [
+      {
+        label: 'Previous File',
+        accelerator: 'CmdOrCtrl+Shift+Tab',
+        click: () => store.switchDocument(-1)
+      },
+      {
+        label: 'Next File',
+        accelerator: 'CmdOrCtrl+Tab',
+        click: () => store.switchDocument(1)
+      },
+      { type: 'separator' }
+    ]
+
+    for (let i = 0; i < documentList.length; i++) {
+      submenu.push({
+        type: "checkbox",
+        label: store.documents[documentList[i]].displayName,
+        checked: store.activeDocumentId === documentList[i],
+        click: () => store.activateDocument(documentList[i])
+      })
+    }
+
+    items.push({ type: 'separator' })
+    items.push({
+      label: 'Switch to...',
+      submenu
+    })
+  }
+
+  items.push({ type: 'separator' })
+  items.push({
+    label: 'Close Document',
+    accelerator: 'CmdOrCtrl+W',
+    click: () => store.closeDocument(store.activeDocumentId)
+  })
+
+  items.push({ type: 'separator' })
+  items.push({
+    label: 'Exit',
+    accelerator: 'CmdOrCtrl+Q',
+    click: () => window.close()
+  })
+
+  return items
 }

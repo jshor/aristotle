@@ -94,7 +94,6 @@ import Editor from '@/components/Editor.vue'
 import Group from '@/components/Group.vue'
 import Connection from './Connection.vue'
 import Item from './Item.vue'
-import RemoteService from '@/services/RemoteService'
 import editorContextMenu from '@/menus/context/editor'
 
 export default defineComponent({
@@ -121,57 +120,41 @@ export default defineComponent({
     onMounted(() => {
       document.addEventListener('keydown', onKeyDown)
       document.addEventListener('keyup', onKeyUp)
+      document.addEventListener('cut', onClipboard('cut'))
+      document.addEventListener('copy', onClipboard('copy'))
+      document.addEventListener('paste', onClipboard('paste'))
+      // document.addEventListener('delete', onClipboard('delete'))
       window.addEventListener('blur', clearKeys)
     })
 
     onBeforeUnmount(() => {
       document.removeEventListener('keydown', onKeyDown)
       document.removeEventListener('keyup', onKeyUp)
+      document.addEventListener('cut', onClipboard('cut'))
+      document.addEventListener('copy', onClipboard('copy'))
+      document.addEventListener('paste', onClipboard('paste'))
       window.removeEventListener('blur', clearKeys)
     })
 
+    function onClipboard (action: 'cut' | 'copy' | 'paste') {
+      return function ($event: ClipboardEvent) {
+        if ($event.target instanceof HTMLInputElement) return
+
+        store[action]()
+        $event.preventDefault()
+      }
+    }
+
     function onKeyDown ($event: KeyboardEvent) {
-      keys[$event.key] = true
+      if ($event.target instanceof HTMLInputElement) return
 
       switch ($event.key) {
         case 'Escape':
           return store.deselectAll()
-        // case 'Delete':
-        //   return store.deleteSelection()
-        // case 'z':
-        // case 'Z':
-        //   if (keys.Control) {
-        //     return (keys.Shift ? store.redo() : store.undo())
-        //   }
-        case 'v':
-        case 'V':
-          if (keys.Control) {
-            store.paste()
-            $event.preventDefault()
-            return
-          }
-        case 'c':
-        case 'C':
-          if (keys.Control) {
-            store.copy()
-            $event.preventDefault()
-            return
-          }
+        case 'Delete':
+          return store.selectAll()
         case 'a':
-        case 'A':
-          if (keys.Control) {
-            store.selectAll()
-            $event.preventDefault()
-            return
-          }
-        case 'r':
-        case 'R':
-          if (keys.Control) {
-            window.location.reload()  // TODO: remove this when done debugging all the time, since this overrides refresh
-            // store.reset()
-            $event.preventDefault()
-            return
-          }
+          return $event.ctrlKey && store.selectAll()
         default:
           return moveItemsByArrowKey($event)
       }
@@ -183,22 +166,10 @@ export default defineComponent({
     }
 
     function onContextMenu ($event: Event) {
-      RemoteService.showContextMenu(editorContextMenu(store))
+      window.api.showContextMenu(editorContextMenu(store))
 
       $event.preventDefault()
       $event.stopPropagation()
-    }
-
-    function onOpenIntegratedCircuit ({ id, ports }: { id: string, ports: Port[] }) {
-      emit('openIntegratedCircuit', {
-        items: {
-          [id]: store.items[id]
-        },
-        ports: ports.reduce((map: Record<string, Port>, port) => ({
-          ...map,
-          [port.id]: port
-        }), {})
-      })
     }
 
     function moveItemsByArrowKey ($event: KeyboardEvent) {
@@ -267,7 +238,6 @@ export default defineComponent({
       onKeyDown,
       onKeyUp,
       onContextMenu,
-      onOpenIntegratedCircuit,
       clearKeys,
       selectItem,
       deselectItem,

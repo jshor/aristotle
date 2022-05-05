@@ -10,10 +10,7 @@
         :store="activeDocument.store"
       />
     </div>
-    <div
-      class="app__bottom"
-      ref="bottom"
-    >
+    <div class="app__bottom">
       <resizable-panes v-model="toolboxWidth">
         <template v-slot:first>
           <toolbox v-if="activeDocument" :store="activeDocument.store" />
@@ -58,6 +55,9 @@
         </template>
       </resizable-panes>
     </div>
+
+    <div class="app__status">
+    </div>
   </div>
 
   <div v-else>
@@ -77,7 +77,8 @@ import { useRootStore } from './store/root'
 import TabItem from './components/tab/TabItem.vue'
 import TabHost from './components/tab/TabHost.vue'
 import Oscilloscope from './containers/Oscilloscope.vue'
-import RemoteService from './services/RemoteService'
+// import RemoteService from './services/RemoteService'
+import createApplicationMenu from './menus'
 
 export default defineComponent({
   name: 'App',
@@ -104,7 +105,7 @@ export default defineComponent({
     }
 
     // update the app menu when any of the store variables it depends on to show/hide menu items change
-    watchEffect(() => RemoteService.setApplicationMenu(store))
+    watchEffect(() => window.api.setApplicationMenu(createApplicationMenu(store)))
 
     watchEffect(() => {
       document.title = store.activeDocument
@@ -112,9 +113,11 @@ export default defineComponent({
         : 'Aristotle'
     })
 
+    window.api.onBeforeClose(store.closeAll)
+
     onMounted(() => {
       document.addEventListener('keydown', onKeyDown)
-      RemoteService.on('close', store.closeApplication)
+      // RemoteService.on('close', store.closeApplication)
     })
 
     onBeforeUnmount(() => {
@@ -123,26 +126,11 @@ export default defineComponent({
     })
 
     function onKeyDown ($event: KeyboardEvent) {
-      if ($event.ctrlKey && $event.key === 'Tab') {
-        store.switchDocument($event.shiftKey ? -1 : 1)
-        $event.preventDefault()
-      }
-
       if ($event.ctrlKey && $event.key.toUpperCase() === 'R') {
         // refresh command
         // TODO: in development only, this will refresh the page; otherwise, reset active circuit
-        RemoteService.canCloseWindow = true
-      }
-
-      if ($event.ctrlKey && $event.key.toUpperCase() === 'Q') {
-        store.closeApplication()
-      }
-
-      if ($event.ctrlKey && $event.key.toUpperCase() === 'W') {
-        if (store.activeDocumentId) {
-          store.closeDocument(store.activeDocumentId)
-          $event.preventDefault()
-        }
+        // RemoteService.canCloseWindow = true
+        window.location.reload()
       }
     }
 
@@ -170,14 +158,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-body {
-  padding: 0;
-  margin: 0;
-  user-select: none;
-  font-family: system-ui;
-  min-height: 100vh;
-  max-height: 100vh;
-}
+$toolbar-height: 50px;
+$status-bar-height: 25px;
 
 .app {
   width: 100vw;
@@ -189,13 +171,18 @@ body {
 
   &__toolbar {
     width: 100%;
-    height: 50px;
+    height: $toolbar-height;
   }
 
   &__bottom {
-    max-height: calc(100% - 50px);
+    max-height: calc(100% - $toolbar-height - $status-bar-height);
     flex: 1;
     display: flex;
+  }
+
+  &__status {
+    background: green;
+    height: $status-bar-height;
   }
 }
 </style>

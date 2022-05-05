@@ -1,6 +1,6 @@
 <template>
   <div class="toolbox-item"
-    :tabindex="-1"
+    :tabindex="0"
     @mousedown="onMouseDown"
   >
     <div class="toolbox-entry">
