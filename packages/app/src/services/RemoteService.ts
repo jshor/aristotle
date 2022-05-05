@@ -3,6 +3,15 @@ import { TinyEmitter } from 'tiny-emitter'
 import createApplicationMenu from '@/menus'
 import { Store } from 'pinia'
 import { RootStore } from '@/store/root'
+// import { Menu, dialog, app, shell, getCurrentWindow, BrowserWindow } from '@electron/remote'
+
+
+
+// window.api.receive("fromMain", (data) => {
+//   console.log(`Received ${data} from main process`);
+// });
+// window.api.send("toMain", "some data");
+
 
 /**
  * This service provides all interactions to Electron remote elements (menus, dialogs, exiting, etc.).
@@ -17,6 +26,8 @@ class RemoteService {
   static emitter = new TinyEmitter()
 
   static clipboard: string | null = null
+
+  static menuCallbacks: Record<string, () => void> = {}
 
   static copy (data: string) {
     if (!window.require) return
@@ -37,12 +48,11 @@ class RemoteService {
    * @param store - root store module
    */
   static setApplicationMenu (store: Store<string, RootStore, any>) {
-    if (!window.require) return
+    // if (!window.require) return
 
-    const { Menu } = window.require('@electron/remote')
-    const menu = Menu.buildFromTemplate(createApplicationMenu(store))
+    // const menu = Menu.buildFromTemplate(createApplicationMenu(store))
 
-    Menu.setApplicationMenu(menu)
+    // Menu.setApplicationMenu(menu)
   }
 
   /**
@@ -51,20 +61,16 @@ class RemoteService {
    * @param entries - menu entries to show to the user
    */
   static showContextMenu (entries: MenuEntry[]) {
-    if (!window.require) return
+    // if (!window.require) return
 
-    const { Menu } = window.require('@electron/remote')
-    const menu = Menu.buildFromTemplate(entries)
+    // const menu = Menu.buildFromTemplate(entries)
 
-    menu.popup()
+    // menu.popup()
+
   }
 
   static beep () {
-    if (!window.require) return
-
-    const { shell } = window.require('@electron/remote')
-
-    shell.beep()
+    // shell.beep()
   }
 
   /**
@@ -73,40 +79,33 @@ class RemoteService {
    * @param url - the vue-router path to open
    */
   static async openModal (url: string = 'https://aristotle.dev') {
-    if (!window.require) return
+    // const parent = getCurrentWindow()
+    // const win = new BrowserWindow({
+    //   autoHideMenuBar: true,
+    //   minimizable: false,
+    //   maximizable: false,
+    //   modal: true,
+    //   show: false,
+    //   parent
+    // })
 
-    const remote = window.require('@electron/remote')
-    const parent = remote.getCurrentWindow()
-    const win = new remote.BrowserWindow({
-      autoHideMenuBar: true,
-      minimizable: false,
-      maximizable: false,
-      modal: true,
-      show: false,
-      parent
-    })
-
-    win.loadURL(url)
-    win.webContents.on('did-finish-load', () => win.show())
-    win.setMenu(null)
+    // win.loadURL(url)
+    // win.webContents.on('did-finish-load', () => win.show())
+    // win.setMenu(null)
   }
 
   static showOpenFileDialog (filters: FileFilter[]) {
-    if (!window.require) return
+    // const defaultPath = path.resolve(app.getPath('desktop'))
 
-    const { dialog, app } = window.require('@electron/remote')
-    const defaultPath = path.resolve(app.getPath('desktop'))
-
-    return dialog.showOpenDialogSync({ defaultPath, filters }) || []
+    // return dialog.showOpenDialogSync({ defaultPath, filters }) || []
+    return [] as string[]
   }
 
   static showSaveFileDialog (filters: FileFilter[], fileName: string) {
-    if (!window.require) return
+    // const defaultPath = path.resolve(app.getPath('desktop'), fileName)
 
-    const { dialog, app } = window.require('@electron/remote')
-    const defaultPath = path.resolve(app.getPath('desktop'), fileName)
-
-    return dialog.showSaveDialogSync({ defaultPath, filters })
+    // return dialog.showSaveDialogSync({ defaultPath, filters })
+    return ''
   }
 
   /**
@@ -127,18 +126,13 @@ class RemoteService {
     title?: string
     buttons?: string[]
   }) {
-    if (!window.require) return buttons.length - 1
-
-    const remote = window.require('@electron/remote')
-
-    return remote
-      .dialog
-      .showMessageBoxSync(remote.getCurrentWindow(), {
-        type,
-        buttons,
-        title,
-        message
-      })
+    return 0
+    // return dialog.showMessageBoxSync(getCurrentWindow(), {
+    //     type,
+    //     buttons,
+    //     title,
+    //     message
+    //   })
   }
 
   // TODO: need to do garbage collection (need 'off' events for this, ClockService, OscillationService, etc.)
@@ -167,27 +161,23 @@ class RemoteService {
    * @emits close when the app has tried to quit but is not ready to
    */
   static assignQuitter () {
-    if (!window.require) return
+    // getCurrentWindow().on('close', (e) => {
+    //   console.log('E: ', e)
 
-    const remote = window.require('@electron/remote')
-
-    remote.getCurrentWindow().on('close', (e) => {
-      console.log('E: ', e)
-
-      if (!this.canCloseWindow) {
-        this.emitter.emit('close')
-      } else {
-        remote.app.quit()
-      }
-    })
+    //   if (!this.canCloseWindow) {
+    //     this.emitter.emit('close')
+    //   } else {
+    //     app.quit()
+    //   }
+    // })
   }
 
   /**
    * Quits the application.
    */
   static quit () {
-    this.canCloseWindow = true
-    window.close()
+    // this.canCloseWindow = true
+    // window.close()
   }
 }
 

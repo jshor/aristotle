@@ -2,6 +2,8 @@
   "name": "@aristotle/app",
   "version": "0.1.0",
   "private": true,
+  "author": "Josh Shor <jpshor@gmail.com>",
+  "description": "Digital logic simulator for Windows, Mac, and Linux.",
   "scripts": {
     "build": "vue-cli-service build --mode production",
     "lint": "vue-cli-service lint",

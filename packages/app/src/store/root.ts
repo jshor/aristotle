@@ -2,7 +2,6 @@
 import { defineStore, StoreDefinition } from 'pinia'
 import { v4 as uuid } from 'uuid'
 import DocumentState from './DocumentState'
-import RemoteService from '@/services/RemoteService'
 import basic from '../containers/fixtures/basic.json'
 import flipFlop from '../containers/fixtures/flipflop.json'
 import integratedCircuit from '../containers/fixtures/ic.json'
@@ -23,6 +22,7 @@ export type RootStore = {
   }
   clipboard: string | null
   activeDocumentId: string | null
+  canExit: boolean
 }
 
 export const useRootStore = defineStore({
@@ -30,7 +30,8 @@ export const useRootStore = defineStore({
   state: (): RootStore => ({
     documents: {},
     clipboard: null,
-    activeDocumentId: null
+    activeDocumentId: null,
+    canExit: false
   }),
   getters: {
     hasOpenDocuments (state) {
@@ -54,13 +55,6 @@ export const useRootStore = defineStore({
     },
     newDocument () {
       console.log('will create new doc')
-    },
-    async closeApplication () {
-      const canClose = await this.closeAll()
-
-      if (canClose) {
-        RemoteService.quit()
-      }
     },
     async closeAll (): Promise<boolean> {
       if (this.activeDocumentId) {
@@ -86,7 +80,7 @@ export const useRootStore = defineStore({
       this.activateDocument(id)
 
       if (store.isDirty) {
-        const dialogResult = RemoteService.showMessageBox({
+        const dialogResult = window.api.showMessageBox({
           message: `Save changes to ${document.fileName}?`,
           title: 'Confirm',
           buttons: ['Yes', 'No', 'Cancel']
@@ -121,7 +115,7 @@ export const useRootStore = defineStore({
         if (!this.activeDocument.filePath || setFileName) {
           // if no file name is defined yet, ask the user for the location to save it
           const fileName = this.activeDocument.fileName || `${this.activeDocument.fileName}.alfx`
-          const filePath = RemoteService.showSaveFileDialog([
+          const filePath = window.api.showSaveFileDialog([
             {
               name: 'Aristotle Logic Circuit (*.alfx)',
               extensions: ['alfx']
@@ -151,7 +145,7 @@ export const useRootStore = defineStore({
 
         return true
       } catch (error) {
-        RemoteService.showMessageBox({
+        window.api.showMessageBox({
           message: 'An error occurred while trying to save the file.',
           title: 'Error',
           type: 'error'
@@ -161,7 +155,7 @@ export const useRootStore = defineStore({
       }
     },
     async selectDocument () {
-      const files = RemoteService.showOpenFileDialog([
+      const files = window.api.showOpenFileDialog([
         {
           name: 'Aristotle Logic Circuit (*.alfx)',
           extensions: ['alfx']
@@ -176,7 +170,8 @@ export const useRootStore = defineStore({
             this.openDocument(files[i], content, uuid())
           }
         } catch (error) {
-          RemoteService.showMessageBox({
+          console.log('ERR', error)
+          window.api.showMessageBox({
             message: 'An error occurred while trying to read the file.',
             title: 'Error',
             type: 'error'

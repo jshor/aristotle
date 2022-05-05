@@ -1,7 +1,8 @@
+import { MenuItemConstructorOptions } from 'electron/main'
 import { Store } from 'pinia'
 import DocumentState from '@/store/DocumentState'
 
-export default function grid (store: Store<string, DocumentState, any>): MenuEntry[] {
+export default function grid (store: Store<string, DocumentState, any>): MenuItemConstructorOptions[] {
   return [
     {
       label: '&Grid',
