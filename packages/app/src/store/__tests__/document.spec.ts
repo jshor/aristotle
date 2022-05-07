@@ -446,18 +446,12 @@ describe('actions', () => {
     })
 
     beforeEach(() => {
-      stubAll(store, ['commitCachedState'])
-
       store.$reset()
       store.$patch({
         items: { item1 },
         ports: { port1 }
       })
       store.setItemPosition({ id: 'item1', position })
-    })
-
-    it('should commit the cached state', () => {
-      expect(store.commitCachedState).toHaveBeenCalled()
     })
 
     it('should update the item\'s position to the new one provided', () => {
@@ -1094,7 +1088,11 @@ describe('actions', () => {
           store.setConnectionPreview(portId)
 
           expect(store.connect).toHaveBeenCalledTimes(1)
-          expect(store.connect).toHaveBeenCalledWith({ source: activePortId, target: portId, isPreview: true })
+          expect(store.connect).toHaveBeenCalledWith({
+            source: activePortId,
+            target: portId,
+            id: expect.any(String)
+          })
         })
       })
 
@@ -1111,7 +1109,11 @@ describe('actions', () => {
           store.setConnectionPreview(portId)
 
           expect(store.connect).toHaveBeenCalledTimes(1)
-          expect(store.connect).toHaveBeenCalledWith({ source: portId, target: activePortId, isPreview: true })
+          expect(store.connect).toHaveBeenCalledWith({
+            source: portId,
+            target: activePortId,
+            id: expect.any(String)
+          })
         })
       })
     })
@@ -1168,22 +1170,40 @@ describe('actions', () => {
     const store = createDocumentStore('document')()
 
     describe('when there is a connection preview set', () => {
+      const source = createPort('source-id', 'item-id', PortType.Output)
+      const target = createPort('target-id', 'item-id', PortType.Input)
       const connection = createConnection('connection', 'source-id', 'target-id')
 
       beforeEach(() => {
         stubAll(store, [
-          'commitCachedState'
+          'connect',
+          'disconnect',
+          'commitState'
         ])
 
         store.$patch({
           connectionPreviewId: connection.id,
-          connections: { connection }
+          connections: { connection },
+          ports: {
+            [source.id]: source,
+            [target.id]: target
+          }
         })
         store.commitPreviewedConnection()
       })
 
       it('should commit the cached state', () => {
-        expect(store.commitCachedState).toHaveBeenCalledTimes(1)
+        expect(store.commitState).toHaveBeenCalledTimes(1)
+      })
+
+      it('should disconnect the existing connection', () => {
+        expect(store.disconnect).toHaveBeenCalledTimes(1)
+        expect(store.disconnect).toHaveBeenCalledWith({ source: source.id, target: target.id })
+      })
+
+      it('should re-connect the connection without a preview ID set', () => {
+        expect(store.connect).toHaveBeenCalledTimes(1)
+        expect(store.connect).toHaveBeenCalledWith({ source: source.id, target: target.id })
       })
 
       it('should clear the connection preview id', () => {
@@ -1214,7 +1234,7 @@ describe('actions', () => {
       })
 
       jest
-        .spyOn(console, 'log')
+        .spyOn(window.api, 'beep')
         .mockImplementation(jest.fn())
 
       stubAll(store, [
@@ -1800,17 +1820,11 @@ describe('actions', () => {
       })
 
       describe('when any connectable port is discovered', () => {
-        beforeEach(() => {
+        it('should clear the list of connectable port IDs', () => {
           patch([newPortId])
 
           store.connectFreeport({ sourceId, portId })
-        })
 
-        it('should commit the undoable state', () => {
-          expect(store.commitState).toHaveBeenCalled()
-        })
-
-        it('should clear the list of connectable port IDs', () => {
           expect(store.connectablePortIds).toEqual([])
         })
       })
@@ -2316,10 +2330,7 @@ describe('actions', () => {
     })
 
     it('should commit addIntegratedCircuit for each integrated circuit item added', () => {
-      expect(store.addIntegratedCircuit).toHaveBeenCalledWith({
-        integratedCircuitItem: addedIc,
-        integratedCircuitPorts: { addedPort1, addedPort2 }
-      })
+      expect(store.addIntegratedCircuit).toHaveBeenCalledWith(addedIc)
     })
 
     it('should commit addNewItem for each non-IC item added', () => {
@@ -2511,13 +2522,12 @@ describe('actions', () => {
     })
 
     describe('when the item is an integrated circuit', () => {
-      let state: DocumentState
-
       const port1 = createPort('port1', 'icItem', PortType.Input)
       const port2 = createPort('port2', 'icItem', PortType.Output)
       const icItem = createItem('icItem', ItemType.IntegratedCircuit, {
         integratedCircuit: {
           items: {},
+          portIds: ['port1'],
           ports: { port1, port2 },
           connections: {}
         }
@@ -2525,17 +2535,16 @@ describe('actions', () => {
 
       beforeEach(() => {
         jest
-          .spyOn(store.simulation, 'addNode')
+          .spyOn(store.simulation, 'addIntegratedCircuit')
           .mockImplementation(jest.fn())
 
         store.addIntegratedCircuit(icItem)
       })
 
-      it('should add each port to the state', () => {
+      xit('should add each port that is visible to the user to the state', () => {
         expect(store.ports).toHaveProperty('port1')
-        expect(store.ports).toHaveProperty('port2')
+        expect(store.ports).not.toHaveProperty('port2')
         expect(store.ports.port1).toEqual(port1)
-        expect(store.ports.port2).toEqual(port2)
       })
 
       it('should add the integrated circuit item to the state', () => {
@@ -2544,8 +2553,8 @@ describe('actions', () => {
       })
 
       it('should install the integrated circuit onto the active circuit', () => {
-        expect(store.simulation.addNode).toHaveBeenCalledTimes(1)
-        expect(store.simulation.addNode).toHaveBeenCalledWith(icItem, { port1, port2 })
+        expect(store.simulation.addIntegratedCircuit).toHaveBeenCalledTimes(1)
+        expect(store.simulation.addIntegratedCircuit).toHaveBeenCalledWith(icItem)
       })
     })
   })
@@ -2577,24 +2586,26 @@ describe('actions', () => {
         jest
           .spyOn(store.simulation, 'removeNode')
           .mockImplementation(jest.fn())
+        jest
+          .spyOn(store, 'removePort')
+          .mockImplementation(jest.fn())
 
         store.removeElement('icItem')
       })
 
       it('should remove each port associated to the IC', () => {
-        expect(store.ports).not.toHaveProperty('port1')
-        expect(store.ports).not.toHaveProperty('port2')
+        expect(store.removePort).toHaveBeenCalledTimes(2)
+        expect(store.removePort).toHaveBeenCalledWith('port1')
+        expect(store.removePort).toHaveBeenCalledWith('port2')
       })
 
       it('should remove each embedded IC item from the circuit', () => {
-        expect(store.simulation.removeNode).toHaveBeenCalledTimes(2)
-        expect(store.simulation.removeNode).toHaveBeenCalledWith(['node1port'])
-        expect(store.simulation.removeNode).toHaveBeenCalledWith(['node2port'])
+        expect(store.simulation.removeNode).toHaveBeenCalledTimes(1)
+        expect(store.simulation.removeNode).toHaveBeenCalledWith(icItem)
       })
 
       it('should not remove ports that are not associated to the IC', () => {
-        expect(store.ports).toHaveProperty('port3')
-        expect(store.ports.port3).toEqual(port3)
+        expect(store.removePort).not.toHaveBeenCalledWith('port3')
       })
 
       it('should remove the IC item', () => {
@@ -2617,18 +2628,24 @@ describe('actions', () => {
         jest
           .spyOn(store.simulation, 'removeNode')
           .mockImplementation(jest.fn())
+        jest
+          .spyOn(store, 'removePort')
+          .mockImplementation(jest.fn())
+
 
         store.removeElement('item1')
       })
 
+
       it('should remove each port associated to the IC', () => {
-        expect(store.ports).not.toHaveProperty('port1')
-        expect(store.ports).not.toHaveProperty('port2')
+        expect(store.removePort).toHaveBeenCalledTimes(2)
+        expect(store.removePort).toHaveBeenCalledWith('port1')
+        expect(store.removePort).toHaveBeenCalledWith('port2')
       })
 
       it('should remove the node from the circuit', () => {
         expect(store.simulation.removeNode).toHaveBeenCalledTimes(1)
-        expect(store.simulation.removeNode).toHaveBeenCalledWith(['port1', 'port2'])
+        expect(store.simulation.removeNode).toHaveBeenCalledWith(item1)
       })
 
       it('should not remove ports that are not associated to the item', () => {
@@ -2637,7 +2654,7 @@ describe('actions', () => {
       })
 
       it('should remove the item', () => {
-        expect(store.items).not.toHaveProperty('icItem')
+        expect(store.items).not.toHaveProperty('item1')
       })
     })
   })
@@ -2940,11 +2957,11 @@ describe('actions', () => {
       expect(store.simulation.addConnection).toHaveBeenCalledWith(source, target)
     })
 
-    it('should set the connection preview ID if isPreview is true', () => {
-      store.connect({ source, target, isPreview: true })
+    // it('should set the connection preview ID if isPreview is true', () => {
+    //   store.connect({ source, target, isPreview: true })
 
-      expect(store.connectionPreviewId).toEqual(Object.keys(store.connections)[0])
-    })
+    //   expect(store.connectionPreviewId).toEqual(Object.keys(store.connections)[0])
+    // })
 
     it('should add the connected port ids to each port\'s list', () => {
       store.connect({ source, target })

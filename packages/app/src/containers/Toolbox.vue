@@ -40,7 +40,7 @@
       :left-port-count="2"
       :right-port-count="1"
       :zoom="zoom"
-      :label="type"
+      :label="type.toUpperCase()"
       @drop="position => onDropLogicGate(type, position)"
     >
       <logic-gate

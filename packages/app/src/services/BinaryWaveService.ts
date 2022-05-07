@@ -1,4 +1,4 @@
-import { LogicValue } from '@aristotle/logic-circuit'
+import { LogicValue } from '@aristotle/circuit'
 
 /**
  * @class BinaryWaveService
@@ -52,8 +52,8 @@ export default class BinaryWaveService implements Pulse {
       this.lastY = 0
     }
 
-    this.width++
     this.addSegment(segment)
+    this.updateWidth()
   }
 
   /**
@@ -85,14 +85,13 @@ export default class BinaryWaveService implements Pulse {
 
     if (!previous && segment.x > 0) {
       this.segments.push({ x: 0, y: segment.y })
-      this.width++
     } else if (previous && previous.x !== segment.x && previous.y !== segment.y) {
       // if a previous segment exists, and both its x and y values mismatch, then remove it
       this.segments.pop()
-      this.width--
     }
 
     this.segments.push(segment)
+    this.updateWidth()
   }
 
   /**
@@ -103,8 +102,8 @@ export default class BinaryWaveService implements Pulse {
   drawPulseChange = (signal: number) => {
     const { x } = this.segments[this.segments.length - 1]
     const y = signal === LogicValue.TRUE ? 0 : 1
-    this.width++
 
+    this.updateWidth()
     this.addSegment({ x, y })
   }
 
@@ -120,7 +119,7 @@ export default class BinaryWaveService implements Pulse {
 
 
     if (pos) {
-      this.width++
+      this.updateWidth()
       this.addSegment({
         x: pos.x + 1,
         y: pos.y
@@ -140,23 +139,35 @@ export default class BinaryWaveService implements Pulse {
     }
 
     const widthToTruncate = this.width - widthToKeep
-    let foundLastSegment = false
 
-    this.segments = this.segments
-      .reverse()
-      .map(({ x, y }) => {
-        x -= widthToTruncate
+    let deltaX = 0
 
-        if (x <= 0 && !foundLastSegment) {
-          foundLastSegment = true
-          x = 0
-        }
+    for (let i = 0; i < this.segments.length; i++) {
+      const { x, y } = this.segments[i]
 
-        return { x, y }
-      })
-      .filter(({ x }) => x >= 0)
-      .reverse()
+      if (x > widthToTruncate) {
+        deltaX = x - widthToTruncate
 
-    this.width = widthToKeep
+        this.segments.splice(0, i)
+        this.segments.unshift({ x: 0, y })
+
+        break
+      }
+    }
+
+    for (let i = 1; i < this.segments.length; i++) {
+      const { x, y } = this.segments[i]
+
+      this.segments[i] = {
+        x: x - widthToTruncate,
+        y
+      }
+    }
+
+    this.updateWidth()
+  }
+
+  updateWidth = () => {
+    this.width = this.segments.slice(-1)[0]?.x || 0
   }
 }

@@ -3,6 +3,12 @@
     v-if="hasOpenDocuments"
     class="app"
   >
+    <div
+      class="app__dropzone"
+      :class="{
+        'app__dropzone--active': isDropping
+      }"
+    />
     <div class="app__toolbar">
       <toolbar
         v-if="activeDocumentId && activeDocument"
@@ -61,14 +67,20 @@
   </div>
 
   <div v-else>
-    no documents open
+    <div
+      class="app__dropzone"
+      :class="{
+        'app__dropzone--active': isDropping
+      }"
+    />
+    no documents open {{ isDropping }}
   </div>
 </template>
 
 <script lang="ts">
 /// <reference path="./types/index.d.ts" />
 import { storeToRefs } from 'pinia'
-import { defineComponent, onBeforeUnmount, onMounted, watchEffect } from 'vue'
+import { defineComponent, onBeforeUnmount, onMounted, watchEffect, ref } from 'vue'
 import Document from './containers/Document.vue'
 import Toolbar from './containers/Toolbar.vue'
 import Toolbox from './containers/Toolbox.vue'
@@ -100,6 +112,8 @@ export default defineComponent({
       hasOpenDocuments
     } = storeToRefs(store)
 
+    let isDropping = ref(false)
+
     if (!hasOpenDocuments.value) {
       store.openTestDocuments()
     }
@@ -114,16 +128,51 @@ export default defineComponent({
     })
 
     window.api.onBeforeClose(store.closeAll)
+    window.api.onOpenFile(store.openDocumentFromPath)
 
     onMounted(() => {
       document.addEventListener('keydown', onKeyDown)
-      // RemoteService.on('close', store.closeApplication)
+      document.addEventListener('dragover', onDragOver)
+      document.addEventListener('dragleave', onDragLeave)
+      document.addEventListener('drop', onDrop)
     })
 
     onBeforeUnmount(() => {
       document.removeEventListener('keydown', onKeyDown)
-      // RemoteService.off('close', store.closeApplication) // TODO
+      document.removeEventListener('dragover', onDragOver)
+      document.removeEventListener('dragleave', onDragLeave)
+      document.removeEventListener('drop', onDrop)
     })
+
+    function onDragOver ($event: DragEvent) {
+      $event.stopPropagation()
+      $event.preventDefault()
+
+      if ($event.dataTransfer) {
+        $event.dataTransfer.dropEffect = 'copy'
+      }
+
+      isDropping.value = true
+    }
+
+    async function onDrop ($event: DragEvent) {
+      $event.stopPropagation()
+      $event.preventDefault()
+
+      const files = $event.dataTransfer?.files
+
+      if (files) {
+        for (let i = 0; i < files.length; i++) {
+          await store.openDocumentFromPath(files[i].path)
+        }
+      }
+
+      isDropping.value = false
+    }
+
+    function onDragLeave () {
+      isDropping.value = false
+    }
 
     function onKeyDown ($event: KeyboardEvent) {
       if ($event.ctrlKey && $event.key.toUpperCase() === 'R') {
@@ -139,6 +188,7 @@ export default defineComponent({
       activeDocumentId,
       documents,
       hasOpenDocuments,
+      isDropping,
       activateDocument: store.activateDocument,
       closeDocument: store.closeDocument,
       switchDocument: store.switchDocument,
@@ -168,6 +218,23 @@ $status-bar-height: 25px;
   max-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  &__dropzone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: $color-bg-primary;
+    opacity: 0;
+    z-index: 10;
+    transition: 0.25s opacity;
+    pointer-events: none;
+
+    &--active {
+      opacity: 0.5;
+    }
+  }
 
   &__toolbar {
     width: 100%;

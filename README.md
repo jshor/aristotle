@@ -8,9 +8,9 @@ The digital logic simulator.
 # 1. Clone the repository.
 git clone https://github.com/jshor/aristotle
 
-# 2. Build the circuit library (first time only)
-yarn build:circuit
+# 2. Install dependencies
+yarn
 
 # 3. Run the application
-yarn start:app
+yarn start
 ```

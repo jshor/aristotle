@@ -1,4 +1,4 @@
-import { CircuitNode, Nor, InputNode, OutputNode, Buffer } from '@aristotle/logic-circuit'
+import { CircuitNode, Nor, InputNode, OutputNode, Buffer } from '@aristotle/circuit'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 

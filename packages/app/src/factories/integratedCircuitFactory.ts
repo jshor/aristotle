@@ -15,7 +15,7 @@ import DocumentState from '@/store/DocumentState'
  * @param stateConnections - connections between items to embed
  */
 export default function integratedCircuitFactory (state: DocumentState) {
-  const { ports, items, connections, groups } = cloneDeep(state)
+  const { ports, items, connections, groups } = cloneDeep(state) as DocumentState
   const integratedCircuitItem = itemFactory(uuid(), ItemType.IntegratedCircuit, 'Flip flop', 400, 400)
 
   Object

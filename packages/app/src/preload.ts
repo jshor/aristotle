@@ -42,6 +42,11 @@ const api = {
       }
     })
   },
+  onOpenFile (fn: (filePath: string) => void) {
+    ipcRenderer.on('open-file', (e, filePath) => {
+      fn(filePath as any)
+    })
+  },
   quit () {
     ipcRenderer.send('quit')
   },

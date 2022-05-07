@@ -41,8 +41,6 @@
         :is-selected="baseItem.isSelected"
         :flash="store.isDebugging && store.isCircuitEvaluated"
         :z-index="baseItem.zIndex + 1000"
-        @select="selectItem(baseItem.id)"
-        @deselect="deselectItem(baseItem.id)"
         @contextmenu="onContextMenu"
         @open-integrated-circuit="$emit('openIntegratedCircuit', baseItem)"
       />
@@ -61,8 +59,6 @@
         :is-preview="store.connectionPreviewId === baseItem.id"
         :flash="store.isDebugging && store.isCircuitEvaluated"
         :z-index="baseItem.zIndex"
-        @select="selectItem(baseItem.id)"
-        @deselect="deselectItem(baseItem.id)"
         @contextmenu="onContextMenu"
       />
     </template>
@@ -110,7 +106,7 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, { emit }) {
+  setup (props) {
     const store = props.store()
     const editor = ref<ComponentPublicInstance<HTMLElement>>()
 
@@ -151,8 +147,6 @@ export default defineComponent({
       switch ($event.key) {
         case 'Escape':
           return store.deselectAll()
-        case 'Delete':
-          return store.selectAll()
         case 'a':
           return $event.ctrlKey && store.selectAll()
         default:
@@ -201,24 +195,6 @@ export default defineComponent({
       keys = {}
     }
 
-    /**
-     * Selects an item having the given id (`Item` or `Connection`).
-     * If the shift key is not held down, then any existing selection is cleared.
-     */
-    function selectItem (id: string) {
-      if (!keys.Control) { // TODO: command too (for mac?)
-        store.deselectAll()
-      }
-
-      store.setSelectionState({ id, value: true })
-    }
-
-    function deselectItem (id: string) {
-      if (!keys.Control) { // TODO: command too (for mac?)
-        store.setSelectionState({ id, value: false })
-      }
-    }
-
     function onSizeChanged ([ target ]: ResizeObserverEntry[]) {
       store.setViewerSize(target.target.getBoundingClientRect())
     }
@@ -239,8 +215,6 @@ export default defineComponent({
       onKeyUp,
       onContextMenu,
       clearKeys,
-      selectItem,
-      deselectItem,
       gridSize: 20
     }
   }

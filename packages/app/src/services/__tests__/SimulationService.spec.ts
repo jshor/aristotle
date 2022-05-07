@@ -3,7 +3,7 @@ import ItemSubtype from '@/types/enums/ItemSubtype'
 import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'
 import circuitNodeMapper from '@/utils/circuitNodeMapper'
-import { CircuitNode } from '@aristotle/logic-circuit'
+import { CircuitNode } from '@aristotle/circuit'
 import BinaryWaveService from '../BinaryWaveService'
 import ClockService from '../ClockService'
 import SimulationService from '../SimulationService'
@@ -263,8 +263,7 @@ describe('Simulation Service', () => {
     const port2 = createPort('port2', 'ic', PortType.Input)
     const item = createItem('item', ItemType.OutputNode)
     const connection = createConnection('connection', 'port1', 'port2')
-    const embeddedPorts = { port1 }
-    const ports = { port2 }
+    const ports = { port1, port2 }
     const ic = createItem('ic', ItemType.IntegratedCircuit, {
       integratedCircuit: {
         ports,
@@ -287,7 +286,7 @@ describe('Simulation Service', () => {
 
     describe('when the item is a valid integrated circuit', () => {
       beforeEach(() => {
-        service.addIntegratedCircuit(ic, embeddedPorts)
+        service.addIntegratedCircuit(ic)
       })
 
       it('should add the connections', () => {
@@ -295,14 +294,14 @@ describe('Simulation Service', () => {
         expect(service.addConnection).toHaveBeenCalledWith(connection.source, connection.target)
       })
 
-      it('should add the items with both embedded and IC-specified ports passed in', () => {
+      it('should add the embedded items with all of their ports passed in', () => {
         expect(service.addNode).toHaveBeenCalledTimes(1)
-        expect(service.addNode).toHaveBeenCalledWith(item, { ...ports, ...embeddedPorts }, true)
+        expect(service.addNode).toHaveBeenCalledWith(item, ports, true)
       })
     })
 
     it('should not add nodes or connections when no integrated circuit specification is provided', () => {
-      service.addIntegratedCircuit(item, embeddedPorts)
+      service.addIntegratedCircuit(item)
 
       expect(service.addNode).not.toHaveBeenCalled()
       expect(service.addConnection).not.toHaveBeenCalled()
@@ -357,7 +356,7 @@ describe('Simulation Service', () => {
       service.addNode(item, ports)
 
       expect(service.addIntegratedCircuit).toHaveBeenCalledTimes(1)
-      expect(service.addIntegratedCircuit).toHaveBeenCalledWith(item, ports)
+      expect(service.addIntegratedCircuit).toHaveBeenCalledWith(item)
     })
 
     it('should add all input and output ports', () => {
@@ -389,15 +388,6 @@ describe('Simulation Service', () => {
 
       expect(service.circuit.addNode).toHaveBeenCalledTimes(1)
       expect(service.circuit.addNode).toHaveBeenCalledWith(circuitNode)
-    })
-
-    it('should monitor the node', () => {
-      const item = createItem('item-id', ItemType.InputNode, { portIds: [inputPort.id, outputPort.id] })
-
-      service.addNode(item, ports)
-
-      expect(service.monitorNode).toHaveBeenCalledTimes(1)
-      expect(service.monitorNode).toHaveBeenCalledWith(item, ports)
     })
 
     it('should not monitor the node if it is forced to continue during execution', () => {

@@ -80,7 +80,7 @@ export default class OscillationService {
 
         displays[name] = {
           points: points.join(' '),
-          width: wave.segments.slice(-1)[0].x,
+          width: wave.width,
           hue: wave.hue
         }
       }
@@ -106,19 +106,18 @@ export default class OscillationService {
    */
   broadcast = () => {
     // set the max history to be twice the size of the user's screen, then cut half of it when it is exceeded
+    const screenWidth = window.screen.width
     const widthOfOneSecond = 1000 / this.refreshRate
-    const maxHistorySeconds = (window.screen.width * 2) / widthOfOneSecond
+    const maxHistorySeconds = screenWidth / widthOfOneSecond
 
-    if ((this.timeMsElapsed / 1000) - this.timeMsOffset >= maxHistorySeconds) {
-      const remainingSeconds = Math.max(maxHistorySeconds / 2, window.innerWidth / widthOfOneSecond)
-
-      this.timeMsOffset += remainingSeconds
+    if (this.timeMsElapsed >= this.timeMsOffset + ((maxHistorySeconds / 2) * 1000)) {
+      this.timeMsOffset = this.timeMsElapsed
 
       Object
         .values(this.waves)
         .forEach((wave: Pulse) => {
           if (wave instanceof BinaryWaveService) {
-            wave.truncateSegments(remainingSeconds * widthOfOneSecond)
+            wave.truncateSegments(screenWidth)
           }
         })
     }

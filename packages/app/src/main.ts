@@ -17,6 +17,7 @@ if (!window.api) {
     copy () {},
     paste () { return '' },
     onBeforeClose () {},
+    onOpenFile () {},
     openFile () { return '' },
     saveFile () {}
   }

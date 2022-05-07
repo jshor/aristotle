@@ -11,7 +11,7 @@
     :flash="flash"
     :label="'TODO'"
     :tabindex="0"
-    @mousedown="onMouseDown"
+    @mousedown.stop="onMouseDown"
     @focus="onFocus"
     ref="root"
     data-test="wire"
@@ -116,7 +116,7 @@ export default defineComponent({
       }
     }
   },
-  setup (props, { emit }) {
+  setup (props) {
     const store = props.store()
     const root = ref<ComponentPublicInstance<HTMLElement>>()
 
@@ -188,7 +188,13 @@ export default defineComponent({
         y: $event.clientY
       }
 
-      emit('select')
+      if (props.isSelected) {
+        store.deselectItem(props.id)
+      } else {
+        store.selectItem(props.id, $event.ctrlKey)
+      }
+
+      focus()
     }
 
     /**
@@ -242,11 +248,10 @@ export default defineComponent({
      *
      * @emits select if the mouse is down
      */
-    function onMouseUp () {
+    function onMouseUp ($event: MouseEvent) {
       if (!isMouseDown) return
 
       isMouseDown = false
-      emit('select')
     }
 
     /**
@@ -255,9 +260,11 @@ export default defineComponent({
      * @emits select if not already selected
      */
     function onFocus () {
-      if (!props.isSelected) {
-        emit('select')
-      }
+      setTimeout(() => {
+        if (!props.isSelected) {
+          store.selectItem(props.id)
+        }
+      })
     }
 
     return {

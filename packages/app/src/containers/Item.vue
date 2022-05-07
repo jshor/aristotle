@@ -20,7 +20,7 @@
     @focus="onFocus"
     @blur="onBlur"
     @keydown.esc="onEscapeKey"
-    @mousedown.stop="focus"
+    @mousedown.stop="onMouseDown"
     ref="selectable"
     data-test="selectable"
   >
@@ -246,7 +246,7 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, { emit }) {
+  setup (props) {
     const store = props.store()
     const selectable = ref<ComponentPublicInstance<HTMLElement>>()
     const forceDragging = ref(false)
@@ -329,6 +329,19 @@ export default defineComponent({
     }
 
     /**
+     * Inverts the selection state the item.
+     */
+    function onMouseDown ($event: MouseEvent) {
+      if (props.isSelected) {
+        store.deselectItem(props.id)
+      } else {
+        store.selectItem(props.id, $event.ctrlKey)
+      }
+
+      focus()
+    }
+
+    /**
      * Escape keydown event handler.
      * This will blur the element if neither it nor any of its children are focused.
      *
@@ -354,13 +367,13 @@ export default defineComponent({
 
     /**
      * Item focus event handler.
-     *
-     * @emits select if item not already selected
      */
     function onFocus () {
-      if (!props.isSelected) {
-        emit('select')
-      }
+      setTimeout(() => {
+        if (!props.isSelected) {
+          store.selectItem(props.id)
+        }
+      })
 
       hasFocus = true
     }
@@ -441,6 +454,7 @@ export default defineComponent({
       onDragStart,
       onDrag,
       onDragEnd,
+      onMouseDown,
       onEscapeKey,
       onBlur,
       onFocus,

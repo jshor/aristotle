@@ -90,7 +90,7 @@ describe('Oscillation Service', () => {
       expect(oscillogram).toHaveProperty('wave')
       expect(oscillogram.wave).toEqual(expect.objectContaining({
         points: '0,0 10,20',
-        width: 10,
+        width: 0,
         hue: expect.any(Number)
       }))
       expect(oscillogram).not.toHaveProperty('clock')
@@ -179,7 +179,7 @@ describe('Oscillation Service', () => {
       service.broadcast()
 
       expect(wave.truncateSegments).toHaveBeenCalledTimes(1)
-      expect(wave.truncateSegments).toHaveBeenCalledWith(window.innerWidth)
+      expect(wave.truncateSegments).toHaveBeenCalledWith(0)
     })
   })
 
