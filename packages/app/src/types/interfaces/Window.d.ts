@@ -18,6 +18,7 @@ declare global {
       copy: (data: string) => void
       paste: () => string
       onBeforeClose (fn: () => Promise<boolean>)
+      onOpenFile (fn: (filePath: string) => void)
       openFile: (filePath: string) => string
       saveFile: (filePath: string, data: Buffer) => void
     }

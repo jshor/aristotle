@@ -4,8 +4,8 @@ const title = 'Aristotle'
 
 module.exports = {
   lintOnSave: false,
-  outputDir: path.resolve('../../build/alpha'),
-  publicPath: '/alpha',
+  // outputDir: path.resolve('../../build/alpha'),
+  // publicPath: '/alpha',
   productionSourceMap: false,
   pages: {
     index: {
@@ -22,11 +22,19 @@ module.exports = {
       filename: 'splash.html'
     }
   },
+  devServer: {
+    progress: false
+  },
   pluginOptions: {
     electronBuilder: {
+      electronVersion: '18.2.0',
       chainWebpackRendererProcess: config => {
         config.target('web');
       },
+      extraFiles: [
+        'public',
+        'build'
+      ],
       preload: 'src/preload',
       // list all node_modules paths so that electron builder can find them in this monorepo
       nodeModulesPath: ['../../node_modules', './node_modules'],
@@ -43,7 +51,16 @@ module.exports = {
           oneClick: false,
           perMachine: true,
           allowToChangeInstallationDirectory: true
-        }
+        },
+        fileAssociations: [
+          {
+            ext: 'alfx',
+            description: 'Aristotle Logic File',
+            mimeType: 'application/alfx',
+            role: 'Editor',
+            icon: 'circuit-icon.ico'
+          }
+        ]
       }
     }
   },

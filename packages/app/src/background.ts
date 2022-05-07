@@ -1,7 +1,8 @@
-import { app, protocol, BrowserWindow, ipcMain, Event, App, BrowserWindowConstructorOptions } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, Event, App, BrowserWindowConstructorOptions, dialog } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import * as remote from '@electron/remote/main'
 import path from 'path'
+import fs from 'fs'
 
 remote.initialize()
 
@@ -34,9 +35,7 @@ function createWindow (opts: BrowserWindowConstructorOptions, fileName: string, 
       win.webContents.openDevTools()
     }
   } else {
-    createProtocol('aristotle')
-
-    win.loadURL(`aristotle://./${fileName}.html`)
+    win.loadURL(`app://./${fileName}.html`)
   }
 
   return win
@@ -51,8 +50,9 @@ function createMainWindow () {
     height: 1200,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nativeWindowOpen: true
-    },
+      nativeWindowOpen: true,
+      backgroundThrottling: false
+    }
   }, 'index', true)
 }
 
@@ -71,7 +71,10 @@ async function boot (app: App, mainWindow: BrowserWindow) {
     alwaysOnTop: true,
     transparent: true,
     show: true,
-    visualEffectState: 'followWindow'
+    visualEffectState: 'followWindow',
+    webPreferences: {
+      backgroundThrottling: false
+    }
   }, 'splash')
 
   splashScreen
@@ -88,11 +91,12 @@ async function boot (app: App, mainWindow: BrowserWindow) {
           // once the main window has finished loading, run out the remaining time on the timer
           await timer
 
-          // then destroy the splash screen and show the main window
+          mainWindow.show()
+
+          // destroy the splash screen AFTER showing the main window
+          // https://github.com/electron/electron/issues/27353#issuecomment-834734077
           splashScreen.destroy()
 
-          mainWindow.show()
-          mainWindow.focus()
           mainWindow.on('close', ($event: Event) => {
             // when the main window is about to close, inform the renderer
             // this gives it time to prompt the user to save any unsaved files before exiting
@@ -101,6 +105,14 @@ async function boot (app: App, mainWindow: BrowserWindow) {
               $event.preventDefault()
             }
           })
+
+          const filePath = process.argv.slice(-1)[0]
+
+          if (process.argv.length > 1 && fs.existsSync(filePath) && !!path.extname(filePath)) {
+            mainWindow
+              .webContents
+              .send('open-file', filePath)
+          }
         })
     })
 
@@ -121,21 +133,45 @@ app.on('window-all-closed', () => {
   }
 })
 
-app.on('ready', async () => {
-  const mainWindow = createMainWindow()
+const gotTheLock = app.requestSingleInstanceLock()
 
-  app.whenReady().then(async () => {
-    await boot(app, mainWindow)
+if (!gotTheLock) {
+  app.quit()
+} else {
+  let mainWindow: BrowserWindow
 
-    app.on('activate', () => {
-      // On macOS it's common to re-create a window in the app when the
-      // dock icon is clicked and there are no other windows open.
-      if (BrowserWindow.getAllWindows().length === 0) {
-        boot(app, createMainWindow())
+  app.on('second-instance', (e, argv) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      mainWindow
+        .webContents
+        .send('open-file', argv.slice(-1)[0])
+
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore()
       }
+      mainWindow.focus()
+    }
+  })
+
+  app.on('ready', async () => {
+    createProtocol('app')
+
+    mainWindow = await createMainWindow()
+
+    app.whenReady().then(async () => {
+      await boot(app, mainWindow)
+
+      app.on('activate', () => {
+        // On macOS it's common to re-create a window in the app when the
+        // dock icon is clicked and there are no other windows open.
+        if (BrowserWindow.getAllWindows().length === 0) {
+          boot(app, createMainWindow())
+        }
+      })
     })
   })
-})
+}
 
 if (isDevelopment) {
   if (process.platform === 'win32') {

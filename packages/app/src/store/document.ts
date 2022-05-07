@@ -1,7 +1,7 @@
 // @ts-check
 import { defineStore } from 'pinia'
 import { v4 as uuid } from 'uuid'
-import { LogicValue } from '@aristotle/logic-circuit'
+import { LogicValue } from '@aristotle/circuit'
 
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
@@ -269,7 +269,6 @@ export const createDocumentStore = (id: string) => defineStore({
         const viewportMidpoint = boundaries.getBoundingBoxMidpoint(this.viewport)
 
         documentPosition = fromDocumentToEditorCoordinates(this.canvas, this.viewport, viewportMidpoint, this.zoomLevel)
-        console.log('item.boundingBox: ', documentPosition, this.viewport)
       }
 
       this.commitState()
@@ -329,6 +328,8 @@ export const createDocumentStore = (id: string) => defineStore({
      * Deletes all selected items and connections.
      */
     deleteSelection () {
+      if (!this.hasSelection) return
+
       this.commitState()
 
       const nonFreeportItems = Object
@@ -830,6 +831,19 @@ export const createDocumentStore = (id: string) => defineStore({
         // otherwise, just select this one item
         this.SET_SELECTION_STATE({ id, isSelected })
       }
+    },
+
+    deselectItem (id: string) {
+      this.setSelectionState({ id, value: true })
+    },
+
+    selectItem (id: string, keepSelection: boolean = false) {
+      console.log('KEEP? ', keepSelection)
+      if (!keepSelection) {
+        this.deselectAll()
+      }
+
+      this.setSelectionState({ id, value: true })
     },
 
     /**
@@ -1532,8 +1546,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
         delete this.ports[portId]
         this.simulation.removePort(portId)
-      } else {
-        console.log('CANT DELETE')
       }
     },
 
@@ -1583,19 +1595,16 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param {Item} integratedCircuitItem
      */
     addIntegratedCircuit (integratedCircuitItem: Item) {
-      if (!integratedCircuitItem.integratedCircuit) return
+      const { integratedCircuit } = integratedCircuitItem
 
-      const integratedCircuitPorts: Record<string, Port> = {}
+      if (!integratedCircuit) return
 
       // assign the visible IC ports
       integratedCircuitItem
         .portIds
         .forEach(portId => {
-          if (integratedCircuitItem.integratedCircuit?.ports[portId]) {
-            this.ports[portId] = integratedCircuitItem.integratedCircuit.ports[portId]
-
-            integratedCircuitPorts[portId] = integratedCircuitItem.integratedCircuit.ports[portId]
-            // this.ports[portId].elementId = integratedCircuitItem.id
+          if (integratedCircuit.ports[portId]) {
+            this.ports[portId] = integratedCircuit.ports[portId]
           }
         })
 
@@ -1610,11 +1619,11 @@ export const createDocumentStore = (id: string) => defineStore({
 
       this
         .simulation
-        .addNode(integratedCircuitItem, integratedCircuitPorts)
+        .addIntegratedCircuit(integratedCircuitItem)
     },
 
     /**
-     * Removes an element and all its associated ports and circuit nodes from the this.
+     * Removes an element and all its associated ports and circuit nodes from the state.
      *
      * @param id - ID of the item to remove
      */
@@ -1986,7 +1995,6 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     paste () {
-      console.log('PASTING...')
       try {
         const state = window.api.paste()
         const parsed = JSON.parse(state as string) as {
@@ -1996,7 +2004,13 @@ export const createDocumentStore = (id: string) => defineStore({
           ports: Record<string, Port>,
           pasteCount: number
         }
-        const mapped = idMapper.mapStandardCircuitIds(parsed)
+        const mapped = idMapper.mapStandardCircuitIds(parsed) as {
+          items: Record<string, Item>
+          connections: Record<string, Connection>
+          groups: Record<string, Group>
+          ports: Record<string, Port>,
+          pasteCount: number
+        }
 
         this.commitState()
         this.deselectAll()

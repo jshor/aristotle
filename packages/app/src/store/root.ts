@@ -163,20 +163,24 @@ export const useRootStore = defineStore({
       ])
 
       for (let i = 0; i < files.length; i++) {
-        try {
-          const content = await FileService.open(files[i])
+        await this.openDocumentFromPath(files[i])
+      }
+    },
+    async openDocumentFromPath (filePath: string) {
+      try {
+        // TODO: need to create lock on file while open
+        const content = await FileService.open(filePath)
 
-          if (content) {
-            this.openDocument(files[i], content, uuid())
-          }
-        } catch (error) {
-          console.log('ERR', error)
-          window.api.showMessageBox({
-            message: 'An error occurred while trying to read the file.',
-            title: 'Error',
-            type: 'error'
-          })
+        if (content) {
+          this.openDocument(filePath, content, uuid())
         }
+      } catch (error) {
+        console.log('ERR', error)
+        window.api.showMessageBox({
+          message: `Could not open ${filePath}. The file is not a valid Aristotle circuit.`,
+          title: 'Error',
+          type: 'error'
+        })
       }
     },
     openDocument (filePath: string, content: string, id: string, displayName: string = '') {

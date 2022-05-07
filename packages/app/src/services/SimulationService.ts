@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash'
-import { Circuit, CircuitNode, OutputNode } from '@aristotle/logic-circuit'
+import { Circuit, CircuitNode, OutputNode } from '@aristotle/circuit'
 import { TinyEmitter } from 'tiny-emitter'
 import BinaryWaveService from './BinaryWaveService'
 import ClockService from './ClockService'
@@ -240,15 +240,9 @@ export default class SimulationService {
   /**
    * Adds an integrated circuit to the simulation.
    *
-   * This will add all embedded circuit components to the circuit to be force-evaluated
-   * (i.e., the node will immediately evaluate, even if the debugger is on).
-   *
-   * This will provide the experience of the entire embedded circuit evaluating completely on any debugging step.
-   *
    * @param item - the high-level integrated circuit item
-   * @param embeddedPorts - the high-level ports associated with the item (ones visible to the user)
    */
-  addIntegratedCircuit = (icItem: Item, e: Record<string, Port>) => {
+  addIntegratedCircuit = (icItem: Item) => {
     if (!icItem.integratedCircuit) return
 
     const { items, connections, ports } = icItem.integratedCircuit
@@ -264,8 +258,6 @@ export default class SimulationService {
       .forEach(c => {
         this.addConnection(c.source, c.target)
       })
-
-    // this.monitorNode(icItem, ports)
   }
 
   /**
@@ -279,7 +271,7 @@ export default class SimulationService {
     if (item.portIds.length === 0) return // if there are no ports, then there is nothing to add
 
     if (item.integratedCircuit) {
-      return this.addIntegratedCircuit(item, ports)
+      return this.addIntegratedCircuit(item)
     }
 
     const inputIds = item.portIds.filter(portId => ports[portId].type === PortType.Input)
@@ -296,9 +288,7 @@ export default class SimulationService {
 
     this.circuit.addNode(node)
 
-    if (!forceContinue) {
-      this.monitorNode(item, ports)
-    }
+    if (!forceContinue) this.monitorNode(item, ports)
   }
 
   /**
@@ -424,12 +414,6 @@ export default class SimulationService {
   addConnection = (sourceId: string, targetId: string) => {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
       this.circuit.addConnection(this.nodes[sourceId], this.nodes[targetId], targetId)
-    } else {
-      if (!this.nodes[sourceId]) {
-        console.log('MISSING SOURCE: ', sourceId, ' TRIED TO CONNECT TO ---', targetId)
-      } else {
-        console.log('MISSING TARGET: ', targetId, ' TRIED TO CONNECT TO ---', sourceId)
-      }
     }
   }
 
@@ -442,8 +426,6 @@ export default class SimulationService {
   removeConnection = (sourceId: string, targetId: string) => {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
       this.circuit.removeConnection(this.nodes[sourceId], this.nodes[targetId])
-    } else {
-      console.log('MISSING NODE FOR REMOVING CONNECTION: ', this.nodes[sourceId], this.nodes[targetId], sourceId, targetId)
     }
   }
 

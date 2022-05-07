@@ -33,9 +33,9 @@ export default class ClockService implements Pulse {
    */
   constructor (name: string, interval: number, signal: number) {
     this.name = name
-    this.lastUpdate = 0
     this.signal = signal
     this.interval = interval
+    this.lastUpdate = -interval
   }
 
   /**
@@ -55,7 +55,7 @@ export default class ClockService implements Pulse {
    */
   public update = (elapsed: number): void => {
     if (elapsed >= this.lastUpdate + this.interval) {
-      this.signal = this.signal === 1 ? -1 : 1
+      this.signal = this.signal === -1 ? 1 : -1
       this.lastUpdate = elapsed
       this.emitter.emit('change', this.signal)
     }

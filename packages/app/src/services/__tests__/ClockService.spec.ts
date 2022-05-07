@@ -13,13 +13,14 @@ describe('Clock Service', () => {
   afterEach(() => jest.resetAllMocks())
 
   describe('on update', () => {
-    it('should not emit when a period has not yet elapsed', () => {
+    it('should emit when a period first elapses', () => {
       const spy = jest.fn()
 
       service.on('change', spy)
       service.update(0)
 
-      expect(spy).not.toHaveBeenCalled()
+      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenCalledWith(-1)
     })
 
     it('should emit a change event when the time elapsed has exceeded the interval period', () => {
