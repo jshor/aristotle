@@ -27,18 +27,18 @@ export default defineComponent({
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid $color-secondary;
+  border: 1px solid var(--color-secondary);
   background-color: rgba(67, 67, 67, 0.5);
   cursor: move;
   pointer-events: all;
 
   &--on {
-    background-color: green;
-    box-shadow: 0 0 20px green;
+    background-color: var(--color-on);
+    box-shadow: 0 0 20px var(--color-on);
   }
 
   &--high-z {
-    background-color: darkred;
+    background-color: var(--color-hi-z);
   }
 }
 </style>

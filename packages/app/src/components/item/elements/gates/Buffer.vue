@@ -39,7 +39,7 @@ export default defineComponent({
 
 <style lang="scss">
 svg {
-  // border: 1px solid green;
+  // border: 1px solid var(--color-on);
   position: absolute;
   box-sizing: border-box;
 

@@ -1,14 +1,14 @@
 import { MenuItemConstructorOptions } from 'electron/main'
-import { RootStore } from '@/store/root'
-import { Store } from 'pinia'
+import { useRootStore } from '@/store/root'
 import edit from './submenus/edit'
 import file from './submenus/file'
 
-export default function createApplicationMenu (store: Store<string, RootStore, any>) {
+export default function createApplicationMenu () {
+  const store = useRootStore()
   const menus: MenuItemConstructorOptions[] = [
     {
       label: 'File',
-      submenu: file(store)
+      submenu: file()
     }
   ]
 

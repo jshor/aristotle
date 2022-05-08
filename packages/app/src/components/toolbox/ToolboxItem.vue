@@ -209,11 +209,11 @@ export default defineComponent({
   display: inline-block;
 
   &:hover {
-    background-color: $color-bg-secondary;
+    background-color: var(--color-bg-secondary);
   }
 
   &:active {
-    background-color: $color-bg-tertiary;
+    background-color: var(--color-bg-tertiary);
   }
 
   &__label {

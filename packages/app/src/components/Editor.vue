@@ -181,9 +181,9 @@ export default defineComponent({
     position: relative;
     box-sizing: border-box;
     background-image:
-      linear-gradient(to right, $color-bg-secondary 1px, transparent 1px),
-      linear-gradient(to bottom, $color-bg-secondary 1px, transparent 1px);
-    background-color: $color-bg-primary;
+      linear-gradient(to right, var(--color-bg-secondary) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-bg-secondary) 1px, transparent 1px);
+    background-color: var(--color-bg-primary);
     transform-origin: top left;
   }
 }

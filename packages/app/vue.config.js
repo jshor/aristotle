@@ -35,7 +35,8 @@ module.exports = {
         'public',
         'build'
       ],
-      preload: 'src/preload',
+      mainProcessFile: 'src/process/main',
+      preload: 'src/process/preload',
       // list all node_modules paths so that electron builder can find them in this monorepo
       nodeModulesPath: ['../../node_modules', './node_modules'],
       builderOptions: {

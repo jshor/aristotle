@@ -64,7 +64,7 @@ export default defineComponent({
   }
 
   &__button {
-    color: $color-primary;
+    color: var(--color-primary);
     background-color: transparent;
     border: 0;
     border-radius: 2px;
@@ -82,11 +82,11 @@ export default defineComponent({
 
     &:not(:disabled) {
       &:hover {
-        background-color: $color-bg-quaternary;
+        background-color: var(--color-bg-quaternary);
       }
 
       &:active {
-        background-color: $color-bg-tertiary;
+        background-color: var(--color-bg-tertiary);
       }
     }
   }

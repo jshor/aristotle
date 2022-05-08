@@ -48,15 +48,15 @@ export default defineComponent({
   display: flex;
   max-width: 200px;
   padding: 0.5rem;
-  background-color: $color-bg-quaternary;
+  background-color: var(--color-bg-quaternary);
   border-style: solid;
-  border-color: $color-bg-tertiary;
+  border-color: var(--color-bg-tertiary);
   border-width: $border-width $border-width $border-width 0;
-  color: $color-primary;
+  color: var(--color-primary);
   box-sizing: border-box;
 
   &:first-of-type {
-    border-left: $border-width solid $color-bg-tertiary;
+    border-left: $border-width solid var(--color-bg-tertiary);
   }
 
   &__label, &__close {
@@ -79,17 +79,17 @@ export default defineComponent({
     font-weight: bold;
 
     &:hover {
-      color: $color-secondary;
+      color: var(--color-secondary);
     }
 
     &:active {
-      color: $color-bg-quaternary;
+      color: var(--color-bg-quaternary);
     }
   }
 
   &--active {
-    background-color: $color-bg-secondary;
-    color: $color-primary;
+    background-color: var(--color-bg-secondary);
+    color: var(--color-primary);
     margin-bottom: -5px;
     padding-bottom: 15px;
 

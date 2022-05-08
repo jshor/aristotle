@@ -41,22 +41,43 @@ describe('Connection.vue', () => {
   afterEach(() => jest.resetAllMocks())
 
   describe('when the mouse is down', () => {
-    it('should emit `select`', async () => {
-      await wrapper
-        .find('[data-test="wire"]')
-        .trigger('mousedown')
-
-      expect(wrapper.emitted()).toHaveProperty('select')
+    beforeEach(() => {
+      jest
+        .spyOn(store, 'selectItem')
+        .mockImplementation(jest.fn())
+      jest
+        .spyOn(store, 'deselectItem')
+        .mockImplementation(jest.fn())
     })
 
-    it('should not emit `select` if the connection is part of a group', async () => {
-      await wrapper.setProps({ groupId: 'group-id' })
-
+    it('should select the connection when not already selected', async () => {
+      await wrapper.setProps({ isSelected: true })
       await wrapper
         .find('[data-test="wire"]')
         .trigger('mousedown')
 
-      expect(wrapper.emitted()).not.toHaveProperty('select')
+        expect(store.deselectItem).toHaveBeenCalledTimes(1)
+        expect(store.deselectItem).toHaveBeenCalledWith(connectionId)
+    })
+
+    it('should select the connection when not selected', async () => {
+      await wrapper.setProps({ isSelected: false })
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('mousedown')
+
+        expect(store.selectItem).toHaveBeenCalledTimes(1)
+        expect(store.selectItem).toHaveBeenCalledWith(connectionId, false)
+    })
+
+    it('should neither select nor de-select the connection if it is part of a group', async () => {
+      await wrapper.setProps({ groupId: 'group-id' })
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('mousedown')
+
+        expect(store.selectItem).not.toHaveBeenCalled()
+        expect(store.deselectItem).not.toHaveBeenCalled()
     })
   })
 
@@ -98,18 +119,6 @@ describe('Connection.vue', () => {
       expect(store.setSnapBoundaries).not.toHaveBeenCalled()
     })
 
-    it('should not create a new freeport if the mouse has not moved', async () => {
-      await window.dispatchEvent(new MouseEvent('mousemove'))
-
-      expect(wrapper.emitted()).not.toHaveProperty('select')
-    })
-
-    it('should not create a new freeport if the mouse button is not down', async () => {
-      await window.dispatchEvent(new MouseEvent('mousemove'))
-
-      expect(wrapper.emitted()).not.toHaveProperty('select')
-    })
-
     it('should not create a new freeport if the component has been destroyed', async () => {
       await window.dispatchEvent(new MouseEvent('mousedown'))
 
@@ -138,10 +147,6 @@ describe('Connection.vue', () => {
         await window.dispatchEvent(new MouseEvent('mouseup'))
       })
 
-      it('should emit `select`', async () => {
-        expect(wrapper.emitted()).toHaveProperty('select')
-      })
-
       it('should not allow further mouse movement to trigger a freeport creation', async () => {
         window.dispatchEvent(new MouseEvent('mousemove', {
           clientX: 10,
@@ -161,22 +166,37 @@ describe('Connection.vue', () => {
   })
 
   describe('when the connection is focused', () => {
-    it('should emit `select` when the connection is not selected', async () => {
-      await wrapper
-        .find('[data-test="wire"]')
-        .trigger('focus')
+    beforeEach(() => {
+      jest
+        .spyOn(store, 'selectItem')
+        .mockImplementation(jest.fn())
 
-      expect(wrapper.emitted()).toHaveProperty('select')
+      jest.useFakeTimers()
     })
 
-    it('should not emit `select` when the connection is already selected', async () => {
-      await wrapper.setProps({ isSelected: true })
+    afterEach(() => jest.useRealTimers())
 
+    it('should select the connection when not selected', async () => {
+      await wrapper.setProps({ isSelected: false })
       await wrapper
         .find('[data-test="wire"]')
         .trigger('focus')
 
-      expect(wrapper.emitted()).not.toHaveProperty('select')
+      jest.advanceTimersByTime(10)
+
+      expect(store.selectItem).toHaveBeenCalledTimes(1)
+      expect(store.selectItem).toHaveBeenCalledWith(connectionId)
+    })
+
+    it('should not select the connection when it is already selected', async () => {
+      await wrapper.setProps({ isSelected: true })
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('focus')
+
+      jest.advanceTimersByTime(10)
+
+      expect(store.selectItem).not.toHaveBeenCalled()
     })
   })
 })

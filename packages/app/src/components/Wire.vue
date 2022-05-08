@@ -115,7 +115,7 @@ export default defineComponent({
     stroke-width: 8;
     pointer-events: all;
     stroke-linecap: square;
-    stroke: $color-secondary;
+    stroke: var(--color-secondary);
   }
 
   &__animation {
@@ -129,20 +129,20 @@ export default defineComponent({
   &__display {
     stroke-width: 6;
     pointer-events: all;
-    stroke: darkred;
+    stroke: var(--color-hi-z);
     transition: 0.25s stroke; // TODO
 
     &--on {
-      stroke: green;
+      stroke: var(--color-on);
     }
 
     &--off {
-      stroke: gray;
+      stroke: var(--color-off);
     }
   }
 
   &--selected {
-    filter: drop-shadow(0 0 6px $color-secondary); // TODO: make this a mixin
+    filter: drop-shadow(0 0 6px var(--color-secondary)); // TODO: make this a mixin
   }
 
   &--preview {
@@ -177,7 +177,7 @@ export default defineComponent({
     filter: inherit;
   }
   50% {
-    filter: drop-shadow(0px 0px 20px $color-primary);
+    filter: drop-shadow(0px 0px 20px var(--color-primary));
   }
   100% {
     filter: inherit;

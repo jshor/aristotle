@@ -98,7 +98,7 @@ export default defineComponent({
 
   &__wire {
     height: 2px;
-    background-color: $color-secondary;
+    background-color: var(--color-secondary);
   }
 
   &__wires {
@@ -110,7 +110,7 @@ export default defineComponent({
     display: flex;
 
     &--multiwire {
-      background-color: $color-secondary;
+      background-color: var(--color-secondary);
       width: 2px;
       height: calc(100% - 22px);
       margin-top: 11px;

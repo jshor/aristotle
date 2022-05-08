@@ -64,8 +64,8 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid $color-secondary;
-  background-color: $color-bg-secondary;
+  border: 1px solid var(--color-secondary);
+  background-color: var(--color-bg-secondary);
   pointer-events: all;
   cursor: move;
 
@@ -76,7 +76,7 @@ export default defineComponent({
     width: 30px;
     height: 30px;
     cursor: pointer;
-    border: 1px solid $color-secondary;
+    border: 1px solid var(--color-secondary);
     color: #fff;
     box-sizing: border-box;
     font-family: 'Courier New', Courier, monospace;
@@ -84,16 +84,16 @@ export default defineComponent({
     border-radius: 2px;
 
     &--on {
-      background-color: green;
-      box-shadow: 0 0 20px green;
+      background-color: var(--color-on);
+      box-shadow: 0 0 20px var(--color-on);
     }
 
     &--off {
-      background-color: gray;
+      background-color: var(--color-off);
     }
 
     &--high-z {
-      background-color: darkred;
+      background-color: var(--color-hi-z);
     }
   }
 }

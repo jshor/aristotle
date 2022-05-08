@@ -130,17 +130,17 @@ $border-width: 1px;
 
 .toolbar {
   display: flex;
-  background-color: $color-bg-secondary;
+  background-color: var(--color-bg-secondary);
   padding: 0.25rem;
   height: 100%;
-  box-shadow: 0 0 $border-width $color-shadow;
+  box-shadow: 0 0 $border-width var(--color-shadow);
 
   &__left {
     flex: 1;
   }
 
   &__left, &__right {
-    border: $border-width solid $color-bg-secondary;
+    border: $border-width solid var(--color-bg-secondary);
     display: flex;
   }
 }

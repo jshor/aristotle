@@ -5,4 +5,77 @@ body {
   font-family: system-ui;
   min-height: 100vh;
   max-height: 100vh;
+  overflow: hidden;
+
+  --color-bg-primary: #1D1E25;
+  --color-bg-secondary: #333641;
+  --color-bg-tertiary: #3D404B;
+  --color-bg-quaternary: #454857;
+
+  // foreground colors
+  --color-primary: #fff;
+  --color-secondary: #9ca0b1;
+  --color-shadow: #000;
 }
+
+// @media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #fff;
+    --color-bg-secondary: #e8e8e8;
+    --color-bg-tertiary: #808080;
+    --color-bg-quaternary: #999;
+
+    // foreground colors
+    --color-primary: #000;
+    --color-secondary: #333;
+    --color-shadow: #444;
+
+    --color-hi-z: darkred;
+    --color-off: gray;
+    --color-on: green;
+  }
+}
+
+.printer-friendly {
+  --color-bg-primary: #fff;
+  --color-bg-secondary: #fff;
+  --color-bg-tertiary: #fff;
+  --color-bg-quaternary: #fff;
+
+  // foreground colors
+  --color-primary: #000;
+  --color-secondary: #000;
+  --color-shadow: #000;
+
+  --color-off: #fff;
+}
+
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: $color-bg-primary;
+    --color-bg-secondary: $color-bg-secondary;
+    --color-bg-tertiary: $color-bg-tertiary;
+    --color-bg-quaternary: $color-bg-quaternary;
+
+    // foreground colors
+    --color-primary: $color-primary;
+    --color-secondary: $color-secondary;
+    --color-shadow: $color-shadow;
+  }
+}
+
+:root {
+  --color-bg-primary: $color-bg-primary;
+  --color-bg-secondary: $color-bg-secondary;
+  --color-bg-tertiary: $color-bg-tertiary;
+  --color-bg-quaternary: $color-bg-quaternary;
+
+  // foreground colors
+  --color-primary: $color-primary;
+  --color-secondary: $color-secondary;
+  --color-shadow: $color-shadow;
+}
+
+// background colors

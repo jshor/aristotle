@@ -5,7 +5,7 @@ import fs from 'fs'
 
 const defaultPath = path.resolve(app.getPath('desktop'))
 
-const api = {
+export const api = {
   showContextMenu (menuItems: MenuItemConstructorOptions[]) {
     Menu
       .buildFromTemplate(menuItems)
@@ -18,7 +18,10 @@ const api = {
     return dialog.showOpenDialogSync({ defaultPath, filters }) || []
   },
   showSaveFileDialog (filters: FileFilter[], fileName: string) {
-    return dialog.showSaveDialogSync({ defaultPath, filters }) || ''
+    return dialog.showSaveDialogSync({
+      defaultPath: path.join(defaultPath, fileName),
+      filters
+    }) || ''
   },
   showMessageBox ({ message, type = 'warning', buttons = ['OK'], title = 'Aristotle' }: {
     message: string

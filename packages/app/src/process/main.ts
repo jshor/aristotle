@@ -50,7 +50,6 @@ function createMainWindow () {
     height: 1200,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nativeWindowOpen: true,
       backgroundThrottling: false
     }
   }, 'index', true)
