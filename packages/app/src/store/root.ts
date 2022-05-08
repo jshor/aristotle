@@ -53,6 +53,30 @@ export const useRootStore = defineStore({
         this.openDocument('', item.integratedCircuit.serializedState, item.id, item.name)
       }
     },
+    async saveImage (data: Blob) {
+      if (!this.activeDocument) return
+
+      try {
+        const partialName = this.activeDocument.displayName.replace(/\.[^/.]+$/, "")
+        const fileName = `${partialName}.png`
+        const filePath = window.api.showSaveFileDialog([
+          {
+            name: 'PNG Image',
+            extensions: ['.png']
+          }
+        ], fileName)
+
+        if (!filePath) return
+
+        await FileService.writeBlob(filePath, data)
+      } catch (error) {
+        window.api.showMessageBox({
+          message: 'An error occurred while trying to save the image.',
+          title: 'Error',
+          type: 'error'
+        })
+      }
+    },
     newDocument () {
       console.log('will create new doc')
     },
@@ -71,6 +95,11 @@ export const useRootStore = defineStore({
       }
 
       return true // all documents successfully closed
+    },
+    printActiveDocument () {
+      if (this.activeDocument) {
+        this.activeDocument.store().isPrinting = true
+      }
     },
     async closeDocument (id: string): Promise<boolean> {
       const document = this.documents[id]

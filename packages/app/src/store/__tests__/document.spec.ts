@@ -171,46 +171,62 @@ describe('actions', () => {
         'disconnect',
         'removeElement',
       ])
+    })
 
+    describe('when there are one or more items selected', () => {
+      beforeEach(() => {
+        store.selectedItemIds = ['item1']
+        store.deleteSelection()
+      })
+
+      it('should commit the current state to the undo stack', () => {
+        expect(store.commitState).toHaveBeenCalledTimes(1)
+      })
+
+      it('should select all connections that are attached to selected non-freeport items', () => {
+        expect(store.setSelectionState).toHaveBeenCalledWith({ id: 'connection1', value: true })
+        expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'connection3', value: true })
+      })
+
+      it('should not select connections attached to a freeport', () => {
+        expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'connection2', value: true })
+      })
+
+      it('should not select a connection with an invalid source port reference', () => {
+        expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'dragged_connection1', value: true })
+        expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'dragged_connection2', value: true })
+      })
+
+      it('should disconnect selected connections', () => {
+        expect(store.disconnect).toHaveBeenCalledWith({ source: 'port5', target: 'port6' })
+      })
+
+      it('should remove selected non-freeport items', () => {
+        expect(store.removeElement).toHaveBeenCalledWith('item1')
+        expect(store.removeElement).not.toHaveBeenCalledWith('item2')
+        expect(store.removeElement).not.toHaveBeenCalledWith('item3')
+        expect(store.removeElement).not.toHaveBeenCalledWith('item4')
+        expect(store.removeElement).not.toHaveBeenCalledWith('freeport')
+      })
+
+      it('should remove selected non-freeport, non-IC items', () => {
+        expect(store.removeElement).toHaveBeenCalledWith('item1')
+      })
+
+      it('should remove all selected freeports', () => {
+        expect(store.removeFreeport).toHaveBeenCalledWith('freeport')
+      })
+    })
+
+    it('should not change the state if nothing is selected', () => {
+      store.selectedItemIds = []
       store.deleteSelection()
-    })
 
-    it('should commit the current state to the undo stack', () => {
-      expect(store.commitState).toHaveBeenCalledTimes(1)
-    })
-
-    it('should select all connections that are attached to selected non-freeport items', () => {
-      expect(store.setSelectionState).toHaveBeenCalledWith({ id: 'connection1', value: true })
-      expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'connection3', value: true })
-    })
-
-    it('should not select connections attached to a freeport', () => {
-      expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'connection2', value: true })
-    })
-
-    it('should not select a connection with an invalid source port reference', () => {
-      expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'dragged_connection1', value: true })
-      expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'dragged_connection2', value: true })
-    })
-
-    it('should disconnect selected connections', () => {
-      expect(store.disconnect).toHaveBeenCalledWith({ source: 'port5', target: 'port6' })
-    })
-
-    it('should remove selected non-freeport items', () => {
-      expect(store.removeElement).toHaveBeenCalledWith('item1')
-      expect(store.removeElement).not.toHaveBeenCalledWith('item2')
-      expect(store.removeElement).not.toHaveBeenCalledWith('item3')
-      expect(store.removeElement).not.toHaveBeenCalledWith('item4')
-      expect(store.removeElement).not.toHaveBeenCalledWith('freeport')
-    })
-
-    it('should remove selected non-freeport, non-IC items', () => {
-      expect(store.removeElement).toHaveBeenCalledWith('item1')
-    })
-
-    it('should remove all selected freeports', () => {
-      expect(store.removeFreeport).toHaveBeenCalledWith('freeport')
+      expect(store.commitState).not.toHaveBeenCalled()
+      expect(store.setSelectionState).not.toHaveBeenCalled()
+      expect(store.disconnect).not.toHaveBeenCalled()
+      expect(store.removeFreeport).not.toHaveBeenCalled()
+      expect(store.removeElement).not.toHaveBeenCalled()
     })
   })
 

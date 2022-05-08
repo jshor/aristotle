@@ -11,14 +11,20 @@ export default class FileService {
     return data
   }
 
+  static async writeBlob (filePath: string, blob: Blob) {
+    const blobby = await blob.arrayBuffer()
+    const buf = Buffer.from(blobby)
+
+    window.api.saveFile(filePath, buf)
+  }
+
   static async save (filePath: string, content: object) {
     const zip = new JSZip()
 
     zip.file('content', JSON.stringify(content))
 
     const compressedContent = await zip.generateAsync({ type: 'blob' })
-    const blob = Buffer.from(await compressedContent.arrayBuffer())
 
-    window.api.saveFile(filePath, blob)
+    this.writeBlob(filePath, compressedContent)
   }
 }

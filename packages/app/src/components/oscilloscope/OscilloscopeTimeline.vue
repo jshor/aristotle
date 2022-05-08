@@ -125,7 +125,7 @@ export default defineComponent({
 
 <style lang="scss">
 .oscilloscope-timeline {
-  background-color: $color-bg-primary;
+  background-color: var(--color-bg-primary);
   height: 100%;
   width: 100%;
   text-align: right;
@@ -153,7 +153,7 @@ export default defineComponent({
 
   &__label {
     padding: 0 0.5em;
-    border-top: 1px solid $color-bg-tertiary;
+    border-top: 1px solid var(--color-bg-tertiary);
     box-sizing: border-box;
     text-align: right;
     flex: 1;
@@ -171,7 +171,7 @@ export default defineComponent({
   }
 
   &__item {
-    border-top: 1px solid $color-bg-tertiary;
+    border-top: 1px solid var(--color-bg-tertiary);
     box-sizing: border-box;
     min-width: 100%;
     min-height: 40px;

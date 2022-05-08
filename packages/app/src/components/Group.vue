@@ -67,7 +67,7 @@ export default defineComponent({
 
   &--is-selected {
     display: block;
-    border-color: $color-secondary;
+    border-color: var(--color-secondary);
     cursor: move;
   }
 }

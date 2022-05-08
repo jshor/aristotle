@@ -15,11 +15,11 @@ $border-width: 1px;
 
 .toolbar-separator {
   display: block;
-  border-left: 1px solid $color-secondary;
+  border-left: 1px solid var(--color-secondary);
   box-sizing: border-box;
   height: 80%;
   margin: 0 0.25rem;
-  box-shadow: 0 0 $border-width $color-shadow;
+  box-shadow: 0 0 $border-width var(--color-shadow);
   width: 1px;
 }
 </style>

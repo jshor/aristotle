@@ -121,8 +121,8 @@ $divider-width: 20px;
   max-height: 100%;
   flex: 1;
   display: flex;
-  background-color: $color-bg-primary;
-  color: $color-secondary;
+  background-color: var(--color-bg-primary);
+  color: var(--color-secondary);
 
   &--vertical {
     flex-direction: column;
@@ -130,12 +130,12 @@ $divider-width: 20px;
 
   &__first {
     display: flex;
-    border-right: 1px solid $color-bg-quaternary;
+    border-right: 1px solid var(--color-bg-quaternary);
 
     &--vertical {
       flex-direction: column;
       border: 0;
-      border-bottom: 1px solid $color-bg-quaternary;
+      border-bottom: 1px solid var(--color-bg-quaternary);
     }
   }
 

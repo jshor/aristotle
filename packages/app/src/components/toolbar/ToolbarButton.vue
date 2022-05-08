@@ -46,13 +46,13 @@ export default defineComponent({
 <style lang="scss">
 .toolbar-button {
   display: flex;
-  color: $color-primary;
+  color: var(--color-primary);
   padding: 0.25rem 0;
   width: 2em;
   height: 2em;
   font-size: 1.25rem;
   border-radius: 2px;
-  text-shadow: drop-shadow(0 0 1px $color-shadow);
+  text-shadow: drop-shadow(0 0 1px var(--color-shadow));
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
@@ -67,8 +67,8 @@ export default defineComponent({
   }
 
   &--active {
-    background: linear-gradient(0, $color-secondary, $color-primary);
-    color: $color-bg-secondary;
+    background: linear-gradient(0, var(--color-secondary), var(--color-primary));
+    color: var(--color-bg-secondary);
   }
 
   &:disabled {
@@ -78,11 +78,11 @@ export default defineComponent({
 
   &:not(:disabled) {
     &:hover {
-      background-color: $color-bg-quaternary;
+      background-color: var(--color-bg-quaternary);
     }
 
     &:active {
-      background-color: $color-bg-tertiary;
+      background-color: var(--color-bg-tertiary);
     }
   }
 }

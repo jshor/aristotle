@@ -1,39 +1,40 @@
 import { MenuItemConstructorOptions } from 'electron/main'
-import { Store } from 'pinia'
-import { RootStore } from '@/store/root'
+import { useRootStore } from '@/store/root'
 
-export default function file (store: Store<string, RootStore, any>): MenuItemConstructorOptions[] {
-  const hasDocument = store.activeDocumentId !== null
-  const documentList = Object.keys(store.documents)
+export default function file (): MenuItemConstructorOptions[] {
+  const rootStore = useRootStore()
+  const hasDocument = rootStore.activeDocumentId !== null
+  const documentList = Object.keys(rootStore.documents)
+  const store = rootStore.activeDocument?.store()
   const items: MenuItemConstructorOptions[] = [
     {
       label: '&New Circuit',
       accelerator: 'CommandOrControl+N',
-      click: store.newDocument
+      click: rootStore.newDocument
     },
     { type: 'separator' },
     {
       label: '&Open Circuit',
       accelerator: 'CommandOrControl+O',
-      click: store.selectDocument
+      click: rootStore.selectDocument
     },
     {
       label: 'Open &Integrated Circuit',
       accelerator: 'CommandOrControl+Shift+O',
-      click: store.selectDocument
+      click: rootStore.selectDocument
     },
     { type: 'separator' },
     {
       label: 'Save',
       enabled: hasDocument,
       accelerator: 'CommandOrControl+S',
-      click: store.saveActiveDocument
+      click: () => rootStore.saveActiveDocument()
     },
     {
       label: 'Save As...',
       enabled: hasDocument,
       accelerator: 'CommandOrControl+Shift+S',
-      click: () => store.saveActiveDocument(true)
+      click: () => rootStore.saveActiveDocument(true)
     },
     {
       label: 'Save All',
@@ -43,13 +44,27 @@ export default function file (store: Store<string, RootStore, any>): MenuItemCon
     },
     { type: 'separator' },
     {
-      label: 'Export',
+      label: 'Print',
       enabled: hasDocument,
-      submenu: [{
-        label: 'Integrated Circuit',
-        accelerator: 'CommandOrControl+Shift+E',
-        click: () => console.log('export IC')
-      }]
+      accelerator: 'CommandOrControl+P',
+      click: () => store?.print()
+    },
+    { type: 'separator' },
+    {
+      label: 'Export...',
+      enabled: hasDocument,
+      submenu: [
+        {
+          label: 'Integrated Circuit',
+          accelerator: 'CommandOrControl+Shift+E',
+          click: () => console.log('export IC')
+        },
+        {
+          label: 'PNG Image',
+          accelerator: 'CommandOrControl+Shift+I',
+          click: () => store?.createImage()
+        }
+      ]
     },
     { type: 'separator' },
     {
@@ -69,17 +84,17 @@ export default function file (store: Store<string, RootStore, any>): MenuItemCon
     }
   ]
 
-  if (Object.keys(store.documents).length > 1) {
+  if (Object.keys(rootStore.documents).length > 1) {
     const submenu: MenuItemConstructorOptions[] = [
       {
         label: 'Previous File',
         accelerator: 'CmdOrCtrl+Shift+Tab',
-        click: () => store.switchDocument(-1)
+        click: () => rootStore.switchDocument(-1)
       },
       {
         label: 'Next File',
         accelerator: 'CmdOrCtrl+Tab',
-        click: () => store.switchDocument(1)
+        click: () => rootStore.switchDocument(1)
       },
       { type: 'separator' }
     ]
@@ -87,9 +102,9 @@ export default function file (store: Store<string, RootStore, any>): MenuItemCon
     for (let i = 0; i < documentList.length; i++) {
       submenu.push({
         type: "checkbox",
-        label: store.documents[documentList[i]].displayName,
-        checked: store.activeDocumentId === documentList[i],
-        click: () => store.activateDocument(documentList[i])
+        label: rootStore.documents[documentList[i]].displayName,
+        checked: rootStore.activeDocumentId === documentList[i],
+        click: () => rootStore.activateDocument(documentList[i])
       })
     }
 
@@ -104,7 +119,8 @@ export default function file (store: Store<string, RootStore, any>): MenuItemCon
   items.push({
     label: 'Close Document',
     accelerator: 'CmdOrCtrl+W',
-    click: () => store.closeDocument(store.activeDocumentId)
+    enabled: hasDocument,
+    click: () => rootStore.closeDocument(rootStore.activeDocumentId as string)
   })
 
   items.push({ type: 'separator' })

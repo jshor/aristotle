@@ -54,6 +54,8 @@ export const createDocumentStore = (id: string) => defineStore({
     isDebugging: false,
     isDirty: false,
     hasLoaded: false,
+    isPrinting: false,
+    isCreatingImage: false,
 
     /* canvas dimensions */
     viewport: new DOMRect(),
@@ -79,7 +81,7 @@ export const createDocumentStore = (id: string) => defineStore({
     items: {},
     connections: {},
     ports: {},
-    groups: {},
+    groups: {}
   }),
 
   getters: {
@@ -1948,6 +1950,14 @@ export const createDocumentStore = (id: string) => defineStore({
       this
         .simulation
         .addNode(this.items[itemId], this.ports, true)
+    },
+
+    print () {
+      this.isPrinting = true
+    },
+
+    createImage () {
+      this.isCreatingImage = true
     },
 
     cut () {

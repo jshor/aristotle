@@ -16,10 +16,10 @@
     "postuninstall": "electron-builder install-app-deps",
     "test": "vue-cli-service test:unit"
   },
-  "main": "background.js",
   "dependencies": {
     "@aristotle/circuit": "*",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
+    "dom-to-image": "^2.6.0",
     "jszip": "^3.9.1",
     "pinia": "^2.0.13",
     "tiny-emitter": "^2.1.0",

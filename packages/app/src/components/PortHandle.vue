@@ -51,13 +51,13 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid $color-secondary;
+  border: 1px solid var(--color-secondary);
   box-sizing: border-box;
   top: -8px;
   left: -8px;
   width: 16px;
   height: 16px;
-  background-color: $color-bg-secondary;
+  background-color: var(--color-bg-secondary);
   border-radius: 50%;
   cursor: move;
   pointer-events: all;

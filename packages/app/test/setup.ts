@@ -21,6 +21,7 @@ global.window.api = {
   copy: jest.fn(),
   paste: jest.fn(() => ''),
   onBeforeClose: jest.fn(),
+  onOpenFile: jest.fn(),
   openFile: jest.fn(() => ''),
   saveFile: jest.fn()
 }

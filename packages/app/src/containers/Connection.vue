@@ -172,8 +172,6 @@ export default defineComponent({
      * Mouse button down event handler.
      *
      * This will inform the component that the mouse is down and ready to create a new freeport, if it moves.
-     *
-     * @emits select if not part of a group
      */
     function onMouseDown ($event: MouseEvent) {
       if (props.groupId !== null) {
@@ -193,8 +191,6 @@ export default defineComponent({
       } else {
         store.selectItem(props.id, $event.ctrlKey)
       }
-
-      focus()
     }
 
     /**
@@ -245,10 +241,8 @@ export default defineComponent({
 
     /**
      * Mouse up event handler.
-     *
-     * @emits select if the mouse is down
      */
-    function onMouseUp ($event: MouseEvent) {
+    function onMouseUp () {
       if (!isMouseDown) return
 
       isMouseDown = false
@@ -256,8 +250,6 @@ export default defineComponent({
 
     /**
      * Focus event handler.
-     *
-     * @emits select if not already selected
      */
     function onFocus () {
       setTimeout(() => {

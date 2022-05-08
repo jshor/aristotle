@@ -1,4 +1,5 @@
 import SimulationService from '@/services/SimulationService'
+import ImageType from '@/types/enums/ImageType'
 
 export default interface DocumentState {
   viewport: DOMRect
@@ -28,4 +29,6 @@ export default interface DocumentState {
   zIndex: number
   activePortId: string | null
   connectionPreviewId: string | null
+  isPrinting: boolean
+  isCreatingImage: boolean
 }

@@ -38,8 +38,8 @@ export default defineComponent({
 .and {
   &__element, &__negation {
     stroke-width: 2;
-    stroke: $color-secondary;
-    fill: $color-bg-secondary;
+    stroke: var(--color-secondary);
+    fill: var(--color-bg-secondary);
     pointer-events: all;
   }
 }

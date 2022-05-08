@@ -82,7 +82,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance } from 'vue'
+import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance, watchEffect } from 'vue'
 import ResizeObserver from 'resize-observer-polyfill'
 import { StoreDefinition } from 'pinia'
 import DocumentState from '@/store/DocumentState'
@@ -91,6 +91,9 @@ import Group from '@/components/Group.vue'
 import Connection from './Connection.vue'
 import Item from './Item.vue'
 import editorContextMenu from '@/menus/context/editor'
+import boundaries from '@/layout/boundaries'
+import printing from '@/utils/printing'
+import { useRootStore } from '@/store/root'
 
 export default defineComponent({
   name: 'Document',
@@ -108,10 +111,16 @@ export default defineComponent({
   },
   setup (props) {
     const store = props.store()
+    const rootStore = useRootStore()
     const editor = ref<ComponentPublicInstance<HTMLElement>>()
 
     let acceleration = 1
     let keys: Record<string, boolean> = {}
+
+    watchEffect(() => {
+      if (store.isPrinting) printImage()
+      if (store.isCreatingImage) exportImage()
+    })
 
     onMounted(() => {
       document.addEventListener('keydown', onKeyDown)
@@ -119,7 +128,6 @@ export default defineComponent({
       document.addEventListener('cut', onClipboard('cut'))
       document.addEventListener('copy', onClipboard('copy'))
       document.addEventListener('paste', onClipboard('paste'))
-      // document.addEventListener('delete', onClipboard('delete'))
       window.addEventListener('blur', clearKeys)
     })
 
@@ -131,6 +139,38 @@ export default defineComponent({
       document.addEventListener('paste', onClipboard('paste'))
       window.removeEventListener('blur', clearKeys)
     })
+
+    function initiatePrint (callback: (editorElement: HTMLElement, boundingBox: BoundingBox) => Promise<void>) {
+      if (editor.value) {
+        const boundingBoxes = Object
+          .values(store.items)
+          .map(({ boundingBox }) => boundingBox)
+        const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
+        const editorElement = editor.value.$el.querySelector('.editor__grid') as HTMLElement
+
+        callback(editorElement, boundingBox)
+      }
+    }
+
+    async function printImage () {
+      initiatePrint(async (editorElement, boundingBox) => {
+        await printing.printImage(store.zoom, editorElement, boundingBox)
+
+        store.isPrinting = false
+      })
+    }
+
+    async function exportImage () {
+      initiatePrint(async (editorElement, boundingBox) => {
+        const { printArea } = printing.createPrintArea(1 / store.zoom, editorElement, boundingBox, 20, '')
+        const image = await printing.createImage<Blob>(printArea, 'toBlob')
+
+        await rootStore.saveImage(image)
+
+        store.isCreatingImage = false
+      })
+    }
+
 
     function onClipboard (action: 'cut' | 'copy' | 'paste') {
       return function ($event: ClipboardEvent) {

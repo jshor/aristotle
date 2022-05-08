@@ -196,24 +196,36 @@ describe('Item.vue', () => {
         spy = jest
           .spyOn(store(), 'setActivePortId')
           .mockImplementation(jest.fn())
+        jest
+          .spyOn(store(), 'selectItem')
+          .mockImplementation(jest.fn())
+
+        jest.useFakeTimers()
       })
 
-      it('should emit `select` when the item is not selected', async () => {
+      afterEach(() => jest.useRealTimers())
+
+      it('should select the connection when not selected', async () => {
+        await wrapper.setProps({ isSelected: false })
         await wrapper
           .find('[data-test="port-item"]')
           .trigger('focus')
 
-        expect(wrapper.emitted()).toHaveProperty('select')
+        jest.advanceTimersByTime(10)
+
+        expect(store().selectItem).toHaveBeenCalledTimes(1)
+        expect(store().selectItem).toHaveBeenCalledWith(itemId)
       })
 
-      it('should not emit `select` when the item is already selected', async () => {
+      it('should not select the connection when it is already selected', async () => {
         await wrapper.setProps({ isSelected: true })
-
-        wrapper
+        await wrapper
           .find('[data-test="port-item"]')
           .trigger('focus')
 
-        expect(wrapper.emitted()).not.toHaveProperty('select')
+        jest.advanceTimersByTime(10)
+
+        expect(store().selectItem).not.toHaveBeenCalled()
       })
     })
 

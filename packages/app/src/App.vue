@@ -63,6 +63,11 @@
     </div>
 
     <div class="app__status">
+      <status-bar
+        v-if="activeDocumentId && activeDocument"
+        :key="activeDocumentId"
+        :store="activeDocument.store"
+      />
     </div>
   </div>
 
@@ -89,6 +94,7 @@ import { useRootStore } from './store/root'
 import TabItem from './components/tab/TabItem.vue'
 import TabHost from './components/tab/TabHost.vue'
 import Oscilloscope from './containers/Oscilloscope.vue'
+import StatusBar from './containers/StatusBar.vue'
 // import RemoteService from './services/RemoteService'
 import createApplicationMenu from './menus'
 
@@ -101,7 +107,8 @@ export default defineComponent({
     TabItem,
     TabHost,
     Toolbox,
-    Oscilloscope
+    Oscilloscope,
+    StatusBar
   },
   setup () {
     const store = useRootStore()
@@ -119,7 +126,7 @@ export default defineComponent({
     }
 
     // update the app menu when any of the store variables it depends on to show/hide menu items change
-    watchEffect(() => window.api.setApplicationMenu(createApplicationMenu(store)))
+    watchEffect(() => window.api.setApplicationMenu(createApplicationMenu()))
 
     watchEffect(() => {
       document.title = store.activeDocument
@@ -209,7 +216,7 @@ export default defineComponent({
 
 <style lang="scss">
 $toolbar-height: 50px;
-$status-bar-height: 25px;
+$status-bar-height: 1.75em;
 
 .app {
   width: 100vw;
@@ -225,7 +232,7 @@ $status-bar-height: 25px;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: $color-bg-primary;
+    background-color: var(--color-bg-primary);
     opacity: 0;
     z-index: 10;
     transition: 0.25s opacity;
@@ -248,7 +255,7 @@ $status-bar-height: 25px;
   }
 
   &__status {
-    background: green;
+    background: var(--color-on);
     height: $status-bar-height;
   }
 }

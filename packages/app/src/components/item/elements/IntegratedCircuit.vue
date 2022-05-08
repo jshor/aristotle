@@ -72,8 +72,8 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: $color-bg-secondary;
-    border: 2px solid $color-secondary;
+    background-color: var(--color-bg-secondary);
+    border: 2px solid var(--color-secondary);
     height: 100%;
     width: 150px;
     pointer-events: all;
@@ -81,7 +81,7 @@ export default defineComponent({
 
   &__wire {
     height: 3px;
-    background-color: $color-secondary;
+    background-color: var(--color-secondary);
   }
 
   &__wires {
