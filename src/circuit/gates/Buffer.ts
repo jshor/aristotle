@@ -14,14 +14,16 @@ class Buffer extends CircuitNode {
       .keys(this.inputValues)
       .pop()
 
-    this.inputValues[id] = value
-    this.newValue = this.eval()
+    if (id) {
+      this.inputValues[id] = value
+      this.newValue = this.eval()
+    }
   }
 
   protected eval = (): number => {
     return Object
       .values(this.inputValues)
-      .pop()
+      .pop() || 0
   }
 }
 

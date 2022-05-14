@@ -1,24 +1,111 @@
 {
+  "name": "aristotle",
+  "version": "0.1.0",
   "private": true,
-  "license": "MIT",
-  "workspaces": [
-    "packages/*"
-  ],
+  "author": "Josh Shor <jpshor@gmail.com>",
+  "description": "Digital logic simulator for Windows, Mac, and Linux.",
   "scripts": {
-    "start:app": "yarn workspace @aristotle/app run start",
-    "start:circuit": "yarn workspace @aristotle/circuit run start",
-    "start": "npm-run-all -p start:app start:circuit",
-    "build:app": "yarn workspace @aristotle/app build",
-    "build:circuit": "yarn workspace @aristotle/circuit build",
-    "build:website": "yarn workspace @aristotle/website build",
-    "build": "yarn build:website && yarn build:circuit && yarn build:app"
+    "lint": "vue-cli-service lint",
+    "test": "vue-cli-service test:unit",
+    "build": "yarn electron:build && yarn docs:build",
+    "start": "yarn electron:serve",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
+    "docs:build": "vuepress build docs",
+    "docs:serve": "vuepress dev docs",
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps"
   },
-  "engines": {
-    "node": ">=14",
-    "yarn": ">=1.22.0"
+  "dependencies": {
+    "@fortawesome/free-regular-svg-icons": "^6.1.1",
+    "@fortawesome/free-solid-svg-icons": "^6.1.1",
+    "dom-to-image": "^2.6.0",
+    "jszip": "^3.9.1",
+    "pinia": "^2.0.13",
+    "tiny-emitter": "^2.1.0",
+    "uuid": "^8.3.2",
+    "vue": "^3.0.0"
   },
-  "packageManager": "yarn@1.22.14",
   "devDependencies": {
-    "npm-run-all": "^4.1.5"
+    "@electron/remote": "^2.0.8",
+    "@pinia/testing": "^0.0.11",
+    "@types/electron-devtools-installer": "^2.2.0",
+    "@types/jest": "^27.4.0",
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-plugin-unit-jest": "^5.0.4",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
+    "@vue/eslint-config-airbnb": "^5.0.2",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "@vue/test-utils": "^2.0.0-0",
+    "@vue/vue3-jest": "^27.0.0-alpha.4",
+    "@vuepress/plugin-register-components": "^2.0.0-beta.43",
+    "electron": "18.2.0",
+    "electron-devtools-installer": "^3.1.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-vue": "^7.0.0",
+    "resize-observer-polyfill": "^1.5.1",
+    "sass": "^1.51.0",
+    "sass-loader": "^10.1.1",
+    "ts-jest": "^27.1.4",
+    "typescript": "~4.1.5",
+    "vue-cli-plugin-electron-builder": "~2.1.1",
+    "vuepress": "^2.0.0-beta.43"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "@vue/airbnb",
+      "@vue/typescript/recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2020
+    },
+    "rules": {},
+    "overrides": [
+      {
+        "files": [
+          "**/__tests__/*.{j,t}s?(x)",
+          "**/tests/unit/**/*.spec.{j,t}s?(x)"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "jest": {
+    "collectCoverage": true,
+    "coverageDirectory": "<rootDir>/test/.coverage",
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/src/.*/__spec__",
+      "<rootDir>/src/.*/__tests__"
+    ],
+    "preset": "@vue/cli-plugin-unit-jest/presets/typescript-and-babel",
+    "setupFiles": [
+      "<rootDir>/test/setup.ts"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/*.spec.(js|jsx|ts|tsx)"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest",
+      "^.+\\.vue$": "@vue/vue3-jest"
+    }
   }
 }
