@@ -1,7 +1,7 @@
 // @ts-check
 import { defineStore } from 'pinia'
 import { v4 as uuid } from 'uuid'
-import { LogicValue } from '@aristotle/circuit'
+import { LogicValue } from '@/circuit'
 
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'

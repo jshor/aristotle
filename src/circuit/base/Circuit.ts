@@ -155,10 +155,12 @@ class Circuit {
   public next = (): void => {
     let isValueChanged = false
     let forceContinue = false
-    let localQueue = []
+    let localQueue: CircuitNode[] = []
 
     while (this.queue.length > 0) {
       const node = this.queue.shift()
+
+      if (!node) continue
 
       localQueue = localQueue.concat(node.propagate())
 

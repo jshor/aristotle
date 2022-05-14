@@ -1,4 +1,4 @@
-import { LogicValue } from '@aristotle/circuit'
+import { LogicValue } from '@/circuit'
 
 /**
  * @class BinaryWaveService

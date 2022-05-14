@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineUserConfig({
   base: '/',
-  dest: path.join(__dirname, '../../build'),
+  dest: 'build',
   head: [
     ['link', {
       rel: 'icon',
@@ -14,9 +14,9 @@ export default defineUserConfig({
   plugins: [
     registerComponentsPlugin({
       components: {
-        Downloads: path.resolve(__dirname, './components/Downloads.vue'),
-        Hook: path.resolve(__dirname, './components/Hook.vue'),
-        Landing: path.resolve(__dirname, './components/Landing.vue')
+        Downloads: path.resolve(__dirname, './docs/components/Downloads.vue'),
+        Hook: path.resolve(__dirname, './docs/components/Hook.vue'),
+        Landing: path.resolve(__dirname, './docs/components/Landing.vue')
       }
     })
   ],

@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash'
-import { Circuit, CircuitNode, OutputNode } from '@aristotle/circuit'
+import { Circuit, CircuitNode, OutputNode } from '@/circuit'
 import { TinyEmitter } from 'tiny-emitter'
 import BinaryWaveService from './BinaryWaveService'
 import ClockService from './ClockService'

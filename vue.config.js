@@ -1,11 +1,9 @@
-const path = require('path')
-
 const title = 'Aristotle'
 
 module.exports = {
   lintOnSave: false,
-  outputDir: path.resolve('../../build/alpha'),
-  publicPath: '/alpha',
+  outputDir: 'build/web',
+  publicPath: '/web',
   productionSourceMap: false,
   pages: {
     index: {
@@ -37,8 +35,6 @@ module.exports = {
       ],
       mainProcessFile: 'src/process/main',
       preload: 'src/process/preload',
-      // list all node_modules paths so that electron builder can find them in this monorepo
-      nodeModulesPath: ['../../node_modules', './node_modules'],
       builderOptions: {
         // electron-builder config: https://www.electron.build/
         productName: title,
