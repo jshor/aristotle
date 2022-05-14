@@ -14,9 +14,6 @@ import { createDocumentStore } from '../document'
 import rotation from '@/layout/rotation'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 
-// jest.mock('@/services/BinaryWaveService')
-// jest.mock('@/services/SimulationService')
-
 const stubAll = (store: any, methods: string[]) => {
   methods.forEach(method => {
     jest
@@ -38,6 +35,239 @@ setActivePinia(createPinia())
 
 describe('actions', () => {
   beforeEach(() => jest.restoreAllMocks())
+
+  describe('incrementZoom', () => {
+    const store = createDocumentStore('document')()
+
+    beforeEach(() => {
+      jest
+        .spyOn(store, 'setZoom')
+        .mockImplementation(jest.fn())
+    })
+
+    it('should decrement the zoom by one scale measure', () => {
+      store.incrementZoom(-1)
+
+      expect(store.setZoom).toHaveBeenCalledTimes(1)
+      expect(store.setZoom).toHaveBeenCalledWith({ zoom: 0.9 })
+    })
+
+    it('should increment the zoom by one scale measure', () => {
+      store.incrementZoom()
+
+      expect(store.setZoom).toHaveBeenCalledTimes(1)
+      expect(store.setZoom).toHaveBeenCalledWith({ zoom: 1.1 })
+    })
+  })
+
+  describe('setZoom', () => {
+    const store = createDocumentStore('document')()
+
+    beforeEach(() => {
+      jest
+        .spyOn(store, 'panTo')
+        .mockImplementation(jest.fn())
+
+      store.$reset()
+      store.zoomLevel = 1
+      store.canvas = {
+        left: -100,
+        right: -300,
+        top: -150,
+        bottom: 150
+      }
+      store.viewport = new DOMRect(100, 50, 300, 250)
+    })
+
+    it('should pan to the center of the viewport when a focal point is not defined', () => {
+      store.setZoom({ zoom: 1.1 })
+
+      expect(store.panTo).toHaveBeenCalledTimes(1)
+      expect(store.panTo).toHaveBeenCalledWith({ x: -100, y: -160 })
+    })
+
+    it('should pan to the document-oriented focal point', () => {
+      store.setZoom({
+        zoom: 1.1,
+        point: {
+          x: 104,
+          y: 117
+        }
+      })
+
+      expect(store.panTo).toHaveBeenCalledTimes(1)
+      expect(store.panTo).toHaveBeenCalledWith({ x: -110, y: -172 })
+    })
+
+    it('should set the zoom level to the minimum possible when the desired zoom is below it', () => {
+      store.setZoom({ zoom: 0.05 })
+
+      expect(store.zoomLevel).toEqual(0.1)
+    })
+
+    it('should set the zoom level to the maximum possible when the desired zoom exceeds it', () => {
+      store.setZoom({ zoom: 2.05 })
+
+      expect(store.zoomLevel).toEqual(2)
+    })
+  })
+
+  describe('setViewerSize', () => {
+    const store = createDocumentStore('document')()
+
+    beforeEach(() => {
+      store.$reset()
+
+      stubAll(store, [
+        'centerAll',
+        'panToCenter'
+      ])
+    })
+
+    it('should canvas size according to the screen size', () => {
+      const rect = new DOMRect(10, 20, 100, 200)
+
+      store.setViewerSize(rect)
+
+      expect(store.viewport).toEqual(rect)
+      expect(store.canvas.right).toEqual(screen.width / 0.1)
+      expect(store.canvas.bottom).toEqual(screen.height / 0.1)
+    })
+
+    it('should pan and center items when the dimensions are set and the document has not yet loaded', () => {
+      store.setViewerSize(new DOMRect(10, 20, 100, 200))
+
+      expect(store.hasLoaded).toEqual(true)
+      expect(store.centerAll).toHaveBeenCalledTimes(1)
+      expect(store.panToCenter).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not pan or center items when the document has already loaded', () => {
+      store.hasLoaded = true
+      store.setViewerSize(new DOMRect(10, 20, 100, 200))
+
+      expect(store.centerAll).not.toHaveBeenCalled()
+      expect(store.panToCenter).not.toHaveBeenCalled()
+    })
+
+    it('should not pan or center items when the width is not defined', () => {
+      store.setViewerSize(new DOMRect(0, 0, 0, 0))
+
+      expect(store.centerAll).not.toHaveBeenCalled()
+      expect(store.panToCenter).not.toHaveBeenCalled()
+    })
+
+    it('should not pan or center items when the height is not defined', () => {
+      store.setViewerSize(new DOMRect(10, 0, 100, 0))
+
+      expect(store.centerAll).not.toHaveBeenCalled()
+      expect(store.panToCenter).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('panTo', () => {
+    it('should update the canvas to move to the given panning point', () => {
+      const store = createDocumentStore('document')()
+
+      store.canvas = {
+        left: -200,
+        top: -200,
+        right: 703,
+        bottom: 918
+      }
+      store.panTo({ x: 200, y: 18 })
+
+      expect(store.canvas).toEqual({
+        left: 200,
+        top: 18,
+        right: 1103,
+        bottom: 1136
+      })
+    })
+  })
+
+  describe('panToCenter', () => {
+    it('should pan to the center of the canvas', () => {
+      const store = createDocumentStore('document')()
+
+      store.canvas = {
+        left: -200,
+        top: -300,
+        right: 4200,
+        bottom: 1900
+      }
+      store.viewport = new DOMRect(20, 20, 200, 300)
+      store.panToCenter()
+
+      expect(store.canvas).toEqual({
+        left: -2100,
+        top: -950,
+        right: 2300,
+        bottom: 1250
+      })
+    })
+  })
+
+  describe('centerAll', () => {
+    const store = createDocumentStore('document')()
+    const item1 = createItem('item1', ItemType.InputNode, {
+      position: {
+        x: 30,
+        y: 30
+      },
+      width: 200,
+      height: 200
+    })
+    const item2 = createItem('item2', ItemType.OutputNode, {
+      position: {
+        x: 60,
+        y: 60
+      },
+      width: 150,
+      height: 150
+    })
+
+    beforeEach(() => {
+      stubAll(store, [
+        'setItemPosition',
+        'setItemPortPositions'
+      ])
+
+      store.$reset()
+      store.canvas = {
+        left: -100,
+        top: -100,
+        right: 500,
+        bottom: 500
+      }
+      store.items = { item1, item2 }
+      store.centerAll()
+    })
+
+    it('should set the position of each item relative to its centered, parent group position', () => {
+      expect(store.setItemPosition).toHaveBeenCalledTimes(2)
+      expect(store.setItemPosition).toHaveBeenCalledWith({
+        id: 'item1',
+        position: {
+          x: 330,
+          y: 330
+        }
+      })
+      expect(store.setItemPosition).toHaveBeenCalledWith({
+        id: 'item2',
+        position: {
+          x: 360,
+          y: 360
+        }
+      })
+    })
+
+    it('should update the port positions of each item', () => {
+      expect(store.setItemPortPositions).toHaveBeenCalledTimes(2)
+      expect(store.setItemPortPositions).toHaveBeenCalledWith('item1')
+      expect(store.setItemPortPositions).toHaveBeenCalledWith('item2')
+    })
+  })
 
   describe('undo', () => {
     const store = createDocumentStore('document')()
@@ -2309,7 +2539,6 @@ describe('actions', () => {
       })
 
       stubAll(store, [
-        'addIntegratedCircuit',
         'addNewItem',
         'removeElement',
         'connect',
@@ -2343,21 +2572,6 @@ describe('actions', () => {
 
     it('should commit disconnect for each connection that will be lost between states', () => {
       expect(store.disconnect).toHaveBeenCalledWith(store.connections.removedConnection)
-    })
-
-    it('should commit addIntegratedCircuit for each integrated circuit item added', () => {
-      expect(store.addIntegratedCircuit).toHaveBeenCalledWith(addedIc)
-    })
-
-    it('should commit addNewItem for each non-IC item added', () => {
-        expect(store.addNewItem).toHaveBeenCalledWith({
-        item: addedItem1,
-        ports: [addedPort1, addedPort2]
-      })
-        expect(store.addNewItem).toHaveBeenCalledWith({
-        item: addedItem2,
-        ports: [addedPort1, addedPort2]
-      })
     })
 
     it('should commit connect for each connection that will be gained between states', () => {
@@ -2493,8 +2707,6 @@ describe('actions', () => {
 
   describe('addNewItem', () => {
     const store = createDocumentStore('document')()
-    const item = createItem('item', ItemType.InputNode)
-    const port = createPort('port', 'item1', PortType.Output)
 
     beforeEach(() => {
       store.$reset()
@@ -2502,39 +2714,30 @@ describe('actions', () => {
       jest
         .spyOn(store.simulation, 'addNode')
         .mockImplementation(jest.fn())
-
-      store.addNewItem({ item, ports: [port] })
     })
 
-    it('should add the ports to the state', () => {
-      expect(store.ports).toHaveProperty('port')
-      expect(store.ports.port).toEqual(port)
-    })
+    describe('when the item is not an integrated circuit', () => {
+      const item = createItem('item', ItemType.InputNode)
+      const port = createPort('port', 'item1', PortType.Output)
 
-    it('should add the item to the state', () => {
-      expect(store.items).toHaveProperty('item')
-      expect(store.items.item).toEqual(item)
-    })
-
-    it('should add the item as a node to the circuit', () => {
-      expect(store.simulation.addNode).toHaveBeenCalledTimes(1)
-      expect(store.simulation.addNode).toHaveBeenCalledWith(item, store.ports)
-    })
-  })
-
-  describe('addIntegratedCircuit', () => {
-    const store = createDocumentStore('document')()
-
-    beforeEach(() => store.$reset())
-
-    it('should not mutate the state if the item is not an integrated circuit', () => {
-      const item1 = createItem('item1', ItemType.LogicGate)
-      store.$patch({
-        items: { item1 }
+      beforeEach(() => {
+        store.addNewItem({ item, ports: [port] })
       })
-      store.addIntegratedCircuit(item1)
 
-      expect(store).not.toHaveProperty('item1')
+      it('should add the ports to the state', () => {
+        expect(store.ports).toHaveProperty('port')
+        expect(store.ports.port).toEqual(port)
+      })
+
+      it('should add the item to the state', () => {
+        expect(store.items).toHaveProperty('item')
+        expect(store.items.item).toEqual(item)
+      })
+
+      it('should add the item as a node to the circuit', () => {
+        expect(store.simulation.addNode).toHaveBeenCalledTimes(1)
+        expect(store.simulation.addNode).toHaveBeenCalledWith(item, store.ports)
+      })
     })
 
     describe('when the item is an integrated circuit', () => {
@@ -2546,21 +2749,18 @@ describe('actions', () => {
           portIds: ['port1'],
           ports: { port1, port2 },
           connections: {}
-        }
+        },
+        portIds: ['port2']
       })
 
       beforeEach(() => {
-        jest
-          .spyOn(store.simulation, 'addIntegratedCircuit')
-          .mockImplementation(jest.fn())
-
-        store.addIntegratedCircuit(icItem)
+        store.addNewItem({ item: icItem, ports: [] })
       })
 
       xit('should add each port that is visible to the user to the state', () => {
-        expect(store.ports).toHaveProperty('port1')
-        expect(store.ports).not.toHaveProperty('port2')
-        expect(store.ports.port1).toEqual(port1)
+        expect(store.ports).not.toHaveProperty('port1')
+        expect(store.ports).toHaveProperty('port2')
+        expect(store.ports.port2).toEqual(port2)
       })
 
       it('should add the integrated circuit item to the state', () => {
@@ -2569,8 +2769,8 @@ describe('actions', () => {
       })
 
       it('should install the integrated circuit onto the active circuit', () => {
-        expect(store.simulation.addIntegratedCircuit).toHaveBeenCalledTimes(1)
-        expect(store.simulation.addIntegratedCircuit).toHaveBeenCalledWith(icItem)
+        expect(store.simulation.addNode).toHaveBeenCalledTimes(1)
+        expect(store.simulation.addNode).toHaveBeenCalledWith(icItem, store.ports)
       })
     })
   })

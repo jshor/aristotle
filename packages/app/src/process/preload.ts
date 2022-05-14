@@ -70,6 +70,9 @@ export const api = {
     return clipboard
       .readBuffer('public/utf8-plain-text')
       .toString()
+  },
+  setFullscreen (isFullscreen: boolean) {
+    getCurrentWindow().setFullScreen(isFullscreen)
   }
 }
 

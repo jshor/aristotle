@@ -7,29 +7,40 @@ body {
   max-height: 100vh;
   overflow: hidden;
 
-  --color-bg-primary: #1D1E25;
-  --color-bg-secondary: #333641;
-  --color-bg-tertiary: #3D404B;
-  --color-bg-quaternary: #454857;
+  --font-family: system-ui;
+
+  --color-bg-primary: #{$color-dark-bg-primary};
+  --color-bg-secondary: #{$color-dark-bg-secondary};
+  --color-bg-tertiary: #{$color-dark-bg-tertiary};
+  --color-bg-quaternary: #{$color-dark-bg-quaternary};
 
   // foreground colors
-  --color-primary: #fff;
-  --color-secondary: #9ca0b1;
-  --color-shadow: #000;
+  --color-primary: #{$color-dark-primary};
+  --color-secondary: #{$color-dark-secondary};
+  --color-shadow: #{$color-dark-shadow};
+
+  --saturation: 70%;
+  --lightness: 70%;
+
+  --color-hi-z: darkred;
+  --color-off: gray;
+  --color-on: green;
 }
 
-// @media (prefers-color-scheme: light) {
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg-primary: #fff;
-    --color-bg-secondary: #e8e8e8;
-    --color-bg-tertiary: #808080;
-    --color-bg-quaternary: #999;
+@media (prefers-color-scheme: light) {
+  body {
+    --color-bg-primary: #{$color-light-bg-primary};
+    --color-bg-secondary: #{$color-light-bg-secondary};
+    --color-bg-tertiary: #{$color-light-bg-tertiary};
+    --color-bg-quaternary: #{$color-light-bg-quaternary};
 
     // foreground colors
-    --color-primary: #000;
-    --color-secondary: #333;
-    --color-shadow: #444;
+    --color-primary: #{$color-light-primary};
+    --color-secondary: #{$color-light-secondary};
+    --color-shadow: #{$color-light-shadow};
+
+    --saturation: 40%;
+    --lightness: 50%;
 
     --color-hi-z: darkred;
     --color-off: gray;

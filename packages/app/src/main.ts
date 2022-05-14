@@ -19,7 +19,8 @@ if (!window.api) {
     onBeforeClose () {},
     onOpenFile () {},
     openFile () { return '' },
-    saveFile () {}
+    saveFile () {},
+    setFullscreen () {}
   }
 }
 

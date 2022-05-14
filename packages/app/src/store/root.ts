@@ -23,6 +23,7 @@ export type RootStore = {
   clipboard: string | null
   activeDocumentId: string | null
   canExit: boolean
+  isFullscreen: boolean
 }
 
 export const useRootStore = defineStore({
@@ -31,7 +32,8 @@ export const useRootStore = defineStore({
     documents: {},
     clipboard: null,
     activeDocumentId: null,
-    canExit: false
+    canExit: false,
+    isFullscreen: false
   }),
   getters: {
     hasOpenDocuments (state) {
@@ -276,6 +278,12 @@ export const useRootStore = defineStore({
       if (nextIndex >= documentIds.length) nextIndex = 0
 
       this.activateDocument(documentIds[nextIndex])
+    },
+
+    toggleFullscreen () {
+      this.isFullscreen = !this.isFullscreen
+
+      window.api.setFullscreen(this.isFullscreen)
     }
   }
 })

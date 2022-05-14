@@ -1,14 +1,29 @@
-// background colors
-$color-bg-primary: #1D1E25;
-$color-bg-secondary: #333641;
-$color-bg-tertiary: #3D404B;
-$color-bg-quaternary: #454857;
+/**
+ * Dark theme colors
+ */
+$color-dark-bg-primary: #1D1E25;
+$color-dark-bg-secondary: #333641;
+$color-dark-bg-tertiary: #3D404B;
+$color-dark-bg-quaternary: #454857;
 
-// foreground colors
-$color-primary: #fff;
-$color-secondary: #9ca0b1;
-$color-shadow: #000;
+$color-dark-primary: #fff;
+$color-dark-secondary: #9ca0b1;
+$color-dark-shadow: #000;
 
-// sizes
+/**
+ * Light theme colors
+ */
+$color-light-bg-primary: #fff;
+$color-light-bg-secondary: #e8e8e8;
+$color-light-bg-tertiary: #999;
+$color-light-bg-quaternary: #808080;
+
+$color-light-primary: #1D1E25;
+$color-light-secondary: #333;
+$color-light-shadow: #888;
+
+/**
+ * Sizes
+ */
 $border-width: 1px;
 $scrollbar-width: 3px;
