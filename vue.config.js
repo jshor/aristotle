@@ -4,7 +4,6 @@ module.exports = {
   lintOnSave: false,
   outputDir: 'build/web',
   publicPath: '/web',
-  productionSourceMap: false,
   pages: {
     index: {
       title,
@@ -20,18 +19,12 @@ module.exports = {
       filename: 'splash.html'
     }
   },
-  devServer: {
-    progress: false
-  },
   pluginOptions: {
     electronBuilder: {
       electronVersion: '18.2.0',
-      chainWebpackRendererProcess: config => {
-        config.target('web');
-      },
+      chainWebpackRendererProcess: config => config.target('web'),
       extraFiles: [
-        'public',
-        'build'
+        'public'
       ],
       mainProcessFile: 'src/process/main',
       preload: 'src/process/preload',
