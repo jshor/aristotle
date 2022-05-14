@@ -37,7 +37,9 @@ function fromDocumentToEditorCoordinates (canvas: BoundingBox, viewport: DOMRect
   }
 }
 
-const MIN_SCALE = 0.25
+const MIN_SCALE = 0.1
+const MAX_SCALE = 2
+const SCALE_STEP = 0.1
 
 export const createDocumentStore = (id: string) => defineStore({
   id,
@@ -141,12 +143,34 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     /**
+     * Increments the current zoom by one scale step (in the positive or negative direction).
+     *
+     * @param [direction = 1] - directional scalar (1 or -1)
+     */
+    incrementZoom (direction = 1) {
+      this.setZoom({
+        zoom: this.zoomLevel + (SCALE_STEP * direction)
+      })
+    },
+
+    /**
      * Sets the zoom level for the document.
+     * This will zoom on the focal point (if provided) or the center of the visible area (viewport).
      *
      * @param zoom - percentage of zoom by decimal (e.g., 1.0 = 100%)
+     * @param [point] - focal point to zoom on
      */
-    setZoom ({ zoom, point }: { zoom: number, point: Point }) {
-      if (zoom < MIN_SCALE || zoom > 5) return
+    setZoom ({ zoom, point }: { zoom: number, point?: Point }) {
+      if (zoom < MIN_SCALE) zoom = MIN_SCALE
+      if (zoom > MAX_SCALE) zoom = MAX_SCALE
+
+      zoom = Math.round(zoom * 100) / 100
+
+      if (!point) {
+        point = boundaries.getBoundingBoxMidpoint(this.viewport)
+        point.x += this.viewport.left
+        point.y += this.viewport.top
+      }
 
       const zoomedPoint = fromDocumentToEditorCoordinates(this.canvas, this.viewport, point, this.zoomLevel)
       const scaledPoint = { // the canvas coordinate, scaled by the new zoom factor
@@ -159,18 +183,23 @@ export const createDocumentStore = (id: string) => defineStore({
       }
 
       this.panTo({
-        x: Math.min(viewportPoint.x - scaledPoint.x, 0),
-        y: Math.min(viewportPoint.y - scaledPoint.y, 0)
+        x: Math.round(Math.min(viewportPoint.x - scaledPoint.x, 0)),
+        y: Math.round(Math.min(viewportPoint.y - scaledPoint.y, 0))
       })
 
       this.zoomLevel = zoom
     },
 
+    /**
+     * Assigns the rects of the canvas and viewport according to the screen size and rect provided.
+     *
+     * @param rect - the bounding box DOM rect of the viewport (user-visible canvas area element)
+     */
     setViewerSize (rect: DOMRect) {
       this.viewport = rect
 
-      this.canvas.bottom = screen.height / MIN_SCALE
       this.canvas.right = screen.width / MIN_SCALE
+      this.canvas.bottom = screen.height / MIN_SCALE
 
       if (!this.hasLoaded && rect.width > 0 && rect.height > 0) {
         this.hasLoaded = true
@@ -179,6 +208,9 @@ export const createDocumentStore = (id: string) => defineStore({
       }
     },
 
+    /**
+     * Pans to the given point.
+     */
     panTo (pan: Point) {
       const deltaX = pan.x - this.canvas.left
       const deltaY = pan.y - this.canvas.top
@@ -189,6 +221,9 @@ export const createDocumentStore = (id: string) => defineStore({
       this.canvas.bottom += deltaY
     },
 
+    /**
+     * Pans to the center of the available canvas, such that its center is visible in the center of the viewport.
+     */
     panToCenter () {
       const midpoint = boundaries.getBoundingBoxMidpoint(this.canvas)
 
@@ -198,6 +233,10 @@ export const createDocumentStore = (id: string) => defineStore({
       })
     },
 
+    /**
+     * Centers all items (together as a group) to the center of the canvas.
+     * All distances between items are maintained when this occurs.
+     */
     centerAll () {
       const boundingBoxes = Object
         .values(this.items)
@@ -227,11 +266,11 @@ export const createDocumentStore = (id: string) => defineStore({
       const originalIcItem = integratedCircuitFactory(this.$state as DocumentState)
       const idMappedIcItem = idMapper.mapIntegratedCircuitIds(originalIcItem)
 
-      // RemoteService.showMessageBox({ message: 'Integrated circuit saved!', type: 'info' })
+      this.insertItem({ item: idMappedIcItem, ports: [] })
+      this.setItemBoundingBox(idMappedIcItem.id)
+      this.setItemPortPositions(idMappedIcItem.id)
+      this.setSelectionState({ id: idMappedIcItem.id, value: true })
 
-      // save file
-      // const file = JSON.stringify(this.$state)
-      this.addIntegratedCircuit(idMappedIcItem)
     },
 
     buildCircuit () {
@@ -268,9 +307,7 @@ export const createDocumentStore = (id: string) => defineStore({
 
     insertItem ({ item, ports }: { item: Item, ports: Port[] }, documentPosition: Point | null = null) {
       if (!documentPosition) {
-        const viewportMidpoint = boundaries.getBoundingBoxMidpoint(this.viewport)
-
-        documentPosition = fromDocumentToEditorCoordinates(this.canvas, this.viewport, viewportMidpoint, this.zoomLevel)
+        documentPosition = boundaries.getBoundingBoxMidpoint(this.viewport)
       }
 
       this.commitState()
@@ -840,7 +877,6 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     selectItem (id: string, keepSelection: boolean = false) {
-      console.log('KEEP? ', keepSelection)
       if (!keepSelection) {
         this.deselectAll()
       }
@@ -954,17 +990,8 @@ export const createDocumentStore = (id: string) => defineStore({
       const selectedItems = Object
         .values(this.items)
         .filter(({ isSelected }) => isSelected)
-      const boundingBox = selectedItems.reduce((boundingBox: BoundingBox, item) => ({
-        left: Math.min(item.boundingBox.left, boundingBox.left),
-        top: Math.min(item.boundingBox.top, boundingBox.top),
-        right: Math.max(item.boundingBox.right, boundingBox.right),
-        bottom: Math.max(item.boundingBox.bottom, boundingBox.bottom)
-      }), {
-        left: Infinity,
-        top: Infinity,
-        right: 0,
-        bottom: 0
-      })
+      const boundingBoxes = selectedItems.map(({ boundingBox }) => boundingBox)
+      const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
       const groupIds = new Set<string>()
 
       selectedItems.forEach(item => {
@@ -1462,14 +1489,10 @@ export const createDocumentStore = (id: string) => defineStore({
       this.groups = groups
 
       addedItems.forEach(id => {
-        if (items[id].integratedCircuit) {
-          this.addIntegratedCircuit(items[id])
-        } else {
-          this.addNewItem({
-            item: items[id],
-            ports: Object.values(ports)
-          })
-        }
+        this.addNewItem({
+          item: items[id],
+          ports: Object.values(ports)
+        })
       })
 
       addedConnections.forEach(id => this.connect(connections[id]))
@@ -1559,6 +1582,19 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param payload.ports - list of ports associated to the item
      */
     addNewItem ({ item, ports }: { item: Item, ports: Port[] }) {
+      const ic = item.integratedCircuit
+
+      if (ic) {
+        // if the item is an integrated circuit, add its visible ports to the document
+        item
+          .portIds
+          .forEach(portId => {
+            if (ic.ports[portId]) {
+              this.ports[portId] = ic.ports[portId]
+            }
+          })
+      }
+
       ports.forEach(port => {
         this.ports[port.id] = port
       })
@@ -1589,39 +1625,6 @@ export const createDocumentStore = (id: string) => defineStore({
       const value = property.value as number
 
       item.portIds.forEach(id => this.setPortValue({ id, value }))
-    },
-
-    /**
-     * Adds the given integrated circuit component to the this.
-     *
-     * @param {Item} integratedCircuitItem
-     */
-    addIntegratedCircuit (integratedCircuitItem: Item) {
-      const { integratedCircuit } = integratedCircuitItem
-
-      if (!integratedCircuit) return
-
-      // assign the visible IC ports
-      integratedCircuitItem
-        .portIds
-        .forEach(portId => {
-          if (integratedCircuit.ports[portId]) {
-            this.ports[portId] = integratedCircuit.ports[portId]
-          }
-        })
-
-      const taxonomy = `${integratedCircuitItem.type}_${integratedCircuitItem.subtype}`
-
-      if (!this.taxonomyCounts[taxonomy]) {
-        this.taxonomyCounts[taxonomy] = 0
-      }
-
-      this.items[integratedCircuitItem.id] = integratedCircuitItem
-      this.items[integratedCircuitItem.id].name = generateItemName(integratedCircuitItem, ++this.taxonomyCounts[taxonomy])
-
-      this
-        .simulation
-        .addIntegratedCircuit(integratedCircuitItem)
     },
 
     /**
@@ -2046,7 +2049,6 @@ export const createDocumentStore = (id: string) => defineStore({
             this.setItemBoundingBox(item.id)
             this.setItemPortPositions(item.id)
             this.setSelectionState({ id: item.id, value: true })
-            this.resetItemValue(item)
           })
 
         Object

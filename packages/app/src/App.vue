@@ -67,6 +67,8 @@
         v-if="activeDocumentId && activeDocument"
         :key="activeDocumentId"
         :store="activeDocument.store"
+        :is-fullscreen="isFullscreen"
+        @fullscreen="toggleFullscreen"
       />
     </div>
   </div>
@@ -116,7 +118,8 @@ export default defineComponent({
       activeDocument,
       activeDocumentId,
       documents,
-      hasOpenDocuments
+      hasOpenDocuments,
+      isFullscreen
     } = storeToRefs(store)
 
     let isDropping = ref(false)
@@ -196,6 +199,8 @@ export default defineComponent({
       documents,
       hasOpenDocuments,
       isDropping,
+      isFullscreen,
+      toggleFullscreen: store.toggleFullscreen,
       activateDocument: store.activateDocument,
       closeDocument: store.closeDocument,
       switchDocument: store.switchDocument,

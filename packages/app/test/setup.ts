@@ -23,7 +23,8 @@ global.window.api = {
   onBeforeClose: jest.fn(),
   onOpenFile: jest.fn(),
   openFile: jest.fn(() => ''),
-  saveFile: jest.fn()
+  saveFile: jest.fn(),
+  setFullscreen: jest.fn()
 }
 
 global.DOMRect = class DOMRect {

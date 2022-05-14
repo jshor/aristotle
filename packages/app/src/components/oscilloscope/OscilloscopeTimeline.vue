@@ -7,7 +7,7 @@
       <div
         v-for="(v, key) in oscillogram"
         :key="key"
-        :style="{ color: `hsla(${v.hue},70%,70%,0.8)` }"
+        :style="{ color: `hsla(${v.hue}, var(--lightness), var(--saturation), 0.8)` }"
         class="oscilloscope-timeline__label"
       >
         {{ key }}
@@ -36,7 +36,7 @@
           >
             <polyline
               :points="value.points"
-              :stroke="`hsla(${value.hue},70%,70%,0.8)`"
+              :stroke="`hsla(${value.hue}, var(--lightness), var(--saturation), 0.8)`"
               stroke-width="2"
               fill="none"
               vector-effect="non-scaling-stroke"

@@ -21,6 +21,7 @@ declare global {
       onOpenFile (fn: (filePath: string) => void)
       openFile: (filePath: string) => string
       saveFile: (filePath: string, data: Buffer) => void
+      setFullscreen: (isFullscreen: boolean) => void
     }
   }
 }

@@ -48,10 +48,11 @@ export default defineComponent({
   display: flex;
   max-width: 200px;
   padding: 0.5rem;
-  background-color: var(--color-bg-quaternary);
+  background-color: var(--color-bg-secondary);
   border-style: solid;
   border-color: var(--color-bg-tertiary);
   border-width: $border-width $border-width $border-width 0;
+  border-bottom: 0;
   color: var(--color-primary);
   box-sizing: border-box;
 
@@ -83,12 +84,12 @@ export default defineComponent({
     }
 
     &:active {
-      color: var(--color-bg-quaternary);
+      color: var(--color-bg-secondary);
     }
   }
 
   &--active {
-    background-color: var(--color-bg-secondary);
+    background-color: var(--color-bg-primary);
     color: var(--color-primary);
     margin-bottom: -5px;
     padding-bottom: 15px;
@@ -96,10 +97,6 @@ export default defineComponent({
     .tab-item__close::before {
       display: block;
     }
-  }
-
-  &--dirty {
-    color: #E2C070; // TODO: brand-primary?
   }
 
   &:not(.tab--active) {

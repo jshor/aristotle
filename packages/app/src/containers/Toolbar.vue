@@ -36,14 +36,17 @@
 <script lang="ts">
 import { v4 as uuid } from 'uuid'
 import {
+
   faFolderOpen,
   faFile,
   faSave,
-  faScissors,
-  faCopy,
-  faPaste,
   faObjectGroup,
   faObjectUngroup,
+  faCopy,
+  faPaste,
+} from '@fortawesome/free-regular-svg-icons'
+import {
+  faScissors,
   faRotateBackward,
   faRotateForward,
   faReply,

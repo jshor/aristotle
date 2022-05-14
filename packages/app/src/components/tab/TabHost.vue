@@ -20,10 +20,11 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   max-height: 100%;
+  margin-left: -1px;
 
   &__list {
     display: flex;
-    border-bottom: 5px solid #333641;
+    border-bottom: 1px solid var(--color-bg-quaternary);
   }
 }
 </style>

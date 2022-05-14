@@ -4,8 +4,8 @@ const title = 'Aristotle'
 
 module.exports = {
   lintOnSave: false,
-  // outputDir: path.resolve('../../build/alpha'),
-  // publicPath: '/alpha',
+  outputDir: path.resolve('../../build/alpha'),
+  publicPath: '/alpha',
   productionSourceMap: false,
   pages: {
     index: {
