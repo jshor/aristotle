@@ -1,11 +1,14 @@
 <template>
   <div class="downloads">
-    <a href="/alpha/" class="downloads__button">
-      <span>Try online</span>
-      <span v-if="version"> v{{ version }}</span>
+    <a
+      v-if="url && os === 'Windows'"
+      :href="url"
+      class="downloads__button"
+    >
+      Download {{ version }}
     </a>
     <div class="downloads__version">
-      <a href="#">Other versions</a>
+      <a href="/web/">Try online</a>
     </div>
   </div>
 </template>
@@ -17,12 +20,14 @@ export default defineComponent({
   name: 'Downloads',
   data () {
     return {
-      version: null
+      version: null,
+      url: null
     }
   },
   async created () {
     try {
-      const response = await fetch('https://api.github.com/repos/jshor/aristotle/git/refs/tags')
+      const slug = 'jshor/aristotle'
+      const response = await fetch(`https://api.github.com/repos/${slug}/git/refs/tags`)
       const data = await response.json()
 
       this.version = data
@@ -30,18 +35,10 @@ export default defineComponent({
         .pop()
         .split('/')
         .pop()
+
+      this.url = `https://github.com/${slug}/releases/download/${this.version}/Aristotle Setup ${this.version}.exe`
     } catch (error) {
       // oh well, we tried
-    }
-  },
-  methods: {
-    getIcon () {
-      switch (this.os) {
-        case 'Mac':
-          return 'apple'
-        default:
-          return this.os.toLowerCase()
-      }
     }
   },
   computed: {
@@ -72,7 +69,7 @@ $shadowColor: #000000;
   line-height: 2.5rem;
   height: 2.5rem;
 
-  @media (max-width 720px) {
+  @media (max-width: 720px) {
     flex-direction: column;
   }
 

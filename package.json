@@ -4,15 +4,17 @@
   "private": true,
   "author": "Josh Shor <jpshor@gmail.com>",
   "description": "Digital logic simulator for Windows, Mac, and Linux.",
+  "main": "background.js",
   "scripts": {
     "lint": "vue-cli-service lint",
     "test": "vue-cli-service test:unit",
-    "build": "yarn electron:build && yarn docs:build",
-    "start": "yarn electron:serve",
-    "electron:build": "vue-cli-service electron:build",
-    "electron:serve": "vue-cli-service electron:serve",
+    "start": "vue-cli-service electron:serve",
+    "build": "vue-cli-service electron:build",
+    "web:build": "vue-cli-service build --mode production",
+    "web:serve": "vue-cli-service serve",
     "docs:build": "vuepress build docs",
     "docs:serve": "vuepress dev docs",
+    "release": "standard-version",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
@@ -53,6 +55,7 @@
     "resize-observer-polyfill": "^1.5.1",
     "sass": "^1.51.0",
     "sass-loader": "^10.1.1",
+    "standard-version": "^9.3.2",
     "ts-jest": "^27.1.4",
     "typescript": "~4.1.5",
     "vue-cli-plugin-electron-builder": "~2.1.1",
@@ -107,5 +110,12 @@
       "^.+\\.tsx?$": "ts-jest",
       "^.+\\.vue$": "@vue/vue3-jest"
     }
+  },
+  "release": {
+    "branches": [
+      {
+        "name": "master"
+      }
+    ]
   }
 }

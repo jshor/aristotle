@@ -105,7 +105,7 @@ $shadowColor: #000000;
     }
   }
 
-  @media (max-width 720px) {
+  @media (max-width: 720px) {
     &__main {
       flex-direction: column;
     }

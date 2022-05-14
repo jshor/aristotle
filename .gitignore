@@ -14,6 +14,7 @@ packages/**/build
 packages/**/dist*
 dist_electron
 build
+dist
 
 # Log files
 npm-debug.log*
