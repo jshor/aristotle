@@ -1,45 +1,160 @@
-name: CI/CD
+name: Merge to master
 
-on: push
+on:
+  push:
+    branches:
+      - master
+  release:
+    types: [created]
 
 env:
-  NODE_VERSION: '14.x'
-
-  # Git release bot credentials
   GIT_USER: 'GitHub Actions'
-  GIT_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com'
+  GIT_EMAIL: 'github-actions[bot]@users.noreply.github.com'
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  # APPLE_ID: ${{ secrets.APPLE_ID }}
+  # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+  # CSC_LINK: ${{ secrets.CSC_LINK }}
+  # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+  # WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+  # WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        node-version: [14]
+        
+    outputs:
+      tag: ${{ steps.git_tag.outputs.tag }}
+      
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ env.NODE_VERSION }}
+      - name: Set git credentials
+        run: |
+          git config --global user.email ${{ env.GIT_USER }}
+          git config --global user.name ${{ env.GIT_EMAIL }}
 
-    - name: Install dependencies
-      run: yarn
+      - name: Install dependencies
+        run: yarn
 
-    # - name: Run tests
-    #   run: yarn test
+      - name: Create initial release
+        run: yarn release
 
-    - name: Build application
-      run: yarn build
+      - name: Store git tag name
+        id: git_tag
+        run: echo "::set-output name=tag::$(git tag --sort=taggerdate | tail -1)"
+        
+      # - name: Run tests
+      #   run: yarn test
 
-    - name: Create CNAME Record
-      run: echo "aristotle.dev" > build/CNAME
+      # - name: Report coverage
+      #   run: yarn codecov
+          
+      - name: Create build
+        run: yarn build
 
-    - name: Deploy docs to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.7.1
-      with:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        GIT_CONFIG_NAME: ${{ env.GIT_USER }}
-        GIT_CONFIG_EMAIL: ${{ env.GIT_EMAIL }}
-        BRANCH: gh-pages
-        FOLDER: build
-        CLEAN: true
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: binary-artifact
+          path: |
+            dist_electron/*.AppImage
+            dist_electron/*.snap
+            dist_electron/*.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set git credentials
+        run: |
+          git config --global user.email ${{ env.GIT_USER }}
+          git config --global user.name ${{ env.GIT_EMAIL }}
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Create full release
+        run: yarn release
+
+      - name: Build docs
+        run: yarn docs:build && yarn web:build
+
+      - name: Publish release
+        run: git push --follow-tags origin master 
+      
+      - name: Upload docs bundle
+        uses: actions/upload-artifact@v2
+        with:
+          name: docs
+          path: build
+
+  deploy-docs:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Set git credentials
+        run: |
+          git config --global user.email ${{ env.GIT_USER }}
+          git config --global user.name ${{ env.GIT_EMAIL }}
+          
+      - name: Pull latest
+        run: git pull origin master
+          
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: docs
+          path: build
+
+      - name: Create CNAME Record
+        run: echo "aristotle.dev" > build/CNAME
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_CONFIG_NAME: ${{ env.GIT_USER }}
+          GIT_CONFIG_EMAIL: ${{ env.GIT_EMAIL }}
+          BRANCH: gh-pages
+          FOLDER: build
+          CLEAN: true
+
+  upload-binaries:
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Pull latest
+        run: git pull origin master
+
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: binary-artifact
+          path: dist_electron
+
+      - name: Upload binary artifacts to release
+        run: |
+          set -x
+          assets=()
+          for asset in ./dist_electron/*; do
+            assets+=("-a" "$asset")
+          done
+          echo "${{ needs.build.outputs.tag }}"
+          hub release create "${assets[@]}" -m "${{ needs.build.outputs.tag }}" "${{ needs.build.outputs.tag }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
