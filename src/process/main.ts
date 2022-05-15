@@ -21,7 +21,6 @@ protocol.registerSchemesAsPrivileged([{
  * Creates a new Electron window that loads the given file name.
  */
 function createWindow (opts: BrowserWindowConstructorOptions, fileName: string, showDevTools: boolean = false) {
-  console.log('creating window')
   const win = new BrowserWindow({
     show: false, // don't show the window until we tell it to
     ...opts
@@ -104,7 +103,6 @@ async function boot (app: App, mainWindow: BrowserWindow) {
               mainWindow.webContents.send('about-to-close')
               $event.preventDefault()
             } else {
-              console.log('QUITTING')
               app.quit()
             }
           })
@@ -123,7 +121,6 @@ async function boot (app: App, mainWindow: BrowserWindow) {
     // the renderer has asked to exit
     canClose = true
     mainWindow.close()
-    console.log('QUITTING 2')
     app.quit()
   })
 }
@@ -178,13 +175,9 @@ if (!gotTheLock) {
 }
 
 if (isDevelopment) {
-  console.log('IS DEV')
   if (process.platform === 'win32') {
-    console.log('WIN32')
     process.on('message', (data: string) => {
-      console.log('MEESAGE')
       if (data === 'graceful-exit') {
-        console.log('EXIT GRACEFULLY')
         app.quit()
       }
     })

@@ -10,7 +10,7 @@
 
 ## Web version
 
-A web version is available [here](https://aristotle.dev/demo/).
+A web version is available [here](https://aristotle.dev/web/).
 
 ## Downloads
 

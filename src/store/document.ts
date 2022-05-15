@@ -6,8 +6,8 @@ import { LogicValue } from '@/circuit'
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
 import SimulationService from '@/services/SimulationService'
-import boundaries from '@/layout/boundaries'
-import rotation from '@/layout/rotation'
+import boundaries from '@/utils/geometry/boundaries'
+import rotation from '@/utils/geometry/rotation'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 
@@ -242,7 +242,7 @@ export const createDocumentStore = (id: string) => defineStore({
         .values(this.items)
         .map(({ boundingBox }) => boundingBox)
       const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
-      const { x, y } = boundaries.getCenteredScreenPoint(this.canvas, boundingBox, 20) // TODO: make this configurable
+      const { x, y } = boundaries.getCenteredScreenPoint(this.canvas, boundingBox, 20) // TODO: make 20 configurable as grid size
 
       const deltaX = x - boundingBox.left
       const deltaY = y - boundingBox.top
@@ -793,7 +793,7 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param selection - two-dimensional boundary
      */
     createSelection (selection: BoundingBox) {
-      if (!boundaries.isTwoDimensional(selection)) return // omit selection lines or points
+      if (!boundaries.isOneOrTwoDimensional(selection)) return // omit selection lines or points
 
       try {
         const itemIds = Object

@@ -7,7 +7,7 @@
       outline: 'none',
       zIndex
     }"
-    :snap-mode="type === ItemType.Freeport ? 'radius' : 'outer'"
+    :snap-mode="snapMode"
     :snap-boundaries="store.snapBoundaries"
     :bounding-box="boundingBox"
     :force-dragging="forceDragging"
@@ -93,7 +93,7 @@
 import ResizeObserver from 'resize-observer-polyfill'
 import { StoreDefinition } from 'pinia'
 import { defineComponent, PropType, onMounted, ref, ComponentPublicInstance, computed } from 'vue'
-import Draggable from '@/components/Draggable.vue'
+import Draggable from '@/components/editor/Draggable.vue'
 import LogicGate from '@/components/item/elements/LogicGate.vue'
 import InputSwitch from '@/components/item/elements/InputSwitch.vue'
 import IntegratedCircuit from '@/components/item/elements/IntegratedCircuit.vue'
@@ -102,11 +102,12 @@ import Freeport from '@/components/item/Freeport.vue'
 import PortHandle from '@/components/PortHandle.vue'
 import PortSet from '@/components/item/PortSet.vue'
 import Properties from '@/components/item/Properties.vue'
-import Selectable from '@/components/Selectable.vue'
+import Selectable from '@/components/editor/Selectable.vue'
 import PortItem from './PortItem.vue'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import DocumentState from '@/store/DocumentState'
+import SnapMode from '@/types/enums/SnapMode'
 
 /**
  * This component represents a two-dimensional item in the editor.
@@ -253,6 +254,14 @@ export default defineComponent({
 
     let hasFocus = false
     let isDragging = false
+
+    const snapMode = computed(() => {
+      if (props.type === ItemType.Freeport) {
+        return SnapMode.Radial
+      }
+
+      return SnapMode.Outer
+    })
 
     /* list of all ports that belong to this item */
     const ports = computed(() => {
@@ -445,6 +454,7 @@ export default defineComponent({
     return {
       selectable,
       store,
+      snapMode,
       ports,
       rawStore: props.store,
       portList,

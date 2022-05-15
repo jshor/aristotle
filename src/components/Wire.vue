@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import renderLayout from '../layout/wire'
+import renderLayout from '@/utils/geometry/wire'
 
 export default defineComponent({
   name: 'Wire',

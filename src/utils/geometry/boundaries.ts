@@ -1,8 +1,98 @@
+/**
+ * Rounds x to the nearest n.
+ */
+function roundToNth (x: number, n: number) {
+  return Math.round(x / n) * n
+}
+
+/**
+ * Returns true if a is within the radial distance of b.
+ */
 function isInNeighborhood (a: Point, b: Point, radius: number): boolean {
   const distX = Math.pow(a.x - b.x, 2)
   const distY = Math.pow(a.y - b.y, 2)
 
   return Math.sqrt(distX + distY) <= radius
+}
+
+/**
+ * Returns the delta of rounding the top-left point of the given bounding box to the nearest distance.
+ * This will achieve the effect of "snapping to grid."
+ *
+ * @param a - the bounding box of the element moving
+ * @param distance - the grid size
+ */
+function getGridSnapPosition (a: BoundingBox, distance: number): Point {
+  return {
+    x: roundToNth(a.left, distance) - a.left,
+    y: roundToNth(a.top, distance) - a.top
+  }
+}
+
+/**
+ * Returns the offset Cartesian distance between bounding box `a` and any other bounding boxes within the radial `distance`.
+ * If no bounding boxes are within 'd' distance, it returns an offset of (0, 0).
+ *
+ * @param boundingBoxes
+ * @param a
+ * @param d
+ */
+function getRadialSnapOffset (boundingBoxes: BoundingBox[], a: BoundingBox, distance: number): Point {
+  for (let i = 0; i < boundingBoxes.length; i++) {
+    const b = boundingBoxes[i]
+
+    if (isInNeighborhood({ x: b.left, y: b.top }, { x: a.left, y: a.top }, distance)) {
+      return {
+        x: b.left - a.left,
+        y: b.top - a.top
+      }
+    }
+  }
+
+  return { x: 0, y: 0 }
+}
+
+/**
+ * Returns the offset Cartesian distance between bounding box `a` and any other bounding boxes within the linear `distance`.
+ * If no bounding boxes are within 'd' distance, it returns an offset of (0, 0).
+ *
+ * @param boundingBoxes
+ * @param a
+ * @param d
+ */
+function getOuterSnapOffset (boundingBoxes: BoundingBox[], a: BoundingBox, distance: number): Point {
+  for (let i = 0; i < boundingBoxes.length; i++) {
+    const offset: Point = { x: 0, y: 0 }
+    const b = boundingBoxes[i]
+    const ts = Math.abs(b.top - a.bottom) <= distance
+    const bs = Math.abs(b.bottom - a.top) <= distance
+    const ls = Math.abs(b.left - a.right) <= distance
+    const rs = Math.abs(b.right - a.left) <= distance
+
+    if (
+      (a.left <= b.right && a.left >= b.left) ||
+      (a.right >= b.left && a.right <= b.right) ||
+      (a.left <= b.left && a.right >= b.right)
+    ) {
+      // a is within the y-axis boundaries
+      if (ts) offset.y = b.top - a.bottom
+      if (bs) offset.y = b.bottom - a.top
+    }
+
+    if (
+      (a.top <= b.bottom && a.top >= b.top) ||
+      (a.bottom >= b.top && a.bottom <= b.bottom) ||
+      (a.top <= b.top && a.bottom >= b.bottom)
+    ) {
+      // a is within the x-axis boundaries
+      if (ls) offset.x = b.left - a.right
+      if (rs) offset.x = b.right - a.left
+    }
+
+    if (offset.x || offset.y) return offset
+  }
+
+  return { x: 0, y: 0 }
 }
 
 /**
@@ -21,6 +111,13 @@ function hasLinearIntersection (a1: Point, a2: Point, b1: Point, b2: Point): boo
   return ccw(a1, b1, b2) !== ccw(a2, b1, b2) && ccw(a1, a2, b1) !== ccw(a1, a2, b2)
 }
 
+/**
+ * Returns true if the overlaps with the given bounding box.
+ *
+ * @param a1 - first point of the line
+ * @param a2 - second point of the line
+ * @param boundingBox - the rectange
+ */
 function isLineIntersectingRectangle (a1: Point, a2: Point, boundingBox: BoundingBox): boolean {
   const b1 = { x: boundingBox.left, y: boundingBox.top }
   const b2 = { x: boundingBox.right, y: boundingBox.top }
@@ -33,6 +130,33 @@ function isLineIntersectingRectangle (a1: Point, a2: Point, boundingBox: Boundin
     || hasLinearIntersection(a1, a2, b4, b1)
 }
 
+/**
+ * Returns true if a and b intersect.
+ *
+ * @param a
+ * @param b
+ * @returns boolean result of intersection
+ */
+function hasIntersection (a: BoundingBox, b: BoundingBox): boolean {
+  if (a.left >= b.right || b.left >= a.right) {
+    // one rect is on left side of other
+    return false
+  }
+
+  if (a.top >= b.bottom || b.top >= a.bottom) {
+    // one rect is above other
+    return false
+  }
+
+  return true
+}
+
+/**
+ * Scales the bounding box by the given scalar.
+ *
+ * @param box
+ * @param scale
+ */
 function scaleBoundingBox (box: BoundingBox, scale: number): BoundingBox {
   return {
     left: box.left * scale,
@@ -42,7 +166,10 @@ function scaleBoundingBox (box: BoundingBox, scale: number): BoundingBox {
   }
 }
 
-function isTwoDimensional (box: BoundingBox) {
+/**
+ * Returns true if the given bounding box is one- or two-dimensional.
+ */
+function isOneOrTwoDimensional (box: BoundingBox) {
   return box.left !== box.right || box.top !== box.bottom
 }
 
@@ -82,27 +209,6 @@ function getPointBoundary (point: Point): BoundingBox {
     right: point.x,
     bottom: point.y
   }
-}
-
-/**
- * Returns true if a and b intersect.
- *
- * @param a
- * @param b
- * @returns boolean result of intersection
- */
-function hasIntersection (a: BoundingBox, b: BoundingBox): boolean {
-  if (a.left >= b.right || b.left >= a.right) {
-    // one rect is on left side of other
-    return false
-  }
-
-  if (a.top >= b.bottom || b.top >= a.bottom) {
-    // one rect is above other
-    return false
-  }
-
-  return true
 }
 
 /**
@@ -154,6 +260,9 @@ function getGroupBoundingBox (boundingBoxes: BoundingBox[]): BoundingBox {
   })
 }
 
+/**
+ * Returns the center point of the given bounding box.
+ */
 function getBoundingBoxMidpoint (boundingBox: BoundingBox): Point {
   const width = boundingBox.right - boundingBox.left
   const height = boundingBox.bottom - boundingBox.top
@@ -171,23 +280,25 @@ function getBoundingBoxMidpoint (boundingBox: BoundingBox): Point {
  * @param childBox
  * @param factor - any factor to round by
  */
-function getCenteredScreenPoint (parentBox: BoundingBox, childBox: BoundingBox, factor: number = 1): Point {
+function getCenteredScreenPoint (parentBox: BoundingBox, childBox: BoundingBox, factor: number): Point {
   const parentMidpoint = getBoundingBoxMidpoint(parentBox)
   const childWidth = childBox.right - childBox.left
   const childHeight = childBox.bottom - childBox.top
-  const roundToGrid = (n: number) => Math.round(n / factor) * factor
 
   return {
-    x: roundToGrid(parentMidpoint.x - (childWidth / 2)),
-    y: roundToGrid(parentMidpoint.y - (childHeight / 2))
+    x: roundToNth(parentMidpoint.x - (childWidth / 2), factor),
+    y: roundToNth(parentMidpoint.y - (childHeight / 2), factor)
   }
 }
 
 export default {
   isInNeighborhood,
+  getRadialSnapOffset,
+  getOuterSnapOffset,
+  getGridSnapPosition,
   isLineIntersectingRectangle,
   scaleBoundingBox,
-  isTwoDimensional,
+  isOneOrTwoDimensional,
   getLinearBoundaries,
   getPointBoundary,
   hasIntersection,

@@ -1,4 +1,3 @@
-import IWireGeometry from '@/interfaces/IWireGeometry'
 import rotate from './rotate'
 
 const WIRE_PADDING = 15
@@ -9,7 +8,7 @@ const WIRE_PADDING = 15
  * @param source
  * @param target
  */
-export default function renderLayout (source: Port, target: Port): IWireGeometry {
+export default function renderLayout (source: Port, target: Port): WireGeometry {
   const a = source.position
   const b = target.position
   const { start, end } = getEndpoints(a, b)
@@ -154,7 +153,7 @@ export function getEndpoints (a: Point, b: Point): { start: Point, end: Point } 
  * @param {Point} start - the source port position
  * @param {Point} end - the target port position
  */
-export function computeBezier (sourceDirection: number, targetDirection: number, start: Point, end: Point): IWireGeometry {
+export function computeBezier (sourceDirection: number, targetDirection: number, start: Point, end: Point): WireGeometry {
   const x1 = start.x
   const y1 = start.y
   const x4 = end.x

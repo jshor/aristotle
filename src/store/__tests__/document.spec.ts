@@ -2,7 +2,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import DocumentState from '../DocumentState'
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
-import boundaries from '@/layout/boundaries'
+import boundaries from '@/utils/geometry/boundaries'
 import ItemType from '@/types/enums/ItemType'
 import {
   createConnection,
@@ -11,7 +11,7 @@ import {
   createPort,
 } from './__helpers__/helpers'
 import { createDocumentStore } from '../document'
-import rotation from '@/layout/rotation'
+import rotation from '@/utils/geometry/rotation'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 
 const stubAll = (store: any, methods: string[]) => {
