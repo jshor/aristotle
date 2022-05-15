@@ -36,7 +36,7 @@ export default defineComponent({
         .split('/')
         .pop()
 
-      this.url = `https://github.com/${slug}/releases/download/${this.version}/Aristotle Setup ${this.version}.exe`
+      this.url = `https://github.com/${slug}/releases/download/${this.version}/Aristotle.Setup.${this.version}.exe`
     } catch (error) {
       // oh well, we tried
     }

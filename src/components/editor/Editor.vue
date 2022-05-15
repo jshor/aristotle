@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, StyleValue } from 'vue'
 import Selector from './Selector.vue'
 
 export default defineComponent({
@@ -50,7 +50,7 @@ export default defineComponent({
     }
   },
   computed: {
-    style () {
+    style (): StyleValue {
       return {
         backgroundSize: `${this.gridSize}px ${this.gridSize}px`,
         transform: `scale(${this.zoom})`,
@@ -118,6 +118,8 @@ export default defineComponent({
      * Terminates panning mode, if panning. This will suppress the context menu if so.
      */
     mouseup ($event: MouseEvent) {
+      if (!this.panning) return
+
       if ($event.button === 2) {
         const deltaX = Math.abs(this.originalMousePosition.x - $event.x)
         const deltaY = Math.abs(this.originalMousePosition.y - $event.y)
@@ -139,9 +141,9 @@ export default defineComponent({
     mousewheel ($event: WheelEvent) {
       if (!$event.shiftKey) return
 
-    // Normalize mouse wheel movement to +1 or -1 to avoid unusual jumps.
-    const wheel = $event.deltaY < 0 ? 1 : -1;
-      const zoom = this.zoom + (wheel/ 10)
+      // normalize mouse wheel movement to +1 or -1 to avoid unusual jumps
+      const wheel = $event.deltaY < 0 ? 1 : -1
+      const zoom = this.zoom + (wheel / 10)
 
       this.$emit('zoom', { zoom, point: $event })
     },

@@ -3,9 +3,16 @@
     :tabindex="0"
     @mousedown="onMouseDown"
   >
-    <div class="toolbox-entry">
-      <div class="toolbox-entry__preview" ref="toolboxItem">
-        <div class="toolbox-entry__inner" ref="selectable" :style="{ zoom }">
+    <div class="toolbox-item__parent">
+      <div
+        class="toolbox-item__preview"
+        ref="preview"
+      >
+        <div
+          class="toolbox-item__inner"
+          ref="selectable"
+          :style="{ zoom }"
+        >
           <slot />
           <port-set>
             <template
@@ -31,40 +38,46 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onBeforeMount, PropType, ref } from 'vue'
+import { defineComponent, onMounted, onBeforeMount, ref } from 'vue'
 import ResizeObserver from 'resize-observer-polyfill'
 import PortHandle from '@/components/PortHandle.vue'
 import PortSet from '@/components/item/PortSet.vue'
 import PortPivot from '@/components/PortPivot.vue'
 
 export default defineComponent({
-  name: 'ToolboxItem',
+  name: 'preview',
   components: {
     PortHandle,
     PortSet,
     PortPivot
   },
   props: {
+    /** Number of ports to display on the left. */
     leftPortCount: {
       type: Number,
       default: 0
     },
+    /** Number of ports to display on the top. */
     topPortCount: {
       type: Number,
       default: 0
     },
+    /** Number of ports to display on the right. */
     rightPortCount: {
       type: Number,
       default: 0
     },
+    /** Number of ports to display on the bottom. */
     bottomPortCount: {
       type: Number,
       default: 0
     },
+    /** User-friendly label. */
     label: {
       type: String,
       required: true
     },
+    /** Current canvas zoom level. */
     zoom: {
       type: Number,
       default: 1
@@ -72,7 +85,7 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const selectable = ref<HTMLElement>()
-    const toolboxItem = ref<HTMLElement>()
+    const preview = ref<HTMLElement>()
     const zoom = ref(1)
     const portCounts = {
       left: props.leftPortCount,
@@ -84,16 +97,24 @@ export default defineComponent({
     let draggedElement: HTMLElement | null = null
     let draggedPoint: Point = { x: 0, y: 0 }
 
+    /**
+     * Resize event handler.
+     * This will update the zoom level of the displayed item such that it fits in the parent (if smaller).
+     */
     function onSizeChanged () {
-      if (selectable.value && toolboxItem.value) {
+      if (selectable.value && preview.value) {
         const inner = selectable.value.getBoundingClientRect()
-        const outer = toolboxItem.value.getBoundingClientRect()
+        const outer = preview.value.getBoundingClientRect()
         const ratio = Math.max(inner.width / outer.width, inner.height / outer.height)
 
         zoom.value = Math.min(1 / ratio, 1)
       }
     }
 
+    /**
+     * Mouse down event handler.
+     * Begins the dragging session.
+     */
     function onMouseDown ($event: MouseEvent) {
       if (!selectable.value) return
 
@@ -108,11 +129,16 @@ export default defineComponent({
       draggedPoint = $event
     }
 
+    /**
+     * Mouse move event handler.
+     */
     function onMouseMove ($event: MouseEvent) {
       if (!draggedElement) return
 
-      const deltaX = Math.abs(draggedPoint.x - $event.x)
-      const deltaY = Math.abs(draggedPoint.y - $event.y)
+      const eventX = $event.clientX
+      const eventY = $event.clientY
+      const deltaX = Math.abs(draggedPoint.x - eventX)
+      const deltaY = Math.abs(draggedPoint.y - eventY)
 
       if (deltaX + deltaY < 4) {
         // if the mouse has not moved at least two pixels, then don't start the dragging process
@@ -125,10 +151,15 @@ export default defineComponent({
 
       const { width, height } = draggedElement.getBoundingClientRect()
 
-      draggedElement.style.left = `${($event.x - ((width / 2) * props.zoom)) / props.zoom}px`
-      draggedElement.style.top = `${($event.y - ((height / 2) * props.zoom)) / props.zoom}px`
+      draggedElement.style.left = `${(eventX - ((width / 2) * props.zoom)) / props.zoom}px`
+      draggedElement.style.top = `${(eventY - ((height / 2) * props.zoom)) / props.zoom}px`
     }
 
+    /**
+     * Mouse button release event handler.
+     *
+     * @emits drop when the toolbox item has been dragged out of the box, or clicked on
+     */
     function onMouseUp () {
       if (!draggedElement) return
       if (!document.body.contains(draggedElement)) emit('drop')
@@ -147,8 +178,8 @@ export default defineComponent({
     const observer = new ResizeObserver(onSizeChanged)
 
     onMounted(() => {
-      if (toolboxItem.value) {
-        observer.observe(toolboxItem.value)
+      if (preview.value) {
+        observer.observe(preview.value)
       }
 
       if (selectable.value) {
@@ -169,24 +200,38 @@ export default defineComponent({
     return {
       portCounts,
       onMouseDown,
+      onSizeChanged,
       zoom,
       selectable,
-      toolboxItem
+      preview
     }
   }
 })
 </script>
 
 <style lang="scss">
-.toolbox-entry {
-  overflow: hidden;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1em;
-  box-sizing: border-box;
-  aspect-ratio: 1;
+.toolbox-item {
+  width: 50%;
+  display: inline-block;
+
+  &:hover {
+    background-color: var(--color-bg-secondary);
+  }
+
+  &:active {
+    background-color: var(--color-bg-tertiary);
+  }
+
+  &__parent {
+    overflow: hidden;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1em;
+    box-sizing: border-box;
+    aspect-ratio: 1;
+  }
 
   &__preview {
     display: flex;
@@ -201,19 +246,6 @@ export default defineComponent({
   &__inner {
     display: inline-block;
     position: relative;
-  }
-}
-
-.toolbox-item {
-  width: 50%;
-  display: inline-block;
-
-  &:hover {
-    background-color: var(--color-bg-secondary);
-  }
-
-  &:active {
-    background-color: var(--color-bg-tertiary);
   }
 
   &__label {

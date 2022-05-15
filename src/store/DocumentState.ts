@@ -1,5 +1,4 @@
 import SimulationService from '@/services/SimulationService'
-import ImageType from '@/types/enums/ImageType'
 
 export default interface DocumentState {
   viewport: DOMRect

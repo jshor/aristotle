@@ -24,7 +24,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import Draggable from './Draggable.vue'
+import Draggable from './editor/Draggable.vue'
 
 export default defineComponent({
   name: 'Group',

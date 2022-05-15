@@ -18,7 +18,7 @@
         bottom: position.y
       }"
       :lock-visual="true"
-      snap-mode="radius"
+      :snap-mode="snapMode"
       @drag-start="dragStart"
       @drag-end="dragEnd"
     >
@@ -39,11 +39,12 @@
 import { defineComponent, PropType } from 'vue'
 import { StoreDefinition } from 'pinia'
 import { v4 as uuid } from 'uuid'
-import Draggable from '../components/Draggable.vue'
+import Draggable from '../components/editor/Draggable.vue'
 import PortHandle from '../components/PortHandle.vue'
 import PortPivot from '../components/PortPivot.vue'
 import DocumentState from '@/store/DocumentState'
 import PortType from '@/types/enums/PortType'
+import SnapMode from '@/types/enums/SnapMode'
 
 export default defineComponent({
   name: 'PortItem',
@@ -119,6 +120,7 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const store = props.store()
+    const snapMode = SnapMode.Radial
 
     let newFreeport: any = {}
     let isDragging = false
@@ -190,6 +192,7 @@ export default defineComponent({
 
     return {
       store,
+      snapMode,
       isDragging,
       onEscapeKey,
       onBlur,

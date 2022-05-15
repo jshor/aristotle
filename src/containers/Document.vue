@@ -85,14 +85,14 @@
 import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance, watchEffect } from 'vue'
 import ResizeObserver from 'resize-observer-polyfill'
 import { StoreDefinition } from 'pinia'
-import DocumentState from '@/store/DocumentState'
-import Editor from '@/components/Editor.vue'
-import Group from '@/components/Group.vue'
 import Connection from './Connection.vue'
 import Item from './Item.vue'
+import Editor from '@/components/editor/Editor.vue'
+import Group from '@/components/Group.vue'
 import editorContextMenu from '@/menus/context/editor'
-import boundaries from '@/layout/boundaries'
+import boundaries from '@/utils/geometry/boundaries'
 import printing from '@/utils/printing'
+import DocumentState from '@/store/DocumentState'
 import { useRootStore } from '@/store/root'
 
 export default defineComponent({
