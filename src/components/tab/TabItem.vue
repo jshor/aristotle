@@ -6,6 +6,7 @@
     }"
     class="tab-item"
     @mousedown="$emit('activate')"
+    @touchstart="$emit('activate')"
   >
     <div class="tab-item__label">
       {{ label }}{{ dirty ? '*' : '' }}
@@ -49,11 +50,11 @@ export default defineComponent({
   max-width: 200px;
   padding: 0.5rem;
   background-color: var(--color-bg-secondary);
-  border-style: solid;
+  color: var(--color-primary);
   border-color: var(--color-bg-tertiary);
+  border-style: solid;
   border-width: $border-width $border-width $border-width 0;
   border-bottom: 0;
-  color: var(--color-primary);
   box-sizing: border-box;
 
   &:first-of-type {

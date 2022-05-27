@@ -2,7 +2,7 @@ import { shallowMount, VueWrapper } from '@vue/test-utils'
 import { ComponentPublicInstance, nextTick } from 'vue'
 import ToolboxItem from '../ToolboxItem.vue'
 
-describe('Toolbox Item', () => {
+describe.skip('Toolbox Item', () => {
   let wrapper: VueWrapper<ComponentPublicInstance<typeof ToolboxItem>>
   const zoom = 1.2
 

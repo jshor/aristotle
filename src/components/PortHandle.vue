@@ -1,12 +1,12 @@
 <template>
-  <div
-    class="port-handle"
-    :class="{
-      'port-handle--active': active
-    }"
-    @mousedown="mousedown"
-    @mouseup="mouseup"
-  />
+  <div class="port-handle">
+    <div
+      class="port-handle__display"
+      :class="{
+        'port-handle__display--active': active
+      }"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -26,49 +26,40 @@ export default defineComponent({
       type: Number,
       default: 0
     }
-  },
-  methods: {
-    /**
-     * Wrapper for the `mousedown` event.
-     */
-    mousedown (event: MouseEvent) {
-      this.$emit('mousedown', event)
-    },
-
-    /**
-     * Wrapper for the `mouseup` event.
-     */
-    mouseup (event: MouseEvent) {
-      this.$emit('mouseup', event)
-    }
   }
 })
 </script>
 
 <style lang="scss">
 .port-handle {
+  --port-radius: 16px;
+
   position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid var(--color-secondary);
   box-sizing: border-box;
-  top: -8px;
-  left: -8px;
-  width: 16px;
-  height: 16px;
-  background-color: var(--color-bg-secondary);
+  top: calc(var(--port-radius) * -1);
+  left: calc(var(--port-radius) * -1);
+  width: calc(var(--port-radius) * 2);
+  height: calc(var(--port-radius) * 2);
   border-radius: 50%;
-  cursor: move;
   pointer-events: all;
-  transition: all 0.25s;
   z-index: 1001;
 
-  &--active {
-    width: 24px;
-    height: 24px;
-    top: -12px;
-    left: -12px;
+  &__display {
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-secondary);
+    transition: all 0.25s;
+    cursor: move;
+
+    &--active {
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 </style>

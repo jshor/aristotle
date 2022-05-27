@@ -14,6 +14,9 @@ describe('Connection.vue', () => {
   const pinia = createTestingPinia()
   const storeInstance = createDocumentStore('document')
   const store = storeInstance()
+  const touchEvent = {
+    touches: [{ clientX: 10, clientY: 11 }]
+  }
 
   let wrapper: VueWrapper
 
@@ -69,16 +72,6 @@ describe('Connection.vue', () => {
         expect(store.selectItem).toHaveBeenCalledTimes(1)
         expect(store.selectItem).toHaveBeenCalledWith(connectionId, false)
     })
-
-    it('should neither select nor de-select the connection if it is part of a group', async () => {
-      await wrapper.setProps({ groupId: 'group-id' })
-      await wrapper
-        .find('[data-test="wire"]')
-        .trigger('mousedown')
-
-        expect(store.selectItem).not.toHaveBeenCalled()
-        expect(store.deselectItem).not.toHaveBeenCalled()
-    })
   })
 
   describe('when the mouse moves', () => {
@@ -87,12 +80,17 @@ describe('Connection.vue', () => {
         .spyOn(store, 'createFreeport')
         .mockImplementation(jest.fn())
       jest
+        .spyOn(store, 'dragItem')
+        .mockImplementation(jest.fn())
+      jest
         .spyOn(store, 'setSnapBoundaries')
         .mockImplementation(jest.fn())
     })
 
     it('should create a new freeport when the mouse moves after the left mouse button is down', async () => {
-      await window.dispatchEvent(new MouseEvent('mousedown'))
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('mousedown')
 
       window.dispatchEvent(new MouseEvent('mousemove', {
         clientX: 10,
@@ -103,8 +101,25 @@ describe('Connection.vue', () => {
       expect(store.setSnapBoundaries).toHaveBeenCalled()
     })
 
-    it('should not create a new freeport after the mouse moves multiple times', async () => {
-      await window.dispatchEvent(new MouseEvent('mousedown'))
+    it('should not create a new freeport if the component has been destroyed', async () => {
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('mousedown')
+
+      wrapper.unmount()
+      window.dispatchEvent(new MouseEvent('mousemove', {
+        clientX: 10,
+        clientY: 22
+      }))
+
+      expect(store.createFreeport).not.toHaveBeenCalled()
+      expect(store.setSnapBoundaries).not.toHaveBeenCalled()
+    })
+
+    it('should drag the newly-created freeport after the mouse moves again after creating a freeport', async () => {
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('mousedown')
 
       window.dispatchEvent(new MouseEvent('mousemove', {
         clientX: 10,
@@ -115,21 +130,115 @@ describe('Connection.vue', () => {
         clientY: 24
       }))
 
-      expect(store.createFreeport).not.toHaveBeenCalled()
-      expect(store.setSnapBoundaries).not.toHaveBeenCalled()
+      expect(store.dragItem).toHaveBeenCalled()
+    })
+  })
+
+  describe('when the connection is physically touched', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(store, 'selectItem')
+        .mockImplementation(jest.fn())
     })
 
-    it('should not create a new freeport if the component has been destroyed', async () => {
-      await window.dispatchEvent(new MouseEvent('mousedown'))
+    describe('when touched for the duration of the touch timeout limit', () => {
+      beforeEach(async () => {
+        navigator.vibrate = jest.fn()
 
-      wrapper.unmount()
-      window.dispatchEvent(new MouseEvent('mousemove', {
-        clientX: 10,
-        clientY: 22
-      }))
+        jest.useFakeTimers()
+        jest
+          .spyOn(navigator, 'vibrate')
+          .mockImplementation(jest.fn())
+
+        await wrapper.setProps({ isMobile: true })
+        await wrapper
+          .find('[data-test="wire"]')
+          .trigger('touchstart', {
+            touches: [{ clientX: 10, clientY: 11 }]
+          })
+
+        jest.advanceTimersByTime(1000)
+      })
+
+      afterEach(() => jest.useRealTimers())
+
+      it('should select the connection while maintaining other selections', () => {
+        expect(store.selectItem).toHaveBeenCalledTimes(1)
+        expect(store.selectItem).toHaveBeenCalledWith(connectionId, true)
+      })
+
+      it('should vibrate the device', () => {
+        expect(navigator.vibrate).toHaveBeenCalledTimes(1)
+        expect(navigator.vibrate).toHaveBeenCalledWith(100)
+      })
+    })
+
+    describe('when touched once before the touch timeout passes', () => {
+      it('should select the connection while maintaining other selections', async () => {
+        await wrapper
+          .find('[data-test="wire"]')
+          .trigger('touchstart', touchEvent)
+
+        expect(store.selectItem).toHaveBeenCalledTimes(1)
+        expect(store.selectItem).toHaveBeenCalledWith(connectionId, true)
+      })
+    })
+  })
+
+  describe('when dragged by a physical touch', () => {
+    const touchMoveEvent = {
+      touches: [{ clientX: 14, clientY: 19 }]
+    }
+
+    beforeEach(() => {
+      jest
+        .spyOn(store, 'createFreeport')
+        .mockImplementation(jest.fn())
+      jest
+        .spyOn(store, 'setSnapBoundaries')
+        .mockImplementation(jest.fn())
+    })
+
+    it('should create a new freeport', async () => {
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('touchstart', touchEvent)
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('touchmove', touchMoveEvent)
+
+      expect(store.createFreeport).toHaveBeenCalled()
+    })
+
+    it('should not create a new freeport when the connection is part of a group', async () => {
+      await wrapper.setProps({ groupId: 'group-id' })
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('touchstart', touchEvent)
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('touchmove', touchMoveEvent)
 
       expect(store.createFreeport).not.toHaveBeenCalled()
-      expect(store.setSnapBoundaries).not.toHaveBeenCalled()
+    })
+
+    it('should not change the selection when the touch moves', async () => {
+      jest
+        .spyOn(store, 'selectItem')
+        .mockImplementation(jest.fn())
+
+      await wrapper.setProps({ isMobile: true })
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('touchstart', touchEvent)
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('touchmove', touchMoveEvent)
+      await wrapper
+        .find('[data-test="wire"]')
+        .trigger('touchend', touchEvent)
+
+      expect(store.selectItem).not.toHaveBeenCalled()
     })
   })
 

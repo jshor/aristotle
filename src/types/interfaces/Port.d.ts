@@ -11,7 +11,9 @@ declare global {
     rotation: number
     orientation: number
     value: number
+    hue: number
     isFreeport: boolean
+    isMonitored: boolean
     connectedPortIds: string[]
   }
 }

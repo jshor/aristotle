@@ -7,7 +7,7 @@ import flipFlop from '../containers/fixtures/flipflop.json'
 import integratedCircuit from '../containers/fixtures/ic.json'
 import testIc from '../containers/fixtures/test.json'
 
-import { createDocumentStore } from './document'
+import { createDocumentStore, DocumentStore } from './document'
 import FileService from '@/services/FileService'
 import getFileName from '@/utils/getFileName'
 
@@ -17,7 +17,7 @@ export type RootStore = {
       fileName: string
       filePath: string
       displayName: string
-      store: StoreDefinition<string, DocumentState>
+      store: DocumentStore
     }
   }
   clipboard: string | null

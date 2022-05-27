@@ -1,4 +1,4 @@
-import DocumentState from '@/store/DocumentState'
+import { DocumentStore } from '@/store/document'
 import ItemSubtype from '../enums/ItemSubtype'
 import ItemType from '../enums/ItemType'
 

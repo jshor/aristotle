@@ -187,7 +187,7 @@ describe('Simulation Service', () => {
   describe('setPortValue()', () => {
     const portId = 'port-id'
     const node = new CircuitNode(portId)
-    const wave = new BinaryWaveService(portId, portId, 1)
+    const wave = new BinaryWaveService(portId, portId, 1, 0)
 
     beforeEach(() => {
       jest
@@ -279,9 +279,6 @@ describe('Simulation Service', () => {
       jest
         .spyOn(service, 'addConnection')
         .mockImplementation(jest.fn())
-      jest
-        .spyOn(service, 'monitorNode')
-        .mockImplementation(jest.fn())
     })
 
     describe('when the item is a valid integrated circuit', () => {
@@ -323,9 +320,6 @@ describe('Simulation Service', () => {
         .mockImplementation(jest.fn())
       jest
         .spyOn(service, 'addClock')
-        .mockImplementation(jest.fn())
-      jest
-        .spyOn(service, 'monitorNode')
         .mockImplementation(jest.fn())
       jest
         .spyOn(service.circuit, 'addNode')
@@ -389,96 +383,6 @@ describe('Simulation Service', () => {
       expect(service.circuit.addNode).toHaveBeenCalledTimes(1)
       expect(service.circuit.addNode).toHaveBeenCalledWith(circuitNode)
     })
-
-    it('should not monitor the node if it is forced to continue during execution', () => {
-      const item = createItem('item-id', ItemType.InputNode, { portIds: [inputPort.id, outputPort.id] })
-
-      service.addNode(item, ports, true)
-
-      expect(service.monitorNode).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('monitorNode()', () => {
-    const circuitNode = new CircuitNode('test')
-    const inputPort = createPort('inputPort', 'item-id', PortType.Input)
-    const outputPort = createPort('outputPort', 'item-id', PortType.Output)
-    const ports = { inputPort, outputPort }
-
-    beforeEach(() => {
-      jest
-        .spyOn(service, 'monitorPort')
-        .mockImplementation(jest.fn())
-    })
-
-    describe('when the item has opted to be visible in the oscilloscope', () => {
-      const details = {
-        portIds: [inputPort.id, outputPort.id],
-        properties: {
-          showInOscilloscope: {
-            type: 'boolean',
-            label: 'show in oscilloscope',
-            value: true
-          }
-        }
-      }
-
-      it('should monitor input ports for an output node', () => {
-        const item = createItem('item', ItemType.OutputNode, details)
-
-        service.nodes[inputPort.id] = circuitNode
-        service.monitorNode(item, ports)
-
-        expect(service.monitorPort).toHaveBeenCalledTimes(1)
-        expect(service.monitorPort).toHaveBeenCalledWith(inputPort.id, circuitNode.value)
-      })
-
-      it('should monitor output ports for an input node', () => {
-        const item = createItem('item', ItemType.InputNode, details)
-
-        service.nodes[outputPort.id] = circuitNode
-        service.monitorNode(item, ports)
-
-        expect(service.monitorPort).toHaveBeenCalledTimes(1)
-        expect(service.monitorPort).toHaveBeenCalledWith(outputPort.id, circuitNode.value)
-      })
-    })
-
-    it('should not monitor any ports if the item is not opted to be visible in the oscilloscope', () => {
-      const item = createItem('item', ItemType.OutputNode, {
-        portIds: [inputPort.id, outputPort.id],
-        properties: {
-          showInOscilloscope: {
-            type: 'boolean',
-            label: 'show in oscilloscope',
-            value: false
-          }
-        }
-      })
-
-      service.monitorNode(item, ports)
-
-      expect(service.monitorPort).not.toHaveBeenCalled()
-    })
-
-    it('should not monitor any ports if there is no option to be visible in the oscilloscope', () => {
-      const item = createItem('item', ItemType.OutputNode, {
-        portIds: [inputPort.id, outputPort.id],
-        properties: {}
-      })
-
-      service.monitorNode(item, ports)
-
-      expect(service.monitorPort).not.toHaveBeenCalled()
-    })
-
-    it('should not monitor any ports if there are no properties', () => {
-      const item = createItem('item', ItemType.OutputNode)
-
-      service.monitorNode(item, ports)
-
-      expect(service.monitorPort).not.toHaveBeenCalled()
-    })
   })
 
   describe('addClock()', () => {
@@ -505,23 +409,6 @@ describe('Simulation Service', () => {
     it('should add the new clock to the oscillator', () => {
       expect(service.oscillator.add).toHaveBeenCalledTimes(1)
       expect(service.oscillator.add).toHaveBeenCalledWith(service.clocks[portId])
-    })
-  })
-
-  describe('addClock()', () => {
-    it('should add the sibling port', () => {
-      const portId = 'port-id'
-      const siblingPortId = 'sibling-port-id'
-
-      jest
-        .spyOn(service, 'addPort')
-        .mockImplementation(jest.fn())
-
-      service.nodes[siblingPortId] = new CircuitNode('sibling-circuit-node')
-      service.addSiblingPort(portId, siblingPortId)
-
-      expect(service.addPort).toHaveBeenCalledTimes(1)
-      expect(service.addPort).toHaveBeenCalledWith(portId, service.nodes[siblingPortId] )
     })
   })
 
@@ -553,7 +440,7 @@ describe('Simulation Service', () => {
       })
 
       it('should draw a pulse change if a wave is associated with it', () => {
-        const wave = new BinaryWaveService('test', 'test', 1)
+        const wave = new BinaryWaveService('test', 'test', 1, 0)
 
         jest
           .spyOn(wave, 'drawPulseChange')
@@ -703,7 +590,7 @@ describe('Simulation Service', () => {
     })
 
     it('should add the wave to the oscillator if it does not already exist', () => {
-      service.monitorPort(portId, 1)
+      service.monitorPort(portId, 1, 0)
 
       expect(service.waves).toHaveProperty(portId)
       expect(service.oscillator.add).toHaveBeenCalledTimes(1)
@@ -711,8 +598,8 @@ describe('Simulation Service', () => {
     })
 
     it('should not add the wave to the oscillator if it already exists', () => {
-      service.waves[portId] = new BinaryWaveService(portId, portId, 1)
-      service.monitorPort(portId, 1)
+      service.waves[portId] = new BinaryWaveService(portId, portId, 1, 0)
+      service.monitorPort(portId, 1, 0)
 
       expect(service.oscillator.add).not.toHaveBeenCalled()
     })
@@ -731,7 +618,7 @@ describe('Simulation Service', () => {
     })
 
     describe('when the wave exists', () => {
-      const wave = new BinaryWaveService(portId, portId, 1)
+      const wave = new BinaryWaveService(portId, portId, 1, 0)
 
       beforeEach(() => {
         service.waves[portId] = wave

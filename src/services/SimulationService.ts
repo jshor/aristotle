@@ -1,5 +1,4 @@
-import { cloneDeep } from 'lodash'
-import { Circuit, CircuitNode, OutputNode } from '@/circuit'
+import { Circuit, CircuitNode } from '@/circuit'
 import { TinyEmitter } from 'tiny-emitter'
 import BinaryWaveService from './BinaryWaveService'
 import ClockService from './ClockService'
@@ -16,6 +15,8 @@ import circuitNodeMapper from '@/utils/circuitNodeMapper'
  * It is important that the simulation maintains the state of the circuit separately from the editor state, as
  * components may be removed/added/changed in the editor by the user at any time. Maintaining them separate allows
  * the state of components present in the editor to be persisted.
+ *
+ * There is a one-to-one relationship between SimulationService instances and Document instances.
  */
 export default class SimulationService {
   /** Mapping of port IDs to their respective circuit nodes. */
@@ -33,8 +34,6 @@ export default class SimulationService {
   /** Logical circuit instance. */
   circuit: Circuit = new Circuit()
 
-  integratedCircuits: Record<string, Circuit> = {}
-
   /** Circuit oscillator. */
   oscillator: OscillationService = new OscillationService()
 
@@ -46,8 +45,6 @@ export default class SimulationService {
 
   /** Oscillogram data, containing each BinaryWave instance observed in the oscilloscope. */
   oscillogram: Oscillogram = {}
-
-  integratedCircuitGroups: Record<string, string[]> = {}
 
   /**
    * Constructor.
@@ -92,6 +89,7 @@ export default class SimulationService {
    * @emits change when the oscillogram or any value changes changes
    */
   emit = () => {
+    // console.log(Object.keys( this.oscillogram))
     this.emitter.emit('change', this.valueMap, this.oscillogram)
   }
 
@@ -288,7 +286,13 @@ export default class SimulationService {
 
     this.circuit.addNode(node)
 
-    if (!forceContinue) this.monitorNode(item, ports)
+    item.portIds.forEach(portId => {
+      const port = ports[portId]
+
+      if (port.isMonitored) {
+        this.monitorPort(portId, port.value, port.hue)
+      }
+    })
   }
 
   /**
@@ -297,6 +301,7 @@ export default class SimulationService {
    * @param portIds - list of IDs of ports associated with the node (at least one matching is required)
    */
   removeNode = (item: Item) => {
+    /** returns the port IDs of all ports that are related to the given integrated circuit */
     const getIntegratedCircuitPortIds = (ic: Item): string[] => {
       if (!ic.integratedCircuit) return []
 
@@ -312,9 +317,10 @@ export default class SimulationService {
         }, [] as string[])
     }
 
+    // remove all nodes that are referenced to port IDs of the given item
     item
       .portIds
-      .concat(getIntegratedCircuitPortIds(item))
+      .concat(getIntegratedCircuitPortIds(item)) // ...including IC ports
       .forEach(portId => {
         const node = this.nodes[portId]
 
@@ -328,26 +334,6 @@ export default class SimulationService {
   }
 
   /**
-   * Monitors a node in the oscilloscope.
-   *
-   * @param item - item to observe
-   * @param ports - ID-to-Port mapping of all related ports
-   */
-  monitorNode = (item: Item, ports: Record<string, Port>) => {
-    if (item.properties?.showInOscilloscope?.value) {
-      const inputIds = item.portIds.filter(portId => ports[portId].type === PortType.Input)
-      const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
-      const portIds = item.type == ItemType.OutputNode
-        ? inputIds // for output nodes, all incoming signals should be monitored
-        : outputIds // for all other nodes, only its output signal should be monitored
-
-      portIds.forEach(portId => {
-        this.monitorPort(portId, this.nodes[portId].value)
-      })
-    }
-  }
-
-  /**
    * Adds an interval clock to the circuit.
    *
    * @param portId
@@ -358,16 +344,6 @@ export default class SimulationService {
       this.setPortValue(portId, signal)
     })
     this.oscillator.add(this.clocks[portId])
-  }
-
-  /**
-   * Adds a given port ID as a sibling to the node having the given port ID.
-   *
-   * @param portId
-   * @param siblingPortId
-   */
-  addSiblingPort = (portId: string, siblingPortId: string) => {
-    this.addPort(portId, this.nodes[siblingPortId])
   }
 
   /**
@@ -435,9 +411,9 @@ export default class SimulationService {
    * @param portId
    * @param value - current port value
    */
-  monitorPort = (portId: string, value: number) => {
+  monitorPort = (portId: string, value: number, hue: number) => {
     if (!this.waves[portId]) {
-      this.waves[portId] = new BinaryWaveService(portId, portId, value)
+      this.waves[portId] = new BinaryWaveService(portId, portId, value, hue)
       this.oscillator.add(this.waves[portId])
     }
   }

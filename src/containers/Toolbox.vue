@@ -1,121 +1,58 @@
 <template>
-  <div class="toolbox">
-    <toolbox-item
-      :right-port-count="1"
-      :zoom="zoom"
-      label="Toggle Switch"
-      @drop="onDropSwitch"
+  <toolbox-layout :is-open="isToolboxOpen">
+    <template
+      v-for="(factorySubtypes, type) in factories"
+      v-slot:[type]
     >
-      <input-switch :value="-1" />
-    </toolbox-item>
-
-    <toolbox-item
-      :right-port-count="1"
-      :zoom="zoom"
-      label="Clock"
-      @drop="onDropClock"
-    >
-      <input-switch :value="-1" />
-    </toolbox-item>
-
-    <toolbox-item
-      :left-port-count="1"
-      :zoom="zoom"
-      label="Lightbulb"
-      @drop="onDropLightbulb"
-    >
-      <lightbulb :value="-1" />
-    </toolbox-item>
-
-    <toolbox-item
-      v-for="(type, index) in [
-        ItemSubtype.And,
-        ItemSubtype.Nand,
-        ItemSubtype.Xnor,
-        ItemSubtype.Xor,
-        ItemSubtype.Nor,
-        ItemSubtype.Or
-      ]"
-      :key="index"
-      :left-port-count="2"
-      :right-port-count="1"
-      :zoom="zoom"
-      :label="type.toUpperCase()"
-      @drop="position => onDropLogicGate(type, position)"
-    >
-      <logic-gate
-        :input-count="2"
-        :type="type"
+      <toolbox-item
+        v-for="(factory, label) in factorySubtypes"
+        :factory="factory"
+        :key="label"
+        :label="label"
+        :zoom="zoom"
+        @drop="onDrop"
       />
-    </toolbox-item>
-  </div>
+    </template>
+  </toolbox-layout>
 </template>
 
 <script lang="ts">
 import { StoreDefinition } from 'pinia'
 import { defineComponent, PropType, computed } from 'vue'
-import DocumentState from '@/store/DocumentState'
-import InputSwitch from '@/components/item/elements/InputSwitch.vue'
-import Lightbulb from '@/components/item/elements/Lightbulb.vue'
-import LogicGate from '@/components/item/elements/LogicGate.vue'
+import { DocumentStore } from '@/store/document'
+import ScrollFade from '@/components/layout/ScrollFade.vue'
 import ToolboxItem from '@/components/toolbox/ToolboxItem.vue'
-import ItemSubtype from '@/types/enums/ItemSubtype'
-import clockFactory from '@/factories/clockFactory'
-import inputFactory from '@/factories/inputFactory'
-import lightbulbFactory from '@/factories/lightbulbFactory'
-import logicGateFactory from '@/factories/logicGateFactory'
+import ToolboxLayout from '@/components/toolbox/ToolboxLayout.vue'
+import factories from '@/factories'
 
 export default defineComponent({
   name: 'Toolbox',
   components: {
-    InputSwitch,
-    Lightbulb,
-    LogicGate,
-    ToolboxItem
-  },
+    ScrollFade,
+    ToolboxItem,
+    ToolboxLayout
+},
   props: {
     store: {
-      type: Function as PropType<StoreDefinition<string, DocumentState>>,
+      type: Function as PropType<DocumentStore>,
       required: true
     }
   },
   setup (props) {
     const store = props.store()
     const zoom = computed(() => store.zoom)
+    const isToolboxOpen = computed(() => store.isToolboxOpen)
 
-    function onDropLightbulb (position?: Point) {
-      store.insertItem(lightbulbFactory(), position)
-    }
-
-    function onDropSwitch (position?: Point) {
-      store.insertItem(inputFactory(ItemSubtype.Switch, 60, 60), position)
-    }
-
-    function onDropClock (position?: Point) {
-      store.insertItem(clockFactory(), position)
-    }
-
-    function onDropLogicGate (type: ItemSubtype, position?: Point) {
-      const { item, ports } = logicGateFactory(type, 140, 50)
-
-      store.insertItem({ item, ports }, position)
+    function onDrop (factory: ItemFactory, position?: Point) {
+      store.insertItem(factory(), position)
     }
 
     return {
-      ItemSubtype,
-      onDropLightbulb,
-      onDropSwitch,
-      onDropClock,
-      onDropLogicGate,
-      zoom
+      factories,
+      zoom,
+      isToolboxOpen,
+      onDrop
     }
   }
 })
 </script>
-
-<style lang="scss">
-.toolbox {
-  overflow-y: auto;
-  max-height: 100%;
-}
-</style>

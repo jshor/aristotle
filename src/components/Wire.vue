@@ -5,17 +5,14 @@
       'wire--flash': flash,
       'wire--preview': isPreview
     }"
-  :width="wire.width" :height="wire.height" :style="{
-    top: `${topLeft.y + wire.minY}px`,
-    left: `${topLeft.x + wire.minX}px`
-  }"
+  :width="geometry.width" :height="geometry.height"
   >
     <title>{{ label }}</title>
     <path
       class="wire__outline"
       fill="none"
-      :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
-      :d="wire.path"
+      :transform="`translate(${Math.abs(geometry.minX)}, ${Math.abs(geometry.minY)})`"
+      :d="geometry.path"
     />
     <path
       class="wire__display"
@@ -24,28 +21,27 @@
         'wire__display--off': source.value === -1
       }"
       fill="none"
-      :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
-      :d="wire.path"
+      :transform="`translate(${Math.abs(geometry.minX)}, ${Math.abs(geometry.minY)})`"
+      :d="geometry.path"
     />
     <path
       v-if="isAnimated"
       class="wire__animation"
       fill="none"
-      :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
-      :d="wire.path"
+      :transform="`translate(${Math.abs(geometry.minX)}, ${Math.abs(geometry.minY)})`"
+      :d="geometry.path"
     />
     <path
       class="wire__clickable"
       fill="none"
-      :transform="`translate(${Math.abs(wire.minX)}, ${Math.abs(wire.minY)})`"
-      :d="wire.path"
+      :transform="`translate(${Math.abs(geometry.minX)}, ${Math.abs(geometry.minY)})`"
+      :d="geometry.path"
     />
   </svg>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import renderLayout from '@/utils/geometry/wire'
+import { defineComponent, PropType, watchEffect } from 'vue'
 
 export default defineComponent({
   name: 'Wire',
@@ -60,14 +56,6 @@ export default defineComponent({
     },
     target: {
       type: Object as PropType<Port>,
-      required: true
-    },
-    topLeft: {
-      type: Object as PropType<Point>,
-      required: true
-    },
-    bottomRight: {
-      type: Object as PropType<Point>,
       required: true
     },
     label: {
@@ -86,12 +74,20 @@ export default defineComponent({
     flash: {
       type: Boolean,
       default: false
+    },
+    /** The wire Bezier curve geometry. */
+    geometry: {
+      type: Object as PropType<WireGeometry>,
+      required: true
     }
   },
-  computed: {
-    wire () {
-      return renderLayout(this.source, this.target)
-    }
+  setup (props) {
+
+    watchEffect(() => {
+      if (props.isSelected) {
+        console.log('WRIEEW')
+      }
+    })
   }
 })
 </script>
@@ -102,6 +98,7 @@ export default defineComponent({
   top: 0;
   left: 0;
   pointer-events: none;
+  touch-action: none;
   outline: none;
 
   &__clickable {

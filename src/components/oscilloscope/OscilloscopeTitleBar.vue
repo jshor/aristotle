@@ -51,7 +51,6 @@ export default defineComponent({
 .oscilloscope-title-bar {
   display: flex;
   box-sizing: border-box;
-  height: 2.5em;
 
   &__actions {
     flex: 1;

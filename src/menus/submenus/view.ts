@@ -1,15 +1,15 @@
 import { MenuItemConstructorOptions } from 'electron/main'
-import DocumentState from '@/store/DocumentState'
-import { Store } from 'pinia'
+import { DocumentStore } from '@/store/document'
 import grid from './grid'
 
-export default function edit (documentStore: Store<string, DocumentState, any>): MenuItemConstructorOptions[] {
+export default function edit (useDocumentStore: DocumentStore): MenuItemConstructorOptions[] {
+  const store = useDocumentStore()
   const zoomSubmenu: MenuItemConstructorOptions[] = []
   let hasFixedZoom = false
 
   for (let i = 1; i <= 8; i++) {
     const zoom = (i * 25) / 100
-    const checked = documentStore.zoomLevel === zoom
+    const checked = store.zoomLevel === zoom
 
     hasFixedZoom = hasFixedZoom || checked
 
@@ -18,7 +18,7 @@ export default function edit (documentStore: Store<string, DocumentState, any>):
       checked,
       label: `${zoom * 100}%`,
       accelerator: zoom === 1 ? 'CommandOrControl+0' : undefined,
-      click: () => documentStore.setZoom({ zoom })
+      click: () => store.setZoom({ zoom })
     })
   }
 
@@ -34,14 +34,14 @@ export default function edit (documentStore: Store<string, DocumentState, any>):
     {
       label: '&Zoom In',
       accelerator: 'CommandOrControl+=',
-      enabled: documentStore.zoomLevel < 2, // TODO: const
-      click: () => documentStore.incrementZoom(1)
+      enabled: store.zoomLevel < 2, // TODO: const
+      click: () => store.incrementZoom(1)
     },
     {
       label: '&Zoom Out',
       accelerator: 'CommandOrControl+-',
-      enabled: documentStore.zoomLevel > 0.1, // TODO: const
-      click: () => documentStore.incrementZoom(-1)
+      enabled: store.zoomLevel > 0.1, // TODO: const
+      click: () => store.incrementZoom(-1)
     },
     {
       label: '&Zoom...',
@@ -51,10 +51,10 @@ export default function edit (documentStore: Store<string, DocumentState, any>):
     {
       label: '&Pan to Center',
       accelerator: 'CommandOrControl+;',
-      click: documentStore.panToCenter
+      click: store.panToCenter
     },
     { type: 'separator' }
   ]
 
-  return menu.concat(grid(documentStore))
+  return menu.concat(grid(useDocumentStore))
 }
