@@ -1,36 +1,26 @@
 <template>
-  <draggable
-    :tabindex="-1"
-    :position="{
-      x: boundingBox.left,
-      y: boundingBox.top
+  <div
+    class="group"
+    :class="{
+      'group--is-selected': isSelected
     }"
+    :tabindex="-1"
     :style="{
+      position: 'absolute',
+      left: `${boundingBox.left}px`,
+      top: `${boundingBox.top}px`,
       width: `${boundingBox.right - boundingBox.left}px`,
       height: `${boundingBox.bottom - boundingBox.top}px`,
       zIndex
     }"
-    :zoom="zoom"
-    :bounding-box="boundingBox"
-  >
-    <div
-      :class="{
-        'group--is-selected': isSelected
-      }"
-      class="group"
-    />
-  </draggable>
+  />
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import Draggable from './editor/Draggable.vue'
 
 export default defineComponent({
   name: 'Group',
-  components: {
-    Draggable
-  },
   props: {
     boundingBox: {
       type: Object as PropType<BoundingBox>,

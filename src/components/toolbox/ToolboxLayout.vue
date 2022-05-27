@@ -1,0 +1,130 @@
+<template>
+  <div
+    ref="toolbox"
+    class="toolbox-layout"
+    :class="{ 'toolbox-layout--open': isOpen }"
+    :style="{ height: `${height}px` }"
+  >
+    <scroll-fade
+      class="toolbox-layout__categories"
+      :hide-scrollbar="true"
+    >
+      <div
+        v-for="cat in categories"
+        class="toolbox-layout__badge"
+        :class="{
+          'toolbox-layout__badge--active': cat === selected
+        }"
+        :key="cat"
+        @click="select(cat)"
+      >
+        {{ cat }}
+      </div>
+    </scroll-fade>
+    <scroll-fade class="toolbox-layout__items">
+      <div
+        v-if="selected"
+        :key="selected"
+        class="toolbox-layout__fade-in"
+      >
+        <slot :name="selected" />
+      </div>
+    </scroll-fade>
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent, computed, ref } from 'vue'
+import ScrollFade from '@/components/layout/ScrollFade.vue'
+
+export default defineComponent({
+  name: 'Toolbox',
+  components: {
+    ScrollFade
+  },
+  props: {
+    isOpen: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup (props, { slots }) {
+    const selected = ref<string | null>(null)
+    const toolbox = ref<HTMLElement | null>(null)
+    const categories = computed(() => Object.keys(slots))
+    const height = computed(() => props.isOpen ? toolbox.value?.scrollHeight : 0)
+
+    function select (categoryName: string) {
+      selected.value = categoryName
+    }
+
+    select(categories.value[0])
+
+    return {
+      categories,
+      selected,
+      select,
+      height,
+      toolbox
+    }
+  }
+})
+</script>
+
+<style lang="scss">
+.toolbox-layout {
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.25s ease-in-out;
+
+  &--open {
+    opacity: 1;
+  }
+
+  &__categories {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  &__badge {
+    padding: 0.25em 0.5em;
+    margin: 0.5em;
+    margin-bottom: 0;
+    border-radius: 2px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover:not(.toolbox-layout__badge--active) {
+      background-color: var(--color-bg-secondary);
+    }
+
+    &--active {
+      background-color: var(--color-primary);
+      color: var(--color-bg-primary);
+      cursor: default;
+    }
+  }
+
+  &__fade-in {
+    animation: 0.5s fade-in forwards;
+  }
+
+  &__items {
+    display: flex;
+    width: 100%;
+    overflow-y: hidden;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+</style>

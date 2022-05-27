@@ -16,12 +16,12 @@ export default function createApplicationMenu () {
   if (store.activeDocument) {
     menus.push({
       label: 'Edit',
-      submenu: edit(store.activeDocument.store())
+      submenu: edit(store.activeDocument.store)
     })
 
     menus.push({
       label: 'View',
-      submenu: view(store.activeDocument.store()).concat([
+      submenu: view(store.activeDocument.store).concat([
         { type: 'separator' },
         {
           type: 'checkbox',

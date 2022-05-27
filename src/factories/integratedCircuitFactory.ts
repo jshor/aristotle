@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash' // TODO
+import cloneDeep from 'lodash.clonedeep'
 import { v4 as uuid } from 'uuid'
 import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'

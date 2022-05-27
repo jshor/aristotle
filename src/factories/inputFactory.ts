@@ -6,7 +6,7 @@ import portFactory from './portFactory'
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
 
-export default function inputFactory (type: ItemSubtype, width: number, height: number, properties: PropertySet = {}) {
+const inputFactory: ItemFactory = (type: ItemSubtype, width: number, height: number, properties: PropertySet = {}) => {
   const elementId = uuid()
   const ports = [
     portFactory(elementId, uuid(), Direction.Right, PortType.Output, 'Output Port')
@@ -29,3 +29,5 @@ export default function inputFactory (type: ItemSubtype, width: number, height: 
 
   return { item, ports }
 }
+
+export default inputFactory

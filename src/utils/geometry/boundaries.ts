@@ -1,3 +1,5 @@
+import SnapMode from "@/types/enums/SnapMode"
+
 /**
  * Rounds x to the nearest n.
  */
@@ -61,8 +63,9 @@ function getRadialSnapOffset (boundingBoxes: BoundingBox[], a: BoundingBox, dist
  * @param d
  */
 function getOuterSnapOffset (boundingBoxes: BoundingBox[], a: BoundingBox, distance: number): Point {
+  const offset: Point = { x: 0, y: 0 }
+
   for (let i = 0; i < boundingBoxes.length; i++) {
-    const offset: Point = { x: 0, y: 0 }
     const b = boundingBoxes[i]
     const ts = Math.abs(b.top - a.bottom) <= distance
     const bs = Math.abs(b.bottom - a.top) <= distance
@@ -88,11 +91,21 @@ function getOuterSnapOffset (boundingBoxes: BoundingBox[], a: BoundingBox, dista
       if (ls) offset.x = b.left - a.right
       if (rs) offset.x = b.right - a.left
     }
-
-    if (offset.x || offset.y) return offset
   }
 
-  return { x: 0, y: 0 }
+  return offset
+}
+
+function getSnapOffset (boundingBoxes: BoundingBox[], boundingBox: BoundingBox, snapMode: SnapMode, distance: number) {
+  switch (snapMode) {
+    case SnapMode.Radial:
+      return getRadialSnapOffset(boundingBoxes, boundingBox, distance)
+    case SnapMode.Grid:
+      return getGridSnapPosition(boundingBox, distance)
+    case SnapMode.Outer:
+    default:
+      return getOuterSnapOffset(boundingBoxes, boundingBox, distance)
+  }
 }
 
 /**
@@ -217,26 +230,26 @@ function getPointBoundary (point: Point): BoundingBox {
  * @param item
  * @returns computed bounding box
  */
-function getItemBoundingBox (item: Item): BoundingBox {
-  if (item.rotation % 2 === 0) {
+function getBoundingBox (position: Point, rotation: number, width: number, height: number): BoundingBox {
+  if (rotation % 2 === 0) {
     // item is right side up or upside down
     return {
-      left: item.position.x,
-      top: item.position.y,
-      bottom: item.height + item.position.y,
-      right: item.width + item.position.x
+      left: position.x,
+      top: position.y,
+      bottom: height + position.y,
+      right: width + position.x
     }
   }
 
   // item is rotated at a 90 degree angle (CW or CCW)
-  const midX = item.position.x + (item.width / 2)
-  const midY = item.position.y + (item.height / 2)
+  const midX = position.x + (width / 2)
+  const midY = position.y + (height / 2)
 
   return {
-    left: midX - (item.height / 2),
-    top: midY - (item.width / 2),
-    right: midX + (item.height / 2),
-    bottom: midY + (item.width / 2)
+    left: midX - (height / 2),
+    top: midY - (width / 2),
+    right: midX + (height / 2),
+    bottom: midY + (width / 2)
   }
 }
 
@@ -291,6 +304,20 @@ function getCenteredScreenPoint (parentBox: BoundingBox, childBox: BoundingBox, 
   }
 }
 
+/**
+ * Computes the minima or maxima between the given points.
+ *
+ * @param a
+ * @param b
+ * @param fn
+ */
+function getExtremePoint (fn: 'min' | 'max', ...points: Point[]): Point {
+  const x = Math[fn](...points.map(({ x }) => x))
+  const y = Math[fn](...points.map(({ y }) => y))
+
+  return { x, y }
+}
+
 export default {
   isInNeighborhood,
   getRadialSnapOffset,
@@ -302,8 +329,10 @@ export default {
   getLinearBoundaries,
   getPointBoundary,
   hasIntersection,
-  getItemBoundingBox,
+  getBoundingBox,
   getGroupBoundingBox,
   getBoundingBoxMidpoint,
-  getCenteredScreenPoint
+  getCenteredScreenPoint,
+  getSnapOffset,
+  getExtremePoint
 }

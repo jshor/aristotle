@@ -1,8 +1,9 @@
 import { MenuItemConstructorOptions } from 'electron/main'
-import { Store } from 'pinia'
-import DocumentState from '@/store/DocumentState'
+import { DocumentStore } from '@/store/document'
 
-export default function grid (store: Store<string, DocumentState, any>): MenuItemConstructorOptions[] {
+export default function grid (useDocumentStore: DocumentStore): MenuItemConstructorOptions[] {
+  const store = useDocumentStore()
+
   return [
     {
       label: '&Grid',

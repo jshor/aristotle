@@ -1,7 +1,11 @@
 <template>
-  <div
+  <resizable
     @mousewheel="mousewheel"
-    @mousedown.right="startPanning"
+    @mousedown.right="onMouseDown"
+    @touchstart="onTouchStart"
+    @touchmove="onTouchMove"
+    @touchend="onTouchEnd"
+    @resize="rect => $emit('resize', rect)"
     class="editor"
   >
     <div
@@ -15,18 +19,28 @@
       />
       <slot />
     </div>
-  </div>
+  </resizable>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType, StyleValue } from 'vue'
 import Selector from './Selector.vue'
+import Resizable from '../interactive/Resizable.vue'
 
 export default defineComponent({
   name: 'Editor',
+  emits: [
+    'resize',
+    'pan',
+    'selection',
+    'deselect',
+    'zoom',
+    'contextmenu'
+  ],
   components: {
-    Selector
-  },
+    Selector,
+    Resizable
+},
   props: {
     zoom: {
       type: Number,
@@ -76,58 +90,95 @@ export default defineComponent({
     }
   },
   mounted () {
-    window.addEventListener('mousemove', this.mousemove)
-    window.addEventListener('mouseup', this.mouseup)
+    window.addEventListener('mousemove', this.onMouseMove)
+    window.addEventListener('mouseup', this.onMouseUp)
   },
   destroy () {
-    window.removeEventListener('mousemove', this.mousemove)
-    window.removeEventListener('mouseup', this.mouseup)
+    window.removeEventListener('mousemove', this.onMouseMove)
+    window.removeEventListener('mouseup', this.onMouseUp)
   },
   methods: {
-    /**
-     * Begins panning the canvas.
-     */
-    startPanning ($event: MouseEvent) {
-      this.panning = true
-      this.panStartPosition = {
-        x: $event.x - this.offset.x,
-        y: $event.y - this.offset.y
-      }
-      this.originalMousePosition = {
-        x: $event.x,
-        y: $event.y
-      }
+    onMouseDown ($event: MouseEvent) {
+      this.startPanning($event.x, $event.y)
 
       $event.preventDefault()
       $event.stopPropagation()
     },
 
+    onTouchStart ($event: TouchEvent) {
+      const { clientX, clientY } = $event.touches[0]
+
+      this.startPanning(clientX, clientY)
+
+      $event.preventDefault()
+      $event.stopPropagation()
+    },
+
+    onMouseMove ($event: MouseEvent) {
+      this.pan($event.x, $event.y)
+    },
+
+    onTouchMove ($event: TouchEvent) {
+      const { clientX, clientY } = $event.touches[0]
+
+      this.pan(clientX, clientY)
+    },
+
+    /**
+     * Begins panning the canvas.
+     */
+    startPanning (x: number, y: number) {
+      this.panning = true
+      this.panStartPosition = {
+        x: x - this.offset.x,
+        y: y - this.offset.y
+      }
+      this.originalMousePosition = { x, y }
+    },
+
     /**
      * Handles the moving of the canvas, if in panning mode.
      */
-    mousemove ($event: MouseEvent) {
+    pan (x: number, y: number) {
       if (this.panning) {
         this.$emit('pan', {
-          x: Math.min($event.x - this.panStartPosition.x, 0),
-          y: Math.min($event.y - this.panStartPosition.y, 0)
+          x: Math.min(x - this.panStartPosition.x, 0),
+          y: Math.min(y - this.panStartPosition.y, 0)
         })
       }
+    },
+
+    hasPannedSubstantially (x: number, y: number) {
+      const deltaX = Math.abs(this.originalMousePosition.x - x)
+      const deltaY = Math.abs(this.originalMousePosition.y - y)
+
+      return deltaX + deltaY < 2
     },
 
     /**
      * Terminates panning mode, if panning. This will suppress the context menu if so.
      */
-    mouseup ($event: MouseEvent) {
+    onMouseUp ($event: MouseEvent) {
       if (!this.panning) return
 
       if ($event.button === 2) {
-        const deltaX = Math.abs(this.originalMousePosition.x - $event.x)
-        const deltaY = Math.abs(this.originalMousePosition.y - $event.y)
-
-        if (deltaX + deltaY < 2) {
+        if (this.hasPannedSubstantially($event.x, $event.y)) {
           // if the mouse moved less than 2 pixels in any direction, show the context menu
-          this.$emit('onContextMenu', $event)
+          this.$emit('contextmenu', $event)
+
+          $event.stopPropagation()
+          $event.preventDefault()
         }
+      }
+
+      this.panning = false
+    },
+
+    onTouchEnd ($event: TouchEvent) {
+      const { clientX, clientY } = $event.changedTouches[0]
+
+      if (this.hasPannedSubstantially(clientX, clientY)) {
+        this.$emit('deselect')
       }
 
       this.panning = false
@@ -174,19 +225,15 @@ export default defineComponent({
 <style lang="scss">
 .editor {
   overflow: hidden;
-  height: 100%;
-  width: 100%;
-  max-width: 100%;
-  max-height: 100%;
 
   &__grid {
     position: relative;
     box-sizing: border-box;
+    transform-origin: top left;
+    background-color: var(--color-bg-primary);
     background-image:
       linear-gradient(to right, var(--color-bg-secondary) 1px, transparent 1px),
       linear-gradient(to bottom, var(--color-bg-secondary) 1px, transparent 1px);
-    background-color: var(--color-bg-primary);
-    transform-origin: top left;
   }
 }
 </style>

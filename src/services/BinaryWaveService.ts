@@ -21,18 +21,20 @@ export default class BinaryWaveService implements Pulse {
   /** Cartesian point values for each pixel segment. */
   public segments: Point[] = []
 
-  /** Random hue color value for the wave. */
-  public hue: number = ~~(360 * Math.random())
+  /** Hue color value for the wave. */
+  public hue: number = 0
 
   /**
    * Constructor.
    *
    * @param name - user-friendly label for this wave
    * @param signal - current signal value to initialize at
+   * @param hue - color value for the wave
    */
-  constructor (id: string, name: string, signal: number) {
+  constructor (id: string, name: string, signal: number, hue: number) {
     this.id = id
     this.name = name
+    this.hue = hue
     this.initialize(signal)
   }
 

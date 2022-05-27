@@ -64,7 +64,7 @@ describe('Oscillation Service', () => {
   describe('clear()', () => {
     it('should clear all binary service waves', () => {
       const clock = new ClockService('clock', 1000, 1)
-      const wave = new BinaryWaveService('wave', 'wave', 1)
+      const wave = new BinaryWaveService('wave', 'wave', 1, 0)
 
       jest
         .spyOn(wave, 'reset')
@@ -79,7 +79,7 @@ describe('Oscillation Service', () => {
 
   describe('computeWaveGeometry()', () => {
     it('should return the oscillogram containing each binary wave having segments', () => {
-      const wave = new BinaryWaveService('wave', 'wave', 1)
+      const wave = new BinaryWaveService('wave', 'wave', 1, 0)
       const clock = new ClockService('clock', 1000, 1)
 
       wave.segments = [{ x: 0, y: 0 }, { x: 10, y: 20 }]
@@ -166,7 +166,7 @@ describe('Oscillation Service', () => {
   })
 
   describe('broadcast()', () => {
-    const wave = new BinaryWaveService('wave', 'wave', 1)
+    const wave = new BinaryWaveService('wave', 'wave', 1, 0)
     const clock = new ClockService('clock', 1000, 1)
 
     it('should truncate segments for each binary wave when the max width has exceeded', () => {
@@ -185,8 +185,8 @@ describe('Oscillation Service', () => {
 
   describe('update()', () => {
     it('should call `update()` on each wave', () => {
-      const wave1 = new BinaryWaveService('wave1', 'wave1', 1)
-      const wave2 = new BinaryWaveService('wave2', 'wave2', 1)
+      const wave1 = new BinaryWaveService('wave1', 'wave1', 1, 0)
+      const wave2 = new BinaryWaveService('wave2', 'wave2', 1, 0)
 
       jest.spyOn(wave1, 'update')
       jest.spyOn(wave2, 'update')
@@ -213,7 +213,7 @@ describe('Oscillation Service', () => {
     })
 
     it('should not add the given wave if one with its id is already registered', () => {
-      const wave = new BinaryWaveService('wave', 'wave', 1)
+      const wave = new BinaryWaveService('wave', 'wave', 1, 0)
 
       service.waves = { wave }
       service.add(wave)
@@ -224,7 +224,7 @@ describe('Oscillation Service', () => {
 
   describe('remove()', () => {
     it('should remove the wave having the given id', () => {
-      const wave = new BinaryWaveService('test', 'test', 1)
+      const wave = new BinaryWaveService('test', 'test', 1, 0)
 
       service.waves = { wave }
       service.remove(wave)

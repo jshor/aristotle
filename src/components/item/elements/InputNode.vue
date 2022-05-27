@@ -1,15 +1,15 @@
 <template>
-  <div class="input-switch">
+  <div class="input-node">
     <button
       type="button"
-      class="input-switch__flipper"
+      class="input-node__flipper"
       :tabindex="0"
       :class="{
-        'input-switch__flipper--on': model === 1,
-        'input-switch__flipper--off': model === -1,
-        'input-switch__flipper--high-z': model === 0
+        'input-node__flipper--on': model === 1,
+        'input-node__flipper--off': model === -1,
+        'input-node__flipper--high-z': model === 0
       }"
-      @mousedown.stop="click"
+      @mousedown.stop="onInput"
     >
       <span v-if="model === 1">ON</span>
       <span v-else-if="model === -1">OFF</span>
@@ -19,46 +19,50 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType, ref, watchEffect } from 'vue'
+import ItemSubtype from '@/types/enums/ItemSubtype'
 
 export default defineComponent({
-  name: 'InputSwitch',
+  name: 'InputNode',
   props: {
-    value: {
-      type: Number,
-      default: 0
-    }
+    ports: {
+      type: Array as PropType<Port[]>,
+      default: () => []
+    },
+    // subtype: {
+    //   type: String as PropType<ItemSubtype>,
+    //   required: true
+    // }
   },
-  data () {
-    return {
-      model: 0
-    }
-  },
-  watch: {
-    value: {
-      handler (value) {
-        this.model = value
-      },
-      immediate: true
-    }
-  },
-  methods: {
-    click ($event: MouseEvent) {
+  setup (props, { emit }) {
+    const model = ref(0)
+
+    watchEffect(() => {
+      model.value = props.ports[0]?.value || 0
+    })
+
+    function onInput ($event: MouseEvent) {
       $event.preventDefault()
       $event.stopPropagation()
 
-      this.model = this.model === 1 ? -1 : 1
+      model.value = model.value === 1 ? -1 : 1
 
-      this.$emit('toggle', this.model)
+      emit('toggle', {
+        id: props.ports[0].id,
+        value: model.value
+      })
+    }
 
-      return false
+    return {
+      model,
+      onInput
     }
   }
 })
 </script>
 
 <style lang="scss">
-.input-switch {
+.input-node {
   width: 60px;
   height: 60px;
   display: flex;

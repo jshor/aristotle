@@ -14,8 +14,8 @@
     @deselect="store.deselectAll"
     @selection="store.createSelection"
     @zoom="store.setZoom"
-    @on-context-menu="onContextMenu"
-    @mousedown="store.deselectAll"
+    @contextmenu="onContextMenu"
+    @resize="store.setViewerSize"
   >
     <!-- when tabbed into, this resets the selection back to the last item -->
     <div
@@ -23,21 +23,13 @@
       @focus="store.recycleSelection(false)"
     />
 
-    <template v-for="(baseItem, index) in store.baseItems">
+    <template v-for="baseItem in store.baseItems">
       <item
-        v-if="baseItem.type"
+        v-if="'type' in baseItem"
+        :tabindex="0"
         :store="storeDefinition"
         :id="baseItem.id"
         :key="baseItem.id"
-        :port-ids="baseItem.portIds"
-        :type="baseItem.type"
-        :subtype="baseItem.subtype"
-        :name="baseItem.name"
-        :position="baseItem.position"
-        :rotation="baseItem.rotation"
-        :group-id="baseItem.groupId"
-        :bounding-box="baseItem.boundingBox"
-        :properties="baseItem.properties"
         :is-selected="baseItem.isSelected"
         :flash="store.isDebugging && store.isCircuitEvaluated"
         :z-index="baseItem.zIndex + 1000"
@@ -48,13 +40,10 @@
 
       <connection
         v-else
+        :tabindex="0"
         :store="storeDefinition"
         :id="baseItem.id"
-        :key="index"
-        :source-id="baseItem.source"
-        :target-id="baseItem.target"
-        :group-id="baseItem.groupId"
-        :connection-chain-id="baseItem.connectionChainId"
+        :key="`c${baseItem.id}`"
         :is-selected="baseItem.isSelected"
         :is-preview="store.connectionPreviewId === baseItem.id"
         :flash="store.isDebugging && store.isCircuitEvaluated"
@@ -83,8 +72,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance, watchEffect } from 'vue'
-import ResizeObserver from 'resize-observer-polyfill'
-import { StoreDefinition } from 'pinia'
 import Connection from './Connection.vue'
 import Item from './Item.vue'
 import Editor from '@/components/editor/Editor.vue'
@@ -92,7 +79,7 @@ import Group from '@/components/Group.vue'
 import editorContextMenu from '@/menus/context/editor'
 import boundaries from '@/utils/geometry/boundaries'
 import printing from '@/utils/printing'
-import DocumentState from '@/store/DocumentState'
+import { DocumentStore } from '@/store/document'
 import { useRootStore } from '@/store/root'
 
 export default defineComponent({
@@ -105,7 +92,7 @@ export default defineComponent({
   },
   props: {
     store: {
-      type: Function as PropType<StoreDefinition<string, DocumentState>>,
+      type: Function as PropType<DocumentStore>,
       required: true
     }
   },
@@ -200,7 +187,8 @@ export default defineComponent({
     }
 
     function onContextMenu ($event: Event) {
-      window.api.showContextMenu(editorContextMenu(store))
+      console.log('contextmenu')
+      window.api.showContextMenu(editorContextMenu(props.store))
 
       $event.preventDefault()
       $event.stopPropagation()
@@ -234,18 +222,6 @@ export default defineComponent({
     function clearKeys () {
       keys = {}
     }
-
-    function onSizeChanged ([ target ]: ResizeObserverEntry[]) {
-      store.setViewerSize(target.target.getBoundingClientRect())
-    }
-
-    const observer = new ResizeObserver(onSizeChanged)
-
-    onMounted(() => {
-      if (editor.value) {
-        observer.observe(editor.value.$el)
-      }
-    })
 
     return {
       store,

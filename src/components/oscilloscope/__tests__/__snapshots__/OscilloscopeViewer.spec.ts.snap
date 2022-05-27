@@ -1,3 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Oscilloscope Viewer should match the snapshot 1`] = `<div class="oscilloscope-viewer"></div>`;
+exports[`Oscilloscope Viewer should match the snapshot 1`] = `
+<div class="oscilloscope-viewer">
+  <div class="oscilloscope-viewer__touch-resizer">
+    <div class="oscilloscope-viewer__mouse-resizer"></div>
+  </div>
+</div>
+`;

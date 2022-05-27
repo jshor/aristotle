@@ -1,3 +1,4 @@
+import Direction from '@/types/enums/Direction'
 import rotate from './rotate'
 
 const WIRE_PADDING = 15
@@ -41,16 +42,16 @@ export function computeStraightLine (a: Point, b: Point) {
  * @param {number} direction
  * @returns {number}
  */
-export function inflectDirection (direction: number, a: Point, b: Point) {
+export function inflectDirection (direction: number, a: Point, b: Point): Direction {
   switch (direction) {
     case 0:
-      return a.y > b.y ? 2 : 0
+      return a.y > b.y ? 2 : Direction.Left
     case 1:
-      return a.x < b.x ? 3 : 1
+      return a.x < b.x ? 3 : Direction.Top
     case 2:
-      return a.y > b.y ? 0 : 2
+      return a.y > b.y ? 0 : Direction.Right
     case 3:
-      return a.x < b.x ? 1 : 3
+      return a.x < b.x ? 1 : Direction.Bottom
     default:
       return inflectDirection(rotate(direction), a, b) // normalize direction to [0,3] and try again
   }
@@ -173,7 +174,7 @@ export function computeBezier (sourceDirection: number, targetDirection: number,
     'C', x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)
   ].join(' ')
 
-  const toNumArr = (...n) => n.map(k => parseInt(k, 10))
+  const toNumArr = (...n: Array<string | number>) => n.map(k => parseInt(k.toString(), 10))
 
   const minX = Math.min(...toNumArr(x1, x2, x3, x4)) - WIRE_PADDING / 2
   const maxX = Math.max(...toNumArr(x1, x2, x3, x4)) + WIRE_PADDING / 2
