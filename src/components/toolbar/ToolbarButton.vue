@@ -1,15 +1,17 @@
 <template>
   <button
     :tabindex="0"
-    :disabled="disabled"
     :class="{
-      'toolbar-button--active': active
+      'toolbar-button--active': active && !isToolbox,
+      'toolbar-button--toolbox': active && isToolbox,
+      'toolbar-button--disabled': disabled
     }"
     class="toolbar-button"
     role="button"
   >
     <icon v-if="icon" :icon="icon" class="toolbar-button__icon" />
     <icon v-else :icon="faUser" class="toolbar-button__icon" />
+    <div class="toolbar-button__text">{{ text }}</div>
   </button>
 </template>
 
@@ -35,9 +37,17 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isToolbox: {
+      type: Boolean,
+      default: false
+    },
     icon: {
       type: Object as PropType<IconDefinition>,
       default: null
+    },
+    text: {
+      type: String,
+      default: ''
     }
   }
 })
@@ -46,37 +56,65 @@ export default defineComponent({
 <style lang="scss">
 .toolbar-button {
   display: flex;
-  color: var(--color-primary);
-  padding: 0.25rem 0;
-  width: 2em;
-  height: 2em;
-  font-size: 1.25rem;
-  border-radius: 2px;
-  text-shadow: drop-shadow(0 0 1px var(--color-shadow));
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  box-sizing: border-box;
+  justify-content: center;
+  padding: 0.25em;
+  border-radius: 2px;
   border: 0;
-  background: none;
-  outline: none;
   cursor: pointer;
-
-  &__icon {
-    height: 90%;
-    width: 90%;
-  }
+  background-color: var(--color-bg-secondary);
+  color: var(--color-primary);
+  text-shadow: drop-shadow(0 0 1px var(--color-shadow));
+  width: 4.5em;
+  box-sizing: border-box;
 
   &--active {
     background: linear-gradient(0, var(--color-secondary), var(--color-primary));
-    color: var(--color-bg-secondary);
+    color: var(--color-bg-primary);
   }
 
-  &:disabled {
+  &--disabled {
     opacity: 0.25;
     cursor: default;
   }
 
-  &:not(:disabled) {
+  &__icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  &__text {
+    padding-top: 0.5em;
+    font-size: 0.8rem;
+    font-family: system-ui;
+    text-align: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+  }
+
+  &--toolbox {
+    background-color: var(--color-bg-primary);
+    position: relative;
+
+    &::after {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      content: ' ';
+      background-color: var(--color-bg-primary);
+      display: block;
+      height: 0.5em;
+      bottom: -0.5em;
+      z-index: 10;
+    }
+  }
+
+  &:not(.toolbar-button--disabled):not(.toolbar-button--toolbox) {
     &:hover {
       background-color: var(--color-bg-quaternary);
     }

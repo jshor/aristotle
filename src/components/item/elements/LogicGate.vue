@@ -33,50 +33,47 @@
       </div>
     </div>
     <component
-      v-bind:is="component"
+      v-bind:is="subtype"
       class="logic-gate__component"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, computed } from 'vue'
 import And from './gates/And.vue'
 import Or from './gates/Or.vue'
 import Nor from './gates/Nor.vue'
 import Nand from './gates/Nand.vue'
 import Xnor from './gates/Xnor.vue'
 import Xor from './gates/Xor.vue'
-import ItemSubtype from '../../../types/enums/ItemSubtype'
+import ItemSubtype from '@/types/enums/ItemSubtype'
 
 export default defineComponent({
   name: 'LogicGate',
+  components: {
+    And,
+    Or,
+    Nor,
+    Nand,
+    Xnor,
+    Xor
+  },
   props: {
-    inputCount: {
-      type: Number,
-      default: 2
+    properties: {
+      type: Object as PropType<PropertySet>,
+      default: () => ({})
     },
-    type: {
+    subtype: {
       subtype: String as PropType<ItemSubtype>,
       required: true
     }
   },
-  computed: {
-    component () {
-      switch (this.type) {
-        case ItemSubtype.And:
-          return And
-        case ItemSubtype.Nand:
-          return Nand
-        case ItemSubtype.Xnor:
-          return Xnor
-        case ItemSubtype.Xor:
-          return Xor
-        case ItemSubtype.Nor:
-          return Nor
-        default:
-          return Or
-      }
+  setup (props) {
+    const inputCount = computed(() => (props.properties.inputCount?.value || 2) as number)
+
+    return {
+      inputCount
     }
   }
 })

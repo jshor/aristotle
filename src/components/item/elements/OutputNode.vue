@@ -1,29 +1,34 @@
 <template>
   <div
-    class="lightbulb"
+    class="output-node"
     :class="{
-      'lightbulb--on': value === 1,
-      'lightbulb--high-z': value === 0
+      'output-node--on': value === 1,
+      'output-node--high-z': value === 0
     }"
   />
 </template>
 
-<script type="ts">
-import { defineComponent } from 'vue'
+<script lang="ts">
+import { defineComponent, PropType, computed } from 'vue'
 
 export default defineComponent({
-  name: 'Lightbulb',
+  name: 'OutputNode',
   props: {
-    value: {
-      type: Number,
-      default: 0
+    ports: {
+      type: Array as PropType<Port[]>,
+      default: () => []
     }
+  },
+  setup (props) {
+    const value = computed(() => props.ports[0]?.value || 0)
+
+    return { value }
   }
 })
 </script>
 
 <style lang="scss">
-.lightbulb {
+.output-node {
   width: 40px;
   height: 40px;
   border-radius: 50%;

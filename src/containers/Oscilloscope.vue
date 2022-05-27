@@ -1,23 +1,22 @@
 <template>
-  <div style="height: 100%">
+  <oscilloscope-viewer
+    v-if="isOscilloscopeOpen"
+    v-model="oscilloscopeHeight"
+    :collapse-height="40"
+    @collapse="closeOscilloscope"
+  >
     <oscilloscope-title-bar
-      :clearable="!isDebugging && isOscilloscopeEnabled && hasWaves"
+      :clearable="hasWaves"
       @clear="clearOscilloscope"
     />
-    <oscilloscope-viewer v-if="isDebugging">
-      oscilloscope not available in debugging mode
-    </oscilloscope-viewer>
-    <oscilloscope-viewer v-else-if="!isOscilloscopeEnabled">
-      the oscilloscope isn't enabled
-    </oscilloscope-viewer>
-    <oscilloscope-viewer v-else-if="!hasWaves">
+    <div v-if="!hasWaves">
       no waves to observe
-    </oscilloscope-viewer>
+    </div>
     <oscilloscope-timeline
       v-else
       :oscillogram="oscillogram"
     />
-  </div>
+  </oscilloscope-viewer>
 </template>
 
 <script lang="ts">
@@ -26,7 +25,7 @@ import { StoreDefinition, storeToRefs } from 'pinia'
 import OscilloscopeTimeline from '@/components/oscilloscope/OscilloscopeTimeline.vue'
 import OscilloscopeTitleBar from '@/components/oscilloscope/OscilloscopeTitleBar.vue'
 import OscilloscopeViewer from '@/components/oscilloscope/OscilloscopeViewer.vue'
-import DocumentState from '@/store/DocumentState'
+import { DocumentStore } from '@/store/document'
 
 export default defineComponent({
   name: 'Oscilloscope',
@@ -37,7 +36,7 @@ export default defineComponent({
   },
   props: {
     store: {
-      type: Function as PropType<StoreDefinition<string, DocumentState>>,
+      type: Function as PropType<DocumentStore>,
       required: true
     }
   },
@@ -46,16 +45,19 @@ export default defineComponent({
     const {
       oscillogram,
       isDebugging,
-      isOscilloscopeEnabled
+      isOscilloscopeOpen,
+      oscilloscopeHeight
     } = storeToRefs(store)
     const hasWaves = computed(() => Object.keys(oscillogram).length > 0)
 
     return {
       isDebugging,
-      isOscilloscopeEnabled,
+      isOscilloscopeOpen,
       hasWaves,
       oscillogram,
-      clearOscilloscope: store.clearOscilloscope
+      oscilloscopeHeight,
+      clearOscilloscope: store.clearOscilloscope,
+      closeOscilloscope: store.closeOscilloscope
     }
   }
 })

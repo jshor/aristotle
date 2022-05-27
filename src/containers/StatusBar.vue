@@ -53,7 +53,7 @@ import StatusBarButton from '@/components/statusbar/StatusBarButton.vue'
 import StatusBarViewer from '@/components/statusbar/StatusBarViewer.vue'
 import StatusBarZoom from '@/components/statusbar/StatusBarZoom.vue'
 import Icon from '@/components/Icon.vue'
-import DocumentState from '@/store/DocumentState'
+import { DocumentStore } from '@/store/document'
 
 export default defineComponent({
   name: 'StatusBar',
@@ -65,7 +65,7 @@ export default defineComponent({
   },
   props: {
     store: {
-      type: Function as PropType<StoreDefinition<string, DocumentState>>,
+      type: Function as PropType<DocumentStore>,
       required: true
     },
     isFullscreen: {

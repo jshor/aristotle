@@ -126,18 +126,18 @@ export default defineComponent({
 <style lang="scss">
 .oscilloscope-timeline {
   background-color: var(--color-bg-primary);
-  height: 100%;
+  color: var(--color-primary);
   width: 100%;
   text-align: right;
   display: flex;
-  color: #fff;
   box-sizing: border-box;
-  height: calc(100% - 2.5em);
+  max-height: 100%;
+  overflow: hidden;
+  flex: 1;
 
   &__list {
     display: flex;
     flex-direction: column;
-    height: 100%;
     box-sizing: border-box;
 
     &::-webkit-scrollbar {
@@ -147,7 +147,6 @@ export default defineComponent({
 
   &__list, &__display {
     overflow: overlay;
-    height: 100%;
     box-sizing: border-box;
   }
 

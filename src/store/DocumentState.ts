@@ -3,6 +3,7 @@ import SimulationService from '@/services/SimulationService'
 export default interface DocumentState {
   viewport: DOMRect
   canvas: BoundingBox
+  oscilloscopeHeight: number
   hasLoaded: boolean
   cachedState: string | null
   undoStack: string[]
@@ -17,10 +18,11 @@ export default interface DocumentState {
   zoomLevel: number
   simulation: SimulationService
   oscillogram: Oscillogram
-  isOscilloscopeEnabled: boolean
+  isOscilloscopeOpen: boolean
   isCircuitEvaluated: boolean
   isDebugging: boolean
   isDirty: boolean
+  isToolboxOpen: boolean
   activeFreeportId: string | null
   selectedItemIds: string[]
   selectedConnectionIds: string[]

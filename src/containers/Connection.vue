@@ -1,98 +1,66 @@
 <template>
-  <wire
+  <draggable
     :style="{ zIndex }"
-    :source="source"
-    :target="target"
-    :top-left="topLeft"
-    :bottom-right="bottomRight"
+    :position="position"
     :is-selected="isSelected"
-    :aria-selected="isSelected"
-    :is-preview="isPreview"
-    :flash="flash"
-    :label="'TODO'"
-    :tabindex="0"
-    @mousedown.stop="onMouseDown"
-    @focus="onFocus"
-    ref="root"
-    data-test="wire"
-  />
+    @drag-start="onDragStart"
+    @drag="onDrag"
+    @drag-end="onDragEnd"
+    @select="k => selectItem(id, k)"
+    @deselect="deselectItem(id)"
+  >
+    <wire
+      :source="source"
+      :target="target"
+      :geometry="geometry"
+      :is-selected="isSelected"
+      :is-preview="isPreview"
+      :flash="flash"
+      :label="'TODO'"
+      ref="root"
+      data-test="wire"
+    />
+  </draggable>
 </template>
 
 <script lang="ts">
 import { v4 as uuid } from 'uuid'
-import { ComponentPublicInstance, defineComponent, onBeforeUnmount, onMounted, PropType, ref, computed } from 'vue'
-import { StoreDefinition } from 'pinia'
+import { ComponentPublicInstance, defineComponent, PropType, ref, computed } from 'vue'
+import Draggable from '@/components/Draggable.vue'
 import Wire from '@/components/Wire.vue'
-import DocumentState from '@/store/DocumentState'
+import { DocumentStore } from '@/store/document'
+import boundaries from '@/utils/geometry/boundaries'
+import renderLayout from '@/utils/geometry/wire'
 
 export default defineComponent({
   name: 'Connection',
   components: {
+    Draggable,
     Wire
   },
   props: {
-    /**
-     * ID of the source port.
-     */
-    sourceId: {
-      type: String,
-      required: true
-    },
-
-    /**
-     * ID of the target port.
-     */
-    targetId: {
-      type: String,
-      required: true
-    },
-
-    /**
-     * ID of the group, if applicable.
-     */
-    groupId: {
-      type: String,
-      default: null
-    },
-
-    /**
-     * ID of the connection chain.
-     */
-    connectionChainId: {
-      type: String,
-      default: null
-    },
-
-    /**
-     * Whether or not this connection is selected.
-     */
+    /** Whether or not this connection is selected. */
     isSelected: {
       type: Boolean,
       default: false
     },
 
-    /**
-     * Whether or not this connection is just for previewing.
-     */
-    isPreview: {
-      type: Boolean,
-      default: false
-    },
-
-    /**
-     * ID of the connection.
-     */
+    /** ID of the connection. */
     id: {
       type: String,
       required: true
     },
 
-    /**
-     * CSS z-index value.
-     */
+    /** CSS z-index value. */
     zIndex: {
       type: Number,
       default: 0
+    },
+
+    /** Whether or not this connection is just for previewing. */
+    isPreview: {
+      type: Boolean,
+      default: false
     },
 
     /** Whether or not the item should show a flash once to the user. */
@@ -101,96 +69,38 @@ export default defineComponent({
       default: false
     },
 
-    /**
-     * Document store instance.
-     */
+    /** Document store instance. */
     store: {
-      type: Function as PropType<StoreDefinition<string, DocumentState>>,
+      type: Function as PropType<DocumentStore>,
       required: true
-    }
-  },
-  watch: {
-    isSelected (value: boolean) {
-      if (value) {
-        this.$el.focus()
-      }
     }
   },
   setup (props) {
     const store = props.store()
+    const connection = ref(store.connections[props.id])
     const root = ref<ComponentPublicInstance<HTMLElement>>()
 
-    const source = computed(() => store.ports[props.sourceId])
-    const target = computed(() => store.ports[props.targetId])
-    const topLeft = computed((): Point => {
-      const a = source.value.position
-      const b = target.value.position
-
-      const x = Math.min(a.x, b.x)
-      const y = Math.min(a.y, b.y)
-
-      return { x, y }
+    const source = computed(() => store.ports[connection.value.source])
+    const target = computed(() => store.ports[connection.value.target])
+    const topLeft = computed(() => {
+      return boundaries.getExtremePoint('min', source.value.position, target.value.position)
     })
-    const bottomRight = computed((): Point => {
-      const a = source.value.position
-      const b = target.value.position
+    const geometry = computed(() => renderLayout(source.value, target.value))
+    const position = computed(() => ({
+      y: topLeft.value.y + geometry.value.minY,
+      x: topLeft.value.x + geometry.value.minX
+    }))
 
-      const x = Math.max(a.x, b.x)
-      const y = Math.max(a.y, b.y)
-
-      return { x, y }
-    })
-
-    onMounted(() => {
-      window.addEventListener('mousemove', onMouseMove)
-      window.addEventListener('mouseup', onMouseUp)
-    })
-
-    onBeforeUnmount(() => {
-      window.removeEventListener('mousemove', onMouseMove)
-      window.removeEventListener('mouseup', onMouseUp)
-    })
-
-    let newFreeport = {
-      itemId: '',
-      inputPortId: '',
-      outputPortId: '',
-      connectionChainId: props.id,
-      value: 0,
-      sourceId: '',
-      targetId: '',
-      position: {}
-    }
-    let originalPosition: Point = {
-      x: 0,
-      y: 0
-    }
-    let portCreated = false
-    let isMouseDown = false
+    let freeportId: string | null = null
 
     /**
      * Mouse button down event handler.
      *
      * This will inform the component that the mouse is down and ready to create a new freeport, if it moves.
      */
-    function onMouseDown ($event: MouseEvent) {
-      if (props.groupId !== null) {
-        // this wire is part of a group, so do not allow the creation of a new freeport
-        return
-      }
-
-      portCreated = false
-      isMouseDown = true
-      originalPosition = {
-        x: $event.clientX,
-        y: $event.clientY
-      }
-
-      if (props.isSelected) {
-        store.deselectItem(props.id)
-      } else {
-        store.selectItem(props.id, $event.ctrlKey)
-      }
+    function onDragStart () {
+      if (connection.value.groupId !== null) return
+      freeportId = null
     }
 
     /**
@@ -201,72 +111,55 @@ export default defineComponent({
      *
      * This will only create a new freeport once per mousedown-move cycle.
      */
-    function onMouseMove ($event: MouseEvent) {
-      if (originalPosition.x === $event.clientX && originalPosition.y === $event.clientY) return
-      if (!isMouseDown) return
+    async function onDrag (position: Point, th: string) {
+      if (!root.value?.$el) return
+      if (freeportId === null) {
+        // directly change the DOM style (as opposed to using v-show/refs) to avoid "flickering" while VDOM updates
+        root.value.$el.style.opacity = '0'
+        freeportId = uuid()
 
-      originalPosition = {
-        x: $event.clientX,
-        y: $event.clientY
-      }
-
-      if (!portCreated && root.value?.$el) {
-        const { top, left } = root.value.$el.getBoundingClientRect()
-        const relativePosition: Point = {
-          x: $event.clientX - left,
-          y: $event.clientY - top
-        }
-        const absolutePosition: Point = {
-          x: topLeft.value.x + relativePosition.x,
-          y: topLeft.value.y + relativePosition.y
-        }
-
-        newFreeport = {
-          itemId: uuid(),
+        store.createFreeport({
+          itemId: freeportId,
           inputPortId: uuid(),
           outputPortId: uuid(),
-          connectionChainId: props.connectionChainId,
-          value: source.value.value,
+          connectionChainId: connection.value.connectionChainId,
+          // value: source.value.value,
           sourceId: source.value.id,
-          targetId: target.value.id,
-          position: absolutePosition
-        }
-
-        store.createFreeport(newFreeport)
-        store.setSnapBoundaries(newFreeport.itemId)
-
-        portCreated = true
+          targetId: target.value.id
+        })
+        store.setSnapBoundaries(freeportId)
       }
+
+      store.dragItem(freeportId, position)
     }
 
     /**
      * Mouse up event handler.
      */
-    function onMouseUp () {
-      if (!isMouseDown) return
+    function onDragEnd () {
+      if (freeportId) {
+        // after dragging has finished, two new connections are established
+        // this connection is now ready to destroy itself
+        store.disconnect({
+          source: connection.value.source,
+          target: connection.value.target
+        })
+      }
 
-      isMouseDown = false
-    }
-
-    /**
-     * Focus event handler.
-     */
-    function onFocus () {
-      setTimeout(() => {
-        if (!props.isSelected) {
-          store.selectItem(props.id)
-        }
-      })
+      freeportId = null
     }
 
     return {
       root,
-      topLeft,
-      bottomRight,
-      onMouseDown,
-      onFocus,
+      geometry,
+      position,
+      onDragStart,
+      onDrag,
+      onDragEnd,
       source,
-      target
+      target,
+      selectItem: store.selectItem,
+      deselectItem: store.deselectItem
     }
   }
 })

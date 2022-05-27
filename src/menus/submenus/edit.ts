@@ -1,8 +1,9 @@
 import { MenuItemConstructorOptions } from 'electron/main'
-import { Store } from 'pinia'
-import DocumentState from '@/store/DocumentState'
+import { DocumentStore } from '@/store/document'
 
-export default function edit (store: Store<string, DocumentState, any>, submenus: MenuItemConstructorOptions[] = []): MenuItemConstructorOptions[] {
+export default function edit (useDocumentStore: DocumentStore, submenus: MenuItemConstructorOptions[] = []): MenuItemConstructorOptions[] {
+  const store = useDocumentStore()
+
   let menu: MenuItemConstructorOptions[] = [
     {
       label: '&Undo',

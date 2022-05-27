@@ -20,13 +20,13 @@ export default defineComponent({
 <style lang="scss">
 .status-bar-viewer {
   display: flex;
+  height: 2em;
   align-items: center;
   background-color: var(--color-bg-secondary);
-  height: 100%;
-  box-sizing: border-box;
-  box-shadow: 0 0 $border-width var(--color-shadow);
-  font-size: 0.85em;
   color: var(--color-secondary);
+  box-shadow: 0 0 $border-width var(--color-shadow);
+  box-sizing: border-box;
+  font-size: 0.85em;
 
   &__left, &__right, &__label {
     display: flex;

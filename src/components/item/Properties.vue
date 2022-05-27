@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts">
-import { cloneDeep } from 'lodash' // TODO
+import cloneDeep from 'lodash.clonedeep'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({

@@ -1,7 +1,6 @@
-// @ts-check
 import { defineStore } from 'pinia'
 import { v4 as uuid } from 'uuid'
-import { LogicValue } from '@/circuit'
+import { CircuitNode, LogicValue } from '@/circuit'
 
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
@@ -16,7 +15,10 @@ import sortByZIndex from '@/utils/sortByZIndex'
 import DocumentState from './DocumentState'
 import integratedCircuitFactory from '@/factories/integratedCircuitFactory'
 import idMapper from '@/utils/idMapper'
-// import RemoteService from '@/services/RemoteService'
+import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
+import SnapMode from '@/types/enums/SnapMode'
+import itemFactory from '@/factories/itemFactory'
+import portFactory from '@/factories/portFactory'
 
 function generateItemName (item: Item, taxonomyCount: number) {
   const name: string[] = [item.type]
@@ -28,13 +30,6 @@ function generateItemName (item: Item, taxonomyCount: number) {
   name.push(taxonomyCount.toString())
 
   return name.join(' ')
-}
-
-function fromDocumentToEditorCoordinates (canvas: BoundingBox, viewport: DOMRect, point: Point, z: number) {
-  return {
-    x: (point.x - viewport.x - canvas.left) / z,
-    y: (point.y - viewport.y - canvas.top) / z
-  }
 }
 
 const MIN_SCALE = 0.1
@@ -51,13 +46,15 @@ export const createDocumentStore = (id: string) => defineStore({
     taxonomyCounts: {},
     zoomLevel: 1,
     zIndex: 1,
-    isOscilloscopeEnabled: true,
+    oscilloscopeHeight: 200,
+    isOscilloscopeOpen: true,
     isCircuitEvaluated: false,
     isDebugging: false,
     isDirty: false,
     hasLoaded: false,
     isPrinting: false,
     isCreatingImage: false,
+    isToolboxOpen: false,
 
     /* canvas dimensions */
     viewport: new DOMRect(),
@@ -117,7 +114,8 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     canGroup () {
-      return this.selectedGroupIds.length > 1 || this.selectedGroupIds[0] === null
+      // return this.selectedGroupIds.length > 1 || this.selectedGroupIds[0] === null // TODO: fails TS check
+      return this.selectedGroupIds.length > 1
     },
 
     canUngroup () {
@@ -257,7 +255,6 @@ export const createDocumentStore = (id: string) => defineStore({
               y: item.position.y + deltaY
             }
           })
-          this.setItemPortPositions(item.id)
         })
     },
 
@@ -316,7 +313,6 @@ export const createDocumentStore = (id: string) => defineStore({
       const position = fromDocumentToEditorCoordinates(this.canvas, this.viewport, documentPosition, this.zoomLevel)
 
       this.setItemPosition({ id: item.id, position })
-      this.setItemPortPositions(item.id)
       this.setSelectionState({ id: item.id, value: true })
     },
 
@@ -543,12 +539,7 @@ export const createDocumentStore = (id: string) => defineStore({
       }
 
       this.items[id].position = position
-      this.items[id].boundingBox = {
-        left: item.boundingBox.left + delta.x,
-        top: item.boundingBox.top + delta.y,
-        bottom: item.boundingBox.bottom + delta.y,
-        right: item.boundingBox.right + delta.x
-      }
+      this.setItemBoundingBox(id)
 
       item
         .portIds
@@ -560,6 +551,21 @@ export const createDocumentStore = (id: string) => defineStore({
             y: port.position.y + delta.y
           }
         })
+    },
+
+    dragItem (id: string, position: Point, snapMode?: SnapMode) {
+      const { x, y } = fromDocumentToEditorCoordinates(this.canvas, this.viewport, position, this.zoom)
+      const { width, height, rotation } = this.items[id]
+      const boundingBox = boundaries.getBoundingBox({ x, y }, rotation, width, height)
+      const offset = boundaries.getSnapOffset(this.snapBoundaries, boundingBox, snapMode || SnapMode.Outer, 15) // TODO: configurable snap position and tolerance
+
+      this.setSelectionPosition({
+        id,
+        position: {
+          x: x + offset.x,
+          y: y + offset.y
+        }
+      })
     },
 
     /**
@@ -620,16 +626,7 @@ export const createDocumentStore = (id: string) => defineStore({
           this.setItemPosition({ id: itemId, position })
         })
 
-      groupIds.forEach(groupId => {
-        const group = this.groups[groupId]
-
-        this.groups[groupId].boundingBox = {
-          left: group.boundingBox.left + delta.x,
-          top: group.boundingBox.top + delta.y,
-          right: group.boundingBox.right +  delta.x,
-          bottom: group.boundingBox.bottom + delta.y
-        }
-      })
+      groupIds.forEach(this.setGroupBoundingBox)
     },
 
     /**
@@ -638,11 +635,16 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param id - ID of the item
      */
     setItemBoundingBox (id: string) {
-      const item = this.items[id]
+      if (!this.items[id]) return
 
-      if (!item) return
+      const {
+        position,
+        rotation,
+        width,
+        height
+      } = this.items[id]
 
-      this.items[id].boundingBox = boundaries.getItemBoundingBox(item)
+      this.items[id].boundingBox = boundaries.getBoundingBox(position, rotation, width, height)
     },
 
     /**
@@ -777,7 +779,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
     clearStatelessInfo () {
       this.unsetConnectionPreview()
-      this.snapBoundaries = []
       this.connectablePortIds = []
       this.selectedConnectionIds = []
       this.selectedItemIds = []
@@ -1013,7 +1014,6 @@ export const createDocumentStore = (id: string) => defineStore({
           id: item.id,
           position: rotation.getGroupedItemRotatedPosition(boundingBox, item, direction)
         })
-        this.setItemBoundingBox(item.id)
         this.setItemPortPositions(item.id)
       })
 
@@ -1074,15 +1074,7 @@ export const createDocumentStore = (id: string) => defineStore({
      *
      * @param data - IDs for apply the new freeport
      */
-    createFreeport (data: {
-      itemId: string,
-      outputPortId: string,
-      inputPortId: string,
-      sourceId?: string,
-      targetId?: string,
-      connectionChainId?: string,
-      position: Point
-    }) {
+    createFreeport (data: Freeport, establishCircuitConnection: boolean = true) {
       if (this.items[data.itemId]) return
 
       if (data.sourceId && data.targetId) {
@@ -1095,10 +1087,11 @@ export const createDocumentStore = (id: string) => defineStore({
       this.activeFreeportId = data.itemId
 
       if (data.sourceId && data.targetId) {
-        this.disconnect({
-          source: data.sourceId,
-          target: data.targetId
-        })
+        // don't destroy the connection yet, as its component may still be in action (i.e., handling dragging)
+        // it will be the responsibility of the connection component to destroy itself
+        this
+          .simulation
+          .removeConnection(data.sourceId, data.targetId)
       }
 
       if (data.sourceId) {
@@ -1106,7 +1099,7 @@ export const createDocumentStore = (id: string) => defineStore({
           source: data.sourceId,
           target: data.inputPortId,
           connectionChainId: data.connectionChainId
-        })
+        }, establishCircuitConnection)
       }
 
       if (data.targetId) {
@@ -1114,7 +1107,7 @@ export const createDocumentStore = (id: string) => defineStore({
           source: data.outputPortId,
           target: data.targetId,
           connectionChainId: data.connectionChainId
-        })
+        }, establishCircuitConnection)
       }
 
       if (data.sourceId && data.targetId) {
@@ -1143,7 +1136,7 @@ export const createDocumentStore = (id: string) => defineStore({
         .values(this.ports)
         .find((p: Port) => {
           // TODO: make '10' a user-configurable number
-          return boundaries.isInNeighborhood(p.position, port.position, 10) && p.id !== portId && this.connectablePortIds.includes(p.id)
+          return p.id !== portId && this.connectablePortIds.includes(p.id) && boundaries.isInNeighborhood(p.position, port.position, 10)
         })
 
       if (newPort) {
@@ -1269,73 +1262,74 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     toggleOscilloscope () {
-      if (this.isOscilloscopeEnabled) {
-        this.disableOscilloscope()
+      if (this.isOscilloscopeOpen) {
+        this.closeOscilloscope()
       } else {
-        this.enableOscilloscope()
+        this.openOscilloscope()
       }
     },
 
-    enableOscilloscope () {
+    openOscilloscope () {
       Object
-        .values(this.items)
-        .forEach(item => this.simulation.monitorNode(item, this.ports))
-
-      this.isOscilloscopeEnabled = true
-    },
-
-    disableOscilloscope () {
-      Object
-        .values(this.items)
-        .forEach(({ portIds }) => {
-          portIds.forEach(this.simulation.unmonitorPort)
+        .values(this.ports)
+        .forEach(port => {
+          if (port.isMonitored) {
+            this.simulation.monitorPort(port.id, port.value, port.hue)
+          }
         })
 
-      this.oscillogram = {}
-      this.simulation.oscillogram = {}
-      this.isOscilloscopeEnabled = false
+      this.isOscilloscopeOpen = true
+    },
+
+    closeOscilloscope (lastHeight?: number) {
+      if (!this.isOscilloscopeOpen) return
+
+      console.log('COLLAPSE TO: ', lastHeight)
+      Object
+        .keys(this.ports)
+        .forEach(this.simulation.unmonitorPort)
+
+      this.simulation.oscillator.clear()
+      this.isOscilloscopeOpen = false
+
+      if (lastHeight) {
+        this.oscilloscopeHeight = lastHeight
+      }
     },
 
     clearOscilloscope () {
       this.simulation.oscillator.clear()
     },
 
-    /**
-     * Adds the item having the given ID to the oscilloscope if the value is true, or removes it otherwise.
-     *
-     * @param payload
-     * @param payload.id - item ID
-     * @param payload.value
-     */
-    setOscilloscopeVisibility ({ id, value }: { id: string, value: boolean }) {
-      if (value) {
-        const item = this.items[id]
-        const portType = item.type === ItemType.OutputNode
-          ? PortType.Input // output elements (lightbulb, etc.) will monitor incoming port values
-          : PortType.Output // all other elements will monitor the outgoing port values
-
-        item
-          .portIds
-          .forEach(portId => {
-            const port = this.ports[portId]
-
-            if (port.type === portType) {
-              this
-                .simulation
-                .monitorPort(portId, port.value)
-            }
-          })
+    togglePortMonitoring (portId: string) {
+      if (this.ports[portId].isMonitored) {
+        this.unmonitorPort(portId)
       } else {
-        const item = this.items[id]
-
-        item
-          .portIds
-          .forEach(portId => {
-            this
-              .simulation
-              .unmonitorPort(portId)
-          })
+        this.monitorPort(portId)
       }
+    },
+
+    monitorPort (portId: string) {
+      const port = this.ports[portId]
+
+      port.hue = port.hue ||  ~~(360 * Math.random())
+      port.isMonitored = true
+
+      this
+        .simulation
+        .monitorPort(portId, port.value, port.hue)
+
+      this.isOscilloscopeOpen = true
+    },
+
+    unmonitorPort (portId: string) {
+      const port = this.ports[portId]
+
+      port.isMonitored = false
+
+      this
+        .simulation
+        .unmonitorPort(portId)
     },
 
     /**
@@ -1370,6 +1364,8 @@ export const createDocumentStore = (id: string) => defineStore({
             virtualElementId: id,
             orientation: Direction.Left,
             isFreeport: false,
+            isMonitored: false,
+            hue: 0,
             position: {
               x: 0,
               y: 0
@@ -1400,9 +1396,6 @@ export const createDocumentStore = (id: string) => defineStore({
         }
 
         switch (propertyName) {
-          case 'showInOscilloscope':
-            this.setOscilloscopeVisibility({ id, value: property.value as boolean })
-            break
           case 'inputCount':
             this.setInputCount({ id, count: property.value as number })
             break
@@ -1501,15 +1494,15 @@ export const createDocumentStore = (id: string) => defineStore({
     },
 
     addPort (itemId: string, port: Port) {
-      const nodeId = Object
-        .keys(this.simulation.nodes)
-        .find(id => this.items[itemId].portIds.includes(id))
+      const node = Object
+        .values(this.simulation.nodes)
+        .find(({ name }) => this.items[itemId].portIds.includes(name))
 
       this.ports[port.id] = port
       this.items[itemId].portIds.push(port.id)
 
-      if (nodeId) {
-        this.simulation.addSiblingPort(port.id, nodeId)
+      if (node) {
+        this.simulation.addPort(port.id, node as CircuitNode)
       } else {
         this.simulation.addNode(this.items[itemId], this.ports)
       }
@@ -1591,12 +1584,14 @@ export const createDocumentStore = (id: string) => defineStore({
           .forEach(portId => {
             if (ic.ports[portId]) {
               this.ports[portId] = ic.ports[portId]
+              this.togglePortMonitoring(portId)
             }
           })
       }
 
       ports.forEach(port => {
         this.ports[port.id] = port
+        this.togglePortMonitoring(port.id)
       })
 
       const taxonomy = `${item.type}_${item.subtype}`
@@ -1615,6 +1610,14 @@ export const createDocumentStore = (id: string) => defineStore({
         .addNode(item, this.ports)
 
       this.resetItemValue(item)
+
+      ports.forEach(port => {
+        if (port.isMonitored) {
+          this
+            .simulation
+            .monitorPort(port.id, port.value, port.hue)
+        }
+      })
     },
 
     resetItemValue (item: Item) {
@@ -1805,7 +1808,12 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param payload.target - target port ID
      * @param payload.connectionChainId - optional connection chain ID to add the connection segment to
      */
-    connect ({ source, target, connectionChainId, id = uuid() }: { source?: string, target?: string, connectionChainId?: string, id?: string }) {
+    connect ({ source, target, connectionChainId, id = uuid() }: {
+      source?: string,
+      target?: string,
+      connectionChainId?: string,
+      id?: string
+    }, establishCircuitConnection: boolean = true) {
       if (source && target) {
         this.connections[id] = {
           id,
@@ -1820,9 +1828,11 @@ export const createDocumentStore = (id: string) => defineStore({
         this.ports[source].connectedPortIds.push(target)
         this.ports[target].connectedPortIds.push(source)
 
-        this
-          .simulation
-          .addConnection(source, target)
+        if (establishCircuitConnection) {
+          this
+            .simulation
+            .addConnection(source, target)
+        }
       }
     },
 
@@ -1889,66 +1899,28 @@ export const createDocumentStore = (id: string) => defineStore({
      * @param payload.position - the initial position of this port
      * @param payload.value - optional value of the port
      */
-    addFreeportItem ({ itemId, inputPortId, outputPortId, position, value }: {
+    addFreeportItem ({ itemId, inputPortId, outputPortId, value = 0 }: {
       itemId: string
-      position: Point
       outputPortId?: string
       inputPortId?: string
       value?: number
     }) {
-      const createPort = (id: string, type: PortType, orientation: Direction): Port => ({
-        id,
-        type,
-        name: '',
-        elementId: itemId,
-        orientation,
-        isFreeport: true,
-        position: {
-          x: 0,
-          y: 0
-        },
-        rotation: 0,
-        value: value || 0,
-        connectedPortIds: []
-      })
-      const portIds: string[] = []
+      const ports: Port[] = []
 
       if (inputPortId) {
-        this.ports[inputPortId] = createPort(inputPortId, PortType.Input, Direction.Right)
-        portIds.push(inputPortId)
+        this.ports[inputPortId] = portFactory(itemId, inputPortId, Direction.Left, PortType.Input, inputPortId)
+        this.ports[inputPortId].value = value
+        ports.push(this.ports[inputPortId])
       }
 
       if (outputPortId) {
-        this.ports[outputPortId] = createPort(outputPortId, PortType.Output, Direction.Left)
-        portIds.push(outputPortId)
+        this.ports[outputPortId] = portFactory(itemId, outputPortId, Direction.Right, PortType.Output, outputPortId)
+        this.ports[outputPortId].value = value
+        ports.push(this.ports[outputPortId])
       }
 
-      if (!this.taxonomyCounts[ItemType.Freeport]) {
-        this.taxonomyCounts[ItemType.Freeport] = 0
-      }
-
-      this.items[itemId] = {
-        id: itemId,
-        name: '',
-        type: ItemType.Freeport,
-        subtype: ItemSubtype.None,
-        portIds,
-        position,
-        rotation: 0,
-        boundingBox: {
-          left: position.x,
-          top: position.y,
-          right: position.x,
-          bottom: position.y
-        },
-        properties: {},
-        isSelected: false,
-        groupId: null,
-        zIndex: ++this.zIndex,
-        width: 1,
-        height: 1
-      }
-      this.items[itemId].name = generateItemName(this.items[itemId], ++this.taxonomyCounts[ItemType.Freeport])
+      this.items[itemId] = itemFactory(itemId, ItemType.Freeport, ItemSubtype.None, 1, 1, ports)
+      this.items[itemId].zIndex = this.zIndex++
 
       this
         .simulation
@@ -1989,7 +1961,7 @@ export const createDocumentStore = (id: string) => defineStore({
           }
 
           return map
-        }, {})
+        }, {} as Record<string, Connection>)
 
       const groups = Object
         .values(this.groups)
@@ -2074,7 +2046,15 @@ export const createDocumentStore = (id: string) => defineStore({
         console.log('ERROR: ', error)
         // TODO: clear clipboard?
       }
+    },
+
+
+    toggleToolbox () {
+      this.isToolboxOpen = !this.isToolboxOpen
     }
   }
 })
 // TODO: when debugger is turned off, make sure all elements take on values defined in valueMap
+
+
+export type DocumentStore = ReturnType<typeof createDocumentStore>

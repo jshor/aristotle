@@ -261,12 +261,6 @@ describe('actions', () => {
         }
       })
     })
-
-    it('should update the port positions of each item', () => {
-      expect(store.setItemPortPositions).toHaveBeenCalledTimes(2)
-      expect(store.setItemPortPositions).toHaveBeenCalledWith('item1')
-      expect(store.setItemPortPositions).toHaveBeenCalledWith('item2')
-    })
   })
 
   describe('undo', () => {
@@ -1639,16 +1633,6 @@ describe('actions', () => {
         expect(store.ports.port2.rotation).toEqual(3)
       })
 
-      it('should update the items\' bounding boxes', () => {
-        expect(store.setItemBoundingBox).toHaveBeenCalledWith('item1')
-        expect(store.setItemBoundingBox).toHaveBeenCalledWith('item2')
-      })
-
-      it('should update the items\' port positions', () => {
-        expect(store.setItemPortPositions).toHaveBeenCalledWith('item1')
-        expect(store.setItemPortPositions).toHaveBeenCalledWith('item2')
-      })
-
       it('should update the group\'s bounding box for each group rotated', () => {
         expect(store.setGroupBoundingBox).toHaveBeenCalledWith('group1')
       })
@@ -1675,14 +1659,6 @@ describe('actions', () => {
 
       it('should set the rotation of the item', () => {
         expect(store.items.item1.rotation).toEqual(2)
-      })
-
-      it('should update the item\'s bounding box', () => {
-        expect(store.setItemBoundingBox).toHaveBeenCalledWith('item1')
-      })
-
-      it('should update the item\'s port position', () => {
-        expect(store.setItemPortPositions).toHaveBeenCalledWith('item1')
       })
     })
   })
@@ -1872,10 +1848,6 @@ describe('actions', () => {
         })
         expect(store.setItemBoundingBox).toHaveBeenCalledWith(itemId)
         expect(store.activeFreeportId).toEqual(itemId)
-      })
-
-      it('should split the connection between the given source and target connection', () => {
-        expect(store.disconnect).toHaveBeenCalledWith({ source: sourceId, target: targetId })
       })
 
       it('should re-connect the source and the target to the newly-created freeport ports', () => {
@@ -2233,70 +2205,6 @@ describe('actions', () => {
     })
   })
 
-  describe('setOscilloscopeVisibility', () => {
-    const store = createDocumentStore('document')()
-
-    beforeEach(() => {
-      store.$reset()
-
-      jest
-        .spyOn(store.simulation, 'unmonitorPort')
-        .mockImplementation(jest.fn())
-      jest
-        .spyOn(store.simulation, 'monitorPort')
-        .mockImplementation(jest.fn())
-    })
-
-    describe('when the item is being added to the oscilloscope', () => {
-      const item1 = createItem('item1', ItemType.OutputNode, { portIds: ['item1port1', 'item2port2'] })
-      const item2 = createItem('item2', ItemType.InputNode, { portIds: ['item2port1', 'item2port2'] })
-      const item1port1 = createPort('item1port1', 'item1', PortType.Input)
-      const item1port2 = createPort('item1port2', 'item1', PortType.Output)
-      const item2port1 = createPort('item2port1', 'item2', PortType.Input)
-      const item2port2 = createPort('item2port2', 'item2', PortType.Output)
-
-      beforeEach(() => {
-        store.$patch({
-          items: { item1, item2 },
-          ports: { item1port1, item1port2, item2port1, item2port2 }
-        })
-      })
-
-      it('should monitor its input ports when the item is an output node', () => {
-        store.setOscilloscopeVisibility({ id: 'item1', value: true })
-
-        expect(store.simulation.monitorPort).toHaveBeenCalledTimes(1)
-        expect(store.simulation.monitorPort).toHaveBeenCalledWith('item1port1', item1port1.value)
-      })
-
-      it('should monitor its output ports when the item is an input node', () => {
-        store.setOscilloscopeVisibility({ id: 'item2', value: true })
-
-        expect(store.simulation.monitorPort).toHaveBeenCalledTimes(1)
-        expect(store.simulation.monitorPort).toHaveBeenCalledWith('item2port2', item2port2.value)
-      })
-    })
-
-    describe('when the item is being removed from the oscilloscope', () => {
-      const item1 = createItem('item1', ItemType.OutputNode, { portIds: ['port1', 'port2'] })
-      const port1 = createPort('port1', 'item1', PortType.Input)
-      const port2 = createPort('port2', 'item1', PortType.Output)
-
-      it('should unmonitor for each port in the given item', () => {
-        store.$patch({
-          items: { item1 },
-          ports: { port1, port2 }
-        })
-
-        store.setOscilloscopeVisibility({ id: 'item1', value: false })
-
-        expect(store.simulation.unmonitorPort).toHaveBeenCalledTimes(2)
-        expect(store.simulation.unmonitorPort).toHaveBeenCalledWith('port1')
-        expect(store.simulation.unmonitorPort).toHaveBeenCalledWith('port2')
-      })
-    })
-  })
-
   describe('setInputCount', () => {
     const store = createDocumentStore('document')()
 
@@ -2345,6 +2253,8 @@ describe('actions', () => {
           virtualElementId: id,
           orientation: Direction.Left,
           isFreeport: false,
+          isMonitored: false,
+          hue: 0,
           position: {
             x: 0,
             y: 0
@@ -2395,7 +2305,6 @@ describe('actions', () => {
 
     beforeEach(() => {
       stubAll(store, [
-        'setOscilloscopeVisibility',
         'setInputCount'
       ])
 
@@ -2411,21 +2320,7 @@ describe('actions', () => {
       })
       store.setProperties({ id, properties })
 
-      expect(store.setOscilloscopeVisibility).not.toHaveBeenCalled()
       expect(store.setInputCount).not.toHaveBeenCalled()
-    })
-
-    it('should dispatch setOscilloscopeVisibility when the showInOscilloscope has changed', () => {
-      const item1 = createItem(id, ItemType.LogicGate, { properties: createProperties() })
-      const properties = createProperties()
-      properties.showInOscilloscope.value = false
-
-      store.$patch({
-        items: { item1 }
-      })
-      store.setProperties({ id, properties })
-
-      expect(store.setOscilloscopeVisibility).toHaveBeenCalledWith({ id, value: false })
     })
 
     it('should dispatch setInputCount when the inputCount has changed', () => {
@@ -3339,6 +3234,8 @@ describe('actions', () => {
         elementId: itemId,
         orientation: Direction.Right,
         isFreeport: true,
+        isMonitored: false,
+        hue: 0,
         position: { x: 0, y: 0 },
         rotation: 0,
         value: 0
@@ -3357,6 +3254,8 @@ describe('actions', () => {
         elementId: itemId,
         orientation: Direction.Left,
         isFreeport: true,
+        isMonitored: false,
+        hue: 0,
         position: { x: 0, y: 0 },
         rotation: 0,
         value: 0

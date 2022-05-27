@@ -1,80 +1,59 @@
 <template>
-  <div class="toolbox-item"
+  <draggable
+    class="toolbox-item"
     :tabindex="0"
-    @mousedown="onMouseDown"
+    @drag-start="onDragStart"
+    @drag="onDrag"
+    @drag-end="onDragEnd"
+    @click="$emit('drop', factory)"
   >
     <div class="toolbox-item__parent">
-      <div
+      <resizable
         class="toolbox-item__preview"
         ref="preview"
+        @resize="rect => previewRect = rect"
       >
-        <div
+        <resizable
           class="toolbox-item__inner"
           ref="selectable"
           :style="{ zoom }"
+          @resize="rect => selectableRect = rect"
         >
-          <slot />
-          <port-set>
-            <template
-              v-for="(count, orientation) in portCounts"
-              v-slot:[orientation]
-            >
-              <port-pivot
-                v-for="i in count"
-                :key="`${orientation}_${count}`"
-                :type="1"
-              >
-                <port-handle />
-              </port-pivot>
-            </template>
-          </port-set>
-        </div>
-      </div>
+          <circuit-component
+            :type="item.type"
+            :subtype="item.subtype"
+            :ports="ports"
+            :properties="item.properties"
+          />
+        </resizable>
+      </resizable>
     </div>
     <div class="toolbox-item__label">
-      {{ label }}
+      {{ item.subtype }}
     </div>
-  </div>
+  </draggable>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onBeforeMount, ref } from 'vue'
-import ResizeObserver from 'resize-observer-polyfill'
-import PortHandle from '@/components/PortHandle.vue'
-import PortSet from '@/components/item/PortSet.vue'
-import PortPivot from '@/components/PortPivot.vue'
+import { defineComponent, ref, PropType, ComponentPublicInstance } from 'vue'
+import CircuitComponent from '../item/CircuitComponent.vue'
+import Draggable from '../Draggable.vue'
+import Resizable from '../interactive/Resizable.vue'
 
 export default defineComponent({
-  name: 'preview',
+  name: 'ToolboxItem',
   components: {
-    PortHandle,
-    PortSet,
-    PortPivot
+    CircuitComponent,
+    Draggable,
+    Resizable
+},
+  emits: {
+    drop: (f: ItemFactory, p?: Point) => true
   },
   props: {
-    /** Number of ports to display on the left. */
-    leftPortCount: {
-      type: Number,
-      default: 0
-    },
-    /** Number of ports to display on the top. */
-    topPortCount: {
-      type: Number,
-      default: 0
-    },
-    /** Number of ports to display on the right. */
-    rightPortCount: {
-      type: Number,
-      default: 0
-    },
-    /** Number of ports to display on the bottom. */
-    bottomPortCount: {
-      type: Number,
-      default: 0
-    },
     /** User-friendly label. */
-    label: {
-      type: String,
+    factory: {
+      type: Function as PropType<ItemFactory>,
       required: true
     },
     /** Current canvas zoom level. */
@@ -84,66 +63,45 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const selectable = ref<HTMLElement>()
-    const preview = ref<HTMLElement>()
+    const selectable = ref<ComponentPublicInstance<HTMLElement>>()
+    const selectableRect = ref(new DOMRect())
+    const previewRect = ref(new DOMRect())
     const zoom = ref(1)
-    const portCounts = {
-      left: props.leftPortCount,
-      top: props.topPortCount,
-      right: props.rightPortCount,
-      bottom: props.bottomPortCount
-    }
+    const { item, ports } = props.factory()
 
     let draggedElement: HTMLElement | null = null
-    let draggedPoint: Point = { x: 0, y: 0 }
 
     /**
      * Resize event handler.
      * This will update the zoom level of the displayed item such that it fits in the parent (if smaller).
      */
     function onSizeChanged () {
-      if (selectable.value && preview.value) {
-        const inner = selectable.value.getBoundingClientRect()
-        const outer = preview.value.getBoundingClientRect()
-        const ratio = Math.max(inner.width / outer.width, inner.height / outer.height)
+      const inner = selectableRect.value
+      const outer = previewRect.value
+      const ratio = Math.max(inner.width / outer.width, inner.height / outer.height)
 
-        zoom.value = Math.min(1 / ratio, 1)
-      }
+      zoom.value = Math.min(1 / ratio, 1)
     }
 
     /**
      * Mouse down event handler.
      * Begins the dragging session.
      */
-    function onMouseDown ($event: MouseEvent) {
-      if (!selectable.value) return
+    function onDragStart () {
+      const inner = selectableRect.value
 
-      const inner = selectable.value.getBoundingClientRect()
-
-      draggedElement = selectable.value.cloneNode(true) as HTMLElement
+      draggedElement = selectable.value?.$el.cloneNode(true) as HTMLElement
       draggedElement.style.position = 'absolute'
       draggedElement.style['zoom'] = `${props.zoom}`
       draggedElement.style.width = `${inner.width}px`
       draggedElement.style.height = `${inner.height}px`
-
-      draggedPoint = $event
     }
 
     /**
      * Mouse move event handler.
      */
-    function onMouseMove ($event: MouseEvent) {
+    function onDrag ({ x, y }: Point) {
       if (!draggedElement) return
-
-      const eventX = $event.clientX
-      const eventY = $event.clientY
-      const deltaX = Math.abs(draggedPoint.x - eventX)
-      const deltaY = Math.abs(draggedPoint.y - eventY)
-
-      if (deltaX + deltaY < 4) {
-        // if the mouse has not moved at least two pixels, then don't start the dragging process
-        return
-      }
 
       if (!document.body.contains(draggedElement)) {
         document.body.appendChild(draggedElement)
@@ -151,8 +109,8 @@ export default defineComponent({
 
       const { width, height } = draggedElement.getBoundingClientRect()
 
-      draggedElement.style.left = `${(eventX - ((width / 2) * props.zoom)) / props.zoom}px`
-      draggedElement.style.top = `${(eventY - ((height / 2) * props.zoom)) / props.zoom}px`
+      draggedElement.style.left = `${(x - ((width / 2) * props.zoom)) / props.zoom}px`
+      draggedElement.style.top = `${(y - ((height / 2) * props.zoom)) / props.zoom}px`
     }
 
     /**
@@ -160,50 +118,32 @@ export default defineComponent({
      *
      * @emits drop when the toolbox item has been dragged out of the box, or clicked on
      */
-    function onMouseUp () {
+    function onDragEnd () {
       if (!draggedElement) return
-      if (!document.body.contains(draggedElement)) emit('drop')
+      if (!document.body.contains(draggedElement)) return
 
       const { x, y } = draggedElement.getBoundingClientRect()
 
       draggedElement.remove()
       draggedElement = null
 
-      emit('drop', {
+      emit('drop', props.factory, {
         x: x * props.zoom,
         y: y * props.zoom
       })
     }
 
-    const observer = new ResizeObserver(onSizeChanged)
-
-    onMounted(() => {
-      if (preview.value) {
-        observer.observe(preview.value)
-      }
-
-      if (selectable.value) {
-        observer.observe(selectable.value)
-      }
-
-      window.addEventListener('mousemove', onMouseMove)
-      window.addEventListener('mouseup', onMouseUp)
-      // window.addEventListener('keydown', onMouseUp)
-    })
-
-    onBeforeMount(() => {
-      window.removeEventListener('mousemove', onMouseMove)
-      window.removeEventListener('mouseup', onMouseUp)
-      // window.removeEventListener('keydown', onMouseUp)
-    })
-
     return {
-      portCounts,
-      onMouseDown,
+      onDragStart,
+      onDrag,
+      onDragEnd,
       onSizeChanged,
+      item,
+      ports,
       zoom,
       selectable,
-      preview
+      selectableRect,
+      previewRect
     }
   }
 })
@@ -211,8 +151,13 @@ export default defineComponent({
 
 <style lang="scss">
 .toolbox-item {
-  width: 50%;
+  position: relative;
   display: inline-block;
+  pointer-events: all;
+  touch-action: auto;
+  aspect-ratio: 0.75;
+  width: 8vh;
+  max-height: 100%;
 
   &:hover {
     background-color: var(--color-bg-secondary);

@@ -5,7 +5,7 @@ describe('Binary Wave Service', () => {
   let service: BinaryWaveService
 
   beforeEach(() => {
-    service = new BinaryWaveService('test', 'test', 1)
+    service = new BinaryWaveService('test', 'test', 1, 0)
   })
 
   afterEach(() => jest.resetAllMocks())

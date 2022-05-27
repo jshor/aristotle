@@ -3,14 +3,14 @@
     <div class="integrated-circuit__wires">
       <div class="integrated-circuit__wires-divider">
         <div
-          v-for="port in portList.left"
+          v-for="port in ports.filter(p => p.orientation === 0)"
           :key="port.id"
           class="integrated-circuit__wire"
         />
       </div>
       <div class="integrated-circuit__wires-divider">
         <div
-          v-for="port in portList.right"
+          v-for="port in ports.filter(p => p.orientation === 2)"
           :key="port.id"
           class="integrated-circuit__wire"
         />
@@ -30,18 +30,9 @@ import { defineComponent, PropType } from 'vue'
 export default defineComponent({
   name: 'IntegratedCircuit',
   props: {
-
-    /**
-     * Bounding box of the item.
-     */
-    portList: {
-      type: Object as PropType<{
-        left?: Port[]
-        top?: Port[]
-        right?: Port[]
-        bottom?: Port[]
-      }>,
-      required: true
+    ports: {
+      type: Array as PropType<Port[]>,
+      default: () => []
     }
   }
 })
