@@ -16,8 +16,6 @@ env:
   # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
   # CSC_LINK: ${{ secrets.CSC_LINK }}
   # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-  # WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-  # WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
 
 jobs:
   build:
@@ -35,6 +33,17 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Set code signing certificate
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            echo "${{ secrets.WIN_CSC_CERT }}" >> certificate.crt
+            echo "${{ secrets.WIN_CSC_KEY }}" >> private.key
+            openssl pkcs12 -export -in certificate.crt -inkey private.key -out codecert.pfx -password pass:${{ secrets.WIN_CSC_KEY_PASSWORD }}
+            echo "CSC_KEY_PASSWORD=${{ secrets.WIN_CSC_KEY_PASSWORD }}" >> $GITHUB_ENV
+            echo "CSC_LINK=codecert.pfx" >> $GITHUB_ENV
+          fi
+        shell: bash
 
       - name: Set git credentials
         run: |

@@ -80,7 +80,7 @@ function createPrintFrame (image: HTMLImageElement, pageSize: number[]) {
  *
  * @param printArea
  */
-async function createImage<T> (printArea: HTMLElement, fn: 'toBlob' | 'toPng') {
+async function createImage<T extends string | Blob> (printArea: HTMLElement, fn: 'toBlob' | 'toPng') {
   document.body.appendChild(printArea)
 
   const dataUrl = await domToImage[fn](printArea) as T
