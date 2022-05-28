@@ -89,7 +89,6 @@ export default class SimulationService {
    * @emits change when the oscillogram or any value changes changes
    */
   emit = () => {
-    // console.log(Object.keys( this.oscillogram))
     this.emitter.emit('change', this.valueMap, this.oscillogram)
   }
 

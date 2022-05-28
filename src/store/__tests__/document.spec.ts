@@ -2434,7 +2434,7 @@ describe('actions', () => {
       })
 
       stubAll(store, [
-        'addNewItem',
+        'addItem',
         'removeElement',
         'connect',
         'disconnect'
@@ -2600,7 +2600,7 @@ describe('actions', () => {
     })
   })
 
-  describe('addNewItem', () => {
+  describe('addItem', () => {
     const store = createDocumentStore('document')()
 
     beforeEach(() => {
@@ -2616,7 +2616,7 @@ describe('actions', () => {
       const port = createPort('port', 'item1', PortType.Output)
 
       beforeEach(() => {
-        store.addNewItem({ item, ports: [port] })
+        store.addItem({ item, ports: [port] })
       })
 
       it('should add the ports to the state', () => {
@@ -2649,7 +2649,7 @@ describe('actions', () => {
       })
 
       beforeEach(() => {
-        store.addNewItem({ item: icItem, ports: [] })
+        store.addItem({ item: icItem, ports: [] })
       })
 
       xit('should add each port that is visible to the user to the state', () => {

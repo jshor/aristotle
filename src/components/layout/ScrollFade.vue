@@ -1,22 +1,27 @@
 <template>
-  <div
+  <resizable
     ref="scroll"
     class="scroll-fade"
     :class="{
       'scrollbar-fade--show-scrollbar': !hideScrollbar
     }"
     :style="`--mask-image-content: linear-gradient(to right, ${gradientStyle})`"
-    @scroll="onScroll"
+    @scroll="onChange"
+    @resize="onChange"
   >
     <slot />
-  </div>
+  </resizable>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+import { ComponentPublicInstance, defineComponent, onMounted, ref } from 'vue'
+import Resizable from '@/components/interactive/Resizable.vue'
 
 export default defineComponent({
   name: 'none',
+  components: {
+    Resizable
+  },
   props: {
     hideScrollbar: {
       type: Boolean,
@@ -26,15 +31,15 @@ export default defineComponent({
   setup () {
     const left = 'transparent, black var(--mask-width)'
     const right = 'black calc(100% - var(--mask-width)), transparent'
-    const scroll = ref<HTMLElement>()
+    const scroll = ref<ComponentPublicInstance<HTMLElement>>()
     const gradientStyle = ref('')
 
-    function getGradientStyle (target: HTMLElement) {
+    function getGradientStyle (element: HTMLElement) {
       const {
         scrollWidth,
         scrollLeft,
         clientWidth
-      } = target
+      } = element
 
       if (scrollWidth > clientWidth) {
         const modifiers: string[] = []
@@ -49,16 +54,14 @@ export default defineComponent({
       return 'transparent transparent'
     }
 
-    function onScroll ({ target }: UIEvent) {
-      gradientStyle.value = getGradientStyle(target as HTMLElement)
+    function onChange () {
+      if (scroll.value) {
+        gradientStyle.value = getGradientStyle(scroll.value.$el)
+      }
     }
 
-    onMounted(() => {
-      gradientStyle.value = getGradientStyle(scroll.value as HTMLElement)
-    })
-
     return {
-      onScroll,
+      onChange,
       gradientStyle,
       scroll
     }

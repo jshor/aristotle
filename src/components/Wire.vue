@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, watchEffect } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   name: 'Wire',
@@ -80,14 +80,6 @@ export default defineComponent({
       type: Object as PropType<WireGeometry>,
       required: true
     }
-  },
-  setup (props) {
-
-    watchEffect(() => {
-      if (props.isSelected) {
-        console.log('WRIEEW')
-      }
-    })
   }
 })
 </script>

@@ -104,6 +104,7 @@ export default defineComponent({
     const snapMode = SnapMode.Radial
 
     let newFreeport: Freeport | null = null
+    let draggedPortId = ''
     let isAdded = false
 
     function onEscapeKey ($event: KeyboardEvent) {
@@ -125,13 +126,14 @@ export default defineComponent({
       newFreeport = {
         itemId: uuid()
       }
+      draggedPortId = uuid()
       isAdded = false
 
       if (props.type === PortType.Input) {
-        newFreeport.outputPortId = uuid()
+        newFreeport.outputPortId = draggedPortId
         newFreeport.targetId = props.id
       } else {
-        newFreeport.inputPortId = uuid()
+        newFreeport.inputPortId = draggedPortId
         newFreeport.sourceId = props.id
       }
     }
@@ -142,7 +144,7 @@ export default defineComponent({
       if (!isAdded) {
         store.createFreeport(newFreeport, false)
         store.setConnectablePortIds({ portId: props.id, isDragging: true })
-        store.setSnapBoundaries(newFreeport.itemId)
+        store.setSnapBoundaries(draggedPortId)
       }
 
       store.dragItem(newFreeport.itemId, { x, y }, SnapMode.Radial)

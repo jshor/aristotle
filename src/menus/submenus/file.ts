@@ -88,12 +88,12 @@ export default function file (): MenuItemConstructorOptions[] {
     const submenu: MenuItemConstructorOptions[] = [
       {
         label: 'Previous File',
-        accelerator: 'CmdOrCtrl+Shift+Tab',
+        accelerator: 'Ctrl+Shift+Tab',
         click: () => rootStore.switchDocument(-1)
       },
       {
         label: 'Next File',
-        accelerator: 'CmdOrCtrl+Tab',
+        accelerator: 'Ctrl+Tab',
         click: () => rootStore.switchDocument(1)
       },
       { type: 'separator' }
