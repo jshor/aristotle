@@ -36,8 +36,8 @@ const MIN_SCALE = 0.1
 const MAX_SCALE = 2
 const SCALE_STEP = 0.1
 
-export const createDocumentStore = (id: string) => defineStore({
-  id,
+export const createDocumentStore = (documentId: string) => defineStore({
+  id: documentId,
   state: (): DocumentState => ({
     undoStack: [],
     redoStack: [],
@@ -47,7 +47,7 @@ export const createDocumentStore = (id: string) => defineStore({
     zoomLevel: 1,
     zIndex: 1,
     oscilloscopeHeight: 200,
-    isOscilloscopeOpen: true,
+    isOscilloscopeOpen: false,
     isCircuitEvaluated: false,
     isDebugging: false,
     isDirty: false,
@@ -203,6 +203,7 @@ export const createDocumentStore = (id: string) => defineStore({
         this.hasLoaded = true
         this.centerAll()
         this.panToCenter()
+        // this.setZoom({ zoom: 1.4 }) // TODO: set the user-defined default zoom like this
       }
     },
 
@@ -263,7 +264,7 @@ export const createDocumentStore = (id: string) => defineStore({
       const originalIcItem = integratedCircuitFactory(this.$state as DocumentState)
       const idMappedIcItem = idMapper.mapIntegratedCircuitIds(originalIcItem)
 
-      this.insertItem({ item: idMappedIcItem, ports: [] })
+      this.insertItemAtPosition({ item: idMappedIcItem, ports: [] })
       this.setItemBoundingBox(idMappedIcItem.id)
       this.setItemPortPositions(idMappedIcItem.id)
       this.setSelectionState({ id: idMappedIcItem.id, value: true })
@@ -300,20 +301,6 @@ export const createDocumentStore = (id: string) => defineStore({
         this.deselectAll()
         this.setSelectionState({ id: id.id, value: true })
       }
-    },
-
-    insertItem ({ item, ports }: { item: Item, ports: Port[] }, documentPosition: Point | null = null) {
-      if (!documentPosition) {
-        documentPosition = boundaries.getBoundingBoxMidpoint(this.viewport)
-      }
-
-      this.commitState()
-      this.addNewItem({ item, ports })
-
-      const position = fromDocumentToEditorCoordinates(this.canvas, this.viewport, documentPosition, this.zoomLevel)
-
-      this.setItemPosition({ id: item.id, position })
-      this.setSelectionState({ id: item.id, value: true })
     },
 
     /**
@@ -410,18 +397,19 @@ export const createDocumentStore = (id: string) => defineStore({
     /**
      * Sets the computed boundaries that an actively-dragged item to snap to.
      *
-     * @param id - ID of the item being dragged
+     * @param id - ID of the item or port being dragged
      */
     setSnapBoundaries (id: string) {
-      const snapBoundaries = ((): BoundingBox[] => {
-        const item = this.items[id]
-
+      this.snapBoundaries = ((): BoundingBox[] => {
         if (this.connectablePortIds.length) {
           // if there are connectable port ids, then use those for boundaries
           return this
             .connectablePortIds
-            .map(id => boundaries.getPointBoundary(this.ports[id].position))
+            .filter(portId => portId !== id)
+            .map(portId => boundaries.getPointBoundary(this.ports[portId].position))
         }
+
+        const item = this.items[id]
 
         if (item && !item.groupId) {
           // the item with the given id is an item that does not belong to a group
@@ -453,27 +441,26 @@ export const createDocumentStore = (id: string) => defineStore({
         }
         return []
       })()
-
-      this.snapBoundaries = snapBoundaries
     },
 
     setItemSize ({ rect, id }: { rect: DOMRectReadOnly, id: string }) {
       const item = this.items[id]
 
-      if (!item) return
+      const width = rect.width / this.zoomLevel
+      const height = rect.height / this.zoomLevel
 
       // reposition w.r.t. the centroid
       const centerX = item.position.x + (item.width / 2)
       const centerY = item.position.y + (item.height / 2)
-      const newX = centerX - (rect.width / 2)
-      const newY = centerY - (rect.height / 2)
+      const newX = centerX - width / 2
+      const newY = centerY - height / 2
 
       this.items[id].position = {
         x: newX,
         y: newY
       }
-      this.items[id].width = rect.width
-      this.items[id].height = rect.height
+      this.items[id].width = width
+      this.items[id].height = height
 
       this.setItemBoundingBox(id)
       this.setItemPortPositions(id)
@@ -674,9 +661,11 @@ export const createDocumentStore = (id: string) => defineStore({
       const items = Object
         .values(this.items)
         .filter(({ isSelected }) => isSelected)
+
       const portIds = items.reduce((portIds, item) => {
         return portIds.concat(item.portIds)
       }, [] as string[])
+
       const connections = Object
         .values(this.connections)
         .filter(c => {
@@ -742,7 +731,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
     /**
      * Deselects all elements.
-     *
      */
     deselectAll () {
       this.clearStatelessInfo()
@@ -761,7 +749,6 @@ export const createDocumentStore = (id: string) => defineStore({
 
     /**
      * Selects all items and connections.
-     *
      */
     selectAll () {
       this.clearStatelessInfo()
@@ -1197,7 +1184,7 @@ export const createDocumentStore = (id: string) => defineStore({
         }, [])
 
       if (isDragging) {
-        // if this port is being dragged, then the user intents to establish a new connection with it
+        // if this port is being dragged, then the user intends to establish a new connection with it
         // remove the last two ports (the two ports on opposite ends of the "preview" connection)
         connectedPortIds.splice(-2)
       }
@@ -1284,7 +1271,6 @@ export const createDocumentStore = (id: string) => defineStore({
     closeOscilloscope (lastHeight?: number) {
       if (!this.isOscilloscopeOpen) return
 
-      console.log('COLLAPSE TO: ', lastHeight)
       Object
         .keys(this.ports)
         .forEach(this.simulation.unmonitorPort)
@@ -1330,6 +1316,8 @@ export const createDocumentStore = (id: string) => defineStore({
       this
         .simulation
         .unmonitorPort(portId)
+
+      this.isOscilloscopeOpen = Object.keys(this.oscillogram).length > 0
     },
 
     /**
@@ -1482,9 +1470,9 @@ export const createDocumentStore = (id: string) => defineStore({
       this.groups = groups
 
       addedItems.forEach(id => {
-        this.addNewItem({
+        this.addItem({
           item: items[id],
-          ports: Object.values(ports)
+          ports
         })
       })
 
@@ -1572,27 +1560,26 @@ export const createDocumentStore = (id: string) => defineStore({
      *
      * @param payload
      * @param payload.item - new item to add
-     * @param payload.ports - list of ports associated to the item
+     * @param payload.ports - mapping of IDs-to-ports, containing a subset of ports belonging to the new item
      */
-    addNewItem ({ item, ports }: { item: Item, ports: Port[] }) {
-      const ic = item.integratedCircuit
+    addItem ({ item, ports }: { item: Item, ports: Record<string, Port> }) {
+      // add all ports associated to this item
+      // if the item is an integrated circuit, only add the ports that it defines (ones visible to the user)
+      const portList = item.integratedCircuit?.ports || ports
 
-      if (ic) {
-        // if the item is an integrated circuit, add its visible ports to the document
-        item
-          .portIds
-          .forEach(portId => {
-            if (ic.ports[portId]) {
-              this.ports[portId] = ic.ports[portId]
-              this.togglePortMonitoring(portId)
+      item
+        .portIds
+        .forEach(portId => {
+          const port = portList[portId]
+
+          if (port) {
+            this.ports[port.id] = port
+
+            if (port.isMonitored) {
+              this.monitorPort(port.id)
             }
-          })
-      }
-
-      ports.forEach(port => {
-        this.ports[port.id] = port
-        this.togglePortMonitoring(port.id)
-      })
+          }
+        })
 
       const taxonomy = `${item.type}_${item.subtype}`
 
@@ -1602,6 +1589,7 @@ export const createDocumentStore = (id: string) => defineStore({
 
       item.name = generateItemName(item, ++this.taxonomyCounts[taxonomy])
 
+      // add the item to the document and create its corresponding circuit node
       this.items[item.id] = item
       this.items[item.id].zIndex = ++this.zIndex
 
@@ -1610,14 +1598,28 @@ export const createDocumentStore = (id: string) => defineStore({
         .addNode(item, this.ports)
 
       this.resetItemValue(item)
+    },
 
-      ports.forEach(port => {
-        if (port.isMonitored) {
-          this
-            .simulation
-            .monitorPort(port.id, port.value, port.hue)
-        }
+    insertItemAtPosition ({ item, ports }: { item: Item, ports: Port[] }, documentPosition: Point | null = null) {
+      if (!documentPosition) {
+        documentPosition = boundaries.getBoundingBoxMidpoint(this.viewport)
+      }
+
+      const position = fromDocumentToEditorCoordinates(this.canvas, this.viewport, documentPosition, this.zoomLevel)
+
+      position.x -= item.width / 2
+      position.y -= item.height / 2
+
+      item.position = position
+
+      this.commitState()
+      this.addItem({
+        item,
+        ports: ports.reduce((map: Record<string, Port>, port) => ({ ...map, [port.id]: port }), {})
       })
+      this.setItemBoundingBox(item.id)
+      this.setItemPortPositions(item.id)
+      this.setSelectionState({ id: item.id, value: true })
     },
 
     resetItemValue (item: Item) {
@@ -1968,15 +1970,13 @@ export const createDocumentStore = (id: string) => defineStore({
         .filter(({ isSelected }) => isSelected)
         .reduce((map, group) => ({ ...map, [group.id]: group }), {})
 
-      const clipboard = JSON.stringify({
+      window.api.copy(JSON.stringify({
         items,
         ports,
         connections,
         groups,
         pasteCount: 1
-      })
-
-      window.api.copy(clipboard)
+      }))
     },
 
     paste () {
@@ -2013,13 +2013,10 @@ export const createDocumentStore = (id: string) => defineStore({
             item.position.y += 20 * parsed.pasteCount
             item.isSelected = false
 
-            this.addNewItem({
+            this.addItem({
               item,
-              ports: item.portIds.map(portId => mapped.ports[portId])
+              ports: mapped.ports
             })
-
-            this.setItemBoundingBox(item.id)
-            this.setItemPortPositions(item.id)
             this.setSelectionState({ id: item.id, value: true })
           })
 

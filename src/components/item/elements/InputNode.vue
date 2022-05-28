@@ -71,6 +71,7 @@ export default defineComponent({
   border: 1px solid var(--color-secondary);
   background-color: var(--color-bg-secondary);
   pointer-events: all;
+  box-sizing: border-box;
   cursor: move;
 
   &__flipper {

@@ -12,7 +12,6 @@
       <toolbar
         :key="activeDocumentId"
         :store="activeDocument.store"
-        @toolbox="isToolboxOpen = !isToolboxOpen"
       />
       <toolbox :store="activeDocument.store" />
     </template>

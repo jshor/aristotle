@@ -51,7 +51,7 @@ class Circuit {
       if (inputIndex !== -1) {
         this.inputNodes.splice(inputIndex, 1)
       }
-      this.reset()
+      // this.reset()
     }
 
     const index = this.nodes.findIndex(({ name }) => name === node.name)

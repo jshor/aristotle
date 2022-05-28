@@ -120,7 +120,7 @@ export default defineComponent({
   },
   setup (props) {
     const store = props.store()
-    const item = ref(store.items[props.id])
+    const item = computed(() => store.items[props.id])
     const itemRef = ref<ComponentPublicInstance<HTMLElement>>()
 
     /* list of all ports that belong to this item */
@@ -157,8 +157,8 @@ export default defineComponent({
      */
     function onDrag (position: Point, offset: Point) {
       store.dragItem(props.id, {
-        x: position.x - offset.x - item.value.width / 2,
-        y: position.y - offset.y - item.value.height / 2
+        x: position.x - offset.x - item.value.width / 2 * store.zoomLevel,
+        y: position.y - offset.y - item.value.height / 2 * store.zoomLevel
       })
     }
 

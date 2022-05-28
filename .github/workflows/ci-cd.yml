@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest]
         node-version: [14]
         
     outputs:
@@ -53,12 +53,12 @@ jobs:
       - name: Install dependencies
         run: yarn
 
-      - name: Create initial release
-        run: yarn release
+      # - name: Create initial release
+      #   run: yarn release
 
-      - name: Store git tag name
-        id: git_tag
-        run: echo "::set-output name=tag::$(git tag --sort=taggerdate | tail -1)"
+      # - name: Store git tag name
+      #   id: git_tag
+      #   run: echo "::set-output name=tag::$(git tag --sort=taggerdate | tail -1)"
         
       # - name: Run tests
       #   run: yarn test
@@ -66,17 +66,17 @@ jobs:
       # - name: Report coverage
       #   run: yarn codecov
           
-      - name: Create build
-        run: yarn build
+      # - name: Create build
+      #   run: yarn build
 
-      - name: Upload binary artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: binary-artifact
-          path: |
-            dist_electron/*.AppImage
-            dist_electron/*.snap
-            dist_electron/*.exe
+      # - name: Upload binary artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: binary-artifact
+      #     path: |
+      #       dist_electron/*.AppImage
+      #       dist_electron/*.snap
+      #       dist_electron/*.exe
 
   release:
     needs: build
@@ -97,8 +97,8 @@ jobs:
       - name: Build docs
         run: yarn docs:build && yarn web:build
 
-      - name: Publish release
-        run: git push --follow-tags origin master 
+      # - name: Publish release
+      #   run: git push --follow-tags origin master 
       
       - name: Upload docs bundle
         uses: actions/upload-artifact@v2
@@ -141,29 +141,29 @@ jobs:
           FOLDER: build
           CLEAN: true
 
-  upload-binaries:
-    needs: [build, release]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+  # upload-binaries:
+  #   needs: [build, release]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
       
-      - name: Pull latest
-        run: git pull origin master
+  #     - name: Pull latest
+  #       run: git pull origin master
 
-      - name: Download binary artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: binary-artifact
-          path: dist_electron
+  #     - name: Download binary artifacts
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: binary-artifact
+  #         path: dist_electron
 
-      - name: Upload binary artifacts to release
-        run: |
-          set -x
-          assets=()
-          for asset in ./dist_electron/*; do
-            assets+=("-a" "$asset")
-          done
-          echo "${{ needs.build.outputs.tag }}"
-          hub release create "${assets[@]}" -m "${{ needs.build.outputs.tag }}" "${{ needs.build.outputs.tag }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Upload binary artifacts to release
+  #       run: |
+  #         set -x
+  #         assets=()
+  #         for asset in ./dist_electron/*; do
+  #           assets+=("-a" "$asset")
+  #         done
+  #         echo "${{ needs.build.outputs.tag }}"
+  #         hub release create "${assets[@]}" -m "${{ needs.build.outputs.tag }}" "${{ needs.build.outputs.tag }}"
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

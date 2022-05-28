@@ -111,7 +111,7 @@ export default defineComponent({
      *
      * This will only create a new freeport once per mousedown-move cycle.
      */
-    async function onDrag (position: Point, th: string) {
+    async function onDrag (position: Point) {
       if (!root.value?.$el) return
       if (freeportId === null) {
         // directly change the DOM style (as opposed to using v-show/refs) to avoid "flickering" while VDOM updates

@@ -118,19 +118,14 @@ export default defineComponent({
      *
      * @emits drop when the toolbox item has been dragged out of the box, or clicked on
      */
-    function onDragEnd () {
+    function onDragEnd (position: Point) {
       if (!draggedElement) return
       if (!document.body.contains(draggedElement)) return
-
-      const { x, y } = draggedElement.getBoundingClientRect()
 
       draggedElement.remove()
       draggedElement = null
 
-      emit('drop', props.factory, {
-        x: x * props.zoom,
-        y: y * props.zoom
-      })
+      emit('drop', props.factory, position)
     }
 
     return {

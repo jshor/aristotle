@@ -1,5 +1,5 @@
 <template>
-  <toolbox-layout :is-open="isToolboxOpen">
+  <toolbox-layout v-if="isToolboxOpen" :is-open="isToolboxOpen">
     <template
       v-for="(factorySubtypes, type) in factories"
       v-slot:[type]
@@ -17,7 +17,6 @@
 </template>
 
 <script lang="ts">
-import { StoreDefinition } from 'pinia'
 import { defineComponent, PropType, computed } from 'vue'
 import { DocumentStore } from '@/store/document'
 import ScrollFade from '@/components/layout/ScrollFade.vue'
@@ -44,7 +43,7 @@ export default defineComponent({
     const isToolboxOpen = computed(() => store.isToolboxOpen)
 
     function onDrop (factory: ItemFactory, position?: Point) {
-      store.insertItem(factory(), position)
+      store.insertItemAtPosition(factory(), position)
     }
 
     return {
