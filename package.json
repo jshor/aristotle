@@ -1,6 +1,6 @@
 {
   "name": "aristotle",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "author": "Josh Shor <jpshor@gmail.com>",
   "description": "Digital logic simulator for Windows, Mac, and Linux.",
