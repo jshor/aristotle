@@ -23,7 +23,7 @@ describe('Item.vue', () => {
       const port1 = createPort('port1', itemId, PortType.Input)
       const item = createItem(itemId, ItemType.LogicGate)
 
-      store().addNewItem({ item, ports: [] })
+      store().addItem({ item, ports: [] })
       store().addPort(itemId, port1)
 
       wrapper = mount(Item, {
@@ -168,7 +168,7 @@ describe('Item.vue', () => {
       const port2 = createPort('port2', itemId, PortType.Output, { orientation: Direction.Right })
       const item = createItem(itemId, ItemType.LogicGate)
 
-      storeInstance.addNewItem({ item, ports: [] })
+      storeInstance.addItem({ item, ports: [] })
       storeInstance.addPort(itemId, port1)
       storeInstance.addPort(itemId, port2)
 

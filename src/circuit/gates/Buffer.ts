@@ -21,9 +21,11 @@ class Buffer extends CircuitNode {
   }
 
   protected eval = (): number => {
-    return Object
-      .values(this.inputValues)
-      .pop() || 0
+    const values = Object.values(this.inputValues)
+
+    // TODO: if any inputs to buffer are TRUE, then return TRUE
+    // otherwise, return the first value discovered
+    return values.find(v => v === 1) || values.pop() || 0
   }
 }
 
