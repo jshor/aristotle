@@ -4,7 +4,7 @@ import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'
 import Direction from '@/types/enums/Direction'
 import itemFactory from './itemFactory'
-import DocumentState from '@/store/DocumentState'
+import { DocumentState } from '@/store/document/state'
 
 /**
  * Creates an integrated circuit item.

@@ -18,6 +18,7 @@
     >
       <port-handle
         :type="type"
+        :hue="hue"
         :active="store.activePortId === id || store.connectablePortIds.includes(id)"
         touch-friendly
       />
@@ -25,6 +26,7 @@
     <port-handle
       v-else
       :type="type"
+      :hue="hue"
       :active="store.activePortId === id || store.connectablePortIds.includes(id)"
     />
   </port-pivot>
@@ -38,7 +40,7 @@ import PortPivot from '../components/PortPivot.vue'
 import { DocumentStore } from '@/store/document'
 import PortType from '@/types/enums/PortType'
 import SnapMode from '@/types/enums/SnapMode'
-import Draggable from '@/components/Draggable.vue'
+import Draggable from '@/components/interactive/Draggable.vue'
 
 export default defineComponent({
   name: 'PortItem',
@@ -83,6 +85,12 @@ export default defineComponent({
 
     /** Port directional orientation. */
     orientation: {
+      type: Number,
+      default: 0
+    },
+
+    /** Color hue of the port. */
+    hue: {
       type: Number,
       default: 0
     },

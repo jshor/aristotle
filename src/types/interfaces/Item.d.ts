@@ -18,13 +18,7 @@ declare global {
     properties: {
       [propertyName: string]: Property
     }
-    integratedCircuit?: {
-      items: Record<string, Item>
-      connections: Record<string, Connection>
-      ports: Record<string, Port>
-      groups: Record<string, Group>
-      serializedState: string
-    }
+    integratedCircuit?: IntegratedCircuit
   }
 }
 

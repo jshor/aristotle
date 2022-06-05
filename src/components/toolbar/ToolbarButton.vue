@@ -8,6 +8,7 @@
     }"
     class="toolbar-button"
     role="button"
+    @click="onClick"
   >
     <icon v-if="icon" :icon="icon" class="toolbar-button__icon" />
     <icon v-else :icon="faUser" class="toolbar-button__icon" />
@@ -27,6 +28,9 @@ export default defineComponent({
   },
   data () {
     return { faUser }
+  },
+  emits: {
+    click: ($event: MouseEvent) => true
   },
   props: {
     active: {
@@ -49,6 +53,18 @@ export default defineComponent({
       type: String,
       default: ''
     }
+  },
+  setup (props, { emit }) {
+    function onClick ($event: MouseEvent) {
+      $event.stopPropagation()
+      $event.preventDefault()
+
+      if (!props.disabled) {
+        emit('click', $event)
+      }
+    }
+
+    return { onClick }
   }
 })
 </script>

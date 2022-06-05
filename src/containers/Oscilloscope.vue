@@ -20,8 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, PropType } from 'vue'
-import { StoreDefinition, storeToRefs } from 'pinia'
+import { defineComponent, computed, PropType, ref } from 'vue'
 import OscilloscopeTimeline from '@/components/oscilloscope/OscilloscopeTimeline.vue'
 import OscilloscopeTitleBar from '@/components/oscilloscope/OscilloscopeTitleBar.vue'
 import OscilloscopeViewer from '@/components/oscilloscope/OscilloscopeViewer.vue'
@@ -42,20 +41,16 @@ export default defineComponent({
   },
   setup (props) {
     const store = props.store()
-    const {
-      oscillogram,
-      isDebugging,
-      isOscilloscopeOpen,
-      oscilloscopeHeight
-    } = storeToRefs(store)
+    const oscilloscopeHeight = ref(store.oscilloscopeHeight)
+    const isOscilloscopeOpen = computed(() => store.isOscilloscopeOpen)
+    const oscillogram = computed(() => store.oscillogram)
     const hasWaves = computed(() => Object.keys(oscillogram).length > 0)
 
     return {
-      isDebugging,
-      isOscilloscopeOpen,
       hasWaves,
       oscillogram,
       oscilloscopeHeight,
+      isOscilloscopeOpen,
       clearOscilloscope: store.clearOscilloscope,
       closeOscilloscope: store.closeOscilloscope
     }

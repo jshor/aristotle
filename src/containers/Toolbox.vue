@@ -1,5 +1,5 @@
 <template>
-  <toolbox-layout v-if="isToolboxOpen" :is-open="isToolboxOpen">
+  <toolbox-layout :is-open="isToolboxOpen">
     <template
       v-for="(factorySubtypes, type) in factories"
       v-slot:[type]

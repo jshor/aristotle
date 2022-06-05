@@ -101,8 +101,7 @@ export default defineComponent({
       hasOpenDocuments,
       isFullscreen
     } = storeToRefs(store)
-
-    let isDropping = ref(false)
+    const isDropping = ref(false)
 
     if (!hasOpenDocuments.value) {
       store.openTestDocuments()

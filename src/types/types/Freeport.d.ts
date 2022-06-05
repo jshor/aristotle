@@ -1,6 +1,7 @@
 declare global {
   type Freeport = {
     itemId: string
+    value?: number
     outputPortId?: string
     inputPortId?: string
     sourceId?: string

@@ -26,11 +26,11 @@
 <script lang="ts">
 import { v4 as uuid } from 'uuid'
 import { ComponentPublicInstance, defineComponent, PropType, ref, computed } from 'vue'
-import Draggable from '@/components/Draggable.vue'
+import Draggable from '@/components/interactive/Draggable.vue'
 import Wire from '@/components/Wire.vue'
 import { DocumentStore } from '@/store/document'
-import boundaries from '@/utils/geometry/boundaries'
-import renderLayout from '@/utils/geometry/wire'
+import boundaries from '@/store/document/geometry/boundaries'
+import renderLayout from '@/store/document/geometry/wire'
 
 export default defineComponent({
   name: 'Connection',
@@ -120,6 +120,7 @@ export default defineComponent({
 
         store.createFreeport({
           itemId: freeportId,
+          // value: source.value.value,
           inputPortId: uuid(),
           outputPortId: uuid(),
           connectionChainId: connection.value.connectionChainId,
@@ -140,7 +141,7 @@ export default defineComponent({
       if (freeportId) {
         // after dragging has finished, two new connections are established
         // this connection is now ready to destroy itself
-        store.disconnect({
+        store.destroyConnection({
           source: connection.value.source,
           target: connection.value.target
         })

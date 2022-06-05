@@ -3,7 +3,7 @@ import LogicValue from '../../types/LogicValue'
 import CircuitNode from '../CircuitNode'
 
 describe('Input Node', () => {
-  let node
+  let node: InputNode
 
   beforeEach(() => {
     node = new InputNode('testNode')
@@ -28,7 +28,7 @@ describe('Input Node', () => {
 
       node.value = value
       node.setValue(value)
-      
+
       expect(node.eval()).toEqual(value)
     })
   })
