@@ -1,4 +1,4 @@
-import { app, protocol, BrowserWindow, ipcMain, Event, App, BrowserWindowConstructorOptions } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, Event, App, BrowserWindowConstructorOptions, nativeImage } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import * as remote from '@electron/remote/main'
 import path from 'path'
@@ -157,6 +157,8 @@ if (!gotTheLock) {
 
   app.on('ready', async () => {
     createProtocol('app')
+
+    const icon = nativeImage.createFromPath(path.join(__dirname, '../../public/resources/icon.ico'))
 
     mainWindow = await createMainWindow()
 

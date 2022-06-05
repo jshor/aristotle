@@ -2,6 +2,8 @@ import CircuitNode from '../base/CircuitNode'
 import LogicValue from '../types/LogicValue'
 
 class Buffer extends CircuitNode {
+  public forceContinue: boolean = true
+
   /**
    * Updates the input value at the given index with the given value.
    *
@@ -20,12 +22,8 @@ class Buffer extends CircuitNode {
     }
   }
 
-  protected eval = (): number => {
-    const values = Object.values(this.inputValues)
-
-    // TODO: if any inputs to buffer are TRUE, then return TRUE
-    // otherwise, return the first value discovered
-    return values.find(v => v === 1) || values.pop() || 0
+  public eval = (): number => {
+    return Object.values(this.inputValues).pop() || LogicValue.UNKNOWN
   }
 }
 

@@ -1,4 +1,4 @@
-import { createConnection, createItem, createPort } from '@/store/__tests__/__helpers__/helpers'
+import { createConnection, createIntegratedCircuit, createItem, createPort } from '@/store/document/actions/__tests__/__helpers__'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'
@@ -13,6 +13,7 @@ describe('Simulation Service', () => {
 
   beforeEach(() => {
     service = new SimulationService([], [], {})
+    service.isPaused = false
   })
 
   afterEach(() => jest.resetAllMocks())
@@ -265,11 +266,11 @@ describe('Simulation Service', () => {
     const connection = createConnection('connection', 'port1', 'port2')
     const ports = { port1, port2 }
     const ic = createItem('ic', ItemType.IntegratedCircuit, {
-      integratedCircuit: {
+      integratedCircuit: createIntegratedCircuit({
         ports,
         items: { item },
         connections: { connection }
-      }
+      })
     })
 
     beforeEach(() => {
@@ -339,11 +340,11 @@ describe('Simulation Service', () => {
 
     it('should add the item as an integrated circuit if it contains one', () => {
       const item = createItem('ic', ItemType.IntegratedCircuit, {
-        integratedCircuit: {
+        integratedCircuit: createIntegratedCircuit({
           items: {},
           ports: {},
           connections: {}
-        },
+        }),
         portIds: [inputPort.id]
       })
 
@@ -429,7 +430,7 @@ describe('Simulation Service', () => {
           .mockImplementation(jest.fn())
         jest
           .spyOn(circuitNode, 'on')
-          .mockImplementation((a, fn: any) => fn(value))
+          .mockImplementation((a, fn) => fn(value))
       })
 
       it('should set the output value', () => {

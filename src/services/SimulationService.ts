@@ -41,7 +41,7 @@ export default class SimulationService {
   emitter: TinyEmitter = new TinyEmitter()
 
   /** Whether or not the simulation is paused. */
-  isPaused: boolean = false
+  isPaused: boolean = true
 
   /** Oscillogram data, containing each BinaryWave instance observed in the oscilloscope. */
   oscillogram: Oscillogram = {}
@@ -79,7 +79,7 @@ export default class SimulationService {
    * @param event - available values: `change`
    * @param fn - callback function, taking the port-value mapping as the first argument and oscillogram data as the second
    */
-  on = (event: string, fn: (valueMap: Record<string, number>, oscillogram: Oscillogram) => void) => {
+  on = (event: 'change', fn: (valueMap: Record<string, number>, oscillogram: Oscillogram) => void) => {
     this.emitter.on(event, fn)
   }
 
@@ -275,7 +275,9 @@ export default class SimulationService {
     const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
     const node = circuitNodeMapper.getCircuitNode(item, inputIds)
 
-    node.forceContinue = forceContinue
+    if (forceContinue) {
+      node.forceContinue = true
+    }
 
     item.portIds.forEach(portId => this.addPort(portId, node))
 

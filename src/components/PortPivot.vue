@@ -16,13 +16,11 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'PortPivot',
   props: {
-    /**
-     * Rotation of the port container.
-     */
+    /** Rotation of the port container. */
     rotation: {
       type: Number,
       default: 0
-    }
+    },
   }
 })
 </script>

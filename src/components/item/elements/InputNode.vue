@@ -10,6 +10,7 @@
         'input-node__flipper--high-z': model === 0
       }"
       @mousedown.stop="onInput"
+      @touchstart.stop="onInput"
     >
       <span v-if="model === 1">ON</span>
       <span v-else-if="model === -1">OFF</span>
@@ -20,7 +21,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref, watchEffect } from 'vue'
-import ItemSubtype from '@/types/enums/ItemSubtype'
 
 export default defineComponent({
   name: 'InputNode',
@@ -34,6 +34,9 @@ export default defineComponent({
     //   required: true
     // }
   },
+  emits: {
+    change: (data: { id: string, value: number }) => true
+  },
   setup (props, { emit }) {
     const model = ref(0)
 
@@ -41,13 +44,13 @@ export default defineComponent({
       model.value = props.ports[0]?.value || 0
     })
 
-    function onInput ($event: MouseEvent) {
+    function onInput ($event: Event) {
       $event.preventDefault()
       $event.stopPropagation()
 
       model.value = model.value === 1 ? -1 : 1
 
-      emit('toggle', {
+      emit('change', {
         id: props.ports[0].id,
         value: model.value
       })

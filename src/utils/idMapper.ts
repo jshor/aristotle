@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid'
 
 type IdMap = Record<string, string>
 
-function mapStandardCircuitIds (circuit: { connections: Record<string, Connection>, items: Record<string, Item>, ports: Record<string, Port>, groups: Record<string, Group> }, idMap: IdMap = {}) {
+function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
 
   let { items, connections, ports, groups } = cloneDeep(circuit)
 

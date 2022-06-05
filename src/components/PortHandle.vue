@@ -5,27 +5,41 @@
       :class="{
         'port-handle__display--active': active
       }"
-    />
+    >
+      <div
+        class="port-handle__hue"
+        :style="{ backgroundColor }"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
 
 export default defineComponent({
   name: 'PortHandle',
   props: {
-  /**
-   * Sets the port handle to be visually active.
-   */
+    /** Sets the port handle to be visually active. */
     active: {
       type: Boolean,
       default: false
     },
-    type: {
+
+    /** Color hue of the port. */
+    hue: {
       type: Number,
       default: 0
     }
+  },
+  setup (props) {
+    const backgroundColor = computed(() => {
+      return props.hue > 0
+        ? `hsla(${props.hue}, var(--lightness), var(--saturation), 0.8)`
+        : 'var(--color-bg-secondary)'
+    })
+
+    return { backgroundColor }
   }
 })
 </script>
@@ -35,9 +49,6 @@ export default defineComponent({
   --port-radius: 16px;
 
   position: absolute;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   box-sizing: border-box;
   top: calc(var(--port-radius) * -1);
   left: calc(var(--port-radius) * -1);
@@ -46,6 +57,12 @@ export default defineComponent({
   border-radius: 50%;
   pointer-events: all;
   z-index: 1001;
+
+  &, &__display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
   &__display {
     width: 50%;
@@ -59,7 +76,14 @@ export default defineComponent({
     &--active {
       width: 100%;
       height: 100%;
+      z-index: 9999;
     }
+  }
+
+  &__hue {
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
   }
 }
 </style>
