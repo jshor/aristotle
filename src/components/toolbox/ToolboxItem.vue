@@ -37,7 +37,7 @@
 <script lang="ts">
 import { defineComponent, ref, PropType, ComponentPublicInstance } from 'vue'
 import CircuitComponent from '../item/CircuitComponent.vue'
-import Draggable from '../Draggable.vue'
+import Draggable from '../interactive/Draggable.vue'
 import Resizable from '../interactive/Resizable.vue'
 
 export default defineComponent({

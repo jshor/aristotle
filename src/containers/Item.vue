@@ -35,7 +35,7 @@
       :properties="item.properties"
       :is-selected="isSelected"
       :flash="flash"
-      @toggle="store.setPortValue"
+      @change="store.setPortValue"
     >
       <template
         v-for="(port, o) in 4"
@@ -52,6 +52,7 @@
           :position="port.position"
           :orientation="port.orientation + item.rotation"
           :connected-port-ids="port.connectedPortIds"
+          :hue="port.isMonitored ? port.hue : 0"
           :rotation="item.rotation"
           @keypress.esc="onEscapeKey"
           @focus="store.setActivePortId(port.id)"
@@ -72,7 +73,7 @@ import PortItem from './PortItem.vue'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import { DocumentStore } from '@/store/document'
-import Draggable from '@/components/Draggable.vue'
+import Draggable from '@/components/interactive/Draggable.vue'
 
 /**
  * This component represents a two-dimensional item in the editor.

@@ -3,7 +3,7 @@ import LogicValue from '../../types/LogicValue'
 import CircuitNode from '../CircuitNode'
 
 describe('Output Node', () => {
-  let node
+  let node: OutputNode
 
   beforeEach(() => {
     node = new OutputNode('testNode')

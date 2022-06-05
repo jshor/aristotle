@@ -51,7 +51,7 @@ class Circuit {
       if (inputIndex !== -1) {
         this.inputNodes.splice(inputIndex, 1)
       }
-      // this.reset()
+      // this.reset() // TODO: why?
     }
 
     const index = this.nodes.findIndex(({ name }) => name === node.name)
@@ -75,7 +75,6 @@ class Circuit {
     source.outputs.push(new Connection(target, targetId))
     source.value = LogicValue.UNKNOWN
     this.enqueue(source)
-    this.next()
   }
 
   /**
@@ -101,7 +100,6 @@ class Circuit {
           this.enqueue(targetNode)
         }
       })
-    this.next()
   }
 
   /**
@@ -154,7 +152,6 @@ class Circuit {
    */
   public next = (): void => {
     let isValueChanged = false
-    let forceContinue = false
     let localQueue: CircuitNode[] = []
 
     while (this.queue.length > 0) {
@@ -168,11 +165,9 @@ class Circuit {
 
       if (node.isValueChanged) {
         isValueChanged = true
-        node.isValueChanged = false
       }
 
       if (node.forceContinue) {
-        forceContinue = true
         this.enqueue(...localQueue)
         localQueue = []
       }

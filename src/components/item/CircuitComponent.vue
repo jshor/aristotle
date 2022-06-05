@@ -9,6 +9,7 @@
     <component
       v-bind:is="type"
       v-bind="$props"
+      @change="onChange"
     />
     <div
       v-for="(name, index) in ['left', 'top', 'right', 'bottom']"
@@ -41,7 +42,9 @@ const components = {
 export default defineComponent({
   name: 'CircuitComponent',
   components,
-  emits: ['toggle'],
+  emits: {
+    change: (data: { id: string, value: number }) => true
+  },
   props: {
     isSelected: {
       type: Boolean,
@@ -66,6 +69,13 @@ export default defineComponent({
     properties: {
       type: Object as PropType<PropertySet>,
       default: () => ({})
+    }
+  },
+  setup (_, { emit }) {
+    return {
+      onChange (args: { id: string, value: number }) {
+        emit('change', args)
+      }
     }
   }
 })

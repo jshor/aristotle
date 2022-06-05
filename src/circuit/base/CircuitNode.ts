@@ -82,7 +82,6 @@ class CircuitNode {
    */
   public setValue = (value: number): void => {
     this.newValue = value
-    this.eval = () => value
   }
 
   /**
@@ -91,7 +90,7 @@ class CircuitNode {
    * @param {String} eventType - 'change' or 'reset'
    * @param {LogicValue} value
    */
-  protected invokeEvent = (eventType: string, value: number): void => {
+  public invokeEvent = (eventType: string, value: number): void => {
     this.events.forEach((event) => {
       if (event.eventType === eventType) {
         event.callback(value)
@@ -104,7 +103,7 @@ class CircuitNode {
    *
    * @returns {LogicValue}
    */
-  protected eval = (): number => {
+  public eval = (): number => {
     return this.value
   }
 
@@ -114,7 +113,7 @@ class CircuitNode {
    * @param {LogicValue} compare - value to get count of
    * @returns {Number}
    */
-  protected valueCount = (compare: number): number => {
+  public valueCount = (compare: number): number => {
     return Object
       .values(this.inputValues)
       .filter((value) => value === compare)
@@ -146,18 +145,31 @@ class CircuitNode {
   /**
    * Propagates a signal, if the value of the node has changed.
    *
-   * @returns {Array<CircuitNodes>} list of all outgoing connected nodes
+   * @returns {CircuitNodes[]} queue of all resulting nodes to be evaluated in the next state
    */
   public propagate = (): Array<CircuitNode> => {
+    let queue: CircuitNode[] = []
+
     if (this.value !== this.newValue) {
       this.isValueChanged = true
       this.value = this.newValue
       this.updateOutputs(this.newValue)
       this.invokeEvent('change', this.newValue)
 
-      return this.outputs.map(({ node }) => node)
+      this
+        .outputs
+        .forEach(({ node }) => {
+          if (node.forceContinue) {
+            // if this node is forced to continue propagation, enqueue its result
+            queue = queue.concat(node.propagate())
+          } else {
+            // otherwise, just enqueue the node itself
+            queue.push(node)
+          }
+        })
     }
-    return []
+
+    return queue
   }
 
   /**

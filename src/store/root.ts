@@ -1,7 +1,6 @@
 // @ts-check
-import { defineStore, StoreDefinition } from 'pinia'
+import { defineStore } from 'pinia'
 import { v4 as uuid } from 'uuid'
-import DocumentState from './DocumentState'
 import basic from '../containers/fixtures/basic.json'
 import flipFlop from '../containers/fixtures/flipflop.json'
 import integratedCircuit from '../containers/fixtures/ic.json'
@@ -15,7 +14,7 @@ export type RootStore = {
   documents: {
     [id: string]: {
       fileName: string
-      filePath: string
+      filePath?: string
       displayName: string
       store: DocumentStore
     }
@@ -80,7 +79,18 @@ export const useRootStore = defineStore({
       }
     },
     newDocument () {
-      console.log('will create new doc')
+      const id = uuid()
+      const store = createDocumentStore(id)
+      const document = store()
+
+      document.resetCircuit()
+
+      this.documents[id] = {
+        fileName: 'Untitled Circuit',
+        displayName: 'Untitled Circuit',
+        store
+      }
+      this.activateDocument(id)
     },
     async closeAll (): Promise<boolean> {
       if (this.activeDocumentId) {
@@ -162,6 +172,8 @@ export const useRootStore = defineStore({
             this.activeDocument.displayName = fileName
           }
         }
+
+        if (!this.activeDocument.filePath) return true
 
         const store = this.activeDocument.store()
 

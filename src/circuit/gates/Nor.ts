@@ -2,7 +2,7 @@ import CircuitNode from '../base/CircuitNode'
 import LogicValue from '../types/LogicValue'
 
 class Nor extends CircuitNode {
-  protected eval = (): number => {
+  public eval = (): number => {
     if (this.valueCount(LogicValue.TRUE)) {
       return LogicValue.FALSE
     }
