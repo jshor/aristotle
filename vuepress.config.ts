@@ -1,5 +1,5 @@
 import { defineUserConfig } from 'vuepress'
-import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
+import registerComponentsPlugin from '@vuepress/plugin-register-components'
 import path from 'path'
 
 export default defineUserConfig({

@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer'
 import JSZip from 'jszip'
 
 export default class FileService {

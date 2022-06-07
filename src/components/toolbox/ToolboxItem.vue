@@ -92,7 +92,7 @@ export default defineComponent({
 
       draggedElement = selectable.value?.$el.cloneNode(true) as HTMLElement
       draggedElement.style.position = 'absolute'
-      draggedElement.style['zoom'] = `${props.zoom}`
+      draggedElement.style['zoom' as any] = `${props.zoom}`
       draggedElement.style.width = `${inner.width}px`
       draggedElement.style.height = `${inner.height}px`
     }

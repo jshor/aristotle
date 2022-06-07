@@ -21,7 +21,7 @@ module.exports = {
   },
   pluginOptions: {
     electronBuilder: {
-      electronVersion: '18.2.0',
+      electronVersion: '19.0.3',
       chainWebpackRendererProcess: config => config.target('web'),
       extraFiles: [
         'public'
