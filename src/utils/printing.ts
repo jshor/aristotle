@@ -22,7 +22,7 @@ function createPrintArea (zoom: number, editor: HTMLElement, boundingBox: Boundi
     child.style.top = `${(top - boundingBox.top)}px`
   }
 
-  printArea.style['zoom'] = zoom.toString()
+  printArea.style['zoom' as any] = zoom.toString()
   printArea.style.width = `${width}px`
   printArea.style.height = `${height}px`
   printArea.style.position = 'relative'
