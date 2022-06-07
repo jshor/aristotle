@@ -71,6 +71,7 @@ export const useRootStore = defineStore({
 
         await FileService.writeBlob(filePath, data)
       } catch (error) {
+        console.log('ERROR: ', error)
         window.api.showMessageBox({
           message: 'An error occurred while trying to save the image.',
           title: 'Error',

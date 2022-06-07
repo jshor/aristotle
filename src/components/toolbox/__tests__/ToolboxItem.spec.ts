@@ -56,7 +56,8 @@ describe.skip('Toolbox Item', () => {
       const element = nodes[0] as HTMLElement
 
       expect(nodes[0]).toBeInstanceOf(HTMLElement)
-      expect(element.style['zoom']).toEqual(zoom.toString())
+      expect(element.style['zoom' as any]).toEqual(zoom.toString())
+      // expect(element.style.transform).toEqual(`scale(${zoom})`)
       expect(element.style.position).toEqual('absolute')
       expect(element.style.width).toBeDefined()
       expect(element.style.height).toBeDefined()
@@ -139,7 +140,8 @@ describe.skip('Toolbox Item', () => {
 
       wrapper.vm.onSizeChanged()
 
-      expect(child.style['zoom']).toEqual(1)
+      // expect(child.style['zoom']).toEqual(1)
+      expect(child.style.transform).toEqual('scale(1)')
     })
   })
 })
