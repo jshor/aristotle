@@ -1,4 +1,4 @@
-import{_ as e,r as s,o as a,c as i,a as t,b as c}from"./app.02b71726.js";const l={},o=c(`<div class="language-bash ext-sh line-numbers-mode"><pre class="language-bash"><code><span class="token comment"># 1. Clone the repository.</span>
+import{_ as e,r as s,o as a,c as i,a as t,b as c}from"./app.f77bed22.js";const l={},o=c(`<div class="language-bash ext-sh line-numbers-mode"><pre class="language-bash"><code><span class="token comment"># 1. Clone the repository.</span>
 <span class="token function">git</span> clone https://github.com/jshor/aristotle
 
 <span class="token comment"># 2. Build the circuit library (first time only)</span>
