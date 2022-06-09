@@ -3,7 +3,8 @@
     :style="{ zIndex }"
     :position="position"
     :is-selected="isSelected"
-    @drag-start="onDragStart"
+    :allow-touch-drag="freeportId !== null"
+    @touchhold="onDragStart"
     @drag="onDrag"
     @drag-end="onDragEnd"
     @select="k => selectItem(id, k)"
@@ -91,16 +92,39 @@ export default defineComponent({
       x: topLeft.value.x + geometry.value.minX
     }))
 
-    let freeportId: string | null = null
+    const freeportId = ref<string | null>(null)
 
     /**
      * Mouse button down event handler.
      *
      * This will inform the component that the mouse is down and ready to create a new freeport, if it moves.
      */
-    function onDragStart () {
-      if (connection.value.groupId !== null) return
-      freeportId = null
+    function onDragStart ({ touches }: TouchEvent) {
+      createFreeport({
+        x: touches[0].clientX,
+        y: touches[0].clientY
+      })
+    }
+
+    function createFreeport (position: Point) {
+      if (!root.value?.$el || connection.value.groupId !== null) return
+
+      // directly change the DOM style (as opposed to using v-show/refs) to avoid "flickering" while VDOM updates
+      root.value.$el.style.opacity = '0'
+      freeportId.value = uuid()
+      navigator.vibrate(20)
+
+      store.createFreeport({
+        itemId: freeportId.value,
+        inputPortId: uuid(),
+        outputPortId: uuid(),
+        connectionChainId: connection.value.connectionChainId,
+        sourceId: source.value.id,
+        targetId: target.value.id
+      })
+
+      store.setSnapBoundaries(freeportId.value)
+      store.dragItem(freeportId.value, position)
     }
 
     /**
@@ -112,26 +136,11 @@ export default defineComponent({
      * This will only create a new freeport once per mousedown-move cycle.
      */
     async function onDrag (position: Point) {
-      if (!root.value?.$el) return
-      if (freeportId === null) {
-        // directly change the DOM style (as opposed to using v-show/refs) to avoid "flickering" while VDOM updates
-        root.value.$el.style.opacity = '0'
-        freeportId = uuid()
-
-        store.createFreeport({
-          itemId: freeportId,
-          // value: source.value.value,
-          inputPortId: uuid(),
-          outputPortId: uuid(),
-          connectionChainId: connection.value.connectionChainId,
-          // value: source.value.value,
-          sourceId: source.value.id,
-          targetId: target.value.id
-        })
-        store.setSnapBoundaries(freeportId)
+      if (!freeportId.value) {
+        createFreeport(position)
+      } else {
+        store.dragItem(freeportId.value, position)
       }
-
-      store.dragItem(freeportId, position)
     }
 
     /**
@@ -147,7 +156,7 @@ export default defineComponent({
         })
       }
 
-      freeportId = null
+      freeportId.value = null
     }
 
     return {
@@ -159,6 +168,7 @@ export default defineComponent({
       onDragEnd,
       source,
       target,
+      freeportId,
       selectItem: store.selectItem,
       deselectItem: store.deselectItem
     }

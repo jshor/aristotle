@@ -3,11 +3,11 @@
     class="draggable"
     ref="draggable"
     :style="style"
-    @mousedown.stop="onMouseDown"
+    @mousedown.left="onMouseDown"
     @mouseup="onMouseUp"
-    @touchstart.stop="onTouchStart"
-    @touchmove.stop="onTouchMove"
-    @touchend.stop="dragEnd"
+    @touchstart="onTouchStart"
+    @touchmove="onTouchMove"
+    @touchend="onTouchEnd"
     @touchcancel="dragEnd"
     @focus="onFocus"
   >
@@ -16,7 +16,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUnmount, onMounted, PropType, computed, ref, ComponentPublicInstance, watchEffect } from 'vue'
+import boundaries from '@/store/document/geometry/boundaries'
+import {
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  computed,
+  ref,
+  ComponentPublicInstance,
+  watchEffect
+} from 'vue'
 import Resizable from './Resizable.vue'
 
 export default defineComponent({
@@ -41,16 +51,22 @@ export default defineComponent({
     isMobile: {
       type: Boolean,
       default: false
+    },
+
+    /** Set to true if the element can be dragged by touch events. */
+    allowTouchDrag: {
+      type: Boolean,
+      default: true
     }
   },
-  emits: [
-    'dragStart',
-    'drag',
-    'dragEnd',
-    'select',
-    'deselect',
-    'touchhold'
-  ],
+  emits: {
+    dragStart: (position: Point, offset: Point) => true,
+    drag: (position: Point, offset: Point) => true,
+    dragEnd: (position: Point, offset: Point) => true,
+    select: (deselectAll?: boolean) => true,
+    deselect: () => true,
+    touchhold: ($event: TouchEvent) => true
+  },
   setup (props, { emit }) {
     const style = computed(() => ({
       left: `${props.position.x}px`,
@@ -58,13 +74,21 @@ export default defineComponent({
     }))
     const draggable = ref<ComponentPublicInstance<HTMLElement>>()
 
+    let touchTimeout = 0
+    let isDragging = false // whether or not this element was dragged
+    let hasMovedSubstantially = false
+    let hasEmittedDragStart = false
+    let initialTouchPosition: Point = { x: 0, y: 0 }
+    let position: Point = { x: 0, y: 0 }
+    let offset: Point = { x: 0, y: 0 } // distance from the click point to the draggable's center point
+
     onMounted(() => {
-      window.addEventListener('mousemove', drag)
+      window.addEventListener('mousemove', onMouseMove)
       window.addEventListener('mouseup', dragEnd)
     })
 
     onBeforeUnmount(() => {
-      window.removeEventListener('mousemove', drag)
+      window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mouseup', dragEnd)
     })
 
@@ -74,23 +98,26 @@ export default defineComponent({
       }
     })
 
-    let touchTimeout = 0
-    let isDragging = false
-    let hasEmittedDragStart = false
-    let position = { x: 0, y: 0 }
-    let offset = { x: 0, y: 0 } // distance from the click point to the draggable's center point
-
     /**
-     * Selects the connection (if not selected), or de-selects it otherwise.
+     * Focus event handler.
      *
-     * @param keepCurrentSelection - if true, maintains the selection state of other items in the editor
+     * @emits `select` if not already selected
      */
-    function toggleSelection (keepCurrentSelection: boolean) {
-      props.isSelected
-        ? emit('deselect')
-        : emit('select', keepCurrentSelection)
+    function onFocus () {
+      setTimeout(() => {
+        if (!props.isSelected) {
+          emit('select', false)
+        }
+      })
     }
 
+    /**
+     * Drag event handler.
+     *
+     * @emits `dragStart` the first time the element is dragged, with position and pointer offset
+     * @emits `drag` when the element is actively dragged, with position and pointer offset
+     * @param {MouseEvent | Touch} $event - event that triggered the dragging operation
+     */
     function drag ({ clientX, clientY }: MouseEvent | Touch) {
       if (!isDragging) return
       if (position.x === clientX && position.y === clientY) return
@@ -100,11 +127,19 @@ export default defineComponent({
         y: clientY
       }
 
-      emit(hasEmittedDragStart ? 'drag' : 'dragStart', position, offset)
+      hasEmittedDragStart
+        ? emit('drag', position, offset)
+        : emit('dragStart', position, offset)
 
       hasEmittedDragStart = true
+      hasMovedSubstantially = true
     }
 
+    /**
+     * Dragging initializer.
+     *
+     * @param {MouseEvent | Touch} $event - event that triggered the dragging operation
+     */
     function dragStart ({ clientX, clientY }: MouseEvent | Touch) {
       if (!draggable.value) return
 
@@ -120,27 +155,53 @@ export default defineComponent({
         y: clientY - (y + height / 2)
       }
 
+      isDragging = true
       hasEmittedDragStart = false
     }
 
+    /**
+     * Dragging terminator.
+     *
+     * @emits `dragEnd` with the last dragged position and pointer offset
+     */
     function dragEnd () {
       if (!isDragging) return
 
-      clearTimeout(touchTimeout)
-      emit('dragEnd', position, offset)
-
       isDragging = false
+
+      if (hasMovedSubstantially) {
+        emit('dragEnd', position, offset)
+      }
     }
 
     /**
      * Mouse down event handler.
+     *
+     * @param {MouseEvent} $event - event that triggered the dragging operation
      */
     function onMouseDown ($event: MouseEvent) {
-      isDragging = true
-
       dragStart($event)
     }
 
+    /**
+     * Mouse movement event handler.
+     *
+     * @param {MouseEvent} $event - event that triggered the dragging operation
+     */
+    function onMouseMove ($event: MouseEvent) {
+      if (isDragging) {
+        $event.stopImmediatePropagation()
+        $event.preventDefault()
+
+        drag($event)
+      }
+    }
+
+    /**
+     * Mouse up event handler.
+     *
+     * @param {MouseEvent} $event - event that triggered the dragging operation
+     */
     function onMouseUp ($event: MouseEvent) {
       if (!hasEmittedDragStart) {
         emit('select', $event.ctrlKey)
@@ -148,37 +209,73 @@ export default defineComponent({
     }
 
     /**
-     * Invoked when the connection is first touched.
+     * Touch event initialization handler.
+     * Invoked when the element is first touched.
+     *
+     * @emits `touchold` when held down for more than 500ms
+     * @param {TouchEvent} $event
      */
     function onTouchStart ($event: TouchEvent) {
-      touchTimeout = window.setTimeout(() => {
-        isDragging = false
-        toggleSelection(true)
-        navigator.vibrate(100) // TODO: make 100 configurable?
-        emit('touchhold', $event)
-      }, 1000) // TODO: make 500 configurable?
+      hasMovedSubstantially = false
+      initialTouchPosition = {
+        x: $event.touches[0].clientX,
+        y: $event.touches[0].clientY
+      }
 
-      dragStart($event.touches[0])
-      isDragging = true
+      touchTimeout = window.setTimeout(() => {
+        emit('touchhold', $event)
+      }, 500) // TODO: make 500 configurable?
     }
 
     /**
      * Invoked when the connection is moved by touching.
+     *
+     * @param {TouchEvent} $event
      */
     function onTouchMove ($event: TouchEvent) {
-      clearTimeout(touchTimeout)
-      drag($event.touches[0])
+      const newPosition: Point = {
+        x: $event.touches[0].clientX,
+        y: $event.touches[0].clientY
+      }
+
+      if (!boundaries.isInNeighborhood(initialTouchPosition, newPosition, 5) && $event.touches.length === 1) {
+        hasMovedSubstantially = true
+        clearTimeout(touchTimeout)
+      }
+
+      if (props.allowTouchDrag) {
+        $event.stopPropagation()
+        $event.preventDefault()
+
+        if (!isDragging) {
+          dragStart($event.touches[0])
+        }
+      }
+
+      if (isDragging) {
+        drag($event.touches[0])
+      }
     }
 
     /**
-     * Focus event handler.
+     * Touch termination event handler.
+     * Completes a dragging operation if in progress.
+     * Changes the selection state otherwise.
+     *
+     * @emits `select` if the element is not selected
+     * @emits `deselect` if the element is currently selected
+     * @param {TouchEvent} $event
      */
-    function onFocus () {
-      setTimeout(() => {
-        if (!props.isSelected) {
-          emit('select', false)
-        }
-      })
+    function onTouchEnd () {
+      clearTimeout(touchTimeout)
+
+      if (isDragging) {
+        dragEnd()
+      } else if (!hasMovedSubstantially) {
+        props.isSelected
+          ? emit('deselect')
+          : emit('select', true)
+      }
     }
 
     return {
@@ -188,6 +285,7 @@ export default defineComponent({
       onMouseUp,
       onTouchStart,
       onTouchMove,
+      onTouchEnd,
       dragEnd,
       onFocus
     }
@@ -200,5 +298,6 @@ export default defineComponent({
   position: absolute;
   pointer-events: none;
   touch-action: none;
+  outline: none;
 }
 </style>

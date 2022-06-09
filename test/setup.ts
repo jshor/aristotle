@@ -10,6 +10,8 @@ global.console = {
   // error: jest.fn()
 }
 
+global.navigator.vibrate = jest.fn()
+
 global.window.api = {
   showContextMenu: jest.fn(),
   setApplicationMenu: jest.fn(),

@@ -132,8 +132,8 @@ export function createFreeport (this: DocumentStoreInstance, data: Freeport, cre
   })
 
   if (data.sourceId && data.targetId) {
-    // don't destroy the connection yet, as its component may still be in action (i.e., handling dragging)
-    // it will be the responsibility of the connection component to destroy itself
+    // only remove the circuit connection (not the store connection), as its component may still be in action (i.e., handling dragging)
+    // once the dragging operation is complete, it will be the responsibility of the connection component to destroy itself
     this
       .simulation
       .removeConnection(data.sourceId, data.targetId)

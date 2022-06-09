@@ -2,22 +2,23 @@
   <draggable
     class="toolbox-item"
     :tabindex="0"
-    @drag-start="onDragStart"
+    @touchhold="onDragStart"
     @drag="onDrag"
     @drag-end="onDragEnd"
     @click="$emit('drop', factory)"
+    :allow-touch-drag="isDragging"
   >
     <div class="toolbox-item__parent">
       <resizable
         class="toolbox-item__preview"
         ref="preview"
-        @resize="rect => previewRect = rect"
+        @resize="rect => onSizeChanged(rect, 'preview')"
       >
         <resizable
           class="toolbox-item__inner"
           ref="selectable"
           :style="{ zoom }"
-          @resize="rect => selectableRect = rect"
+          @resize="rect => onSizeChanged(rect, 'selectable')"
         >
           <circuit-component
             :type="item.type"
@@ -64,44 +65,57 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const selectable = ref<ComponentPublicInstance<HTMLElement>>()
-    const selectableRect = ref(new DOMRect())
-    const previewRect = ref(new DOMRect())
+    const isDragging = ref(false)
     const zoom = ref(1)
     const { item, ports } = props.factory()
+    const rects = {
+      selectable: new DOMRect(),
+      preview: new DOMRect()
+    }
 
     let draggedElement: HTMLElement | null = null
 
     /**
      * Resize event handler.
      * This will update the zoom level of the displayed item such that it fits in the parent (if smaller).
+     *
+     * @param {DOMRect} rect - the DOM rect of the element resized
+     * @param {string<selectable | preview>} type - the element that resized
      */
-    function onSizeChanged () {
-      const inner = selectableRect.value
-      const outer = previewRect.value
+    function onSizeChanged (rect: DOMRect, type: 'selectable' | 'preview') {
+      rects[type] = rect
+
+      const inner = rects.selectable
+      const outer = rects.preview
       const ratio = Math.max(inner.width / outer.width, inner.height / outer.height)
 
       zoom.value = Math.min(1 / ratio, 1)
     }
 
     /**
-     * Mouse down event handler.
-     * Begins the dragging session.
+     * Mouse down event handler. Begins the dragging session.
      */
     function onDragStart () {
-      const inner = selectableRect.value
+      const inner = rects.selectable
 
       draggedElement = selectable.value?.$el.cloneNode(true) as HTMLElement
       draggedElement.style.position = 'absolute'
       draggedElement.style['zoom' as any] = `${props.zoom}`
       draggedElement.style.width = `${inner.width}px`
       draggedElement.style.height = `${inner.height}px`
+      isDragging.value = true
+      navigator.vibrate(20)
     }
 
     /**
      * Mouse move event handler.
+     *
+     * @param {Point} position - the absolute screen coordinates of the element
      */
     function onDrag ({ x, y }: Point) {
-      if (!draggedElement) return
+      if (!draggedElement) {
+        return onDragStart()
+      }
 
       if (!document.body.contains(draggedElement)) {
         document.body.appendChild(draggedElement)
@@ -117,13 +131,14 @@ export default defineComponent({
      * Mouse button release event handler.
      *
      * @emits drop when the toolbox item has been dragged out of the box, or clicked on
+     * @param {Point} position - the absolute screen coordinates of the element
      */
     function onDragEnd (position: Point) {
       if (!draggedElement) return
-      if (!document.body.contains(draggedElement)) return
 
       draggedElement.remove()
       draggedElement = null
+      isDragging.value = false
 
       emit('drop', props.factory, position)
     }
@@ -137,8 +152,7 @@ export default defineComponent({
       ports,
       zoom,
       selectable,
-      selectableRect,
-      previewRect
+      isDragging
     }
   }
 })
@@ -151,7 +165,7 @@ export default defineComponent({
   pointer-events: all;
   touch-action: auto;
   aspect-ratio: 0.75;
-  width: 8vh;
+  width: 6rem;
   max-height: 100%;
 
   &:hover {

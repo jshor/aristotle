@@ -187,7 +187,6 @@ export default defineComponent({
     }
 
     function onContextMenu ($event: Event) {
-      console.log('contextmenu')
       window.api.showContextMenu(editorContextMenu(props.store))
 
       $event.preventDefault()

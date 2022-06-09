@@ -8,6 +8,7 @@
     }"
     :position="item.position"
     :is-selected="isSelected"
+    :allow-touch-drag="isSelected"
     @resize="onResize"
     @keydown.esc="onEscapeKey"
     @drag="onDrag"

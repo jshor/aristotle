@@ -11,10 +11,7 @@ function roundToNth (x: number, n: number) {
  * Returns true if a is within the radial distance of b.
  */
 function isInNeighborhood (a: Point, b: Point, radius: number): boolean {
-  const distX = Math.pow(a.x - b.x, 2)
-  const distY = Math.pow(a.y - b.y, 2)
-
-  return Math.sqrt(distX + distY) <= radius
+  return Math.hypot(a.x - b.x, a.y - b.y) <= radius
 }
 
 /**
