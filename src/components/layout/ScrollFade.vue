@@ -14,11 +14,11 @@
 </template>
 
 <script lang="ts">
-import { ComponentPublicInstance, defineComponent, onMounted, ref } from 'vue'
+import { ComponentPublicInstance, defineComponent, ref } from 'vue'
 import Resizable from '@/components/interactive/Resizable.vue'
 
 export default defineComponent({
-  name: 'none',
+  name: 'ScrollFade',
   components: {
     Resizable
   },

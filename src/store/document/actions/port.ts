@@ -58,23 +58,8 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
       })
     })
 
-  const port = this.ports[portId]
-
-  if (port) {
-    const item = this.items[port.elementId]
-
-    if (!item) return
-
-    // remove the reference to the port from the element
-    const portIndex = item.portIds.findIndex(i => i === portId)
-
-    if (portIndex !== -1) {
-      this.items[item.id].portIds.splice(portIndex, 1)
-    }
-
-    delete this.ports[portId]
-    this.simulation.removePort(portId)
-  }
+  delete this.ports[portId]
+  this.simulation.removePort(portId)
 }
 
 /**

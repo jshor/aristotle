@@ -22,13 +22,7 @@
       </div>
     </scroll-fade>
     <scroll-fade class="toolbox-layout__items">
-      <div
-        v-if="selected"
-        :key="selected"
-        class="toolbox-layout__fade-in"
-      >
-        <slot :name="selected" />
-      </div>
+      <slot :name="selected" />
     </scroll-fade>
   </div>
 </template>
@@ -75,11 +69,15 @@ export default defineComponent({
 .toolbox-layout {
   height: 0;
   opacity: 0;
-  overflow: hidden;
   transition: all 0.25s ease-in-out;
+  overflow-x: auto;
 
   &--open {
     opacity: 1;
+  }
+
+  &__items {
+    display: flex;
   }
 
   &__categories {
@@ -106,16 +104,6 @@ export default defineComponent({
       color: var(--color-bg-primary);
       cursor: default;
     }
-  }
-
-  &__fade-in {
-    animation: 0.5s fade-in forwards;
-  }
-
-  &__items {
-    display: flex;
-    width: 100%;
-    overflow-y: hidden;
   }
 }
 

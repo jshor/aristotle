@@ -10,14 +10,17 @@ import { defineComponent, onMounted, ref } from 'vue'
 
 export default defineComponent({
   name: 'Resizable',
-  emits: ['resize'],
+  emits: {
+    resize: (rect: DOMRect) => true
+  },
   setup (_, { emit }) {
     const resizable = ref<HTMLElement>()
 
     /**
-     * Item resize event handler. This will inform the store of the new size of the item.
+     * Element resize event handler.
      *
-     * @param targets - target element that has been resized
+     * @emits `resize` with the new DOMRect of the element
+     * @param {ResizeObserverEntry[]} targets - target element that has been resized
      */
     function onSizeChanged ([ target ]: ResizeObserverEntry[]) {
       emit('resize', target.target.getBoundingClientRect())
@@ -32,6 +35,7 @@ export default defineComponent({
     })
 
     return {
+      onSizeChanged,
       resizable
     }
   }

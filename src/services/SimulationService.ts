@@ -148,6 +148,7 @@ export default class SimulationService {
   }
 
   stopDebugging = () => {
+    this.advance()
     this.isDebug = false
     this.nextState = null
     this.unpause()

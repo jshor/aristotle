@@ -5,6 +5,7 @@ body {
   font-family: system-ui;
   min-height: 100vh;
   max-height: 100vh;
+  overscroll-behavior: contain;
   // overflow: hidden;
 
   --font-family: system-ui;

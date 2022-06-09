@@ -8,23 +8,29 @@
     @mousedown="$emit('activate')"
     @touchstart="$emit('activate')"
   >
+    <div class="tab-item__icon">
+      <icon :icon="faCodeBranch" />
+    </div>
     <div class="tab-item__label">
       {{ label }}{{ dirty ? '*' : '' }}
     </div>
     <div
-      class="tab-item__close"
+      class="tab-item__icon tab-item__icon--close"
       @click.stop="$emit('close')"
     >
-      ✖
+      <icon :icon="faClose" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { faClose, faCodeBranch } from '@fortawesome/free-solid-svg-icons'
 import { defineComponent } from 'vue'
+import Icon from '../Icon.vue'
 
 export default defineComponent({
   name: 'TabItem',
+  components: { Icon },
   props: {
     /** Whether or not the tab is currently displayed as active. */
     active: {
@@ -40,15 +46,23 @@ export default defineComponent({
       type: Boolean,
       default: false
     }
+  },
+  setup () {
+    return {
+      faClose,
+      faCodeBranch
+    }
   }
 })
 </script>
 
 <style lang="scss">
 .tab-item {
+  --padding: 0.5em;
+
   display: flex;
   max-width: 200px;
-  padding: 0.5rem;
+  padding: var(--padding);
   background-color: var(--color-bg-secondary);
   color: var(--color-primary);
   border-color: var(--color-bg-tertiary);
@@ -61,10 +75,11 @@ export default defineComponent({
     border-left: $border-width solid var(--color-bg-tertiary);
   }
 
-  &__label, &__close {
+  &__label, &__icon {
     display: inline-block;
     justify-content: center;
     align-items: center;
+    padding: 0 calc(var(--padding) / 2);
   }
 
   &__label {
@@ -74,45 +89,38 @@ export default defineComponent({
     text-overflow: ellipsis;
   }
 
-  &__close {
-    padding-left: 0.5rem;
+  &__icon {
+    display: flex;
     transition: all 0.1s;
-    cursor: pointer;
     font-weight: bold;
+    width: 0.75em;
+    border-radius: 2px;
 
-    &:hover {
-      color: var(--color-secondary);
-    }
+    &--close {
+      cursor: pointer;
 
-    &:active {
-      color: var(--color-bg-secondary);
+      &:hover, &:active {
+        background-color: var(--color-bg-tertiary);
+      }
     }
   }
 
   &--active {
     background-color: var(--color-bg-primary);
     color: var(--color-primary);
-    margin-bottom: -5px;
-    padding-bottom: 15px;
+    margin-bottom: calc(var(--padding) * -1);
+    padding-bottom: calc(var(--padding) * 2);
+  }
 
-    .tab-item__close::before {
-      display: block;
+  &:not(.tab-item--active) {
+    .tab-item__icon--close {
+      opacity: 0;
     }
   }
 
-  &:not(.tab--active) {
-    cursor: pointer;
-  }
-
   &:hover {
-    .tab__close {
-      &::before {
-        display: block;
-      }
-
-      &::after {
-        display: none;
-      }
+    .tab-item__icon--close {
+      opacity: 1;
     }
   }
 }
