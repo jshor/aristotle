@@ -89,7 +89,7 @@ export function incrementZIndex (this: DocumentStoreInstance, direction: number)
  *
  * @param {number} zIndex - new zIndex to move items to
  */
- export function setZIndex (this: DocumentStoreInstance, zIndex: number) {
+export function setZIndex (this: DocumentStoreInstance, zIndex: number) {
   const items: BaseItem[] = Object.values(this.items)
   const connections: BaseItem[] = Object.values(this.connections)
   let baseItems = items

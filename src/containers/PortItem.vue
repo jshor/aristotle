@@ -12,7 +12,7 @@
       @drag-start="onDragStart"
       @drag="onDrag"
       @drag-end="onDragEnd"
-      @touchhold="store.togglePortMonitoring(id)"
+      @touchhold="onTouchHold"
       @dblclick="store.togglePortMonitoring(id)"
       :tabindex="-1"
     >
@@ -146,7 +146,7 @@ export default defineComponent({
       }
     }
 
-    function onDrag ({ x, y }: MouseEvent) {
+    function onDrag ({ x, y }: Point) {
       if (newFreeport === null) return
 
       if (!isAdded) {
@@ -178,6 +178,11 @@ export default defineComponent({
       }
     }
 
+    function onTouchHold () {
+      navigator.vibrate(100)
+      store.togglePortMonitoring(props.id)
+    }
+
     return {
       store,
       snapMode,
@@ -186,6 +191,7 @@ export default defineComponent({
       onDragEnd,
       onEscapeKey,
       onBlur,
+      onTouchHold,
       PortType
     }
   }

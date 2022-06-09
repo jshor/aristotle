@@ -65,7 +65,12 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
 
 export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports }: { item: Item, ports: Port[] }, documentPosition: Point | null = null) {
   if (!documentPosition) {
-    documentPosition = boundaries.getBoundingBoxMidpoint(this.viewport)
+    const midpoint = boundaries.getBoundingBoxMidpoint(this.viewport)
+
+    documentPosition = {
+      x: midpoint.x + this.viewport.left,
+      y: midpoint.y + this.viewport.top
+    }
   }
 
   const position = fromDocumentToEditorCoordinates(this.canvas, this.viewport, documentPosition, this.zoomLevel)

@@ -6,8 +6,9 @@ import { api } from '../preload'
  * TODO: all of these tests fail because of "No such module was linked: electron_common_features"
  *
  * see: https://github.com/electron/remote/issues/101
+ *
+ * (it is not fixed in 2.0.8)
  */
-
 jest.mock('electron')
 jest.mock('@electron/remote')
 

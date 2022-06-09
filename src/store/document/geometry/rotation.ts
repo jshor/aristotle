@@ -30,7 +30,7 @@ function getGroupedItemRotatedPosition (groupBoundingBox: BoundingBox, item: Ite
   const cy = item.position.y
   const ax = cx + (item.width / 2)
   const ay = cy + (item.height / 2)
-  const L = Math.sqrt(Math.pow((mx - ax), 2) + Math.pow((my - ay), 2))
+  const L = Math.hypot(mx - ax, my - ay)
   const currentAngleRad = Math.atan2((ay - my), (ax - mx))
   const newAngle = (90 * direction * (Math.PI / 180)) + currentAngleRad
   const newAx = (L * Math.cos(newAngle)) + mx
