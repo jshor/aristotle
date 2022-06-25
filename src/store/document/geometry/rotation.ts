@@ -52,7 +52,13 @@ function getGroupedItemRotatedPosition (groupBoundingBox: BoundingBox, item: Ite
  * @returns
  */
 function getRotatedPortPosition (port: Port, portList: Port[], item: Item, index: number): Point {
-  const { left, top, bottom, right } = item.boundingBox
+  let { left, top, bottom, right } = item.boundingBox
+
+  if (item.integratedCircuit) {
+    // if this is an integrated circuit, reserve the top and bottom sections (each having 40px height)
+    bottom -= 40
+    top += 40
+  }
 
   // ports use CSS "space around" flex property for positions
   // compute the spacing of each port based on the element width/height
