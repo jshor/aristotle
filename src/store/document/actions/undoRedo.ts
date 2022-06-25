@@ -113,5 +113,5 @@ export function applyState (this: DocumentStoreInstance, savedState: string) {
 
   addedConnections.forEach(id => this.connect(connections[id]))
 
-  this.simulation.step()
+  this.stepThroughCircuit()
 }

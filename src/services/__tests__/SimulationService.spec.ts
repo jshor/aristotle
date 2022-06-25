@@ -32,7 +32,7 @@ describe('Simulation Service', () => {
     it('should emit a change event when broadcast', () => {
       const spy = jest.fn()
 
-      service.on('change', spy)
+      service.onChange(spy)
       service.emit()
 
       expect(spy).toHaveBeenCalledTimes(1)
@@ -134,8 +134,13 @@ describe('Simulation Service', () => {
       })
     })
 
-    it('should throw an error if the maximum number of iterations has been reached', () => {
-      expect(() => service.step(10000 + 1)).toThrow()
+    it('should emit an error if the maximum number of iterations has been reached', () => {
+      jest.spyOn(service.emitter, 'emit')
+
+      service.step(1000 + 1)
+
+      expect(service.emitter.emit).toHaveBeenCalledTimes(1)
+      expect(service.emitter.emit).toHaveBeenCalledWith('error', 'INFINITE_LOOP')
     })
 
     it('should not execute if the simulation is paused', () => {

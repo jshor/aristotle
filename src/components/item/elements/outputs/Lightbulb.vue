@@ -1,29 +1,22 @@
 <template>
-  <component
-    v-bind:is="subtype"
-    v-bind="$props"
+  <div
+    class="lightbulb"
+    :class="{
+      'lightbulb--on': value === 1,
+      'lightbulb--high-z': value === 0
+    }"
   />
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType, computed } from 'vue'
-import Lightbulb from './outputs/Lightbulb.vue'
-
-const components = {
-  Lightbulb
-}
 
 export default defineComponent({
-  name: 'OutputNode',
-  components,
+  name: 'Lightbulb',
   props: {
     ports: {
       type: Array as PropType<Port[]>,
       default: () => []
-    },
-    subtype: {
-      type: String,
-      required: true
     }
   },
   setup (props) {
@@ -35,7 +28,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.output-node {
+.lightbulb {
   width: 40px;
   height: 40px;
   border-radius: 50%;

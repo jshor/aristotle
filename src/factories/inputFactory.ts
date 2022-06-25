@@ -14,6 +14,7 @@ const inputFactory: ItemFactory = (type: ItemSubtype, width: number, height: num
   const item = itemFactory(elementId, ItemType.InputNode, type, width, height, ports)
 
   item.properties = {
+    ...item.properties,
     ...properties,
     startValue: {
       label: 'Start value',

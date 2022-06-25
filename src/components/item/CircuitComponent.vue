@@ -29,7 +29,6 @@ import IntegratedCircuit from '@/components/item/elements/IntegratedCircuit.vue'
 import LogicGate from '@/components/item/elements/LogicGate.vue'
 import OutputNode from '@/components/item/elements/OutputNode.vue'
 import ItemType from '@/types/enums/ItemType'
-import ItemSubtype from '@/types/enums/ItemSubtype'
 
 const components = {
   Freeport,

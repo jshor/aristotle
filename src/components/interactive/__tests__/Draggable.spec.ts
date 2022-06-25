@@ -122,13 +122,6 @@ describe('Draggable component', () => {
 
       expect(spy).toHaveBeenCalled()
     })
-
-    it('should emit `select` with the ctrl key value`', async () => {
-      await wrapper.trigger('mouseup', { ctrlKey: true })
-
-      expect(wrapper.emitted()).toHaveProperty('select')
-      expect(wrapper.emitted().select[0]).toEqual([true])
-    })
   })
 
   describe('when using touch gestures', () => {
