@@ -8,6 +8,7 @@ enum ItemSubtype {
 
   /* output nodes */
   Lightbulb = 'Lightbulb',
+  DigitDisplay = 'DigitDisplay',
 
   /* buffers */
   Buffer = 'Buffer',

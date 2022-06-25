@@ -497,7 +497,7 @@ describe('freeport actions', () => {
           right: 1,
           bottom: 1
         },
-        properties: {},
+        properties: expect.any(Object),
         isSelected: false,
         groupId: null,
         zIndex: 1,

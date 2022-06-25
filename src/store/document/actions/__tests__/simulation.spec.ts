@@ -109,7 +109,7 @@ describe('simulation actions', () => {
       store.items = { item1, item2 }
 
       jest
-        .spyOn(store.simulation, 'on')
+        .spyOn(store.simulation, 'onChange')
         .mockImplementation(jest.fn())
     })
 

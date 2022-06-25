@@ -91,7 +91,7 @@ export const createDocumentStore = (documentId: string) => defineStore({
 
     async saveIntegratedCircuit () {
       // TODO: this action should live in the root state, not here
-      const originalIcItem = integratedCircuitFactory(this.$state as DocumentState)
+      const originalIcItem = integratedCircuitFactory(this.$state, 'Flip flop', 400, 400)
       const idMappedIcItem = idMapper.mapIntegratedCircuitIds(originalIcItem)
 
       this.insertItemAtPosition({ item: idMappedIcItem, ports: [] })

@@ -1,10 +1,12 @@
 <template>
   <svg
+    class="buffer"
     width="100"
     height="50"
     viewBox="0 -1 100 50"
   >
     <path
+      class="buffer__element"
       transform="translate(40, 0)"
       stroke="#000"
       stroke-width="2"
@@ -13,6 +15,7 @@
     />
     <circle
       v-if="isNegated"
+      class="buffer__negation"
       stroke="#000"
       stroke-width="2"
       cx="88"
@@ -38,12 +41,11 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-svg {
-  // border: 1px solid var(--color-on);
-  position: absolute;
-  box-sizing: border-box;
-
-  path {
+.buffer {
+  &__element, &__negation {
+    stroke-width: 2;
+    stroke: var(--color-secondary);
+    fill: var(--color-bg-secondary);
     pointer-events: all;
   }
 }

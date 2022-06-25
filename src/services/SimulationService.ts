@@ -79,8 +79,12 @@ export default class SimulationService {
    * @param event - available values: `change`
    * @param fn - callback function, taking the port-value mapping as the first argument and oscillogram data as the second
    */
-  on = (event: 'change', fn: (valueMap: Record<string, number>, oscillogram: Oscillogram) => void) => {
-    this.emitter.on(event, fn)
+  onChange = (fn: (valueMap: Record<string, number>, oscillogram: Oscillogram) => void) => {
+    this.emitter.on('change', fn)
+  }
+
+  onError = (fn: (error: string) => void) => {
+    this.emitter.on('error', fn)
   }
 
   /**
@@ -121,9 +125,9 @@ export default class SimulationService {
 
     const shouldContinue = this.circuit.queue.length > 0 // TODO: use circuit.isComplete()?
 
-    if (iteration > 10000) {
+    if (iteration > 1000) {
       // TODO: configure this to detect infinite loops...
-      throw new Error('An infinite loop detected!')
+      this.emitter.emit('error', 'INFINITE_LOOP')
     }
 
     if (shouldContinue) {

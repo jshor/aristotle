@@ -17,25 +17,6 @@ export function start (this: DocumentStoreInstance) {
   }
 }
 
-export function buildCircuit (this: DocumentStoreInstance) {
-  this.simulation.oscillator?.stop()
-
-  const simulation = new SimulationService(Object.values(this.items), Object.values(this.connections), this.ports)
-
-  simulation.on('change', (valueMap: Record<string, number>, oscillogram: Oscillogram) => {
-    for (const portId in valueMap) {
-      if (this.ports[portId]) {
-        this.ports[portId].value = valueMap[portId]
-      }
-    }
-
-    this.isCircuitEvaluated = !this.simulation.canContinue
-    this.oscillogram = oscillogram
-  })
-
-  this.simulation = simulation
-}
-
 /**
  * Updates the store according to the port-value mapping provided.
  * This also accepts oscillogram to update the visual oscilloscope.
@@ -51,6 +32,16 @@ export function onSimulationUpdate (this: DocumentStoreInstance, valueMap: Recor
   this.oscillogram = oscillogram
 }
 
+export function onError (this: DocumentStoreInstance, error: string) {
+  window.api.showMessageBox({
+    message: 'An infinite loop was detected! Entering debugger mode.',
+    type: 'error'
+  })
+
+  this.isDebugging = true
+  this.simulation.startDebugging()
+}
+
 export function resetCircuit (this: DocumentStoreInstance) {
   const items = Object.values(this.items)
   const connections = Object.values(this.connections)
@@ -63,7 +54,8 @@ export function resetCircuit (this: DocumentStoreInstance) {
 
   this.simulation.oscillator?.stop()
   this.simulation = new SimulationService(items, connections, this.ports)
-  this.simulation.on('change', this.onSimulationUpdate)
+  this.simulation.onChange(this.onSimulationUpdate)
+  this.simulation.onError(this.onError)
 
   Object
     .values(this.items)
@@ -136,18 +128,4 @@ export function closeOscilloscope (this: DocumentStoreInstance, lastHeight?: num
 
 export function clearOscilloscope (this: DocumentStoreInstance) {
   this.simulation.oscillator.clear()
-}
-
-export default {
-  stop,
-  start,
-  buildCircuit,
-  onSimulationUpdate,
-  resetCircuit,
-  toggleDebugger,
-  stepThroughCircuit,
-  toggleOscilloscope,
-  openOscilloscope,
-  closeOscilloscope,
-  clearOscilloscope
 }

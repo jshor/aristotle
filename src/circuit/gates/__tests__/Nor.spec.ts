@@ -29,22 +29,22 @@ describe('Nor Gate', () => {
         expect(node.eval()).toEqual(LogicValue.FALSE)
       })
 
-      it('should return Hi-Z when all input values are either FALSE or Hi-Z', () => {
+      it('should return true when all input values are either FALSE or Hi-Z', () => {
         node.inputValues = {
           input1: LogicValue.FALSE,
           input2: LogicValue.FALSE,
           input3: LogicValue.UNKNOWN
         }
 
-        expect(node.eval()).toEqual(LogicValue.UNKNOWN)
+        expect(node.eval()).toEqual(LogicValue.TRUE)
       })
 
-      it('should return Hi-Z when all input values are Hi-Z', () => {
+      it('should return true when no inputs are true', () => {
         node.inputValues = {
           input1: LogicValue.UNKNOWN
         }
 
-        expect(node.eval()).toEqual(LogicValue.UNKNOWN)
+        expect(node.eval()).toEqual(LogicValue.TRUE)
       })
     })
 

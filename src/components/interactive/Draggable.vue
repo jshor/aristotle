@@ -204,7 +204,7 @@ export default defineComponent({
      */
     function onMouseUp ($event: MouseEvent) {
       if (!hasEmittedDragStart) {
-        emit('select', $event.ctrlKey)
+        // emit('select', $event.ctrlKey) // TODO
       }
     }
 

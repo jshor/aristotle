@@ -23,6 +23,12 @@ export default function itemFactory (id: string, type: ItemType, subtype: string
     width,
     height,
     isSelected: false,
-    properties: {}
+    properties: {
+      name: {
+        type: 'text',
+        label: 'Name',
+        value: ''
+      }
+    }
   }
 }

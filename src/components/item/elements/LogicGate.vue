@@ -44,6 +44,7 @@ import { defineComponent, PropType, computed } from 'vue'
 import And from './gates/And.vue'
 import Or from './gates/Or.vue'
 import Nor from './gates/Nor.vue'
+import Not from './gates/Not.vue'
 import Nand from './gates/Nand.vue'
 import Xnor from './gates/Xnor.vue'
 import Xor from './gates/Xor.vue'
@@ -55,6 +56,7 @@ export default defineComponent({
     And,
     Or,
     Nor,
+    Not,
     Nand,
     Xnor,
     Xor

@@ -4,7 +4,6 @@ import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'
 import Direction from '@/types/enums/Direction'
 import itemFactory from './itemFactory'
-import { DocumentState } from '@/store/document/state'
 
 /**
  * Creates an integrated circuit item.
@@ -14,9 +13,9 @@ import { DocumentState } from '@/store/document/state'
  * @param stateItems - items to embed
  * @param stateConnections - connections between items to embed
  */
-export default function integratedCircuitFactory (state: DocumentState) {
-  const { ports, items, connections, groups } = cloneDeep(state) as DocumentState
-  const integratedCircuitItem = itemFactory(uuid(), ItemType.IntegratedCircuit, 'Flip flop', 400, 400)
+export default function integratedCircuitFactory (state: SerializableState, subtype: string, width: number, height: number) {
+  const { ports, items, connections, groups } = cloneDeep(state)
+  const integratedCircuitItem = itemFactory(uuid(), ItemType.IntegratedCircuit, subtype, width, height)
 
   Object
     .values(items)
@@ -50,6 +49,7 @@ export default function integratedCircuitFactory (state: DocumentState) {
             type: item.type === ItemType.InputNode
               ? PortType.Input
               : PortType.Output,
+            name: item.name,
             id: newId,
             elementId: item.id,
             orientation
