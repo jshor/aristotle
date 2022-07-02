@@ -96,20 +96,18 @@ export default defineComponent({
   &__clickable {
     animation: none;
     stroke-width: 16;
-    pointer-events: all;
+    pointer-events: visibleStroke;
     cursor: pointer;
   }
 
   &__outline {
     stroke-width: 8;
-    pointer-events: all;
     stroke-linecap: square;
     stroke: var(--color-secondary);
   }
 
   &__animation {
     stroke-width: 1;
-    pointer-events: all;
     stroke-dasharray: 5;
     animation: animate1 500s infinite linear;
     stroke: #fff;
@@ -117,7 +115,6 @@ export default defineComponent({
 
   &__display {
     stroke-width: 6;
-    pointer-events: all;
     stroke: var(--color-hi-z);
     transition: 0.25s stroke; // TODO
 

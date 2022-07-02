@@ -464,7 +464,7 @@ describe('selection actions', () => {
       stubAll(store, [
         'commitState',
         'setSelectionState',
-        'removeFreeport',
+        'disconnectFreeport',
         'disconnect',
         'removeElement',
       ])
@@ -511,7 +511,7 @@ describe('selection actions', () => {
       })
 
       it('should remove all selected freeports', () => {
-        expect(store.removeFreeport).toHaveBeenCalledWith('freeport')
+        expect(store.disconnectFreeport).toHaveBeenCalledWith('freeport')
       })
     })
 
@@ -522,7 +522,7 @@ describe('selection actions', () => {
       expect(store.commitState).not.toHaveBeenCalled()
       expect(store.setSelectionState).not.toHaveBeenCalled()
       expect(store.disconnect).not.toHaveBeenCalled()
-      expect(store.removeFreeport).not.toHaveBeenCalled()
+      expect(store.disconnectFreeport).not.toHaveBeenCalled()
       expect(store.removeElement).not.toHaveBeenCalled()
     })
   })
