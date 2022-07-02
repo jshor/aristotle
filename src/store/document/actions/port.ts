@@ -58,8 +58,16 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
       })
     })
 
-  delete this.ports[portId]
   this.simulation.removePort(portId)
+
+  const itemId = this.ports[portId].elementId
+  const portIndex = this.items[itemId].portIds.indexOf(portId)
+
+  if (portIndex !== -1) {
+    this.items[itemId].portIds.splice(portIndex, 1)
+  }
+
+  delete this.ports[portId]
 }
 
 /**
@@ -160,7 +168,7 @@ export function unmonitorPort (this: DocumentStoreInstance, portId: string) {
 }
 
 /**
- * Assigns values to the ports in the this according to the given map.
+ * Assigns values to the ports in the state according to the given map.
  *
  * @param valueMap - Port-ID-to-value mapping
  */

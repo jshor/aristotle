@@ -218,7 +218,7 @@ describe('item actions', () => {
 
     describe('when the input count is increased', () => {
       beforeEach(() => {
-        store.setInputCount({ id, count: 4 })
+        store.setInputCount(id, 4)
       })
 
       it('should add the difference number of input ports', () => {
@@ -248,7 +248,7 @@ describe('item actions', () => {
 
     describe.skip('when the input count is decreased', () => {
       beforeEach(() => {
-        store.setInputCount({ id, count: 1 })
+        store.setInputCount(id, 1)
       })
 
       it('should remove the difference number of input ports at the end of the list', () => {
@@ -298,7 +298,7 @@ describe('item actions', () => {
       store.$patch({
         items: { item1 }
       })
-      store.setProperties({ id, properties })
+      store.setProperties(id, properties)
 
       expect(store.setInputCount).not.toHaveBeenCalled()
     })
@@ -312,9 +312,9 @@ describe('item actions', () => {
       store.$patch({
         items: { item1 }
       })
-      store.setProperties({ id, properties })
+      store.setProperties(id, properties)
 
-      expect(store.setInputCount).toHaveBeenCalledWith({ id, count: 3 })
+      expect(store.setInputCount).toHaveBeenCalledWith(id, 3)
     })
 
     it('should set the new item property value', () => {
@@ -327,7 +327,7 @@ describe('item actions', () => {
       store.$patch({
         items: { item1 }
       })
-      store.setProperties({ id, properties })
+      store.setProperties(id, properties)
 
       expect(store.items[id].properties[propertyName].value).toEqual(value)
     })

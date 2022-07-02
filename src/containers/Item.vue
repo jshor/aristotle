@@ -21,11 +21,12 @@
   >
     <properties
       v-if="isPropertiesEnabled"
-      :tabindex="0"
       :properties="item.properties"
       :id="id"
+      :viewport="viewport"
       @update="store.setProperties"
       @focus="store.setActivePortId(null)"
+      @pan="store.panDelta"
       aria-label="Properties dialog"
       data-test="properties"
     />
@@ -49,7 +50,6 @@
           :id="port.id"
           :key="port.id"
           :type="port.type"
-          :is-freeport="item.type === ItemType.Freeport"
           :position="port.position"
           :orientation="port.orientation + item.rotation"
           :connected-port-ids="port.connectedPortIds"
@@ -70,6 +70,7 @@
 import { defineComponent, PropType, ref, computed, ComponentPublicInstance } from 'vue'
 import CircuitComponent from '@/components/item/CircuitComponent.vue'
 import Properties from '@/components/item/Properties.vue'
+import PortHandle from '@/components/PortHandle.vue'
 import PortItem from './PortItem.vue'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
@@ -87,6 +88,7 @@ export default defineComponent({
     CircuitComponent,
     Draggable,
     PortItem,
+    PortHandle,
     Properties
   },
   props: {
@@ -123,6 +125,7 @@ export default defineComponent({
   setup (props) {
     const store = props.store()
     const item = computed(() => store.items[props.id])
+    const viewport = computed(() => store.viewport)
     const itemRef = ref<ComponentPublicInstance<HTMLElement>>()
 
     /* list of all ports that belong to this item */
@@ -202,6 +205,7 @@ export default defineComponent({
       itemRef,
       store,
       ports,
+      viewport,
       isPropertiesEnabled,
       focus,
       onDrag,

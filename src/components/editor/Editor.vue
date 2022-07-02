@@ -32,7 +32,8 @@ import {
   computed,
   onMounted,
   onBeforeUnmount,
-  ref
+  ref,
+  watch
 } from 'vue'
 import Selector from './Selector.vue'
 import Resizable from '../interactive/Resizable.vue'
@@ -57,7 +58,7 @@ export default defineComponent({
   name: 'Editor',
   emits: {
     resize: (rect: DOMRect) => true,
-    pan: (point: Point) => true,
+    pan: (point: Point, animate?: boolean) => true,
     selection: (boundingBox: BoundingBox) => true,
     deselect: () => true,
     zoom: (payload: { zoom: number, point?: Point }) => true,
@@ -96,6 +97,12 @@ export default defineComponent({
     offset: {
       type: Object as PropType<Point>,
       default: () => ({ x: 0, y: 0 })
+    },
+
+    /** Whether or not the panning change should be animated. */
+    animatePan: {
+      type: Boolean,
+      default: false
     }
   },
   setup (props, { emit }) {
@@ -113,8 +120,6 @@ export default defineComponent({
     }
     let speed = 0
     let angle = 0
-    let animationInterval = 0
-    let lastMouseMoveTime = 0
     let isPanning = false
     let firstPinchDistance = 0
     let initialZoom = 1
@@ -168,8 +173,6 @@ export default defineComponent({
       previousPosition = { x, y }
       speed = 0
       angle = 0
-
-      clearInterval(animationInterval)
     }
 
     /**
@@ -191,38 +194,21 @@ export default defineComponent({
         speed = Math.hypot(deltaX, deltaY)
         angle = Math.atan2(deltaY, deltaX)
         previousPosition = { x, y }
-        lastMouseMoveTime = Date.now()
       }
     }
 
     /**
-     * Ends panning. This will continue panning for 500ms, linearly easing out.
+     * Ends panning. This will ease panning out by the computed speed in `pan()`.
      */
     function endPanning () {
-      let percent = 0
-      let lastDate = Date.now()
-      let dampening = 0.25
+      const friction = 2 // TODO: const?
+      const x = speed * Math.cos(angle) * friction
+      const y = speed * Math.sin(angle) * friction
 
-      const easeOutPanning = () => {
-        const r = speed * (1 - percent)
-        const x = r * Math.cos(angle) * dampening
-        const y = r * Math.sin(angle) * dampening
-
-        percent = (Date.now() - lastDate) / 500
-
-        emit('pan', {
-          x: Math.min(props.offset.x - x, 0),
-          y: Math.min(props.offset.y - y, 0)
-        })
-
-        if (percent >= 1) {
-          clearInterval(animationInterval)
-        }
-      }
-
-      if (Date.now() - lastMouseMoveTime < 100) {
-        animationInterval = window.setInterval(easeOutPanning)
-      }
+      emit('pan', {
+        x: Math.min(props.offset.x - x, 0),
+        y: Math.min(props.offset.y - y, 0)
+      }, true)
     }
 
     /**

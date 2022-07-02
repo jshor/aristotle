@@ -372,13 +372,20 @@ describe('Simulation Service', () => {
     it('should add a clock element using the first output port if its subtype is a clock input', () => {
       const item = createItem('item-id', ItemType.InputNode, {
         subtype: ItemSubtype.Clock,
-        portIds: [inputPort.id, outputPort.id]
+        portIds: [inputPort.id, outputPort.id],
+        properties: {
+          interval: {
+            type: 'number',
+            value: 1500,
+            label: 'Interval'
+          }
+        }
       })
 
       service.addNode(item, ports)
 
       expect(service.addClock).toHaveBeenCalledTimes(1)
-      expect(service.addClock).toHaveBeenCalledWith(outputPort.id)
+      expect(service.addClock).toHaveBeenCalledWith(outputPort.id, 1500)
     })
 
     it('should add the node to the circuit', () => {

@@ -11,18 +11,20 @@
       v-bind="$props"
       @change="onChange"
     />
-    <div
-      v-for="(name, index) in ['left', 'top', 'right', 'bottom']"
-      :key="index"
-      :class="`circuit-component__ports circuit-component__ports--${name}`"
-    >
-      <slot :name="index" />
-    </div>
+    <template v-if="type !== ItemType.Freeport">
+      <div
+        v-for="(name, index) in ['left', 'top', 'right', 'bottom']"
+        :key="index"
+        :class="`circuit-component__ports circuit-component__ports--${name}`"
+      >
+        <slot :name="index" />
+      </div>
+    </template>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import Freeport from '@/components/item/Freeport.vue'
 import InputNode from '@/components/item/elements/InputNode.vue'
 import IntegratedCircuit from '@/components/item/elements/IntegratedCircuit.vue'
@@ -74,7 +76,8 @@ export default defineComponent({
     return {
       onChange (args: { id: string, value: number }) {
         emit('change', args)
-      }
+      },
+      ItemType
     }
   }
 })

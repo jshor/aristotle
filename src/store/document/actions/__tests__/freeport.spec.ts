@@ -17,7 +17,7 @@ setActivePinia(createPinia())
 describe('freeport actions', () => {
   beforeEach(() => jest.restoreAllMocks())
 
-  describe('removeFreeport', () => {
+  describe('disconnectFreeport', () => {
     const store = createDocumentStore('document')()
 
     beforeEach(() => {
@@ -49,7 +49,7 @@ describe('freeport actions', () => {
             'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port2', 'port3'] })
           }
         })
-        store.removeFreeport('freeport')
+        store.disconnectFreeport('freeport')
       })
 
       it('should disconnect the freeport from its source', () => {
@@ -85,7 +85,7 @@ describe('freeport actions', () => {
             'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port2', 'port3'] })
           }
         })
-        store.removeFreeport('freeport')
+        store.disconnectFreeport('freeport')
       })
 
       it('should only disconnect the freeport from its source', () => {
@@ -113,7 +113,7 @@ describe('freeport actions', () => {
             'item2': createItem('item2', ItemType.OutputNode, { portIds: ['port4'] })
           }
         })
-        store.removeFreeport('freeport')
+        store.disconnectFreeport('freeport')
       })
 
       it('should only disconnect the freeport from its target', () => {

@@ -201,42 +201,14 @@ export function deleteSelection (this: DocumentStoreInstance) {
 
   this.commitState()
 
-  const nonFreeportItems = Object
-    .values(this.items)
-    .filter(({ isSelected, type }) => isSelected && type !== ItemType.Freeport)
-  const nonFreeportItemIds = nonFreeportItems.map(({ id }) => id)
-
-  // select the full chains of each connection attached to each selected item
-  Object
-    .values(this.connections)
-    .filter(c => {
-      const sourcePort = this.ports[c.source]
-      const targetPort = this.ports[c.target]
-
-      if (sourcePort && targetPort) {
-        return nonFreeportItemIds.includes(sourcePort.elementId) ||
-          nonFreeportItemIds.includes(targetPort.elementId)
-      }
-    })
-    .forEach(({ id }) => this.setSelectionState({ id, value: true }))
-
-  // remove all selected connections
-  Object
+  const connections = Object
     .values(this.connections)
     .filter(({ isSelected }) => isSelected)
-    .forEach(connection => {
-      this.disconnect({
-        source: connection.source,
-        target: connection.target
-      })
-    })
 
-  // delete all selected non-freeport items
-  nonFreeportItems.forEach(i => this.removeElement(i.id))
-
-  // handle selected freeport deletions using removeFreeport
-  Object
+  const items = Object
     .values(this.items)
-    .filter(({ isSelected, type }) => isSelected && type === ItemType.Freeport)
-    .forEach(f => this.removeFreeport(f.id))
+    .filter(({ isSelected }) => isSelected)
+
+  items.forEach(({ id }) => this.removeElement(id))
+  connections.forEach(this.disconnect)
 }
