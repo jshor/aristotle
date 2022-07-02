@@ -236,11 +236,6 @@
           "value": 2,
           "type": "number",
           "min": 2
-        },
-        "showInOscilloscope": {
-          "label": "Show in oscilloscope",
-          "value": true,
-          "type": "boolean"
         }
       },
       "groupId": null,
@@ -275,11 +270,6 @@
           "value": 2,
           "type": "number",
           "min": 2
-        },
-        "showInOscilloscope": {
-          "label": "Show in oscilloscope",
-          "value": true,
-          "type": "boolean"
         }
       },
       "groupId": null,
@@ -312,6 +302,13 @@
           "value": "",
           "type": "text"
         },
+        "interval": {
+          "label": "Interval",
+          "value": 1000,
+          "type": "number",
+          "min": 100,
+          "step": 100
+        },
         "startValue": {
           "label": "Start value",
           "value": -1,
@@ -321,11 +318,6 @@
             "Hi-Z": 0,
             "False": -1
           }
-        },
-        "showInOscilloscope": {
-          "label": "Show in oscilloscope",
-          "value": true,
-          "type": "boolean"
         }
       },
       "groupId": null,
@@ -367,11 +359,6 @@
             "Hi-Z": 0,
             "False": -1
           }
-        },
-        "showInOscilloscope": {
-          "label": "Show in oscilloscope",
-          "value": true,
-          "type": "boolean"
         }
       },
       "groupId": null,
@@ -403,11 +390,6 @@
           "label": "Name",
           "value": "",
           "type": "text"
-        },
-        "showInOscilloscope": {
-          "label": "Show in oscilloscope",
-          "value": true,
-          "type": "boolean"
         }
       },
       "groupId": null,
@@ -439,11 +421,6 @@
           "label": "Name",
           "value": "",
           "type": "text"
-        },
-        "showInOscilloscope": {
-          "label": "Show in oscilloscope",
-          "value": true,
-          "type": "boolean"
         }
       },
       "groupId": null,

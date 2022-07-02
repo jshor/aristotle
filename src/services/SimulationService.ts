@@ -14,7 +14,7 @@ import circuitNodeMapper from '@/utils/circuitNodeMapper'
  *
  * It is important that the simulation maintains the state of the circuit separately from the editor state, as
  * components may be removed/added/changed in the editor by the user at any time. Maintaining them separate allows
- * the state of components present in the editor to be persisted.
+ * the signal state of components present in the editor to persist.
  *
  * There is a one-to-one relationship between SimulationService instances and Document instances.
  */
@@ -45,6 +45,14 @@ export default class SimulationService {
 
   /** Oscillogram data, containing each BinaryWave instance observed in the oscilloscope. */
   oscillogram: Oscillogram = {}
+
+  canContinue: boolean = false
+
+  nextState: string | null = null
+
+  isDebug: boolean = false
+
+  nextValueMap: Record<string, number> = {}
 
   /**
    * Constructor.
@@ -136,14 +144,6 @@ export default class SimulationService {
 
     this.emit()
   }
-
-  canContinue: boolean = false
-
-  nextState: string | null = null
-
-  isDebug: boolean = false
-
-  nextValueMap: Record<string, number> = {}
 
   startDebugging = () => {
     this.isDebug = true
@@ -287,7 +287,7 @@ export default class SimulationService {
     item.portIds.forEach(portId => this.addPort(portId, node))
 
     if (item.type === ItemType.InputNode && item.subtype === ItemSubtype.Clock) {
-      this.addClock(outputIds[0])
+      this.addClock(outputIds[0], item.properties.interval?.value as number)
     }
 
     this.circuit.addNode(node)
@@ -344,12 +344,18 @@ export default class SimulationService {
    *
    * @param portId
    */
-  addClock = (portId: string) => {
-    this.clocks[portId] = new ClockService(portId, 1000, 1) // TODO: make 1000 configurable by the item
+  addClock = (portId: string, interval = 1000) => { // TODO: make 1000 a constant (default interval)
+    this.clocks[portId] = new ClockService(portId, interval, 1)
     this.clocks[portId].on('change', (signal: number) => {
       this.setPortValue(portId, signal)
     })
     this.oscillator.add(this.clocks[portId])
+  }
+
+  setClockInterval = (portId: string, interval: number) => {
+    if (this.clocks[portId]) {
+      this.clocks[portId].interval = interval
+    }
   }
 
   /**

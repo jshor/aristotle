@@ -1,19 +1,13 @@
 <template>
-  <div class="freeport" />
+  <port-handle />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import PortHandle from '../PortHandle.vue'
 
 export default defineComponent({
-  name: 'Freeport'
+  name: 'Freeport',
+  components: { PortHandle }
 })
 </script>
-
-<style lang="scss">
-.freeport {
-  width: 0px;
-  height: 1px;
-  pointer-events: all;
-}
-</style>

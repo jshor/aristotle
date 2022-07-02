@@ -56,7 +56,7 @@ export function addFreeportItem (this: DocumentStoreInstance, { itemId, inputPor
  *
  * @param id - ID of the freeport item
  */
-export function removeFreeport (this: DocumentStoreInstance, id: string) {
+export function disconnectFreeport (this: DocumentStoreInstance, id: string) {
   const item = this.items[id]
 
   let originalSourceId = ''
@@ -66,19 +66,16 @@ export function removeFreeport (this: DocumentStoreInstance, id: string) {
   Object
     .values(this.connections)
     .forEach(c => {
-      if (c.target === item.portIds[0]) originalSourceId = c.source
-      if (c.source === item.portIds[1]) originalTargetId = c.target
+      if (c.target === item.portIds[1]) originalSourceId = c.source
+      if (c.source === item.portIds[0]) originalTargetId = c.target
     })
 
-  if (originalSourceId) this.disconnect({ source: originalSourceId, target: item.portIds[0] })
-  if (originalTargetId) this.disconnect({ source: item.portIds[1], target: originalTargetId })
+  if (originalSourceId) this.disconnect({ source: originalSourceId, target: item.portIds[1] })
+  if (originalTargetId) this.disconnect({ source: item.portIds[0], target: originalTargetId })
   if (originalSourceId && originalTargetId) {
     // reconnect the true source and target
     this.connect({ source: originalSourceId, target: originalTargetId })
   }
-
-  // finally, remove the element
-  this.removeElement(id)
 }
 
 /**

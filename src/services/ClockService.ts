@@ -15,11 +15,11 @@ export default class ClockService implements Pulse {
   /** Current signal value. */
   public signal: number = 0
 
+  /** Interval, in milliseconds, to oscillate at. */
+  public interval: number = 0
+
   /** Last update time, in milliseconds. */
   private lastUpdate: number
-
-  /** Interval, in milliseconds, to oscillate at. */
-  private interval: number = 0
 
   /** Event emitter. */
   private emitter: TinyEmitter = new TinyEmitter()

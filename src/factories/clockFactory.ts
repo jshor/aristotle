@@ -6,7 +6,8 @@ const clockFactory: ItemFactory = () => inputFactory(ItemSubtype.Clock, 60, 60, 
     label: 'Interval',
     value: 1000,
     type: 'number',
-    min: 100
+    min: 100,
+    step: 100
   }
 })
 

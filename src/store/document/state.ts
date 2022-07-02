@@ -28,6 +28,7 @@ export interface DocumentState extends SerializableState {
   connectionPreviewId: string | null
   isPrinting: boolean
   isCreatingImage: boolean
+  animatePan: boolean
 }
 
 export const state = (): DocumentState => ({
@@ -47,6 +48,7 @@ export const state = (): DocumentState => ({
   isPrinting: false,
   isCreatingImage: false,
   isToolboxOpen: false,
+  animatePan: false,
 
   /* canvas dimensions */
   viewport: new DOMRect(),

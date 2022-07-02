@@ -5,6 +5,7 @@ import PortType from '@/types/enums/PortType'
 import Direction from '@/types/enums/Direction'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
+import ItemType from '@/types/enums/ItemType'
 
 function generateItemName (item: Item, taxonomyCount: number) {
   const name: string[] = [item.type]
@@ -19,7 +20,7 @@ function generateItemName (item: Item, taxonomyCount: number) {
 }
 
 /**
- * Adds any non-IC component to the this.
+ * Adds any non-IC component to the state.
  *
  * @param payload
  * @param payload.item - new item to add
@@ -61,6 +62,7 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
     .addNode(item, this.ports)
 
   this.resetItemValue(item)
+  this.setProperties(item.id, item.properties)
 }
 
 export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports }: { item: Item, ports: Port[] }, documentPosition: Point | null = null) {
@@ -108,12 +110,18 @@ export function resetItemValue (this: DocumentStoreInstance, item: Item) {
 export function removeElement (this: DocumentStoreInstance, id: string) {
   const item = this.items[id]
 
+  if (item.type === ItemType.Freeport) {
+    this.disconnectFreeport(id)
+  }
+
   this
     .simulation
     .removeNode(item)
 
   // remove all ports associated with the item
-  item.portIds.forEach(portId => this.removePort(portId))
+  const ids = [...item.portIds]
+
+  ids.forEach(portId => this.removePort(portId))
 
   // remove the item
   delete this.items[id]
@@ -127,7 +135,7 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
  * @param payload.id - LogicGate ID
  * @param payload.count - new number of input ports
  */
- export function setInputCount (this: DocumentStoreInstance, { id, count }: { id: string, count: number }) {
+ export function setInputCount (this: DocumentStoreInstance, id: string, count: number) {
   const item = this.items[id]
   const oldCount = item.properties.inputCount.value as number
 
@@ -172,7 +180,7 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
  * @param payload.id - item ID
  * @param payload.properties - new version of the properties
  */
-export function setProperties (this: DocumentStoreInstance, { id, properties }: { id: string, properties: PropertySet }) {
+export function setProperties (this: DocumentStoreInstance, id: string, properties: PropertySet) {
   const item = this.items[id]
 
   for (const propertyName in properties) {
@@ -182,9 +190,14 @@ export function setProperties (this: DocumentStoreInstance, { id, properties }: 
       continue // do nothing if the property value has not changed
     }
 
+    this.commitState()
+
     switch (propertyName) {
       case 'inputCount':
-        this.setInputCount({ id, count: property.value as number })
+        this.setInputCount(id, property.value as number)
+        break
+      case 'interval':
+        this.simulation.setClockInterval(item.portIds.slice(-1)[0], property.value as number)
         break
     }
 
