@@ -7,53 +7,12 @@ import {
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
-import rotation from '../../geometry/rotation'
-import ItemSubtype from '@/types/enums/ItemSubtype'
 import { LogicValue } from '@/circuit'
 
 setActivePinia(createPinia())
 
 describe('simulation actions', () => {
   beforeEach(() => jest.restoreAllMocks())
-
-  describe('stop', () => {
-    const store = createDocumentStore('document')()
-
-    it('should pause the simulation', () => {
-      jest
-        .spyOn(store.simulation, 'pause')
-        .mockImplementation(jest.fn())
-
-      store.stop()
-
-      expect(store.simulation.pause).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  describe('start', () => {
-    const store = createDocumentStore('document')()
-
-    beforeEach(() => {
-      jest
-        .spyOn(store.simulation, 'unpause')
-        .mockImplementation(jest.fn())
-    })
-
-    it('should un-pause the simulation', () => {
-      store.isDebugging = false
-      store.start()
-
-      expect(store.simulation.unpause).toHaveBeenCalledTimes(1)
-    })
-
-    it('should not un-pause the simulation when debugging', () => {
-      store.isDebugging = true
-      store.start()
-
-      expect(store.simulation.unpause).not.toHaveBeenCalled()
-    })
-  })
-
 
   describe('onSimulationUpdate()', () => {
     const store = createDocumentStore('document')()
@@ -74,7 +33,7 @@ describe('simulation actions', () => {
 
     beforeEach(() => {
       store.ports = { port1, port2 }
-      store.onSimulationUpdate(valueMap, oscillogram)
+      store.onSimulationUpdate(valueMap)
     })
 
     afterEach(() => store.$reset())

@@ -4,6 +4,13 @@
     <div class="oscilloscope-title-bar__actions">
       <button
         class="oscilloscope-title-bar__button"
+        title="Close"
+        @click="$emit('close')"
+      >
+        <icon :icon="faClose" />
+      </button>
+      <button
+        class="oscilloscope-title-bar__button"
         title="Clear oscilloscope"
         :disabled="!clearable"
         @click="$emit('clear')"
@@ -13,17 +20,17 @@
       <button
         class="oscilloscope-title-bar__button"
         title="Close"
-        @click="$emit('close')"
+        @click="$emit('toggle')"
       >
-        <icon :icon="faClose" />
+        <icon :icon="isRecording ? faPause : faPlay" />
       </button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { faBan, faClose, faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { defineComponent } from 'vue'
-import { faBan, faClose } from '@fortawesome/free-solid-svg-icons'
 import Icon from '@/components/Icon.vue'
 
 export default defineComponent({
@@ -36,12 +43,18 @@ export default defineComponent({
     clearable: {
       type: Boolean,
       default: true
+    },
+    isRecording: {
+      type: Boolean,
+      default: true
     }
   },
   setup () {
     return {
       faBan,
-      faClose
+      faClose,
+      faPause,
+      faPlay
     }
   }
 })

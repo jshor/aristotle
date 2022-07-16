@@ -1,6 +1,5 @@
 
 import Direction from '@/types/enums/Direction'
-// TODO: rename parent 'layout' folder to 'geometry'
 
 /**
  * Normalizes the given rotation with respect to any additional rotation to augment by.
@@ -42,50 +41,7 @@ function getGroupedItemRotatedPosition (groupBoundingBox: BoundingBox, item: Ite
   }
 }
 
-/**
- * Returns the absolute Cartesian position of a port based on its parent's rotation and position.
- *
- * @param port
- * @param portList
- * @param item
- * @param index
- * @returns
- */
-function getRotatedPortPosition (port: Port, portList: Port[], item: Item, index: number): Point {
-  let { left, top, bottom, right } = item.boundingBox
-
-  if (item.integratedCircuit) {
-    // if this is an integrated circuit, reserve the top and bottom sections (each having 40px height)
-    bottom -= 40
-    top += 40
-  }
-
-  // ports use CSS "space around" flex property for positions
-  // compute the spacing of each port based on the element width/height
-  // there are n spacings for n ports
-  const spacing = (port.orientation + item.rotation) % 2 === 0
-    ? Math.floor((bottom - top) / portList.length)
-    : Math.floor((right - left) / portList.length)
-
-  // compute the distance (from left-to-right or top-to-bottom)
-  // the distance will be the center of the computed spacing
-  const distance = (spacing * (index + 1)) - (spacing / 2)
-
-  switch (rotate(port.orientation + item.rotation)) {
-    case Direction.Left:
-      return { x: left, y: top + distance }
-    case Direction.Top:
-      return { x: right - distance, y: top }
-    case Direction.Right:
-      return { x: right, y: bottom - distance }
-    case Direction.Bottom:
-    default:
-      return { x: left + distance, y: bottom }
-  }
-}
-
 export default {
   rotate,
-  getGroupedItemRotatedPosition,
-  getRotatedPortPosition
+  getGroupedItemRotatedPosition
 }

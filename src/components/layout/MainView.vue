@@ -1,5 +1,10 @@
 <template>
-  <div class="main-view">
+  <div
+    class="main-view"
+    :class="{
+      'main-view--blurred': isBlurred
+    }"
+  >
     <div class="main-view__top">
       <slot name="top" />
     </div>
@@ -16,7 +21,13 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'MainView'
+  name: 'MainView',
+  props: {
+    isBlurred: {
+      type: Boolean,
+      default: false
+    }
+  }
 })
 </script>
 
@@ -29,6 +40,10 @@ export default defineComponent({
   &__middle {
     flex: 1;
     overflow: hidden;
+  }
+
+  &--blurred {
+    filter: blur(4px);
   }
 }
 </style>

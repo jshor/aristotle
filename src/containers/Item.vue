@@ -1,7 +1,6 @@
 <template>
   <draggable
     :style="{
-      transform: `rotate(${90 * item.rotation}deg)`,
       outline: 'none',
       pointerEvents: 'none',
       zIndex
@@ -13,6 +12,9 @@
     @keydown.esc="onEscapeKey"
     @drag="onDrag"
     @drag-start="onDragStart"
+    @contextmenu="onContextMenu"
+    @dblclick="revealCustomCircuit"
+    @touchhold="revealCustomCircuit"
     @drag-end="store.commitCachedState"
     @select="k => store.selectItem(id, k)"
     @deselect="store.deselectItem(id)"
@@ -33,11 +35,15 @@
     <circuit-component
       :type="item.type"
       :subtype="item.subtype"
+      :name="item.name"
       :ports="ports"
       :properties="item.properties"
       :is-selected="isSelected"
       :flash="flash"
-      @change="store.setPortValue"
+      :style="{
+        transform: `rotate(${90 * item.rotation}deg)`
+      }"
+      @signal="store.setPortValue"
     >
       <template
         v-for="(port, o) in 4"
@@ -48,7 +54,8 @@
           :tabindex="0"
           :store="$props.store"
           :id="port.id"
-          :key="port.id"
+          :key="`${port.id}_${portUpdates}`"
+          :title="port.name"
           :type="port.type"
           :position="port.position"
           :orientation="port.orientation + item.rotation"
@@ -67,15 +74,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, computed, ComponentPublicInstance } from 'vue'
+import { defineComponent, PropType, ref, computed, ComponentPublicInstance, watch } from 'vue'
 import CircuitComponent from '@/components/item/CircuitComponent.vue'
 import Properties from '@/components/item/Properties.vue'
-import PortHandle from '@/components/PortHandle.vue'
 import PortItem from './PortItem.vue'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import { DocumentStore } from '@/store/document'
 import Draggable from '@/components/interactive/Draggable.vue'
+import { useRootStore } from '@/store/root'
+import editorContextMenu from '@/menus/context/editor'
 
 /**
  * This component represents a two-dimensional item in the editor.
@@ -88,7 +96,6 @@ export default defineComponent({
     CircuitComponent,
     Draggable,
     PortItem,
-    PortHandle,
     Properties
   },
   props: {
@@ -122,11 +129,16 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const store = props.store()
     const item = computed(() => store.items[props.id])
     const viewport = computed(() => store.viewport)
     const itemRef = ref<ComponentPublicInstance<HTMLElement>>()
+    const portUpdates = ref(0)
+
+    /** watch for any updates that cause the ports to move its position (relative to the item) */
+    watch(() => item.value?.rotation, () => portUpdates.value++)
+    watch(() => item.value?.properties.inputCount?.value, () => portUpdates.value++)
 
     /* list of all ports that belong to this item */
     const ports = computed(() => {
@@ -146,6 +158,15 @@ export default defineComponent({
      */
     function focus () {
       itemRef.value?.$el.focus()
+    }
+
+    /**
+     * Opens the custom circuit (if any) in a new file tab.
+     */
+    function revealCustomCircuit () {
+      if (item.value?.subtype === ItemSubtype.CustomCircuit) {
+        useRootStore().openIntegratedCircuit(item.value)
+      }
     }
 
     function onDragStart () {
@@ -200,6 +221,14 @@ export default defineComponent({
       })
     }
 
+    function onContextMenu () {
+      if (!props.isSelected) {
+        store.selectItem(props.id)
+      }
+
+      window.api.showContextMenu(editorContextMenu(props.store))
+    }
+
     return {
       item,
       itemRef,
@@ -207,12 +236,15 @@ export default defineComponent({
       ports,
       viewport,
       isPropertiesEnabled,
+      portUpdates,
       focus,
       onDrag,
       onDragStart,
       onEscapeKey,
       onResize,
       onPortBlur,
+      onContextMenu,
+      revealCustomCircuit,
       ItemSubtype,
       ItemType
     }

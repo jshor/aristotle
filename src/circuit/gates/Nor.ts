@@ -7,9 +7,9 @@ class Nor extends CircuitNode {
       return LogicValue.FALSE
     }
 
-    // if (this.valueCount(LogicValue.UNKNOWN)) {
-    //   return LogicValue.UNKNOWN
-    // }
+    if (this.valueCount(LogicValue.UNKNOWN)) {
+      return LogicValue.UNKNOWN
+    }
 
     return LogicValue.TRUE
   }

@@ -249,9 +249,6 @@ export default defineComponent({
           // if the mouse moved less than 2 pixels in any direction, show the context menu
           emit('contextmenu', $event)
 
-          $event.stopPropagation()
-          $event.preventDefault()
-
           return
         }
       }

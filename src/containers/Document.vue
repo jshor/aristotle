@@ -23,7 +23,10 @@
       @focus="store.recycleSelection(false)"
     />
 
-    <template v-for="baseItem in store.baseItems">
+    <template
+      v-if="store.hasLoaded"
+      v-for="baseItem in store.baseItems"
+    >
       <item
         v-if="'type' in baseItem"
         :tabindex="0"
@@ -34,7 +37,6 @@
         :flash="store.isDebugging && store.isCircuitEvaluated"
         :z-index="baseItem.zIndex + 1000"
         @contextmenu="onContextMenu"
-        @open-integrated-circuit="$emit('openIntegratedCircuit', baseItem)"
       />
       <!-- Note: z-index of items will be offset by +1000 to ensure it always overlaps wires -->
 
@@ -100,6 +102,7 @@ export default defineComponent({
     const store = props.store()
     const rootStore = useRootStore()
     const editor = ref<ComponentPublicInstance<HTMLElement>>()
+    const updates = ref(0)
 
     let acceleration = 1
     let keys: Record<string, boolean> = {}
@@ -225,6 +228,7 @@ export default defineComponent({
     return {
       store,
       editor,
+      updates,
       storeDefinition: props.store,
       onKeyDown,
       onKeyUp,

@@ -5,7 +5,7 @@
   "private": true,
   "author": "Josh Shor <jpshor@gmail.com>",
   "description": "Digital logic simulator for Windows, Mac, and Linux.",
-  "main": "index.js",
+  "main": "background.js",
   "scripts": {
     "lint": "vue-cli-service lint",
     "test": "vue-cli-service test:unit --runInBand",
@@ -29,7 +29,8 @@
     "pinia": "^2.0.14",
     "tiny-emitter": "^2.1.0",
     "uuid": "^8.3.2",
-    "vue": "^3.2.37"
+    "vue": "^3.2.37",
+    "vue3-smooth-dnd": "^0.0.2"
   },
   "devDependencies": {
     "@electron/remote": "^2.0.8",

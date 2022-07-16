@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, MenuItemConstructorOptions, FileFilter, clipboard } from 'electron'
-import { Menu, dialog, app, getCurrentWindow } from '@electron/remote'
+import { Menu, dialog, app, screen, getCurrentWindow } from '@electron/remote'
 import path from 'path'
 import fs from 'fs'
 
@@ -7,6 +7,18 @@ const defaultPath = path.resolve(app.getPath('desktop'))
 
 export const api = {
   showContextMenu (menuItems: MenuItemConstructorOptions[]) {
+    const point = screen.getCursorScreenPoint()
+
+    // TODO: put this in a wrapper for dev mode only (not production)
+    menuItems.push({
+      label: 'Inspect Element',
+      click: () => {
+        getCurrentWindow()
+          .webContents
+          .inspectElement(point.x, point.y)
+      }
+    })
+
     Menu
       .buildFromTemplate(menuItems)
       .popup()
@@ -23,6 +35,14 @@ export const api = {
       filters
     }) || ''
   },
+
+  getFilePaths (directoryPath: string, filter: string) {
+    return fs
+      .readdirSync(directoryPath)
+      .filter(fileName => fileName.includes(filter))
+      .map(fileName => path.resolve(path.join(directoryPath, fileName)))
+  },
+
   showMessageBox ({ message, type = 'warning', buttons = ['OK'], title = 'Aristotle' }: {
     message: string
     type?: string
@@ -56,7 +76,7 @@ export const api = {
   openFile (filePath: string) {
     return fs
       .readFileSync(filePath)
-      .toString()
+      // .toString()
   },
   saveFile (filePath: string, data: Buffer) {
     fs.writeFileSync(filePath, data)

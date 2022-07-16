@@ -2,34 +2,48 @@ import SimulationService from '@/services/SimulationService'
 import { DocumentStoreInstance } from '..'
 
 /**
- * Stops the simulation.
- */
-export function stop (this: DocumentStoreInstance) {
-  this.simulation.pause()
-}
-
-/**
  * Restarts the simulation (if not in debugging mode).
  */
-export function start (this: DocumentStoreInstance) {
-  if (!this.isDebugging) {
-    this.simulation.unpause()
+export function toggleOscillatorRecording (this: DocumentStoreInstance) {
+  if (this.simulation.oscillator.isPaused) {
+    this.simulation.oscillator.start()
+  } else {
+    this.simulation.oscillator.stop()
   }
+
+  this.isOscilloscopeRecording = !this.simulation.oscillator.isPaused
 }
 
 /**
  * Updates the store according to the port-value mapping provided.
  * This also accepts oscillogram to update the visual oscilloscope.
  */
-export function onSimulationUpdate (this: DocumentStoreInstance, valueMap: Record<string, number>, oscillogram: Oscillogram) {
+export function onSimulationUpdate (this: DocumentStoreInstance, valueMap: Record<string, number>) {
   for (const portId in valueMap) {
     if (this.ports[portId]) {
-      this.ports[portId].value = valueMap[portId]
+      const port = this.ports[portId]
+      const item = this.items[port.elementId]
+
+      if (item && port.value !== valueMap[portId]) {
+        this.debugger.hasUpdated = true
+      }
+
+      port.value = valueMap[portId]
     }
   }
 
   this.isCircuitEvaluated = !this.simulation.canContinue
-  this.oscillogram = oscillogram
+
+  clearTimeout(this.debugger.timeout)
+
+  this.debugger.timeout = window.setTimeout(() => {
+    // if the user can still advance a step and the circuit hasn't finished evaluating yet, step over again
+    // this is in a timeout in order to wait for the next JS frame (by which time all event emissions will have completed)
+    if (!this.debugger.hasUpdated && this.simulation.canContinue && this.isDebugging) {
+      this.debugger.hasUpdated = false
+      this.simulation.advanceDebuggerStep()
+    }
+  })
 }
 
 export function onError (this: DocumentStoreInstance, error: string) {
@@ -52,11 +66,17 @@ export function resetCircuit (this: DocumentStoreInstance) {
       port.value = 0
     })
 
-  this.simulation.oscillator?.stop()
+  this.simulation.stop()
   this.simulation = new SimulationService(items, connections, this.ports)
   this.simulation.onChange(this.onSimulationUpdate)
   this.simulation.onError(this.onError)
 
+  // set the callback to update the oscilloscope when the oscillogram updates
+  this.simulation.oscillator.on('change', oscillogram => {
+    this.oscillogram = oscillogram
+  })
+
+  // apply the initial port values
   Object
     .values(this.items)
     .forEach(({ properties, portIds }) => {
@@ -68,7 +88,7 @@ export function resetCircuit (this: DocumentStoreInstance) {
       }
     })
 
-  this.simulation.unpause()
+  this.simulation.start()
 
   if (this.isDebugging) {
     this.simulation.startDebugging()
@@ -77,11 +97,14 @@ export function resetCircuit (this: DocumentStoreInstance) {
 }
 
 export function stepThroughCircuit (this: DocumentStoreInstance) {
-  this.simulation.advance()
+  this.debugger.hasUpdated = false
+  this.simulation.advanceDebuggerStep()
   this.isCircuitEvaluated = !this.simulation.canContinue
 }
 
 export function toggleDebugger (this: DocumentStoreInstance) {
+
+
   if (this.isDebugging) {
     this.simulation.stopDebugging()
   } else {

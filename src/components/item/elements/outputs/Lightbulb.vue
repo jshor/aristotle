@@ -1,10 +1,8 @@
 <template>
   <div
     class="lightbulb"
-    :class="{
-      'lightbulb--on': value === 1,
-      'lightbulb--high-z': value === 0
-    }"
+    :class="`lightbulb--${modifier}`"
+    :title="ports[0]?.value"
   />
 </template>
 
@@ -20,9 +18,18 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const value = computed(() => props.ports[0]?.value || 0)
+    const modifier = computed(() => {
+      switch (props.ports[0]?.value) {
+        case 1:
+          return 'on'
+        case -1:
+          return 'off'
+        default:
+          return 'high-z'
+      }
+    })
 
-    return { value }
+    return { modifier }
   }
 })
 </script>

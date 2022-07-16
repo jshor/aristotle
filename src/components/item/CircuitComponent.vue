@@ -3,19 +3,21 @@
     class="circuit-component"
     :class="{
       'circuit-component--selected': isSelected,
-      'circuit-component--flash': flash
+      'circuit-component--flash': flash,
+      'circuit-component--custom': subtype === ItemSubtype.CustomCircuit
     }"
   >
     <component
       v-bind:is="type"
       v-bind="$props"
-      @change="onChange"
+      @signal="onChange"
     />
     <template v-if="type !== ItemType.Freeport">
       <div
         v-for="(name, index) in ['left', 'top', 'right', 'bottom']"
         :key="index"
-        :class="`circuit-component__ports circuit-component__ports--${name}`"
+        :class="`circuit-component__ports--${name}`"
+        class="circuit-component__ports"
       >
         <slot :name="index" />
       </div>
@@ -31,6 +33,7 @@ import IntegratedCircuit from '@/components/item/elements/IntegratedCircuit.vue'
 import LogicGate from '@/components/item/elements/LogicGate.vue'
 import OutputNode from '@/components/item/elements/OutputNode.vue'
 import ItemType from '@/types/enums/ItemType'
+import ItemSubtype from '@/types/enums/ItemSubtype'
 
 const components = {
   Freeport,
@@ -44,7 +47,7 @@ export default defineComponent({
   name: 'CircuitComponent',
   components,
   emits: {
-    change: (data: { id: string, value: number }) => true
+    signal: (data: { id: string, value: number }) => true
   },
   props: {
     isSelected: {
@@ -60,8 +63,12 @@ export default defineComponent({
       required: true
     },
     subtype: {
-      type: String,
+      type: String as PropType<ItemSubtype>,
       required: true
+    },
+    name: {
+      type: String,
+      default: ''
     },
     ports: {
       type: Array as PropType<Port[]>,
@@ -75,9 +82,10 @@ export default defineComponent({
   setup (_, { emit }) {
     return {
       onChange (args: { id: string, value: number }) {
-        emit('change', args)
+        emit('signal', args)
       },
-      ItemType
+      ItemType,
+      ItemSubtype
     }
   }
 })
@@ -86,6 +94,7 @@ export default defineComponent({
 <style lang="scss">
 .circuit-component {
   outline: none;
+  filter: drop-shadow(0 0 6px transparent);
 
   &__ports {
     position: relative;
@@ -120,16 +129,19 @@ export default defineComponent({
 
     &--bottom {
       top: 50%;
+      align-items: flex-end;
+      padding-top: var(--integrated-circuit-wire-height);
     }
 
-    &--bottom, &--right {
+    &--right {
       align-items: flex-end;
-      flex-direction: column-reverse;
+      flex-direction: column;
     }
 
     &--top {
       bottom: 50%;
       align-items: flex-start;
+      padding-bottom: var(--integrated-circuit-wire-height);
     }
   }
 
@@ -139,6 +151,23 @@ export default defineComponent({
 
   &--flash {
     animation: flash 1s normal ease-out;
+  }
+
+  &--custom {
+    .circuit-component__ports {
+      &--left, &--right {
+        padding: var(--integrated-circuit-wire-height) 0;
+      }
+
+      &--top {
+        margin-top: calc(var(--integrated-circuit-wire-height) * -1);
+      }
+
+      &--top, &--bottom {
+        margin-left: calc(var(--integrated-circuit-wire-height) + 6px);
+        margin-right: calc(var(--integrated-circuit-wire-height) + 6px);
+      }
+    }
   }
 }
 

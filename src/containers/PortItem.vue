@@ -3,6 +3,7 @@
     :rotation="rotation"
     @blur="onBlur"
     @keydown.esc="onEscapeKey"
+    @resize="onResize"
     @keydown.space="store.cycleConnectionPreviews(id)"
     @keydown.enter="store.commitPreviewedConnection"
     @contextmenu="store.setActivePortId(id)"
@@ -13,7 +14,7 @@
       @drag="onDrag"
       @drag-end="onDragEnd"
       @touchhold="onTouchHold"
-      @dblclick="store.togglePortMonitoring(id)"
+      @dblclick="onDoubleClick"
       :tabindex="-1"
     >
       <port-handle
@@ -35,19 +36,21 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { v4 as uuid } from 'uuid'
-import PortHandle from '../components/PortHandle.vue'
-import PortPivot from '../components/PortPivot.vue'
+import PortHandle from '@/components/port/PortHandle.vue'
+import PortPivot from '@/components/port/PortPivot.vue'
 import { DocumentStore } from '@/store/document'
 import PortType from '@/types/enums/PortType'
 import SnapMode from '@/types/enums/SnapMode'
 import Draggable from '@/components/interactive/Draggable.vue'
+import Resizable from '@/components/interactive/Resizable.vue'
 
 export default defineComponent({
   name: 'PortItem',
   components: {
     PortHandle,
     PortPivot,
-    Draggable
+    Draggable,
+    Resizable
 },
   props: {
     /** Port ID. */
@@ -178,8 +181,22 @@ export default defineComponent({
       }
     }
 
-    function onTouchHold () {
+    function onTouchHold ($event: TouchEvent) {
+      $event.stopPropagation()
+      $event.preventDefault()
       navigator.vibrate(100)
+
+      store.togglePortMonitoring(props.id)
+    }
+
+    function onResize (rect: DOMRect) {
+      store.setPortRelativePosition(rect, props.id)
+    }
+
+    function onDoubleClick ($event: MouseEvent) {
+      $event.stopPropagation()
+      $event.preventDefault()
+
       store.togglePortMonitoring(props.id)
     }
 
@@ -192,6 +209,8 @@ export default defineComponent({
       onEscapeKey,
       onBlur,
       onTouchHold,
+      onResize,
+      onDoubleClick,
       PortType
     }
   }

@@ -4,8 +4,21 @@ import edit from './submenus/edit'
 import file from './submenus/file'
 import view from './submenus/view'
 
-export default function createApplicationMenu () {
+export default function createApplicationMenu (): MenuItemConstructorOptions[] {
   const store = useRootStore()
+
+  if (store.isDialogOpen) {
+    // TODO: set only basic menus (file and help)
+    return [
+      {
+        label: 'File',
+        submenu: [{
+          label: 'Exit'
+        }]
+      }
+    ]
+  }
+
   const menus: MenuItemConstructorOptions[] = [
     {
       label: 'File',

@@ -10,7 +10,7 @@ class OutputNode extends CircuitNode {
   public update = (value: number): void => {
     if (this.newValue !== value) {
       this.newValue = value
-      this.invokeEvent('change', value)
+      this.invokeEvent('change', this.newValue, [])
     }
   }
 }

@@ -40,9 +40,6 @@ export default class SimulationService {
   /** Event emitter. */
   emitter: TinyEmitter = new TinyEmitter()
 
-  /** Whether or not the simulation is paused. */
-  isPaused: boolean = true
-
   /** Oscillogram data, containing each BinaryWave instance observed in the oscilloscope. */
   oscillogram: Oscillogram = {}
 
@@ -63,10 +60,6 @@ export default class SimulationService {
    */
   constructor (items: Item[], connections: Connection[], ports: Record<string, Port>) {
     this.addElements(items, connections, ports)
-    this.oscillator.on('change', oscillogram => {
-      this.oscillogram = oscillogram
-      this.emit()
-    })
   }
 
   /**
@@ -87,7 +80,7 @@ export default class SimulationService {
    * @param event - available values: `change`
    * @param fn - callback function, taking the port-value mapping as the first argument and oscillogram data as the second
    */
-  onChange = (fn: (valueMap: Record<string, number>, oscillogram: Oscillogram) => void) => {
+  onChange = (fn: (valueMap: Record<string, number>) => void) => {
     this.emitter.on('change', fn)
   }
 
@@ -101,24 +94,7 @@ export default class SimulationService {
    * @emits change when the oscillogram or any value changes changes
    */
   emit = () => {
-    this.emitter.emit('change', this.valueMap, this.oscillogram)
-  }
-
-  /**
-   * Pauses the simulation.
-   */
-  pause = () => {
-    this.oscillator.stop()
-    this.isPaused = true
-  }
-
-  /**
-   * Continues the simulation.
-   */
-  unpause = () => {
-    this.isPaused = false
-    this.oscillator.start()
-    this.emit()
+    this.emitter.emit('change', this.valueMap)
   }
 
   /**
@@ -127,8 +103,6 @@ export default class SimulationService {
    * @param [iteration = 0] - internal iteration count (should always invoke using `0` or undefined)
    */
   step = (iteration: number = 0) => {
-    if (this.isPaused) return
-
     this.circuit.next()
 
     const shouldContinue = this.circuit.queue.length > 0 // TODO: use circuit.isComplete()?
@@ -142,23 +116,43 @@ export default class SimulationService {
       this.step(++iteration)
     }
 
-    this.emit()
+    if (!this.isDebug) this.emit()
+  }
+
+  toggleClocks = (fn: 'start' | 'stop') => {
+    Object
+      .values(this.clocks)
+      .forEach(clock => clock[fn]())
+  }
+
+  start = () => {
+    if (!this.isDebug) {
+      this.toggleClocks('start')
+    }
+    this.oscillator.start()
+  }
+
+  stop = () => {
+    this.toggleClocks('stop')
+    this.oscillator.stop()
   }
 
   startDebugging = () => {
     this.isDebug = true
-    this.pause()
     this.computeNextState()
+    this.toggleClocks('stop')
   }
 
   stopDebugging = () => {
-    this.advance()
     this.isDebug = false
+    this.advanceDebuggerStep()
     this.nextState = null
-    this.unpause()
+    this.toggleClocks('start')
   }
 
-  advance = () => {
+  advanceDebuggerStep = () => {
+    if (!this.isDebug) return this.step()
+
     const nextValues = Object.keys(this.nextValueMap)
 
     if (nextValues.length > 0) {
@@ -190,17 +184,6 @@ export default class SimulationService {
     this.canContinue = this.nextState !== null
   }
 
-  /**
-   * Sets the output value of a given target node.
-   *
-   * @param id - ID of the port with new value
-   * @param value - new value to set
-   */
-  setOutputValue = (id: string, value: number) => {
-    this.valueMap[id] = value
-    this.emit()
-  }
-
   updatePortValue = (portId: string, value: number) => {
     this.nodes[portId].setValue(value)
     this.circuit.enqueue(this.nodes[portId])
@@ -216,8 +199,6 @@ export default class SimulationService {
       .reduce((anyValueChanged: boolean, portId) => {
         return anyValueChanged || this.valueMap[portId] !== this.nextValueMap[portId]
       }, false)
-
-    this.emit()
   }
 
   /**
@@ -252,7 +233,7 @@ export default class SimulationService {
     Object
       .values(items)
       .forEach(item => {
-        this.addNode(item, ports, true)
+        this.addNode(item, ports)
       })
 
     Object
@@ -270,7 +251,7 @@ export default class SimulationService {
    * @param [forceContinue] - if true, forces the circuit node to evaluate immediately
    */
   addNode = (item: Item, ports: Record<string, Port>, forceContinue: boolean = false) => {
-    if (item.portIds.length === 0) return // if there are no ports, then there is nothing to add
+    if (item.portIds.length === 0) return // if there are no ports, then there is nothing to add to the simulation
 
     if (item.integratedCircuit) {
       return this.addIntegratedCircuit(item)
@@ -285,6 +266,16 @@ export default class SimulationService {
     }
 
     item.portIds.forEach(portId => this.addPort(portId, node))
+
+    node.on('change', (value: number, outputs: string[]) => {
+      // each time the node value changes, update its oscillogram wave (if any) and the value map to emit to the consumer
+      outputs
+        .concat(outputIds) // include all output ports
+        .forEach(id => {
+          this.valueMap[id] = value
+          this.waves[id]?.drawPulseChange(value)
+        })
+    })
 
     if (item.type === ItemType.InputNode && item.subtype === ItemSubtype.Clock) {
       this.addClock(outputIds[0], item.properties.interval?.value as number)
@@ -367,10 +358,6 @@ export default class SimulationService {
   addPort = (portId: string, node: CircuitNode) => {
     this.nodes[portId] = node
 
-    node.on('change', (value: number) => {
-      this.setOutputValue(portId, value)
-      this.waves[portId]?.drawPulseChange(value)
-    })
   }
 
   /**
@@ -399,9 +386,10 @@ export default class SimulationService {
    * @param sourceId
    * @param targetId
    */
-  addConnection = (sourceId: string, targetId: string) => {
+  addConnection = (sourceId: string, targetId: string, sourceValue?: number) => {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
-      this.circuit.addConnection(this.nodes[sourceId], this.nodes[targetId], targetId)
+      this.circuit.addConnection(this.nodes[sourceId], this.nodes[targetId], targetId, sourceValue)
+      this.advanceDebuggerStep()
     }
   }
 
@@ -411,9 +399,10 @@ export default class SimulationService {
    * @param sourceId
    * @param targetId
    */
-  removeConnection = (sourceId: string, targetId: string) => {
+  removeConnection = (sourceId: string, targetId: string, sourceValue?: number) => {
     if (this.nodes[sourceId] && this.nodes[targetId]) {
-      this.circuit.removeConnection(this.nodes[sourceId], this.nodes[targetId])
+      this.circuit.removeConnection(this.nodes[sourceId], this.nodes[targetId], sourceValue)
+      this.advanceDebuggerStep()
     }
   }
 

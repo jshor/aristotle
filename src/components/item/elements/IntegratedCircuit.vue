@@ -1,43 +1,37 @@
 <template>
   <component
-    v-bind:is="component"
+    v-bind:is="subtype"
     v-bind="$props"
   />
 </template>
 
 <script lang="ts">
 import ItemSubtype from '@/types/enums/ItemSubtype'
-import CustomCircuit from './integratedCircuits/CustomCircuit.vue'
+import CustomCircuit from './integratedCircuits/CustomCircuit/CustomCircuit.vue'
 import DigitDisplay from './integratedCircuits/DigitDisplay.vue'
 import { defineComponent, PropType } from 'vue'
 
+const components = {
+  CustomCircuit,
+  DigitDisplay
+}
+
 export default defineComponent({
   name: 'IntegratedCircuit',
-  components: {
-    CustomCircuit,
-    DigitDisplay
-  },
+  components,
   props: {
     ports: {
       type: Array as PropType<Port[]>,
       default: () => []
     },
     subtype: {
+      type: String as PropType<ItemSubtype>,
+      required: true
+    },
+    name: {
       type: String,
-      default: 'CustomCircuit'
+      default: ''
     }
-  },
-  setup (props) {
-    const component = (() => {
-      switch (props.subtype) {
-        case ItemSubtype.DigitDisplay:
-          return props.subtype
-        default:
-          return 'CustomCircuit'
-      }
-    })()
-
-    return { component }
   }
 })
 </script>

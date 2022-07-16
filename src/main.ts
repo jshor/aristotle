@@ -20,7 +20,8 @@ if (!window.api) {
     onOpenFile () {},
     openFile () { return '' },
     saveFile () {},
-    setFullscreen () {}
+    setFullscreen () {},
+    getFilePaths () { return [] }
   }
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="toolbar">
       <div class="toolbar__fixed">
-        <toolbar-button :icon="faScrewdriverWrench" text="Toolbox" is-toolbox @click="store.toggleToolbox" :active="store.isToolboxOpen" />
+        <toolbar-button :icon="faScrewdriverWrench" text="Toolbox" is-toolbox @click="rootStore.toggleToolbox" :active="rootStore.isToolboxOpen" />
         <toolbar-separator />
       </div>
 
@@ -11,29 +11,29 @@
         <toolbar-button :icon="faFile" text="New" />
         <toolbar-button :icon="faSave" text="Save" />
         <toolbar-separator />
-        <toolbar-button @click="store.undo" :disabled="!store.canUndo" :icon="faReply" text="Undo" />
-        <toolbar-button @click="store.redo" :disabled="!store.canRedo" :icon="faShare" text="Redo" />
+        <toolbar-button @click="documentStore.undo" :disabled="!documentStore.canUndo" :icon="faReply" text="Undo" />
+        <toolbar-button @click="documentStore.redo" :disabled="!documentStore.canRedo" :icon="faShare" text="Redo" />
         <toolbar-separator />
-        <toolbar-button @click="store.rotate(1)" :disabled="!store.hasSelectedItems" :icon="faRotateForward" text="Rotate" />
+        <toolbar-button @click="documentStore.rotate(1)" :disabled="!documentStore.hasSelectedItems" :icon="faRotateForward" text="Rotate" />
         <toolbar-separator />
-        <toolbar-button @click="store.group" :disabled="!store.canGroup" :icon="faObjectGroup" text="Group" />
-        <toolbar-button @click="store.ungroup" :disabled="!store.canUngroup" :icon="faObjectUngroup" text="Ungroup" />
+        <toolbar-button @click="documentStore.group" :disabled="!documentStore.canGroup" :icon="faObjectGroup" text="Group" />
+        <toolbar-button @click="documentStore.ungroup" :disabled="!documentStore.canUngroup" :icon="faObjectUngroup" text="Ungroup" />
         <toolbar-separator />
         <toolbar-button :icon="faScissors" text="Cut" />
         <toolbar-button :icon="faCopy" text="Copy" />
         <toolbar-button :icon="faPaste" text="Paste" />
-        <toolbar-button @click="store.deleteSelection" :disabled="!store.hasSelection" :icon="faBan" text="Delete" />
+        <toolbar-button @click="documentStore.deleteSelection" :disabled="!documentStore.hasSelection" :icon="faBan" text="Delete" />
         <toolbar-separator />
-        <toolbar-button @click="store.saveIntegratedCircuit" :icon="faMicrochip" text="Build IC" />
+        <toolbar-button @click="rootStore.launchIntegratedCircuitBuilder" :icon="faMicrochip" text="Export" />
       </div>
 
       <div class="toolbar__right">
-        <toolbar-button :icon="faBug" :active="store.isDebugging" @click="store.toggleDebugger" text="Debug" />
+        <toolbar-button :icon="faBug" :active="documentStore.isDebugging" @click="documentStore.toggleDebugger" text="Debug" />
         <toolbar-separator />
-        <toolbar-button :icon="faArrowsRotate" @click="store.resetCircuit" text="Reset" />
-        <toolbar-button :icon="faForwardStep" :disabled="!store.isDebugging || store.isCircuitEvaluated" @click="store.stepThroughCircuit" text="Next" />
+        <toolbar-button :icon="faArrowsRotate" @click="documentStore.resetCircuit" text="Reset" />
+        <toolbar-button :icon="faForwardStep" :disabled="!documentStore.isDebugging || documentStore.isCircuitEvaluated" @click="documentStore.stepThroughCircuit" text="Next" />
         <toolbar-separator />
-        <toolbar-button :icon="faWaveSquare" :disabled="store.isDebugging" :active="!store.isDebugging && store.isOscilloscopeOpen" @click="store.toggleOscilloscope" text="Monitor" />
+        <toolbar-button :icon="faWaveSquare" :disabled="documentStore.isDebugging" :active="!documentStore.isDebugging && documentStore.isOscilloscopeOpen" @click="documentStore.toggleOscilloscope" text="Analyze" />
       </div>
       </scroll-fade>
 
@@ -66,6 +66,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { DocumentStore } from '@/store/document'
 import { StoreDefinition } from 'pinia'
+import { useRootStore } from '@/store/root'
 import { defineComponent, PropType, computed } from 'vue'
 import ToolbarButton from '../components/toolbar/ToolbarButton.vue'
 import ToolbarSeparator from '../components/toolbar/ToolbarSeparator.vue'
@@ -108,11 +109,13 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const store = props.store()
-    const isComplete = computed(() => store.simulation.circuit.isComplete())
+    const rootStore = useRootStore()
+    const documentStore = props.store()
+    const isComplete = computed(() => documentStore.simulation.circuit.isComplete())
 
     return {
-      store,
+      rootStore,
+      documentStore,
       isComplete
     }
   }
