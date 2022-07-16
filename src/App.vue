@@ -6,14 +6,20 @@
     }"
   />
 
-  <main-view v-if="activeDocumentId && activeDocument">
+  <main-view
+    v-if="activeDocumentId && activeDocument"
+    :is-blurred="isDialogOpen"
+    @contextmenu="onContextMenu">
     <template #top>
       <div v-if="isMobile">mobile bar</div>
       <toolbar
         :key="activeDocumentId"
         :store="activeDocument.store"
       />
-      <toolbox :store="activeDocument.store" />
+      <toolbox
+        :is-open="isToolboxOpen"
+        :store="activeDocument.store"
+      />
     </template>
 
     <template #middle>
@@ -60,6 +66,10 @@
     no documents open {{ isDropping }}
   </div>
 
+  <builder-view
+    v-if="isBuilderOpen"
+  />
+
 </template>
 
 <script lang="ts">
@@ -80,6 +90,8 @@ import createApplicationMenu from './menus'
 import MainView from './components/layout/MainView.vue'
 import isMobile from '@/utils/isMobile'
 
+import BuilderView from '@/views/BuilderView.vue'
+
 export default defineComponent({
   name: 'App',
   components: {
@@ -90,7 +102,8 @@ export default defineComponent({
     Toolbox,
     Oscilloscope,
     StatusBar,
-    MainView
+    MainView,
+    BuilderView
 },
   setup () {
     const store = useRootStore()
@@ -99,7 +112,10 @@ export default defineComponent({
       activeDocumentId,
       documents,
       hasOpenDocuments,
-      isFullscreen
+      isFullscreen,
+      isDialogOpen,
+      isBuilderOpen,
+      isToolboxOpen
     } = storeToRefs(store)
     const isDropping = ref(false)
 
@@ -172,6 +188,10 @@ export default defineComponent({
       }
     }
 
+    function onContextMenu () {
+      // window.api.showContextMenu([])
+    }
+
     return {
       activeDocument,
       activeDocumentId,
@@ -179,6 +199,10 @@ export default defineComponent({
       hasOpenDocuments,
       isDropping,
       isFullscreen,
+      isDialogOpen,
+      isBuilderOpen,
+      isToolboxOpen,
+      onContextMenu,
       toggleFullscreen: store.toggleFullscreen,
       activateDocument: store.activateDocument,
       closeDocument: store.closeDocument,

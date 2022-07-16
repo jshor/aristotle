@@ -22,7 +22,6 @@ describe('rotation actions', () => {
         'commitState',
         'setItemPosition',
         'setItemBoundingBox',
-        'setItemPortPositions',
         'setGroupBoundingBox'
       ])
 

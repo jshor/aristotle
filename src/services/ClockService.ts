@@ -24,6 +24,8 @@ export default class ClockService implements Pulse {
   /** Event emitter. */
   private emitter: TinyEmitter = new TinyEmitter()
 
+  private isStopped = false
+
   /**
    * Constructor.
    *
@@ -48,13 +50,21 @@ export default class ClockService implements Pulse {
     this.emitter.on(event, fn)
   }
 
+  stop = () => {
+    this.isStopped = true
+  }
+
+  start = () => {
+    this.isStopped = false
+  }
+
   /**
    * Updates all waves with the given time elapsed.
    *
    * @param elapsed - time elapsed during simulation
    */
   public update = (elapsed: number): void => {
-    if (elapsed >= this.lastUpdate + this.interval) {
+    if (!this.isStopped && elapsed >= this.lastUpdate + this.interval) {
       this.signal = this.signal === -1 ? 1 : -1
       this.lastUpdate = elapsed
       this.emitter.emit('change', this.signal)

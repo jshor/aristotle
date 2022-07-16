@@ -45,10 +45,17 @@ module.exports = {
         fileAssociations: [
           {
             ext: 'alfx',
-            description: 'Aristotle Logic File',
+            description: 'Aristotle Logic Circuit File',
             mimeType: 'application/alfx',
             role: 'Editor',
             icon: 'circuit-icon.ico'
+          },
+          {
+            ext: 'aicx',
+            description: 'Aristotle Integrated Circuit File',
+            mimeType: 'application/aicx',
+            role: 'Editor',
+            icon: 'integrated-circuit.ico'
           }
         ]
       }

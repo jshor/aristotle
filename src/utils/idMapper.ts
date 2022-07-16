@@ -151,8 +151,11 @@ function mapIntegratedCircuitIds (item: Item) {
     ports: {},
     groups: {}
   })
+  const mappedItem = Object.values(items)[0]
 
-  return Object.values(items)[0]
+  mappedItem.id = uuid()
+
+  return mappedItem // Object.values(items)[0]
 }
 
 export default {

@@ -254,10 +254,6 @@ describe('item actions', () => {
       it('should remove the difference number of input ports at the end of the list', () => {
         expect(store.removePort).toHaveBeenCalledWith(port3.id)
       })
-
-      it('should set the item port positions', () => {
-        expect(store.setItemPortPositions).toHaveBeenCalledWith(id)
-      })
     })
   })
 

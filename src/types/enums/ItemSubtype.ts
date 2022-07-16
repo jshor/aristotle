@@ -1,6 +1,8 @@
 enum ItemSubtype {
   None = 'None',
 
+  CustomCircuit = 'CustomCircuit',
+
   /* input nodes */
   Switch = 'Switch',
   PushButton = 'PushButton',

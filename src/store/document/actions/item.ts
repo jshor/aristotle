@@ -7,18 +7,6 @@ import ItemSubtype from '@/types/enums/ItemSubtype'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
 import ItemType from '@/types/enums/ItemType'
 
-function generateItemName (item: Item, taxonomyCount: number) {
-  const name: string[] = [item.type]
-
-  if (item.subtype !== ItemSubtype.None) {
-    name.push(item.subtype)
-  }
-
-  name.push(taxonomyCount.toString())
-
-  return name.join(' ')
-}
-
 /**
  * Adds any non-IC component to the state.
  *
@@ -45,13 +33,14 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
       }
     })
 
-  const taxonomy = `${item.type}_${item.subtype}`
+  let name = item.name
+  let c = 0
 
-  if (!this.taxonomyCounts[taxonomy]) {
-    this.taxonomyCounts[taxonomy] = 0
+  while (this.itemNames.includes(name)) {
+    name = `${item.name} ${++c}`
   }
 
-  item.name = generateItemName(item, ++this.taxonomyCounts[taxonomy])
+  item.name = name
 
   // add the item to the document and create its corresponding circuit node
   this.items[item.id] = item
@@ -63,6 +52,7 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
 
   this.resetItemValue(item)
   this.setProperties(item.id, item.properties)
+  this.setItemBoundingBox(item.id)
 }
 
 export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports }: { item: Item, ports: Port[] }, documentPosition: Point | null = null) {
@@ -88,7 +78,6 @@ export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports
     ports: ports.reduce((map: Record<string, Port>, port) => ({ ...map, [port.id]: port }), {})
   })
   this.setItemBoundingBox(item.id)
-  this.setItemPortPositions(item.id)
   this.setSelectionState({ id: item.id, value: true })
 }
 
@@ -110,6 +99,7 @@ export function resetItemValue (this: DocumentStoreInstance, item: Item) {
 export function removeElement (this: DocumentStoreInstance, id: string) {
   const item = this.items[id]
 
+  if (!item) return
   if (item.type === ItemType.Freeport) {
     this.disconnectFreeport(id)
   }

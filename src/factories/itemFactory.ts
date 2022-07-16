@@ -1,6 +1,7 @@
+import ItemSubtype from '@/types/enums/ItemSubtype'
 import ItemType from '@/types/enums/ItemType'
 
-export default function itemFactory (id: string, type: ItemType, subtype: string, width: number, height: number, ports: Port[] = []): Item {
+export default function itemFactory (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports: Port[] = []): Item {
   return {
     id,
     name: '',

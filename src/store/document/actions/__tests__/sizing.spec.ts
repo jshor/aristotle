@@ -86,7 +86,6 @@ describe('sizing actions', () => {
 
       stubAll(store, [
         'setItemBoundingBox',
-        'setItemPortPositions',
         'setGroupBoundingBox'
       ])
 
@@ -105,11 +104,6 @@ describe('sizing actions', () => {
     it('should update the item\'s bounding box', () => {
       expect(store.setItemBoundingBox).toHaveBeenCalledTimes(1)
       expect(store.setItemBoundingBox).toHaveBeenCalledWith(id)
-    })
-
-    it('should update the item\'s port position', () => {
-      expect(store.setItemPortPositions).toHaveBeenCalledTimes(1)
-      expect(store.setItemPortPositions).toHaveBeenCalledWith(id)
     })
 
     it('should update the group bounding box if the item belongs to one', () => {

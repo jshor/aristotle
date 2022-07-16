@@ -124,7 +124,7 @@ export function createFreeport (this: DocumentStoreInstance, data: Freeport, cre
     if (createCircuitConnection) {
       this
         .simulation
-        .addConnection(connection.source, connection.target)
+        .addConnection(connection.source, connection.target, this.ports[connection.source].value)
     }
   })
 
@@ -133,7 +133,7 @@ export function createFreeport (this: DocumentStoreInstance, data: Freeport, cre
     // once the dragging operation is complete, it will be the responsibility of the connection component to destroy itself
     this
       .simulation
-      .removeConnection(data.sourceId, data.targetId)
+      .removeConnection(data.sourceId, data.targetId, this.ports[data.sourceId].value)
   }
 
   if (data.sourceId && data.targetId) {

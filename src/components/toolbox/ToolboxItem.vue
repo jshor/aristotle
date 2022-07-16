@@ -30,7 +30,7 @@
       </resizable>
     </div>
     <div class="toolbox-item__label">
-      {{ item.subtype }}
+      {{ item.name || item.subtype }}
     </div>
   </draggable>
 </template>

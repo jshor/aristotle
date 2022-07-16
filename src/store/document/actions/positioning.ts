@@ -33,45 +33,10 @@ export function centerAll (this: DocumentStoreInstance) {
     })
 }
 
-/**
- * Sets the absolute positions for all ports that belong to the given item.
- *
- * @param id - ID of the item containing the ports
- */
-export function setItemPortPositions (this: DocumentStoreInstance, id: string) {
-  const item = this.items[id]
+export function setPortRelativePosition (this: DocumentStoreInstance, position: Point, portId: string) {
+  const port = this.ports[portId]
 
-  if (!item) return
-
-  const portGroups = item
-    .portIds
-    .reduce((portGroups: Map<Direction, Port[]>, portId) => {
-      const port = this.ports[portId]
-
-      if (port) {
-        const index: Direction = rotation.rotate(port.orientation + item.rotation)
-
-        portGroups.get(index)?.push(port)
-      }
-
-      return portGroups
-    }, new Map<Direction, Port[]>([
-      [Direction.Left, []],
-      [Direction.Top, []],
-      [Direction.Right, []],
-      [Direction.Bottom, []]
-    ]))
-
-  const setPortGroupPositions = (ports: Port[] = []) => {
-    ports.forEach((port, index) => {
-      this.ports[port.id].position = rotation.getRotatedPortPosition(port, ports, item, index)
-    })
-  }
-
-  setPortGroupPositions(portGroups.get(Direction.Left))
-  setPortGroupPositions(portGroups.get(Direction.Top))
-  setPortGroupPositions(portGroups.get(Direction.Right))
-  setPortGroupPositions(portGroups.get(Direction.Bottom))
+  port.position = fromDocumentToEditorCoordinates(this.canvas, this.viewport, position, this.zoom)
 }
 
 /**

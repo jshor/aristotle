@@ -13,7 +13,6 @@ describe('Simulation Service', () => {
 
   beforeEach(() => {
     service = new SimulationService([], [], {})
-    service.isPaused = false
   })
 
   afterEach(() => jest.resetAllMocks())
@@ -69,49 +68,6 @@ describe('Simulation Service', () => {
     })
   })
 
-  describe('pause()', () => {
-    beforeEach(() => {
-      jest
-        .spyOn(service.oscillator, 'stop')
-        .mockImplementation(jest.fn())
-
-      service.pause()
-    })
-
-    it('should set the `isPaused` flag to true', () => {
-      expect(service.isPaused).toEqual(true)
-    })
-
-    it('should stop the oscillator', () => {
-      expect(service.oscillator.stop).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  describe('unpause()', () => {
-    beforeEach(() => {
-      jest
-        .spyOn(service.oscillator, 'start')
-        .mockImplementation(jest.fn())
-      jest
-        .spyOn(service, 'emit')
-        .mockImplementation(jest.fn())
-
-      service.unpause()
-    })
-
-    it('should set the `isPaused` flag to false', () => {
-      expect(service.isPaused).toEqual(false)
-    })
-
-    it('should start the oscillator', () => {
-      expect(service.oscillator.start).toHaveBeenCalledTimes(1)
-    })
-
-    it('should invoke the callback function with the current value map and oscillogram', () => {
-      expect(service.emit).toHaveBeenCalledTimes(1)
-    })
-  })
-
   describe('step()', () => {
     beforeEach(() => {
       jest
@@ -143,13 +99,6 @@ describe('Simulation Service', () => {
       expect(service.emitter.emit).toHaveBeenCalledWith('error', 'INFINITE_LOOP')
     })
 
-    it('should not execute if the simulation is paused', () => {
-      service.isPaused = true
-      service.step()
-
-      expect(service.circuit.next).not.toHaveBeenCalled()
-    })
-
     it('should step through the circuit again with its iteration count incremented if the circuit queue is not empty', () => {
       const spy = jest.spyOn(service, 'step')
       const queue = [new CircuitNode('test')]
@@ -165,28 +114,6 @@ describe('Simulation Service', () => {
       expect(spy).toHaveBeenCalledTimes(2)
       expect(spy).toHaveBeenNthCalledWith(1, 0)
       expect(spy).toHaveBeenNthCalledWith(2, 1)
-    })
-  })
-
-  describe('setOutputValue()', () => {
-    const id = 'node-id'
-    const value = 1
-
-    beforeEach(() => {
-      jest
-        .spyOn(service, 'emit')
-        .mockImplementation(jest.fn())
-
-      service.setOutputValue(id, value)
-    })
-
-    it('should set the new value onto the value map', () => {
-      expect(service.valueMap).toHaveProperty(id)
-      expect(service.valueMap[id]).toEqual(value)
-    })
-
-    it('should invoke the callback function with the updated value map', () => {
-      expect(service.emit).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -438,18 +365,8 @@ describe('Simulation Service', () => {
 
       beforeEach(() => {
         jest
-          .spyOn(service, 'setOutputValue')
-          .mockImplementation(jest.fn())
-        jest
           .spyOn(circuitNode, 'on')
           .mockImplementation((a, fn) => fn(value))
-      })
-
-      it('should set the output value', () => {
-        service.addPort(portId, circuitNode)
-
-        expect(service.setOutputValue).toHaveBeenCalledTimes(1)
-        expect(service.setOutputValue).toHaveBeenCalledWith(portId, value)
       })
 
       it('should draw a pulse change if a wave is associated with it', () => {

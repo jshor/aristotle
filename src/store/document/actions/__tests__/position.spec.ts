@@ -36,8 +36,7 @@ describe('positioning actions', () => {
 
     beforeEach(() => {
       stubAll(store, [
-        'setItemPosition',
-        'setItemPortPositions'
+        'setItemPosition'
       ])
 
       store.$reset()
@@ -66,81 +65,6 @@ describe('positioning actions', () => {
           x: 360,
           y: 360
         }
-      })
-    })
-  })
-
-  describe('setItemPortPositions', () => {
-    const store = createDocumentStore('document')()
-
-    beforeEach(() => {
-      store.$reset()
-    })
-
-    describe('when the item does not exist', () => {
-      it('should not compute any new port positions', () => {
-        jest.spyOn(rotation, 'getRotatedPortPosition')
-
-        store.setItemPortPositions('item1')
-
-        expect(rotation.getRotatedPortPosition).not.toHaveBeenCalled()
-      })
-    })
-
-    describe('when no ports are present', () => {
-      it('should not compute any new port positions', () => {
-        const item1 = createItem('item1', ItemType.LogicGate)
-
-        jest.spyOn(rotation, 'getRotatedPortPosition')
-
-        store.$patch({
-          items: { item1 }
-        })
-        store.setItemPortPositions(item1.id)
-
-        expect(rotation.getRotatedPortPosition).not.toHaveBeenCalled()
-      })
-    })
-
-    describe('when ports are present', () => {
-      const item1 = createItem('item1', ItemType.LogicGate, {
-        portIds: ['leftPort', 'topPort', 'rightPort', 'bottomPort']
-      })
-      const leftPort = createPort('leftPort', 'item1', PortType.Output, { orientation: 0 })
-      const topPort = createPort('topPort', 'item1', PortType.Output, { orientation: 1 })
-      const rightPort = createPort('rightPort', 'item1', PortType.Output, { orientation: 2 })
-      const bottomPort = createPort('bottomPort', 'item1', PortType.Output, { orientation: 3 })
-
-      beforeEach(() => {
-        store.$patch({
-          ports: { leftPort, topPort, rightPort, bottomPort },
-          items: { item1 }
-        })
-        store.setItemPortPositions(item1.id)
-      })
-
-      it('should set the new positions of left ports', () => {
-        expect(store.ports[leftPort.id].position).toEqual(
-          rotation.getRotatedPortPosition(leftPort, [leftPort], item1, 0)
-        )
-      })
-
-      it('should set the new positions of right ports', () => {
-        expect(store.ports[rightPort.id].position).toEqual(
-          rotation.getRotatedPortPosition(rightPort, [rightPort], item1, 0)
-        )
-      })
-
-      it('should set the new positions of top ports', () => {
-        expect(store.ports[topPort.id].position).toEqual(
-          rotation.getRotatedPortPosition(topPort, [topPort], item1, 0)
-        )
-      })
-
-      it('should set the new positions of bottom ports', () => {
-        expect(store.ports[bottomPort.id].position).toEqual(
-          rotation.getRotatedPortPosition(bottomPort, [bottomPort], item1, 0)
-        )
       })
     })
   })

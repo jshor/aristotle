@@ -200,15 +200,6 @@ export function deleteSelection (this: DocumentStoreInstance) {
   if (!this.hasSelection) return
 
   this.commitState()
-
-  const connections = Object
-    .values(this.connections)
-    .filter(({ isSelected }) => isSelected)
-
-  const items = Object
-    .values(this.items)
-    .filter(({ isSelected }) => isSelected)
-
-  items.forEach(({ id }) => this.removeElement(id))
-  connections.forEach(this.disconnect)
+  this.clearBaseItems(this.selectedItemIds, this.selectedConnectionIds, this.selectedGroupIds.filter(id => id !== null) as string[])
+  this.deselectAll()
 }

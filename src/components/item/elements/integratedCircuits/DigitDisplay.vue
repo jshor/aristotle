@@ -68,21 +68,15 @@ export default defineComponent({
       default: () => []
     }
   },
-  setup (props, { emit }) {
+  setup (props) {
     const segments = computed(() => {
       const binaryString = props
         .ports
-        .map((node) => {
-
-          console.log(node, node.value)
-          return node.value === 1 ? 1 : 0
-        })
+        .map(node => node.value === 1 ? 1 : 0)
         .join('')
       const hexString = parseInt(binaryString, 2)
         .toString(16)
         .toLowerCase()
-
-      console.log('hex: ', binaryString, hexString)
 
       return charMap[hexString].map((value, index) => {
         const suffix = value ? 'on' : 'bg-tertiary'
