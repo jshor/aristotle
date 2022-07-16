@@ -35,7 +35,7 @@ export default defineComponent({
     // }
   },
   emits: {
-    change: (data: { id: string, value: number }) => true
+    signal: (data: { id: string, value: number }) => true
   },
   setup (props, { emit }) {
     const model = ref(0)
@@ -50,7 +50,7 @@ export default defineComponent({
 
       model.value = model.value === 1 ? -1 : 1
 
-      emit('change', {
+      emit('signal', {
         id: props.ports[0].id,
         value: model.value
       })

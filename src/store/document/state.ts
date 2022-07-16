@@ -10,15 +10,15 @@ export interface DocumentState extends SerializableState {
   redoStack: string[]
   snapBoundaries: BoundingBox[]
   connectablePortIds: string[]
-  taxonomyCounts: Record<string, number>
+  itemNames: string[],
   zoomLevel: number
   simulation: SimulationService
   oscillogram: Oscillogram
   isOscilloscopeOpen: boolean
+  isOscilloscopeRecording: boolean
   isCircuitEvaluated: boolean
   isDebugging: boolean
   isDirty: boolean
-  isToolboxOpen: boolean
   activeFreeportId: string | null
   selectedItemIds: string[]
   selectedConnectionIds: string[]
@@ -29,6 +29,10 @@ export interface DocumentState extends SerializableState {
   isPrinting: boolean
   isCreatingImage: boolean
   animatePan: boolean
+  debugger: {
+    timeout: number
+    hasUpdated: boolean
+  }
 }
 
 export const state = (): DocumentState => ({
@@ -36,19 +40,25 @@ export const state = (): DocumentState => ({
   redoStack: [],
   simulation: new SimulationService([], [], {}),
   oscillogram: {},
-  taxonomyCounts: {},
+  itemNames: [],
   zoomLevel: 1,
   zIndex: 1,
   oscilloscopeHeight: 200,
   isOscilloscopeOpen: false,
+  isOscilloscopeRecording: true,
   isCircuitEvaluated: false,
   isDebugging: false,
   isDirty: false,
   hasLoaded: false,
   isPrinting: false,
   isCreatingImage: false,
-  isToolboxOpen: false,
   animatePan: false,
+
+  /** debugger status */
+  debugger: {
+    timeout: 0,
+    hasUpdated: false
+  },
 
   /* canvas dimensions */
   viewport: new DOMRect(),

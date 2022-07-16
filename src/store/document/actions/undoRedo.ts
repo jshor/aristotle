@@ -97,8 +97,7 @@ export function applyState (this: DocumentStoreInstance, savedState: string) {
   const addedItems = getExcludedMembers(items, this.items)
   const addedConnections = getExcludedMembers(connections, this.connections)
 
-  removedConnections.forEach(id => this.disconnect(this.connections[id]))
-  removedItems.forEach(id => this.removeElement(id))
+  this.clearBaseItems(removedItems, removedConnections, [])
 
   this.ports = ports
   this.items = items

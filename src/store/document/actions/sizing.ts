@@ -5,6 +5,38 @@ const MIN_SCALE = 0.1
 const MAX_SCALE = 2
 const SCALE_STEP = 0.1
 
+export function updateCanvasSize (this: DocumentStoreInstance) {
+  const boundingBoxes = Object
+    .values(this.items)
+    .map(item => item.boundingBox)
+
+  const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
+  const width = boundingBox.right - boundingBox.left
+  const height = boundingBox.bottom - boundingBox.top
+  const canvasWidth = this.canvas.right - this.canvas.left
+  const canvasHeight = this.canvas.bottom - this.canvas.top
+
+  if (width > canvasWidth || height > canvasHeight) {
+    // if the boundaries of item(s) exceeds the canvas dimensions, then resize the canvas
+    // the new canvas size should be twice the dimensions of the boundary of all the items
+    this.canvas = {
+      left: 0,
+      top: 0,
+      right: width * 2,
+      bottom: height * 2
+    }
+    this.centerAll()
+    this.panToCenter()
+  }
+
+  // zoom to fit everything on the screen (within the editor viewport)
+  setTimeout(() => {
+    this.setZoom({
+      zoom: Math.min(this.viewport.width / width, this.viewport.height / height, 1)
+    })
+  })
+}
+
 /**
  * Assigns the rects of the canvas and viewport according to the screen size and rect provided.
  *
@@ -12,12 +44,12 @@ const SCALE_STEP = 0.1
  */
 export function setViewerSize (this: DocumentStoreInstance, rect: DOMRect) {
   this.viewport = rect
-
   this.canvas.right = screen.width / MIN_SCALE
-  this.canvas.bottom = screen.height / MIN_SCALE
+  this.canvas.bottom =  screen.height / MIN_SCALE
 
   if (!this.hasLoaded && rect.width > 0 && rect.height > 0) {
     this.hasLoaded = true
+    this.updateCanvasSize()
     this.centerAll()
     this.panToCenter()
     // this.setZoom({ zoom: 1.4 }) // TODO: set the user-defined default zoom like this
@@ -52,7 +84,6 @@ export function setItemSize (this: DocumentStoreInstance, { rect, id }: { rect: 
   this.items[id].height = height
 
   this.setItemBoundingBox(id)
-  this.setItemPortPositions(id)
 
   if (this.items[id].groupId) {
     this.setGroupBoundingBox(this.items[id].groupId as string)

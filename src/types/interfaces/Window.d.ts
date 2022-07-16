@@ -9,7 +9,7 @@ declare global {
       showSaveFileDialog: (filters: FileFilter[], fileName: string) => string
       showMessageBox: ({ message, type, buttons, title }: {
         message: string
-        type?: string
+        type?: 'none' | 'info' | 'error' | 'question' | 'warning'
         title?: string
         buttons?: string[]
       }) => number
@@ -21,6 +21,7 @@ declare global {
       onOpenFile (fn: (filePath: string) => void)
       openFile: (filePath: string) => string
       saveFile: (filePath: string, data: Buffer) => void
+      getFilePaths: (directoryPath: string, filter: string) => string[]
       setFullscreen: (isFullscreen: boolean) => void
     }
   }

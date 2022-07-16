@@ -46,7 +46,6 @@
 </template>
 
 <script lang="ts">
-import { StoreDefinition } from 'pinia'
 import { defineComponent, PropType, computed } from 'vue'
 import { faMinus, faPlus, faCompress, faExpand } from '@fortawesome/free-solid-svg-icons'
 import StatusBarButton from '@/components/statusbar/StatusBarButton.vue'

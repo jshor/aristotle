@@ -9,6 +9,7 @@
     @drag-end="onDragEnd"
     @select="k => selectItem(id, k)"
     @deselect="deselectItem(id)"
+    @contextmenu="onContextMenu"
   >
     <wire
       :source="source"
@@ -32,6 +33,7 @@ import Wire from '@/components/Wire.vue'
 import { DocumentStore } from '@/store/document'
 import boundaries from '@/store/document/geometry/boundaries'
 import renderLayout from '@/store/document/geometry/wire'
+import editorContextMenu from '@/menus/context/editor'
 
 export default defineComponent({
   name: 'Connection',
@@ -100,6 +102,7 @@ export default defineComponent({
      * This will inform the component that the mouse is down and ready to create a new freeport, if it moves.
      */
     function onDragStart ({ touches }: TouchEvent) {
+      // TODO: bug: if the cursor drags only 1px (or some insufficient amount to create a new freeport) then the connection will inadvertantly be deleted
       createFreeport({
         x: touches[0].clientX,
         y: touches[0].clientY
@@ -120,7 +123,8 @@ export default defineComponent({
         outputPortId: uuid(),
         connectionChainId: connection.value.connectionChainId,
         sourceId: source.value.id,
-        targetId: target.value.id
+        targetId: target.value.id,
+        value: source.value.value
       })
 
       store.setSnapBoundaries(freeportId.value)
@@ -159,6 +163,14 @@ export default defineComponent({
       freeportId.value = null
     }
 
+    function onContextMenu () {
+      if (!props.isSelected) {
+        store.selectItem(props.id)
+      }
+
+      window.api.showContextMenu(editorContextMenu(props.store))
+    }
+
     return {
       root,
       geometry,
@@ -166,6 +178,7 @@ export default defineComponent({
       onDragStart,
       onDrag,
       onDragEnd,
+      onContextMenu,
       source,
       target,
       freeportId,

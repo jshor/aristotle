@@ -7,7 +7,9 @@
   >
     <oscilloscope-title-bar
       :clearable="hasWaves"
+      :is-recording="isOscilloscopeRecording"
       @clear="clearOscilloscope"
+      @toggle="toggleOscillatorRecording"
     />
     <div v-if="!hasWaves">
       no waves to observe
@@ -25,6 +27,7 @@ import OscilloscopeTimeline from '@/components/oscilloscope/OscilloscopeTimeline
 import OscilloscopeTitleBar from '@/components/oscilloscope/OscilloscopeTitleBar.vue'
 import OscilloscopeViewer from '@/components/oscilloscope/OscilloscopeViewer.vue'
 import { DocumentStore } from '@/store/document'
+import { storeToRefs } from 'pinia'
 
 export default defineComponent({
   name: 'Oscilloscope',
@@ -41,18 +44,28 @@ export default defineComponent({
   },
   setup (props) {
     const store = props.store()
-    const oscilloscopeHeight = ref(store.oscilloscopeHeight)
-    const isOscilloscopeOpen = computed(() => store.isOscilloscopeOpen)
-    const oscillogram = computed(() => store.oscillogram)
-    const hasWaves = computed(() => Object.keys(oscillogram).length > 0)
+    const {
+      oscilloscopeHeight,
+      isOscilloscopeOpen,
+      isOscilloscopeRecording,
+      oscillogram
+    } = storeToRefs(store)
+    const {
+      clearOscilloscope,
+      closeOscilloscope,
+      toggleOscillatorRecording
+    } = store
+    const hasWaves = computed(() => Object.keys(store.oscillogram).length > 0)
 
     return {
       hasWaves,
       oscillogram,
       oscilloscopeHeight,
       isOscilloscopeOpen,
-      clearOscilloscope: store.clearOscilloscope,
-      closeOscilloscope: store.closeOscilloscope
+      isOscilloscopeRecording,
+      clearOscilloscope,
+      closeOscilloscope,
+      toggleOscillatorRecording
     }
   }
 })

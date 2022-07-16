@@ -71,10 +71,13 @@ class Circuit {
    * @param {CircuitNode} target - target node
    * @param {Number} targetId - entry port id on the target node for the connection
    */
-  public addConnection = (source: CircuitNode, target: CircuitNode, targetId: string): void => {
+  public addConnection = (source: CircuitNode, target: CircuitNode, targetId: string, sourceValue: number = LogicValue.UNKNOWN): void => {
     source.outputs.push(new Connection(target, targetId))
-    source.value = LogicValue.UNKNOWN
-    this.enqueue(source)
+    source.value = sourceValue
+
+    if (!sourceValue) {
+      this.enqueue(source)
+    }
   }
 
   /**
@@ -84,14 +87,14 @@ class Circuit {
    * @param {CircuitNode} sourceNode - source node to disconnect
    * @param {CircuitNode} targetNode - target node to disconnect
    */
-  public removeConnection = (sourceNode: CircuitNode, targetNode: CircuitNode): void => {
+  public removeConnection = (sourceNode: CircuitNode, targetNode: CircuitNode, sourceValue: number = LogicValue.UNKNOWN): void => {
     sourceNode
       .outputs
       .concat()
       .forEach(({ node, id }: Connection, i: number) => {
         if (targetNode === node) {
           // reset the input of the target for this connection to hi-Z
-          targetNode.update(LogicValue.UNKNOWN, id)
+          targetNode.update(sourceValue, id)
 
           // remove the output entry at the source
           sourceNode.outputs.splice(i, 1)

@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import Lightbulb from './outputs/Lightbulb.vue'
 
 const components = {
@@ -25,11 +25,6 @@ export default defineComponent({
       type: String,
       required: true
     }
-  },
-  setup (props) {
-    const value = computed(() => props.ports[0]?.value || 0)
-
-    return { value }
   }
 })
 </script>

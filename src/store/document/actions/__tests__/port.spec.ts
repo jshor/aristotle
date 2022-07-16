@@ -72,55 +72,6 @@ describe('port actions', () => {
     // assertRemovePort('when the output port of the freeport item in the chain is being removed', 'outputPort')
   })
 
-  describe('setPortValues', () => {
-    const store = createDocumentStore('document')()
-
-    let port1: Port
-    let port2: Port
-    let port3: Port
-
-    beforeEach(() => {
-      store.$reset()
-
-      port1 = createPort('port1', 'item1', PortType.Input, { value: 0 })
-      port2 = createPort('port2', 'item1', PortType.Output, { value: -1 })
-      port3 = createPort('port3', 'item1', PortType.Output, { value: -1 })
-    })
-
-    it('should set the values of each port changed in the value map', () => {
-      store.$patch({
-        ports: { port1, port2, port3 }
-      })
-      store.setPortValues({ port1: 1, port2: 1 })
-
-      expect(store.ports.port1.value).toEqual(1)
-      expect(store.ports.port2.value).toEqual(1)
-    })
-
-    it('should not change the value of a port not present in the value map', () => {
-      store.$patch({
-        ports: { port1, port2, port3 }
-      })
-      store.setPortValues({ port1: 1, port2: 1 })
-
-      expect(store.ports.port3.value).toEqual(-1)
-    })
-
-    it('should not break if a port that does not exist is present in the map', () => {
-      store.$patch({
-        ports: { port1, port2, port3 }
-      })
-
-      expect.assertions(3)
-
-      store.setPortValues({ someNonExistingPort: 1 })
-
-      expect(store.ports.port1.value).toEqual(0)
-      expect(store.ports.port2.value).toEqual(-1)
-      expect(store.ports.port3.value).toEqual(-1)
-    })
-  })
-
   describe('setPortValue', () => {
     it('should set given the port value for the given node id', () => {
       const store = createDocumentStore('document')()

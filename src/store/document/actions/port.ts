@@ -11,11 +11,13 @@ export function addPort (this: DocumentStoreInstance, itemId: string, port: Port
   this.ports[port.id] = port
   this.items[itemId].portIds.push(port.id)
 
-  if (node) {
-    this.simulation.addPort(port.id, node as CircuitNode)
-  } else {
-    this.simulation.addNode(this.items[itemId], this.ports)
-  }
+  // if (port.type === PortType.Output) {
+    if (node) {
+      this.simulation.addPort(port.id, node as CircuitNode)
+    } else {
+      this.simulation.addNode(this.items[itemId], this.ports)
+    }
+  // }
 }
 
 /**
@@ -25,6 +27,10 @@ export function addPort (this: DocumentStoreInstance, itemId: string, port: Port
  * @param portId - ID of the port to destroy
  */
 export function removePort (this: DocumentStoreInstance, portId: string) {
+  // check to make sure that the element this port is attached to exists in the editor
+  // (note: some ports may be embedded in ICs and therefore not in the editor directly)
+  if (!this.items[this.ports[portId]?.elementId]) return
+
   // remove all connections associated with this port
   Object
     .values(this.connections)
@@ -36,16 +42,7 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
         freeportIds
       } = getConnectionChain(Object.values(this.connections), this.ports, c.connectionChainId)
 
-      connectionIds.forEach(id => {
-        // delete all connections associated with the chain
-        const { source, target } = this.connections[id]
-
-        this
-          .simulation
-          .removeConnection(source, target)
-
-        delete this.connections[id]
-      })
+      connectionIds.forEach(id => this.disconnect(this.connections[id]))
 
       freeportIds.forEach(id => {
         // delete all freeports associated with the chain
@@ -132,6 +129,11 @@ export function setPortValue (this: DocumentStoreInstance, { id, value }: { id: 
   this
     .simulation
     .setPortValue(id, value)
+
+
+  if (this.isDebugging) {
+    this.isCircuitEvaluated = !this.simulation.canContinue
+  }
 }
 
 export function togglePortMonitoring (this: DocumentStoreInstance, portId: string) {
@@ -165,17 +167,4 @@ export function unmonitorPort (this: DocumentStoreInstance, portId: string) {
     .unmonitorPort(portId)
 
   this.isOscilloscopeOpen = Object.keys(this.oscillogram).length > 0
-}
-
-/**
- * Assigns values to the ports in the state according to the given map.
- *
- * @param valueMap - Port-ID-to-value mapping
- */
-export function setPortValues (this: DocumentStoreInstance, valueMap: Record<string, number>) {
-  for (const portId in valueMap) {
-    if (this.ports[portId]) {
-      this.ports[portId].value = valueMap[portId]
-    }
-  }
 }

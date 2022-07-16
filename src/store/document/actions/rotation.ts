@@ -4,6 +4,7 @@ import rotation from '../geometry/rotation'
 
 /**
  * Rotates all selected elements by 90 degrees.
+ * If multiple items are selected, this will rotate them as if they are all part of a group.
  *
  * @param direction - direction of rotation (1 = CW, -1 = CCW)
  */
@@ -36,7 +37,6 @@ export function rotate (this: DocumentStoreInstance, direction: number) {
       id: item.id,
       position: rotation.getGroupedItemRotatedPosition(boundingBox, item, direction)
     })
-    this.setItemPortPositions(item.id)
   })
 
   groupIds.forEach(groupId => {

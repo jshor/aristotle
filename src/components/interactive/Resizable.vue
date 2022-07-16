@@ -13,7 +13,7 @@ export default defineComponent({
   emits: {
     resize: (rect: DOMRect) => true
   },
-  setup (_, { emit }) {
+  setup (props, { emit }) {
     const resizable = ref<HTMLElement>()
 
     /**

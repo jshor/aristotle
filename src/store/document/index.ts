@@ -17,9 +17,7 @@ import * as snappingActions from './actions/snapping'
 import * as undoRedoActions from './actions/undoRedo'
 import * as zIndexActions from './actions/zIndex'
 import * as zoomingActions from './actions/zooming'
-import integratedCircuitFactory from '@/factories/integratedCircuitFactory'
 import sortByZIndex from '@/utils/sortByZIndex'
-import idMapper from '@/utils/idMapper'
 
 export const createDocumentStore = (documentId: string) => defineStore({
   id: documentId,
@@ -87,18 +85,7 @@ export const createDocumentStore = (documentId: string) => defineStore({
     ...sizingActions,
     ...undoRedoActions,
     ...zIndexActions,
-    ...zoomingActions,
-
-    async saveIntegratedCircuit () {
-      // TODO: this action should live in the root state, not here
-      const originalIcItem = integratedCircuitFactory(this.$state, 'Flip flop', 400, 400)
-      const idMappedIcItem = idMapper.mapIntegratedCircuitIds(originalIcItem)
-
-      this.insertItemAtPosition({ item: idMappedIcItem, ports: [] })
-      this.setItemBoundingBox(idMappedIcItem.id)
-      this.setItemPortPositions(idMappedIcItem.id)
-      this.setSelectionState({ id: idMappedIcItem.id, value: true })
-    }
+    ...zoomingActions
   }
 })
 

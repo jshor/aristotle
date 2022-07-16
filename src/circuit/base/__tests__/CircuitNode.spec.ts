@@ -44,7 +44,7 @@ describe('Circuit Node', () => {
       })
 
       it('should call only the \'change\' eventType callbacks', () => {
-        node.invokeEvent('change', newValue)
+        node.invokeEvent('change', newValue, [])
 
         expect(eventFn2).not.toHaveBeenCalled()
         expect(eventFn1).toHaveBeenCalledTimes(1)
@@ -54,7 +54,7 @@ describe('Circuit Node', () => {
       })
 
       it('should call only the \'reset\' eventType callbacks', () => {
-        node.invokeEvent('reset', newValue)
+        node.invokeEvent('reset', newValue, [])
 
         expect(eventFn1).not.toHaveBeenCalled()
         expect(eventFn3).not.toHaveBeenCalled()

@@ -7,8 +7,10 @@ import integratedCircuit from '../containers/fixtures/ic.json'
 import testIc from '../containers/fixtures/test.json'
 
 import { createDocumentStore, DocumentStore } from './document'
+import { useIntegratedCircuitStore } from './integratedCircuit'
 import FileService from '@/services/FileService'
 import getFileName from '@/utils/getFileName'
+import idMapper from '@/utils/idMapper'
 
 export type RootStore = {
   documents: {
@@ -23,6 +25,8 @@ export type RootStore = {
   activeDocumentId: string | null
   canExit: boolean
   isFullscreen: boolean
+  isBuilderOpen: boolean
+  isToolboxOpen: boolean
 }
 
 export const useRootStore = defineStore({
@@ -32,7 +36,9 @@ export const useRootStore = defineStore({
     clipboard: null,
     activeDocumentId: null,
     canExit: false,
-    isFullscreen: false
+    isFullscreen: false,
+    isBuilderOpen: false,
+    isToolboxOpen: false
   }),
   getters: {
     hasOpenDocuments (state) {
@@ -46,9 +52,46 @@ export const useRootStore = defineStore({
       }
 
       return null
+    },
+    isDialogOpen (state) {
+      return state.isBuilderOpen
     }
   },
   actions: {
+    async launchIntegratedCircuitBuilder () {
+      const integratedCircuitStore = useIntegratedCircuitStore()
+      const document = this.activeDocument
+
+      if (document) {
+        this.isBuilderOpen = true
+
+        try {
+          await integratedCircuitStore.launchBuilder(document.store().$state)
+
+          const store = document.store()
+
+          // const dialogResult = window.api.showMessageBox({
+          //   message: `Integrated circuit successfully created. Do you want to add it to the current document?`,
+          //   title: 'Confirm',
+          //   buttons: ['Yes', 'No']
+          // })
+
+          const idMappedIcItem = idMapper.mapIntegratedCircuitIds(integratedCircuitStore.model as Item)
+
+
+
+          store.insertItemAtPosition({ item: idMappedIcItem, ports: [] })
+          store.setItemBoundingBox(idMappedIcItem.id)
+          store.setSelectionState({ id: idMappedIcItem.id, value: true })
+
+        } catch (e) {
+          window.api.showMessageBox({ message: 'That\'s okay.' })
+        }
+
+        this.isBuilderOpen = false
+      }
+
+    },
     openIntegratedCircuit (item: Item) {
       if (item.integratedCircuit) {
         this.openDocument('', item.integratedCircuit.serializedState, item.id, item.name)
@@ -139,9 +182,11 @@ export const useRootStore = defineStore({
         }
       }
 
-      // TODO: call some sort of teardown/$dispose() function of document
-      delete this.documents[id]
       this.activeDocumentId = null
+      store.simulation.stop()
+      store.$reset()
+      store.$dispose()
+      delete this.documents[id]
 
       const remainingId = Object.keys(this.documents).pop()
 
@@ -203,6 +248,10 @@ export const useRootStore = defineStore({
         {
           name: 'Aristotle Logic Circuit (*.alfx)',
           extensions: ['alfx']
+        },
+        {
+          name: 'Aristotle Integrated Circuit (*.aicx)',
+          extensions: ['aicx']
         }
       ])
 
@@ -219,7 +268,7 @@ export const useRootStore = defineStore({
           this.openDocument(filePath, content, uuid())
         }
       } catch (error) {
-        console.log('ERR', error)
+        console.log(error)
         window.api.showMessageBox({
           message: `Could not open ${filePath}. The file is not a valid Aristotle circuit.`,
           title: 'Error',
@@ -240,7 +289,10 @@ export const useRootStore = defineStore({
 
       this.documents[id] = {
         fileName,
-        filePath,
+        // if this is an integrated circuit file (.aicx), then it cannot be directly saved
+        filePath: /^.*.aicx$/i.test(filePath)
+          ? undefined // omit the file path for IC files
+          : filePath, // otherwise, use the file path for a typical circuit
         displayName: displayName || fileName,
         store
       }
@@ -259,10 +311,10 @@ export const useRootStore = defineStore({
       this.activateDocument(documentIds[nextIndex])
     },
     pauseActivity () {
-      this.activeDocument?.store().stop()
+      this.activeDocument?.store().simulation.stop()
     },
     resumeActivity () {
-      this.activeDocument?.store().start()
+      this.activeDocument?.store().simulation.start()
     },
     activateDocument (id: string) {
       this.pauseActivity()
@@ -280,6 +332,7 @@ export const useRootStore = defineStore({
       // this.openDocument('integrated-circuit.alfx', JSON.stringify(integratedCircuit))
       // this.pauseActivity()
       this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop), uuid(), 'flip-flop.alfx')
+      useIntegratedCircuitStore().loadLibrary()
     },
 
     navigateDocumentList (direction: number) {
@@ -297,6 +350,10 @@ export const useRootStore = defineStore({
       this.isFullscreen = !this.isFullscreen
 
       window.api.setFullscreen(this.isFullscreen)
+    },
+
+    toggleToolbox () {
+      this.isToolboxOpen = !this.isToolboxOpen
     }
   }
 })

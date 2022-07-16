@@ -38,9 +38,7 @@ export default function digitFactory () {
       groups: {}
     })
 
-  const item = integratedCircuitFactory(state, ItemSubtype.DigitDisplay, 40, 40)
-
-  console.log(item)
+  const item = integratedCircuitFactory(state, 'Digit Display', 40, 40, ItemSubtype.DigitDisplay)
 
   return { item, ports }
 }

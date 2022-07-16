@@ -90,10 +90,10 @@ class CircuitNode {
    * @param {String} eventType - 'change' or 'reset'
    * @param {LogicValue} value
    */
-  public invokeEvent = (eventType: string, value: number): void => {
+  public invokeEvent = (eventType: string, value: number, outputIds: string[]): void => {
     this.events.forEach((event) => {
       if (event.eventType === eventType) {
-        event.callback(value)
+        event.callback(value, outputIds)
       }
     })
   }
@@ -126,9 +126,14 @@ class CircuitNode {
    * @param {LogicValue} newValue - new value to output to the nodes
    */
   public updateOutputs = (newValue: number): void => {
+    const outputIds: string[] = []
+
     this.outputs.forEach(({ node, id }: Connection) => {
       node.update(newValue, id)
+      outputIds.push(id)
     })
+
+    this.invokeEvent('change', newValue, outputIds)
   }
 
   /**
@@ -140,6 +145,7 @@ class CircuitNode {
   public update = (value: number, id: string): void => {
     this.inputValues[id] = value
     this.newValue = this.eval()
+    this.invokeEvent('change', this.newValue, this.outputs.map(({ id }) => id))
   }
 
   /**
@@ -154,7 +160,6 @@ class CircuitNode {
       this.isValueChanged = true
       this.value = this.newValue
       this.updateOutputs(this.newValue)
-      this.invokeEvent('change', this.newValue)
 
       this
         .outputs
@@ -178,7 +183,7 @@ class CircuitNode {
   public reset = (): void => {
     this.value = LogicValue.UNKNOWN
     this.newValue = LogicValue.UNKNOWN
-    this.invokeEvent('change', this.newValue)
+    this.invokeEvent('change', this.newValue, this.outputs.map(({ id }) => id))
   }
 
   /**
