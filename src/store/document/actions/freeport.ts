@@ -42,7 +42,7 @@ export function addFreeportItem (this: DocumentStoreInstance, { itemId, inputPor
     ports.push(this.ports[inputPortId])
   }
 
-  this.items[itemId] = itemFactory(itemId, ItemType.Freeport, ItemSubtype.None, 1, 1, ports)
+  this.items[itemId] = itemFactory(itemId, ItemType.Freeport, ItemSubtype.None, 1, 1, 'Proxy', ports)
   this.items[itemId].zIndex = this.zIndex++
 
   this

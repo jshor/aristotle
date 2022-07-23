@@ -2,11 +2,12 @@ import { DocumentStoreInstance } from '..'
 
 export function loadDocument (this: DocumentStoreInstance, document: string) {
   const parsed = JSON.parse(document)
-  const state = parsed.integratedCircuit
-    ? JSON.stringify(parsed.integratedCircuit)
-    : document
 
-  this.applyState(state)
+  this.isIntegratedCircuit = !!parsed.integratedCircuit
+
+  this.applyState(this.isIntegratedCircuit
+    ? JSON.stringify(parsed.integratedCircuit)
+    : document)
   this.resetCircuit()
 }
 

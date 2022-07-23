@@ -31,6 +31,7 @@
             :label="document.displayName"
             :active="activeDocumentId === id"
             :dirty="document.store().isDirty"
+            :is-integrated-circuit="document.store().isIntegratedCircuit"
             @activate="activateDocument(id.toString())"
             @close="closeDocument(id.toString())"
           />

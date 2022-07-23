@@ -15,7 +15,7 @@ export default function digitFactory () {
       const portId = uuid()
       const itemId = uuid()
       const port = portFactory(itemId, portId, Direction.Left, PortType.Output, `Input Port ${i + 1}`)
-      const item = itemFactory(itemId, ItemType.InputNode, ItemSubtype.Switch, 0, 0, [port])
+      const item = itemFactory(itemId, ItemType.InputNode, ItemSubtype.Switch, 0, 0, '4-bit display', [port])
 
       ports.push(port)
 

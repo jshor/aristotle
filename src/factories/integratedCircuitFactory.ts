@@ -16,7 +16,7 @@ import ItemSubtype from '@/types/enums/ItemSubtype'
  */
 export default function integratedCircuitFactory (state: SerializableState, name: string, width: number, height: number, subtype = ItemSubtype.CustomCircuit) {
   const { ports, items, connections, groups } = cloneDeep(state)
-  const integratedCircuitItem = itemFactory(uuid(), ItemType.IntegratedCircuit, subtype, width, height)
+  const integratedCircuitItem = itemFactory(uuid(), ItemType.IntegratedCircuit, subtype, width, height, name)
 
   Object
     .values(items)

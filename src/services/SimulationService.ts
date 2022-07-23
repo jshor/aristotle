@@ -366,10 +366,9 @@ export default class SimulationService {
    *
    * @param portId
    */
-  removePort = (portId: string) => { // TODO: need to remove wave from oscillation
-    if (this.clocks[portId]) {
-      this.oscillator.remove(this.clocks[portId])
-    }
+  removePort = (portId: string) => {
+    this.oscillator.remove(this.clocks[portId])
+    this.oscillator.remove(this.waves[portId])
 
     this.unmonitorPort(portId)
 

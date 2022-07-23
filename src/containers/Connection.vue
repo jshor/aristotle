@@ -18,7 +18,7 @@
       :is-selected="isSelected"
       :is-preview="isPreview"
       :flash="flash"
-      :label="'TODO'"
+      :label="label"
       ref="root"
       data-test="wire"
     />
@@ -93,6 +93,9 @@ export default defineComponent({
       y: topLeft.value.y + geometry.value.minY,
       x: topLeft.value.x + geometry.value.minX
     }))
+    const label = computed(() => {
+      return `Connection from ${source.value.name} to ${target.value.name}`
+    })
 
     const freeportId = ref<string | null>(null)
 
@@ -181,6 +184,7 @@ export default defineComponent({
       onContextMenu,
       source,
       target,
+      label,
       freeportId,
       selectItem: store.selectItem,
       deselectItem: store.deselectItem

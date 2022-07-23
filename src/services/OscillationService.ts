@@ -188,8 +188,10 @@ export default class OscillationService {
    *
    * @param {Pulse} wave
    */
-  remove = ({ id }: Pulse): void => {
-    delete this.waves[id]
+  remove = (wave: Pulse): void => {
+    if (!wave) return
+
+    delete this.waves[wave.id]
 
     if (Object.keys(this.waves).length === 0) {
       this.stop()

@@ -50,8 +50,8 @@ export function panDelta (this: DocumentStoreInstance, delta: Point, animate = f
 export function panToCenter (this: DocumentStoreInstance) {
   const midpoint = boundaries.getBoundingBoxMidpoint(this.canvas)
   const pan = {
-    x: (this.viewport.width / 2) - midpoint.x,
-    y: (this.viewport.height / 2) - midpoint.y
+    x: (this.viewport.width / 2) - (midpoint.x * this.zoomLevel),
+    y: (this.viewport.height / 2) - (midpoint.y * this.zoomLevel)
   }
 
   this.panTo(pan)

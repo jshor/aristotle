@@ -10,13 +10,13 @@ export interface DocumentState extends SerializableState {
   redoStack: string[]
   snapBoundaries: BoundingBox[]
   connectablePortIds: string[]
-  itemNames: string[],
   zoomLevel: number
   simulation: SimulationService
   oscillogram: Oscillogram
   isOscilloscopeOpen: boolean
   isOscilloscopeRecording: boolean
   isCircuitEvaluated: boolean
+  isIntegratedCircuit: boolean
   isDebugging: boolean
   isDirty: boolean
   activeFreeportId: string | null
@@ -40,13 +40,13 @@ export const state = (): DocumentState => ({
   redoStack: [],
   simulation: new SimulationService([], [], {}),
   oscillogram: {},
-  itemNames: [],
   zoomLevel: 1,
   zIndex: 1,
   oscilloscopeHeight: 200,
   isOscilloscopeOpen: false,
   isOscilloscopeRecording: true,
   isCircuitEvaluated: false,
+  isIntegratedCircuit: false,
   isDebugging: false,
   isDirty: false,
   hasLoaded: false,

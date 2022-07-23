@@ -17,12 +17,13 @@
     <oscilloscope-timeline
       v-else
       :oscillogram="oscillogram"
+      :ports="ports"
     />
   </oscilloscope-viewer>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, PropType, ref } from 'vue'
+import { defineComponent, computed, PropType } from 'vue'
 import OscilloscopeTimeline from '@/components/oscilloscope/OscilloscopeTimeline.vue'
 import OscilloscopeTitleBar from '@/components/oscilloscope/OscilloscopeTitleBar.vue'
 import OscilloscopeViewer from '@/components/oscilloscope/OscilloscopeViewer.vue'
@@ -48,7 +49,8 @@ export default defineComponent({
       oscilloscopeHeight,
       isOscilloscopeOpen,
       isOscilloscopeRecording,
-      oscillogram
+      oscillogram,
+      ports
     } = storeToRefs(store)
     const {
       clearOscilloscope,
@@ -58,6 +60,7 @@ export default defineComponent({
     const hasWaves = computed(() => Object.keys(store.oscillogram).length > 0)
 
     return {
+      ports,
       hasWaves,
       oscillogram,
       oscilloscopeHeight,

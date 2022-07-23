@@ -201,7 +201,7 @@ export default defineComponent({
      * Ends panning. This will ease panning out by the computed speed in `pan()`.
      */
     function endPanning () {
-      const friction = 2 // TODO: const?
+      const friction = 1.5 // TODO: const?
       const x = speed * Math.cos(angle) * friction
       const y = speed * Math.sin(angle) * friction
 

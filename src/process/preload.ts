@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, MenuItemConstructorOptions, FileFilter, clipboard } from 'electron'
+import { contextBridge, ipcRenderer, MenuItemConstructorOptions, FileFilter, clipboard, shell } from 'electron'
 import { Menu, dialog, app, screen, getCurrentWindow } from '@electron/remote'
 import path from 'path'
 import fs from 'fs'
@@ -6,6 +6,9 @@ import fs from 'fs'
 const defaultPath = path.resolve(app.getPath('desktop'))
 
 export const api = {
+  beep () {
+    shell.beep()
+  },
   showContextMenu (menuItems: MenuItemConstructorOptions[]) {
     const point = screen.getCursorScreenPoint()
 

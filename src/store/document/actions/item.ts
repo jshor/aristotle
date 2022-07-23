@@ -3,7 +3,6 @@ import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
 import PortType from '@/types/enums/PortType'
 import Direction from '@/types/enums/Direction'
-import ItemSubtype from '@/types/enums/ItemSubtype'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
 import ItemType from '@/types/enums/ItemType'
 
@@ -18,6 +17,26 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
   // add all ports associated to this item
   // if the item is an integrated circuit, only add the ports that it defines (ones visible to the user)
   const portList = item.integratedCircuit?.ports || ports
+  const itemNames = Object
+    .values(this.items)
+    .map(({ name }) => name)
+
+  let name = item.name
+  let c = 1
+
+  while (itemNames.includes(name)) {
+    name = `${item.name} ${++c}`
+  }
+
+  item.name = name
+
+  if (item.properties?.name) {
+    item.properties.name.value = name
+  }
+
+  // add the item to the document and create its corresponding circuit node
+  this.items[item.id] = item
+  this.items[item.id].zIndex = ++this.zIndex
 
   item
     .portIds
@@ -30,21 +49,9 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
         if (port.isMonitored) {
           this.monitorPort(port.id)
         }
+        this.setPortName(port)
       }
     })
-
-  let name = item.name
-  let c = 0
-
-  while (this.itemNames.includes(name)) {
-    name = `${item.name} ${++c}`
-  }
-
-  item.name = name
-
-  // add the item to the document and create its corresponding circuit node
-  this.items[item.id] = item
-  this.items[item.id].zIndex = ++this.zIndex
 
   this
     .simulation
@@ -142,7 +149,7 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
       // add the difference of ports one by one
       this.addPort(id, {
         id: portId,
-        name: '', // TODO
+        name: '',
         connectedPortIds: [],
         type: PortType.Input,
         elementId: id,

@@ -2,22 +2,45 @@ import { CircuitNode } from '@/circuit'
 import { DocumentStoreInstance } from '..'
 import getConnectionChain from '@/utils/getConnectionChain'
 import PortType from '@/types/enums/PortType'
+import ItemSubtype from '@/types/enums/ItemSubtype'
+import ItemType from '@/types/enums/ItemType'
 
 export function addPort (this: DocumentStoreInstance, itemId: string, port: Port) {
+  const item = this.items[itemId]
   const node = Object
     .values(this.simulation.nodes)
-    .find(({ name }) => this.items[itemId].portIds.includes(name))
+    .find(({ name }) => item.portIds.includes(name))
 
   this.ports[port.id] = port
   this.items[itemId].portIds.push(port.id)
+  this.setPortName(port)
 
-  // if (port.type === PortType.Output) {
-    if (node) {
-      this.simulation.addPort(port.id, node as CircuitNode)
-    } else {
-      this.simulation.addNode(this.items[itemId], this.ports)
-    }
-  // }
+  if (node) {
+    this.simulation.addPort(port.id, node as CircuitNode)
+  } else {
+    this.simulation.addNode(this.items[itemId], this.ports)
+  }
+}
+
+export function setPortName (this: DocumentStoreInstance, port: Port) {
+  const item = this.items[port.elementId]
+
+  if (!item) return
+
+  const siblingNames = item
+    .portIds
+    .map(id => this.ports[id]?.name)
+  const portType = port.type === PortType.Input ? 'Input' : 'Output'
+  const name = item.subtype === ItemSubtype.CustomCircuit
+    ? port.name
+    : `${item.name} ${portType} Port`
+  let c = 1
+
+  port.name = name
+
+  while (siblingNames.includes(port.name)) {
+    port.name = `${name} ${++c}`
+  }
 }
 
 /**

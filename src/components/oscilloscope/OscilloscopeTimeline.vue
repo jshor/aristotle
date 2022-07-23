@@ -10,7 +10,7 @@
         :style="{ color: `hsla(${v.hue}, var(--lightness), var(--saturation), 0.8)` }"
         class="oscilloscope-timeline__label"
       >
-        {{ key }}
+        {{ ports[key]?.name || key }}
       </div>
     </div>
 
@@ -57,6 +57,11 @@ export default defineComponent({
     /** The oscillogram displayed in the timeline. */
     oscillogram: {
       type: Object as PropType<Oscillogram>,
+      required: true
+    },
+    /** Port mapping. */
+    ports: {
+      type: Object as PropType<Record<string, Port>>,
       required: true
     }
   },

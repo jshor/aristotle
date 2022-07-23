@@ -6,6 +6,7 @@
       'circuit-component--flash': flash,
       'circuit-component--custom': subtype === ItemSubtype.CustomCircuit
     }"
+    :title="name"
   >
     <component
       v-bind:is="type"

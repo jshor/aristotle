@@ -9,10 +9,17 @@
     @touchstart="$emit('activate')"
   >
     <div class="tab-item__icon">
-      <icon :icon="faCodeBranch" />
+      <icon
+        v-if="isIntegratedCircuit"
+        :icon="faMicrochip"
+      />
+      <icon
+        v-else
+        :icon="faCodeBranch"
+      />
     </div>
     <div class="tab-item__label">
-      {{ label }}{{ dirty ? '*' : '' }}
+       {{ isIntegratedCircuit}}{{ label }}{{ dirty ? '*' : '' }}
     </div>
     <div
       class="tab-item__icon tab-item__icon--close"
@@ -24,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { faClose, faCodeBranch } from '@fortawesome/free-solid-svg-icons'
+import { faClose, faCodeBranch, faMicrochip } from '@fortawesome/free-solid-svg-icons'
 import { defineComponent } from 'vue'
 import Icon from '../Icon.vue'
 
@@ -45,12 +52,17 @@ export default defineComponent({
     dirty: {
       type: Boolean,
       default: false
+    },
+    isIntegratedCircuit: {
+      type: Boolean,
+      default: false
     }
   },
   setup () {
     return {
       faClose,
-      faCodeBranch
+      faCodeBranch,
+      faMicrochip
     }
   }
 })

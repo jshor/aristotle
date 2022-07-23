@@ -45,7 +45,7 @@ export function updateCanvasSize (this: DocumentStoreInstance) {
 export function setViewerSize (this: DocumentStoreInstance, rect: DOMRect) {
   this.viewport = rect
   this.canvas.right = screen.width / MIN_SCALE
-  this.canvas.bottom =  screen.height / MIN_SCALE
+  this.canvas.bottom = screen.height / MIN_SCALE
 
   if (!this.hasLoaded && rect.width > 0 && rect.height > 0) {
     this.hasLoaded = true

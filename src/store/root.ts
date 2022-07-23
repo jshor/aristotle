@@ -18,6 +18,7 @@ export type RootStore = {
       fileName: string
       filePath?: string
       displayName: string
+      isIntegratedCircuit: boolean
       store: DocumentStore
     }
   }
@@ -132,7 +133,8 @@ export const useRootStore = defineStore({
       this.documents[id] = {
         fileName: 'Untitled Circuit',
         displayName: 'Untitled Circuit',
-        store
+        store,
+        isIntegratedCircuit: false
       }
       this.activateDocument(id)
     },
@@ -294,7 +296,8 @@ export const useRootStore = defineStore({
           ? undefined // omit the file path for IC files
           : filePath, // otherwise, use the file path for a typical circuit
         displayName: displayName || fileName,
-        store
+        store,
+        isIntegratedCircuit: document.isIntegratedCircuit
       }
       this.activateDocument(id)
     },

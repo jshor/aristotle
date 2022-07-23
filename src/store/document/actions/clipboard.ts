@@ -63,6 +63,7 @@ export function paste (this: DocumentStoreInstance) {
     Object
       .values(mapped.items)
       .forEach(item => {
+        // TODO: should change this to paste in the middle of the viewport, *not* its original canvas location
         item.position.x += 20 * parsed.pasteCount
         item.position.y += 20 * parsed.pasteCount
         item.isSelected = false
@@ -93,8 +94,7 @@ export function paste (this: DocumentStoreInstance) {
     }
 
     window.api.copy(JSON.stringify(clipboardData))
-  } catch (error) {
-    console.log('ERROR: ', error)
-    // TODO: clear clipboard?
+  } catch (_) {
+    window.api.beep()
   }
 }

@@ -14,7 +14,7 @@ type FactoryDictionary = {
 
 export default {
   [ItemType.InputNode]: {
-    [ItemSubtype.Switch]: inputFactory.bind(this, ItemSubtype.Switch, 60, 60),
+    [ItemSubtype.Switch]: inputFactory.bind(this, ItemSubtype.Switch, 60, 60, 'Switch'),
     [ItemSubtype.Clock]: clockFactory
   },
   [ItemType.OutputNode]: {

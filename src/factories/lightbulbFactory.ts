@@ -11,7 +11,7 @@ export default function lightbulbFactory () {
   const ports = [
     portFactory(elementId, uuid(), Direction.Left, PortType.Input, 'Input Port')
   ]
-  const item = itemFactory(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, ports)
+  const item = itemFactory(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, 'Lightbulb', ports)
 
   return { item, ports }
 }
