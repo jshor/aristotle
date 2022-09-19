@@ -71,6 +71,8 @@ export default defineComponent({
   opacity: 0;
   transition: all 0.25s ease-in-out;
   overflow-x: auto;
+  background-color: var(--color-bg-primary);
+  color: var(--color-primary);
 
   &--open {
     opacity: 1;

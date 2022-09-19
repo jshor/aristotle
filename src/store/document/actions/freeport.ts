@@ -6,6 +6,7 @@ import Direction from '@/types/enums/Direction'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import PortType from '@/types/enums/PortType'
+import { usePreferencesStore } from '@/store/preferences'
 
 /**
  * Adds a new freeport element. This can be used in either of two scenarios:
@@ -160,11 +161,11 @@ export function createFreeport (this: DocumentStoreInstance, data: Freeport, cre
  */
 export function connectFreeport (this: DocumentStoreInstance, { sourceId, targetId, portId }: { sourceId?: string, targetId?: string, portId: string }) {
   const port = this.ports[portId]
+  const snap = usePreferencesStore().snapping.snapTolerance.value as number
   const newPort = Object
     .values(this.ports)
     .find((p: Port) => {
-      // TODO: make '10' a user-configurable number
-      return p.id !== portId && this.connectablePortIds.includes(p.id) && boundaries.isInNeighborhood(p.position, port.position, 10)
+      return p.id !== portId && this.connectablePortIds.includes(p.id) && boundaries.isInNeighborhood(p.position, port.position, snap)
     })
 
   if (newPort) {
