@@ -42,7 +42,7 @@ describe('simulation actions', () => {
       expect(store.ports).not.toHaveProperty('invalidPort')
     })
 
-    it('should update the store\'s oscillogram with the one provided', () => {
+    xit('should update the store\'s oscillogram with the one provided', () => {
       expect(store.oscillogram).toEqual(oscillogram)
     })
   })

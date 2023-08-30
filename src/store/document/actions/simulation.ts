@@ -38,7 +38,7 @@ export function onSimulationUpdate (this: DocumentStoreInstance, valueMap: Recor
 
   this.debugger.timeout = window.setTimeout(() => {
     // if the user can still advance a step and the circuit hasn't finished evaluating yet, step over again
-    // this is in a timeout in order to wait for the next JS frame (by which time all event emissions will have completed)
+    // this is in a timeout in order to wait for the next JS frame (by which time all events will have been emitted)
     if (!this.debugger.hasUpdated && this.simulation.canContinue && this.isDebugging) {
       this.debugger.hasUpdated = false
       this.simulation.advanceDebuggerStep()

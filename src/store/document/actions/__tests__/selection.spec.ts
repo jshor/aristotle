@@ -463,16 +463,16 @@ describe('selection actions', () => {
 
       stubAll(store, [
         'commitState',
-        'setSelectionState',
-        'disconnectFreeport',
+        'deselectAll',
         'disconnect',
-        'removeElement',
+        'removeElement'
       ])
     })
 
     describe('when there are one or more items selected', () => {
       beforeEach(() => {
         store.selectedItemIds = ['item1']
+        store.selectedConnectionIds = ['connection3']
         store.deleteSelection()
       })
 
@@ -480,38 +480,24 @@ describe('selection actions', () => {
         expect(store.commitState).toHaveBeenCalledTimes(1)
       })
 
-      it('should select all connections that are attached to selected non-freeport items', () => {
-        expect(store.setSelectionState).toHaveBeenCalledWith({ id: 'connection1', value: true })
-        expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'connection3', value: true })
-      })
-
-      it('should not select connections attached to a freeport', () => {
-        expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'connection2', value: true })
-      })
-
-      it('should not select a connection with an invalid source port reference', () => {
-        expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'dragged_connection1', value: true })
-        expect(store.setSelectionState).not.toHaveBeenCalledWith({ id: 'dragged_connection2', value: true })
-      })
-
       it('should disconnect selected connections', () => {
-        expect(store.disconnect).toHaveBeenCalledWith({ source: 'port5', target: 'port6' })
+        expect(store.disconnect).toHaveBeenCalledWith(store.connections['connection3'])
       })
 
-      it('should remove selected non-freeport items', () => {
+      it('should not disconnect non-selected connections', () => {
+        expect(store.disconnect).not.toHaveBeenCalledWith({ source: 'port1', target: 'port2' })
+        expect(store.disconnect).not.toHaveBeenCalledWith({ source: 'port3', target: 'port4' })
+      })
+
+      it('should remove selected items', () => {
         expect(store.removeElement).toHaveBeenCalledWith('item1')
+      })
+
+      it('should not remove non-selected items', () => {
         expect(store.removeElement).not.toHaveBeenCalledWith('item2')
         expect(store.removeElement).not.toHaveBeenCalledWith('item3')
         expect(store.removeElement).not.toHaveBeenCalledWith('item4')
         expect(store.removeElement).not.toHaveBeenCalledWith('freeport')
-      })
-
-      it('should remove selected non-freeport, non-IC items', () => {
-        expect(store.removeElement).toHaveBeenCalledWith('item1')
-      })
-
-      it('should remove all selected freeports', () => {
-        expect(store.disconnectFreeport).toHaveBeenCalledWith('freeport')
       })
     })
 
@@ -520,10 +506,9 @@ describe('selection actions', () => {
       store.deleteSelection()
 
       expect(store.commitState).not.toHaveBeenCalled()
-      expect(store.setSelectionState).not.toHaveBeenCalled()
       expect(store.disconnect).not.toHaveBeenCalled()
-      expect(store.disconnectFreeport).not.toHaveBeenCalled()
       expect(store.removeElement).not.toHaveBeenCalled()
+      expect(store.deselectAll).not.toHaveBeenCalled()
     })
   })
 
