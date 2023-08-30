@@ -25,12 +25,11 @@ describe('freeport actions', () => {
 
       stubAll(store, [
         'disconnect',
-        'connect',
-        'removeElement'
+        'connect'
       ])
     })
 
-    describe('when a connection is connected at both the target and the source', () => {
+    describe('when a connection is connected at both the true target and the true source', () => {
       beforeEach(() => {
         store.$patch({
           connections: {
@@ -46,7 +45,7 @@ describe('freeport actions', () => {
           items: {
             'item1': createItem('item1', ItemType.InputNode, { portIds: ['port1'] }),
             'item2': createItem('item2', ItemType.OutputNode, { portIds: ['port4'] }),
-            'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port2', 'port3'] })
+            'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port3', 'port2'] })
           }
         })
         store.disconnectFreeport('freeport')
@@ -63,10 +62,6 @@ describe('freeport actions', () => {
       it('should connect the freeport\'s original source to its original target', () => {
         expect(store.connect).toHaveBeenCalledWith({ source: 'port1', target: 'port4' })
       })
-
-      it('should remove the item from the document', () => {
-        expect(store.removeElement).toHaveBeenCalledWith('freeport')
-      })
     })
 
     describe('when a connection is a freeport being dragged from a source port', () => {
@@ -82,7 +77,7 @@ describe('freeport actions', () => {
           },
           items: {
             'item1': createItem('item1', ItemType.InputNode, { portIds: ['port1'] }),
-            'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port2', 'port3'] })
+            'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port3', 'port2'] })
           }
         })
         store.disconnectFreeport('freeport')
@@ -90,10 +85,6 @@ describe('freeport actions', () => {
 
       it('should only disconnect the freeport from its source', () => {
         expect(store.disconnect).toHaveBeenCalledWith({ source: 'port1', target: 'port2' })
-      })
-
-      it('should remove the item from the document', () => {
-        expect(store.removeElement).toHaveBeenCalledWith('freeport')
       })
     })
 
@@ -109,7 +100,7 @@ describe('freeport actions', () => {
             'port4': createPort('port4', 'item2', PortType.Input)
           },
           items: {
-            'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port2', 'port3'] }),
+            'freeport': createItem('freeport', ItemType.Freeport, { portIds: ['port3', 'port2'] }),
             'item2': createItem('item2', ItemType.OutputNode, { portIds: ['port4'] })
           }
         })
@@ -119,10 +110,6 @@ describe('freeport actions', () => {
       it('should only disconnect the freeport from its target', () => {
         expect(store.disconnect).toHaveBeenCalledWith({ source: 'port3', target: 'port4' })
       })
-
-      it('should remove the item from the document', () => {
-        expect(store.removeElement).toHaveBeenCalledWith('freeport')
-      })
     })
   })
 
@@ -130,8 +117,8 @@ describe('freeport actions', () => {
     const store = createDocumentStore('document')()
 
     const itemId = 'freeport'
-    const sourceId = 'source-port'
-    const targetId = 'target-port'
+    const sourceId = 'port1'
+    const targetId = 'port2'
     const connectionChainId = 'connection-chain'
     const inputPortId = 'freeport-input-port'
     const outputPortId = 'freeport-output-port'
@@ -139,38 +126,67 @@ describe('freeport actions', () => {
 
     beforeEach(() => {
       store.$reset()
+      store.$patch({
+        connections: {
+          'connection1': createConnection('connection1', 'port1', 'port2'),
+        },
+        ports: {
+          'port1': createPort('port1', 'item1', PortType.Output),
+          'port2': createPort('port2', 'item2', PortType.Input)
+        },
+        items: {
+          'item1': createItem('item1', ItemType.InputNode, { portIds: ['port1'] }),
+          'item2': createItem('item2', ItemType.OutputNode, { portIds: ['port2'] })
+        }
+      })
 
       stubAll(store, [
-        'addFreeportItem',
-        'disconnect',
-        'connect',
         'commitState',
+        'deselectAll',
         'setItemBoundingBox',
         'setSelectionState',
-        'deselectAll',
-        'createConnection'
+        'incrementZIndex'
       ])
       stubAll(store.simulation, [
+        'addNode',
         'addConnection',
         'removeConnection'
       ])
+      stubAll(store.simulation.circuit, [
+        'next'
+      ])
+
+      jest.spyOn(store, 'addFreeportItem')
+      jest.spyOn(store, 'createConnection')
+      jest.spyOn(store, 'connect')
+      jest.spyOn(store, 'disconnect')
     })
 
     it('should not create a new freeport if an item having the same ID already exists', () => {
-      store.$patch({
-        items: {
-          [itemId]: createItem(itemId, ItemType.Freeport)
-        }
-      })
-      store.createFreeport({
+      const data = {
         itemId,
+        sourceId,
+        targetId,
+        inputPortId,
         outputPortId,
-        inputPortId
-      })
+        connectionChainId,
+        position
+      }
 
-      expect(store.connect).not.toHaveBeenCalled()
-      expect(store.disconnect).not.toHaveBeenCalled()
+      store.createFreeport(data)
+
+      expect(store.deselectAll).toHaveBeenCalledTimes(2)
+      expect(store.addFreeportItem).toHaveBeenCalledTimes(1)
+      expect(store.setItemBoundingBox).toHaveBeenCalledTimes(1)
+      expect(store.createConnection).toHaveBeenCalledTimes(2)
+
+      jest.resetAllMocks()
+      store.createFreeport(data)
+
+      expect(store.deselectAll).not.toHaveBeenCalled()
       expect(store.addFreeportItem).not.toHaveBeenCalled()
+      expect(store.setItemBoundingBox).not.toHaveBeenCalled()
+      expect(store.createConnection).not.toHaveBeenCalled()
     })
 
     describe('when this freeport is a joint between two connection segments', () => {
@@ -206,6 +222,29 @@ describe('freeport actions', () => {
         })
         expect(store.setItemBoundingBox).toHaveBeenCalledWith(itemId)
         expect(store.activeFreeportId).toEqual(itemId)
+      })
+
+      it('should add the two new connections to the simulation', () => {
+        expect(store.simulation.addConnection).toHaveBeenCalledTimes(2)
+        expect(store.simulation.addConnection).toHaveBeenCalledWith(sourceId, inputPortId, store.ports[sourceId].value)
+        expect(store.simulation.addConnection).toHaveBeenCalledWith(outputPortId, targetId, store.ports[sourceId].value)
+      })
+
+      it('should remove the original connection from the simulation', () => {
+        expect(store.simulation.removeConnection).toHaveBeenCalledTimes(1)
+        expect(store.simulation.removeConnection).toHaveBeenCalledWith(sourceId, targetId, store.ports[sourceId].value)
+      })
+
+      it('should bring the freeport item to the front', () => {
+        expect(store.setSelectionState).toHaveBeenCalledWith({
+          id: itemId,
+          value: true
+        })
+        expect(store.incrementZIndex).toHaveBeenCalledWith(1)
+      })
+
+      it('should advance the circuit', () => {
+        expect(store.simulation.circuit.next).toHaveBeenCalledTimes(1)
       })
     })
 

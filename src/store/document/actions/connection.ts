@@ -104,6 +104,8 @@ export function createConnection (this: DocumentStoreInstance, data: { source: s
 }
 
 export function connect (this: DocumentStoreInstance, data: { source: string, target: string, id?: string, connectionChainId?: string }) {
+  if (!this.ports[data.source] || !this.ports[data.target]) return
+
   this.createConnection(data)
 
   this

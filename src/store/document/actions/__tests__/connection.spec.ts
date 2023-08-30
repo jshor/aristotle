@@ -51,6 +51,15 @@ describe('connection actions', () => {
       expect(store.simulation.addConnection).toHaveBeenCalledWith(source, target)
     })
 
+    it('should not add the connection to the state if the source was not found', () => {
+      store.connect({ source: 'some-undefined-id', target })
+
+      const connections = Object.keys(store.connections)
+
+      expect(connections).toHaveLength(0)
+      expect(store.simulation.addConnection).not.toHaveBeenCalled()
+    })
+
     // it('should set the connection preview ID if isPreview is true', () => {
     //   store.connect({ source, target, isPreview: true })
 

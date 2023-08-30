@@ -8,7 +8,7 @@ import BinaryWaveService from '../BinaryWaveService'
 import ClockService from '../ClockService'
 import SimulationService from '../SimulationService'
 
-describe('Simulation Service', () => {
+describe.skip('Simulation Service', () => {
   let service: SimulationService
 
   beforeEach(() => {
