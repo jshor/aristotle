@@ -97,7 +97,8 @@ export function applyState (this: DocumentStoreInstance, savedState: string) {
   const addedItems = getExcludedMembers(items, this.items)
   const addedConnections = getExcludedMembers(connections, this.connections)
 
-  this.clearBaseItems(removedItems, removedConnections, [])
+  removedConnections.forEach(id => this.disconnect(this.connections[id]))
+  removedItems.forEach(this.removeElement)
 
   this.ports = ports
   this.items = items
@@ -112,5 +113,5 @@ export function applyState (this: DocumentStoreInstance, savedState: string) {
 
   addedConnections.forEach(id => this.connect(connections[id]))
 
-  this.stepThroughCircuit()
+  // this.stepThroughCircuit() // TODO: why do this? should this remain?
 }

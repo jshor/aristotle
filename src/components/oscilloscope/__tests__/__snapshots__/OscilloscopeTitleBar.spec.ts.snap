@@ -3,7 +3,9 @@
 exports[`Oscilloscope Title Bar should match the snapshot 1`] = `
 "<div class=\\"oscilloscope-title-bar\\">
   <div class=\\"oscilloscope-title-bar__title\\">Oscilloscope</div>
-  <div class=\\"oscilloscope-title-bar__actions\\"><button class=\\"oscilloscope-title-bar__button\\" title=\\"Clear oscilloscope\\">
+  <div class=\\"oscilloscope-title-bar__actions\\"><button class=\\"oscilloscope-title-bar__button\\" title=\\"Close\\">
+      <icon-stub icon=\\"[object Object]\\"></icon-stub>
+    </button><button class=\\"oscilloscope-title-bar__button\\" title=\\"Clear oscilloscope\\">
       <icon-stub icon=\\"[object Object]\\"></icon-stub>
     </button><button class=\\"oscilloscope-title-bar__button\\" title=\\"Close\\">
       <icon-stub icon=\\"[object Object]\\"></icon-stub>

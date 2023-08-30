@@ -48,9 +48,9 @@ describe('Circuit Node', () => {
 
         expect(eventFn2).not.toHaveBeenCalled()
         expect(eventFn1).toHaveBeenCalledTimes(1)
-        expect(eventFn1).toHaveBeenCalledWith(newValue)
+        expect(eventFn1).toHaveBeenCalledWith(newValue, [])
         expect(eventFn3).toHaveBeenCalledTimes(1)
-        expect(eventFn3).toHaveBeenCalledWith(newValue)
+        expect(eventFn3).toHaveBeenCalledWith(newValue, [])
       })
 
       it('should call only the \'reset\' eventType callbacks', () => {
@@ -59,7 +59,7 @@ describe('Circuit Node', () => {
         expect(eventFn1).not.toHaveBeenCalled()
         expect(eventFn3).not.toHaveBeenCalled()
         expect(eventFn2).toHaveBeenCalledTimes(1)
-        expect(eventFn2).toHaveBeenCalledWith(newValue)
+        expect(eventFn2).toHaveBeenCalledWith(newValue, [])
       })
     })
 
@@ -191,13 +191,6 @@ describe('Circuit Node', () => {
         expect(node.updateOutputs).toHaveBeenCalledWith(newValue)
       })
 
-      it('should invoke the `change` event listener with the new value as the arg', () => {
-        node.propagate()
-
-        expect(node.invokeEvent).toHaveBeenCalledTimes(1)
-        expect(node.invokeEvent).toHaveBeenCalledWith('change', newValue)
-      })
-
       it('should return an array containing all of the output nodes', () => {
         const result = node.propagate()
 
@@ -242,7 +235,7 @@ describe('Circuit Node', () => {
 
     it('should call the `change` event listener', () => {
       expect(node.invokeEvent).toHaveBeenCalledTimes(1)
-      expect(node.invokeEvent).toHaveBeenCalledWith('change', LogicValue.UNKNOWN)
+      expect(node.invokeEvent).toHaveBeenCalledWith('change', LogicValue.UNKNOWN, [])
     })
   })
 

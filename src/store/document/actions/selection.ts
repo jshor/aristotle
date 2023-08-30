@@ -148,7 +148,7 @@ export function updateSelectionList (this: DocumentStoreInstance, { id, isSelect
 }
 
 /**
- * Inverts the selection this of the element having the given ID, or forces it to the value provided.
+ * Inverts the selection value of the element having the given ID, or forces it to the value provided.
  * If the element is a member of a group, every item in that group will be selected.
  *
  * @param payload.id - the ID of the element to toggle its selection
@@ -200,6 +200,25 @@ export function deleteSelection (this: DocumentStoreInstance) {
   if (!this.hasSelection) return
 
   this.commitState()
-  this.clearBaseItems(this.selectedItemIds, this.selectedConnectionIds, this.selectedGroupIds.filter(id => id !== null) as string[])
+  this
+    .selectedConnectionIds
+    .forEach(id => this.disconnect(this.connections[id]))
+  this
+    .selectedItemIds
+    .forEach(id => this.removeElement(id))
+  this
+    .selectedGroupIds
+    .forEach(id => id !== null && delete this.groups[id])
   this.deselectAll()
+}
+
+export function clearStatelessInfo (this: DocumentStoreInstance) {
+  this.unsetConnectionPreview()
+  this.connectablePortIds = []
+  this.selectedConnectionIds = []
+  this.selectedItemIds = []
+  this.selectedPortIndex = -1
+  this.cachedState = null
+  this.activePortId = null
+  this.connectionPreviewId = null
 }
