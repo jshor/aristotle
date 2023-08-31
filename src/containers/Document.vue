@@ -2,11 +2,16 @@
   <editor
     ref="editor"
     :zoom="store.zoomLevel"
-    :grid-size="gridSize"
+    :grid-size="grid.showGrid.value ? grid.gridSize.value : 0"
     :tabindex="0"
     :offset="{
       x: store.canvas.left,
       y: store.canvas.top
+    }"
+    :style="{
+      '--color-on': colors.onColor.value,
+      '--color-off': colors.offColor.value,
+      '--color-hi-i': colors.unknownColor.value
     }"
     :width="store.canvas.right - store.canvas.left"
     :height="store.canvas.bottom - store.canvas.top"
@@ -83,6 +88,8 @@ import boundaries from '@/store/document/geometry/boundaries'
 import printing from '@/utils/printing'
 import { DocumentStore } from '@/store/document'
 import { useRootStore } from '@/store/root'
+import { storeToRefs } from 'pinia'
+import { usePreferencesStore } from '@/store/preferences'
 
 export default defineComponent({
   name: 'Document',
@@ -103,6 +110,7 @@ export default defineComponent({
     const rootStore = useRootStore()
     const editor = ref<ComponentPublicInstance<HTMLElement>>()
     const updates = ref(0)
+    const { colors, grid } = storeToRefs(usePreferencesStore())
 
     let acceleration = 1
     let keys: Record<string, boolean> = {}
@@ -229,12 +237,13 @@ export default defineComponent({
       store,
       editor,
       updates,
+      colors,
+      grid,
       storeDefinition: props.store,
       onKeyDown,
       onKeyUp,
       onContextMenu,
-      clearKeys,
-      gridSize: 20
+      clearKeys
     }
   }
 })

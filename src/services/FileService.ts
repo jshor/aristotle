@@ -20,6 +20,7 @@ export default class FileService {
   }
 
   static async save (filePath: string, content: object) {
+    // TODO: handle rapid-succession saves (in a queue?)
     const zip = new JSZip()
 
     zip.file('content', JSON.stringify(content))

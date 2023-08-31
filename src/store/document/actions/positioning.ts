@@ -5,17 +5,20 @@ import Direction from '@/types/enums/Direction'
 import SnapMode from '@/types/enums/SnapMode'
 import ItemType from '@/types/enums/ItemType'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
+import { usePreferencesStore } from '@/store/preferences'
 
 /**
  * Centers all items (together as a group) to the center of the canvas.
  * All distances between items are maintained when this occurs.
  */
 export function centerAll (this: DocumentStoreInstance) {
+  const { grid } = usePreferencesStore()
+  const gridSize = grid.gridSize.value as number
   const boundingBoxes = Object
     .values(this.items)
     .map(({ boundingBox }) => boundingBox)
   const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
-  const { x, y } = boundaries.getCenteredScreenPoint(this.canvas, boundingBox, 20) // TODO: make 20 configurable as grid size
+  const { x, y } = boundaries.getCenteredScreenPoint(this.canvas, boundingBox, gridSize)
 
   const deltaX = x - boundingBox.left
   const deltaY = y - boundingBox.top
@@ -69,10 +72,33 @@ export function setItemPosition (this: DocumentStoreInstance, { id, position }: 
 }
 
 export function dragItem (this: DocumentStoreInstance, id: string, position: Point, snapMode?: SnapMode) {
+  const { snapping, grid } = usePreferencesStore()
   const { x, y } = fromDocumentToEditorCoordinates(this.canvas, this.viewport, position, this.zoom)
   const { width, height, rotation } = this.items[id]
   const boundingBox = boundaries.getBoundingBox({ x, y }, rotation, width, height)
-  const offset = boundaries.getSnapOffset(this.snapBoundaries, boundingBox, snapMode || SnapMode.Outer, 15) // TODO: configurable snap position and tolerance
+  const snapPreference = (() => {
+    if (snapMode) return snapMode
+    if (snapping.snapToGrid.value) return SnapMode.Grid
+    if (snapping.snapToAlign.value) return SnapMode.Outer
+    return SnapMode.None
+  })()
+  const snapTolerance = (() => {
+    switch (snapPreference) {
+      case SnapMode.Grid:
+        return grid.gridSize.value
+      case SnapMode.Outer:
+      case SnapMode.Radial:
+        return snapping.snapTolerance.value
+      default:
+        return 0
+    }
+  })() as number
+  const offset = boundaries.getSnapOffset(
+    this.snapBoundaries,
+    boundingBox,
+    snapMode || snapPreference,
+    snapTolerance
+  )
 
   this.setSelectionPosition({
     id,

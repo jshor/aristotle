@@ -24,6 +24,8 @@ export type RootStore = {
   clipboard: string | null
   activeDocumentId: string | null
   canExit: boolean
+  isSettingsOpen: boolean
+  isDocumentSelectOpen: boolean
   isFullscreen: boolean
   isBuilderOpen: boolean
   isToolboxOpen: boolean
@@ -38,7 +40,9 @@ export const useRootStore = defineStore({
     canExit: false,
     isFullscreen: false,
     isBuilderOpen: false,
-    isToolboxOpen: false
+    isToolboxOpen: false,
+    isSettingsOpen: false,
+    isDocumentSelectOpen: false
   }),
   getters: {
     hasOpenDocuments (state) {

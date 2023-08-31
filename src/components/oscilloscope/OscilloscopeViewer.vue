@@ -105,6 +105,8 @@ export default defineComponent({
   flex-direction: column;
   position: relative;
   border-top: 1px solid var(--color-bg-secondary);
+  background-color: var(--color-bg-primary);
+  color: var(--color-primary);
   --resizer-height: 1em;
 
   &__touch-resizer {

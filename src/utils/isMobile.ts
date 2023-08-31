@@ -1,3 +1,3 @@
 const isMobile = true
 
-export default false
+export default isMobile
