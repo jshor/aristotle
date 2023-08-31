@@ -5,14 +5,12 @@
   "private": true,
   "author": "Josh Shor <jpshor@gmail.com>",
   "description": "Digital logic simulator for Windows, Mac, and Linux.",
-  "main": "background.js",
+  "main": "dist-electron/main/main.js",
   "scripts": {
-    "lint": "vue-cli-service lint",
-    "test": "vue-cli-service test:unit --runInBand",
-    "start": "vue-cli-service electron:serve",
-    "build": "vue-cli-service electron:build",
-    "web:build": "vue-cli-service build --mode production",
-    "web:serve": "vue-cli-service serve",
+    "dev": "vite",
+    "build": "vite build && electron-builder",
+    "lint": "eslint src",
+    "test": "jest --runInBand",
     "docs:build": "vuepress build docs",
     "docs:serve": "vuepress dev docs",
     "release": "standard-version",
@@ -24,103 +22,53 @@
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "buffer": "^6.0.3",
     "dom-to-image": "^2.6.0",
-    "jszip": "^3.10.0",
+    "jszip": "^3.10.1",
     "lodash.clonedeep": "^4.5.0",
-    "pinia": "^2.0.14",
+    "pinia": "^2.1.6",
     "tiny-emitter": "^2.1.0",
-    "uuid": "^8.3.2",
-    "vue": "^3.2.37",
+    "uuid": "^9.0.0",
+    "vue": "^3.3.4",
     "vue3-smooth-dnd": "^0.0.2"
   },
   "devDependencies": {
-    "@electron/remote": "^2.0.8",
-    "@pinia/testing": "^0.0.12",
+    "@electron/remote": "^2.0.11",
+    "@pinia/testing": "^0.1.3",
     "@types/dom-to-image": "^2.6.4",
-    "@types/electron-devtools-installer": "^2.2.2",
-    "@types/jest": "^28.1.1",
+    "@types/jest": "^29.5.4",
     "@types/lodash.clonedeep": "^4.5.7",
-    "@types/uuid": "^8.3.4",
-    "@typescript-eslint/eslint-plugin": "^5.27.1",
-    "@typescript-eslint/parser": "^5.27.1",
-    "@vue/cli-plugin-babel": "^5.0.4",
-    "@vue/cli-plugin-eslint": "^5.0.4",
-    "@vue/cli-plugin-typescript": "^5.0.4",
-    "@vue/cli-plugin-unit-jest": "^5.0.4",
-    "@vue/cli-service": "^5.0.4",
-    "@vue/compiler-sfc": "^3.2.37",
-    "@vue/eslint-config-airbnb": "^6.0.0",
-    "@vue/eslint-config-typescript": "^10.0.0",
-    "@vue/test-utils": "^2.0.0",
-    "@vue/vue3-jest": "^28.0.0",
-    "@vuepress/plugin-register-components": "^2.0.0-beta.46",
-    "electron": "19.0.3",
-    "electron-devtools-installer": "^3.2.0",
-    "eslint": "^8.17.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-vue": "^9.1.0",
+    "@types/uuid": "^9.0.3",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "@vitejs/plugin-vue": "^4.3.4",
+    "@vue/eslint-config-airbnb": "^7.0.0",
+    "@vue/eslint-config-typescript": "^11.0.3",
+    "@vue/test-utils": "^2.4.1",
+    "@vue/vue3-jest": "^29.2.5",
+    "@vuepress/plugin-register-components": "^2.0.0-beta.67",
+    "electron": "^26.1.0",
+    "electron-builder": "^24.6.3",
+    "eslint": "^8.48.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-vue": "^9.17.0",
+    "jest": "^29.6.4",
+    "jest-environment-jsdom": "^29.6.4",
     "resize-observer-polyfill": "^1.5.1",
-    "sass": "^1.52.2",
-    "sass-loader": "^13.0.0",
+    "sass": "^1.66.1",
     "standard-version": "^9.5.0",
-    "ts-jest": "^28.0.4",
-    "ts-loader": "~8.2.0",
-    "typescript": "^4.7.3",
-    "vue-cli-plugin-electron-builder": "^2.1.1",
-    "vuepress": "^2.0.0-beta.46"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "@vue/airbnb",
-      "@vue/typescript/recommended"
-    ],
-    "parserOptions": {
-      "ecmaVersion": 2020
-    },
-    "rules": {},
-    "overrides": [
-      {
-        "files": [
-          "**/__tests__/*.{j,t}s?(x)",
-          "**/tests/unit/**/*.spec.{j,t}s?(x)"
-        ],
-        "env": {
-          "jest": true
-        }
-      }
-    ]
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
+    "vite-plugin-electron": "^0.14.0-beta.0",
+    "vite-plugin-electron-renderer": "^0.14.5",
+    "vue-tsc": "^1.8.8",
+    "vuepress": "^2.0.0-beta.67"
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
     "not dead"
   ],
-  "jest": {
-    "collectCoverage": true,
-    "coverageDirectory": "<rootDir>/test/.coverage",
-    "coveragePathIgnorePatterns": [
-      "<rootDir>/src/.*/__spec__",
-      "<rootDir>/src/.*/__tests__"
-    ],
-    "moduleNameMapper": {
-      "^@/(.*)": "<rootDir>/src/$1"
-    },
-    "setupFiles": [
-      "<rootDir>/test/setup.ts"
-    ],
-    "testMatch": [
-      "<rootDir>/src/**/*.spec.(js|jsx|ts|tsx)"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest",
-      "^.+\\.vue$": "@vue/vue3-jest"
-    },
-    "testEnvironment": "jsdom"
-  },
   "release": {
     "branches": [
       {

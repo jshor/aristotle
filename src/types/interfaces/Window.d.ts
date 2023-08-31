@@ -7,12 +7,7 @@ declare global {
       setApplicationMenu: (menuItems: MenuItemConstructorOptions[]) => void
       showOpenFileDialog: (filters: FileFilter[]) => string[]
       showSaveFileDialog: (filters: FileFilter[], fileName: string) => string
-      showMessageBox: ({ message, type, buttons, title }: {
-        message: string
-        type?: 'none' | 'info' | 'error' | 'question' | 'warning'
-        title?: string
-        buttons?: string[]
-      }) => number
+      showMessageBox: ({ message, type, buttons, title }: MessageBoxSyncOptions) => number
       beep: () => void
       quit: () => void
       copy: (data: string) => void
@@ -20,9 +15,10 @@ declare global {
       onBeforeClose (fn: () => Promise<boolean>)
       onOpenFile (fn: (filePath: string) => void)
       openFile: (filePath: string) => string
-      saveFile: (filePath: string, data: Buffer) => void
+      saveFile: (filePath: string, data: ArrayBuffer) => void
       getFilePaths: (directoryPath: string, filter: string) => string[]
       setFullscreen: (isFullscreen: boolean) => void
+      getDefaultSavePath: () => string
     }
   }
 }

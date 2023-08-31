@@ -1,4 +1,3 @@
-import { Buffer } from 'buffer'
 import JSZip from 'jszip'
 
 export default class FileService {
@@ -14,9 +13,8 @@ export default class FileService {
 
   static async writeBlob (filePath: string, blob: Blob) {
     const blobby = await blob.arrayBuffer()
-    const buf = Buffer.from(blobby)
 
-    window.api.saveFile(filePath, buf)
+    window.api.saveFile(filePath, blobby)
   }
 
   static async save (filePath: string, content: object) {

@@ -1,8 +1,13 @@
 import { app, protocol, BrowserWindow, ipcMain, Event, App, BrowserWindowConstructorOptions, nativeImage } from 'electron'
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import * as remote from '@electron/remote/main'
-import path from 'path'
-import fs from 'fs'
+import path from 'node:path'
+import fs from 'node:fs'
+
+process.env.DIST_ELECTRON = path.join(__dirname, '..')
+process.env.DIST = path.join(process.env.DIST_ELECTRON, '../dist/public')
+process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL
+  ? path.join(process.env.DIST_ELECTRON, '../public')
+  : process.env.DIST
 
 remote.initialize()
 
@@ -22,20 +27,23 @@ protocol.registerSchemesAsPrivileged([{
  */
 function createWindow (opts: BrowserWindowConstructorOptions, fileName: string, showDevTools: boolean = false) {
   const win = new BrowserWindow({
+    icon: process.env.VITE_DEV_SERVER_URL
+      ? path.join(__dirname, '../../public/resources/icon.ico')
+      : path.join(__dirname, '../../dist/resources/icon.ico'),
     show: false, // don't show the window until we tell it to
     ...opts
   })
 
   remote.enable(win.webContents)
 
-  if (process.env.WEBPACK_DEV_SERVER_URL) {
-    win.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}${fileName}.html`)
+  if (process.env.VITE_DEV_SERVER_URL) { // electron-vite-vue#298
+    win.loadURL(`${process.env.VITE_DEV_SERVER_URL}${fileName}.html`)
 
     if (showDevTools) {
       win.webContents.openDevTools()
     }
   } else {
-    win.loadURL(`app://./${fileName}.html`)
+    win.loadFile(path.join(process.env.DIST!, `${fileName}.html`))
   }
 
   return win
@@ -46,11 +54,13 @@ function createWindow (opts: BrowserWindowConstructorOptions, fileName: string, 
  */
 function createMainWindow () {
   return createWindow({
+    title: 'Main window',
     width: 2000,
     height: 1200,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      backgroundThrottling: false
+      preload: path.join(__dirname, '../preload/preload.js'),
+      backgroundThrottling: false,
+      nodeIntegration: true
     }
   }, 'index', true)
 }
@@ -156,9 +166,7 @@ if (!gotTheLock) {
   })
 
   app.on('ready', async () => {
-    createProtocol('app')
-
-    const icon = nativeImage.createFromPath(path.join(__dirname, '../../public/resources/icon.ico'))
+    // const icon = nativeImage.createFromPath(path.join(__dirname, '../../public/resources/icon.ico'))
 
     mainWindow = await createMainWindow()
 
