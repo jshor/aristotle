@@ -33,7 +33,7 @@ export const useIntegratedCircuitStore = defineStore('integratedCircuit', {
     },
 
     async loadLibrary () {
-      const filePaths = window.api.getFilePaths('../../Desktop', 'aicx')
+      const filePaths = window.api.getFilePaths(window.api.getDefaultSavePath(), 'aicx')
 
       for (let i = 0; i < filePaths.length; i++) {
         await this.loadCircuit(filePaths[i])

@@ -27,7 +27,8 @@ global.window.api = {
   openFile: jest.fn(() => ''),
   saveFile: jest.fn(),
   setFullscreen: jest.fn(),
-  getFilePaths: jest.fn(() => [])
+  getFilePaths: jest.fn(() => []),
+  getDefaultSavePath: jest.fn(() => '')
 }
 
 global.DOMRect = class DOMRect {

@@ -1,7 +1,8 @@
-import { contextBridge, ipcRenderer, MenuItemConstructorOptions, FileFilter, clipboard } from 'electron'
+import { contextBridge, ipcRenderer, MenuItemConstructorOptions, FileFilter, clipboard, MessageBoxSyncOptions } from 'electron'
 import { Menu, dialog, app, screen, getCurrentWindow } from '@electron/remote'
 import path from 'path'
 import fs from 'fs'
+import os from 'os'
 
 const defaultPath = path.resolve(app.getPath('desktop'))
 
@@ -43,12 +44,7 @@ export const api = {
       .map(fileName => path.resolve(path.join(directoryPath, fileName)))
   },
 
-  showMessageBox ({ message, type = 'warning', buttons = ['OK'], title = 'Aristotle' }: {
-    message: string
-    type?: string
-    title?: string
-    buttons?: string[]
-  }) {
+  showMessageBox ({ message, type = 'warning', buttons = ['OK'], title = 'Aristotle' }: MessageBoxSyncOptions) {
     return dialog.showMessageBoxSync(getCurrentWindow(), {
       type,
       buttons,
@@ -78,8 +74,10 @@ export const api = {
       .readFileSync(filePath)
       // .toString()
   },
-  saveFile (filePath: string, data: Buffer) {
-    fs.writeFileSync(filePath, data)
+  saveFile (filePath: string, data: ArrayBuffer) {
+    const buf = Buffer.from(data)
+
+    fs.writeFileSync(filePath, buf)
   },
   copy (data: string) {
     const buffer = Buffer.from(data, 'utf8')
@@ -93,6 +91,9 @@ export const api = {
   },
   setFullscreen (isFullscreen: boolean) {
     getCurrentWindow().setFullScreen(isFullscreen)
+  },
+  getDefaultSavePath () {
+    return os.homedir()
   }
 }
 

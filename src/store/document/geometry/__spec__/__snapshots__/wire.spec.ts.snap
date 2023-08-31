@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Wire Layout renderLayout() should render a bottom-left (a) to top-right wire (b) 1`] = `
-Object {
+{
   "height": 65,
   "minX": -22.5,
   "minY": -7.5,
@@ -11,7 +11,7 @@ Object {
 `;
 
 exports[`Wire Layout renderLayout() should render a bottom-left (b) to top-right wire (a) 1`] = `
-Object {
+{
   "height": 65,
   "minX": -22.5,
   "minY": -7.5,
@@ -21,7 +21,7 @@ Object {
 `;
 
 exports[`Wire Layout renderLayout() should render a top-left (a) to bottom-right wire (b) 1`] = `
-Object {
+{
   "height": 65,
   "minX": -17.5,
   "minY": -7.5,
@@ -31,7 +31,7 @@ Object {
 `;
 
 exports[`Wire Layout renderLayout() should render a top-left (b) to bottom-right wire (a) 1`] = `
-Object {
+{
   "height": 65,
   "minX": -17.5,
   "minY": -7.5,

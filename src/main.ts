@@ -21,7 +21,8 @@ if (!window.api) {
     openFile () { return '' },
     saveFile () {},
     setFullscreen () {},
-    getFilePaths () { return [] }
+    getFilePaths () { return [] },
+    getDefaultSavePath () { return ''}
   }
 }
 
