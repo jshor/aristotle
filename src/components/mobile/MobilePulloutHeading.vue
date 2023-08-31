@@ -1,7 +1,7 @@
 <template>
   <div class="mobile-pullout-heading">
     <img
-      src="logo.svg"
+      src="/public/logo.svg"
       class="mobile-pullout-heading__logo"
     />
     <div class="mobile-pullout-heading__brand">

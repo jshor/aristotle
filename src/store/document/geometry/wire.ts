@@ -1,5 +1,5 @@
 import Direction from '@/types/enums/Direction'
-import rotate from './rotate'
+import rotation from './rotation'
 
 const WIRE_PADDING = 15
 
@@ -53,7 +53,7 @@ export function inflectDirection (direction: number, a: Point, b: Point): Direct
     case Direction.Bottom:
       return a.x < b.x ? Direction.Top : Direction.Bottom
     default:
-      return inflectDirection(rotate(direction), a, b) // normalize direction to [0,3] and try again
+      return inflectDirection(rotation.rotate(direction), a, b) // normalize direction to [0,3] and try again
   }
 }
 
@@ -68,14 +68,14 @@ export function inflectDirection (direction: number, a: Point, b: Point): Direct
 export function getPortDirection (port: Port, a: Point, b: Point) {
   // the true direction needs to take into account inherent orientation + its rotation
   // bezier index directions are one integer off (see computeBezier()) -- subtract by 1
-  let direction = rotate(port.orientation + port.rotation - 1)
+  let direction = rotation.rotate(port.orientation + port.rotation - 1)
 
   if (port.isFreeport) {
     // inflect direction for FreePorts to give the "pinched" appearance when dragged out of range
     direction = inflectDirection(direction, a, b)
 
     if (port.rotation % 4 === 1 || port.rotation % 4 === 2) {
-      direction = rotate(direction - 2)
+      direction = rotation.rotate(direction - 2)
     }
   }
 

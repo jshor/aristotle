@@ -12,9 +12,10 @@ node_modules
 # dist
 packages/**/build
 packages/**/dist*
-dist_electron
-build
+dist-electron
 dist
+build
+release
 
 # Log files
 npm-debug.log*

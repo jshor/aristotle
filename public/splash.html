@@ -3,7 +3,8 @@
   <head>
     <meta name="color-scheme" content="dark light" />
     <meta charset="utf-8">
-    <title><%= htmlWebpackPlugin.options.title %></title>
+    <title>Aristotle</title>
+    <link rel="stylesheet" href="/src/styles/splash.scss" />
   </head>
   <body>
     <div
@@ -11,12 +12,12 @@
       style="display: none"
     >
       <img
-        src="logo.svg"
+        src="/logo.svg"
         alt="<%= htmlWebpackPlugin.options.title %>"
         width="100"
       />
       <h1 class="splash__title">
-        <%= htmlWebpackPlugin.options.title %>
+        Aristotle
       </h1>
       <div class="splash__loader">
         <div class="splash__loader-bar"></div>

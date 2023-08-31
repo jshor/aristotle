@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [14]
+        node-version: [18]
         
     outputs:
       tag: ${{ steps.git_tag.outputs.tag }}
@@ -94,8 +94,14 @@ jobs:
       - name: Create full release
         run: yarn release
 
+      - name: Build web app
+        run: yarn vite build --base web 
+
       - name: Build docs
-        run: yarn docs:build && yarn web:build
+        run: yarn docs:build
+
+      - name: Copy web app into docs
+        run: cp -r dist/public build/web && cp -r dist/assets build/web/assets
 
       # - name: Publish release
       #   run: git push --follow-tags origin master 

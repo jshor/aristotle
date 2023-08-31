@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "YourAppID",
+  "asar": true,
+  "directories": {
+    "output": "release/${version}",
+    "buildResources": "public/resources"
+  },
+  "files": [
+    "dist-electron",
+    "dist"
+  ],
+  "mac": {
+    "artifactName": "${productName}_${version}.${ext}",
+    "target": ["dmg"]
+  },
+  "win": {
+    "target": [{
+      "target": "nsis",
+      "arch": ["x64"]
+    }],
+    "artifactName": "${productName}_${version}.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "deleteAppDataOnUninstall": false
+  },
+  "fileAssociations": [{
+    "ext": "alfx",
+    "description": "Aristotle Logic Circuit File",
+    "mimeType": "application/alfx",
+    "role": "Editor",
+    "icon": "circuit-icon.ico"
+  }, {
+    "ext": "aicx",
+    "description": "Aristotle Integrated Circuit File",
+    "mimeType": "application/aicx",
+    "role": "Editor",
+    "icon": "integrated-circuit.ico"
+  }]
+}
