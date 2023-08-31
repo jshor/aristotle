@@ -125,8 +125,6 @@ export default defineComponent({
 
 <style lang="scss">
 .oscilloscope-timeline {
-  background-color: var(--color-bg-primary);
-  color: var(--color-primary);
   width: 100%;
   text-align: right;
   display: flex;
