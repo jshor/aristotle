@@ -2,7 +2,8 @@
 import { defineStore } from 'pinia'
 import { v4 as uuid } from 'uuid'
 import basic from '../containers/fixtures/basic.json'
-import flipFlop from '../containers/fixtures/flipflop.json'
+// import flipFlop from '../containers/fixtures/flipflop.json'
+import flipFlop from '../containers/fixtures/counter.json'
 import integratedCircuit from '../containers/fixtures/ic.json'
 import testIc from '../containers/fixtures/test.json'
 
@@ -187,7 +188,7 @@ export const useRootStore = defineStore({
       }
 
       this.activeDocumentId = null
-      store.simulation.stop()
+      store.stopSimulation()
       store.$reset()
       store.$dispose()
       delete this.documents[id]
@@ -290,6 +291,7 @@ export const useRootStore = defineStore({
       const fileName = getFileName(filePath)
 
       document.loadDocument(content)
+      document.oscillator.onTick = (o: Oscillogram) => document.oscillogram = o
 
       this.documents[id] = {
         fileName,
@@ -315,10 +317,10 @@ export const useRootStore = defineStore({
       this.activateDocument(documentIds[nextIndex])
     },
     pauseActivity () {
-      this.activeDocument?.store().simulation.stop()
+      this.activeDocument?.store().stopSimulation()
     },
     resumeActivity () {
-      this.activeDocument?.store().simulation.start()
+      this.activeDocument?.store().startSimulation()
     },
     activateDocument (id: string) {
       this.pauseActivity()
@@ -336,7 +338,7 @@ export const useRootStore = defineStore({
       // this.openDocument('integrated-circuit.alfx', JSON.stringify(integratedCircuit))
       // this.pauseActivity()
       this.openDocument('flip-flop.alfx', JSON.stringify(flipFlop), uuid(), 'flip-flop.alfx')
-      useIntegratedCircuitStore().loadLibrary()
+
     },
 
     navigateDocumentList (direction: number) {

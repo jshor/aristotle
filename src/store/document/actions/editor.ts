@@ -7,7 +7,12 @@ export function loadDocument (this: DocumentStoreInstance, document: string) {
     : document
 
   this.applyState(state)
+  this.initialize()
+}
+
+export function initialize (this: DocumentStoreInstance) {
   this.resetCircuit()
+  this.oscillator.onTick = (o: Oscillogram) => this.oscillogram = o
 }
 
 export function print (this: DocumentStoreInstance) {

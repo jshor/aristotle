@@ -17,6 +17,8 @@
     <oscilloscope-timeline
       v-else
       :oscillogram="oscillogram"
+      :items="items"
+      :ports="ports"
     />
   </oscilloscope-viewer>
 </template>
@@ -48,18 +50,25 @@ export default defineComponent({
       oscilloscopeHeight,
       isOscilloscopeOpen,
       isOscilloscopeRecording,
-      oscillogram
+      oscillogram,
+      items,
+      ports
     } = storeToRefs(store)
     const {
-      clearOscilloscope,
       closeOscilloscope,
       toggleOscillatorRecording
     } = store
     const hasWaves = computed(() => Object.keys(store.oscillogram).length > 0)
 
+    function clearOscilloscope () {
+      store.oscillator.clear()
+    }
+
     return {
       hasWaves,
       oscillogram,
+      items,
+      ports,
       oscilloscopeHeight,
       isOscilloscopeOpen,
       isOscilloscopeRecording,

@@ -1,3 +1,4 @@
+import ClockService from '@/services/ClockService'
 import { DocumentStoreInstance } from '..'
 
 /**
@@ -100,8 +101,25 @@ export function applyState (this: DocumentStoreInstance, savedState: string) {
   removedConnections.forEach(id => this.disconnect(this.connections[id]))
   removedItems.forEach(this.removeElement)
 
-  this.ports = ports
-  this.items = items
+  Object
+    .keys(ports)
+    .forEach(id => {
+      this.ports[id] = {
+        ...ports[id],
+        value: this.ports[id]?.value,
+        wave: this.ports[id]?.wave
+      }
+    })
+
+  Object
+    .keys(items)
+    .forEach(id => {
+      this.items[id] = {
+        ...items[id],
+        clock: this.items[id]?.clock || ClockService.deserialize(items[id]?.clock)
+      }
+    })
+
   this.groups = groups
 
   addedItems.forEach(id => {

@@ -74,18 +74,11 @@ describe('Circuit', () => {
         circuit.nodes.push(node)
       })
 
-      xit('should remove it from the input list', () => {
+      it('should remove it from the input list', () => {
         circuit.inputNodes.push(node)
         circuit.removeNode(node)
 
         expect(circuit.inputNodes).not.toContain(node)
-      })
-
-      xit('should reset the circuit', () => {
-        jest.spyOn(circuit, 'reset')
-        circuit.removeNode(node)
-
-        expect(circuit.reset).toHaveBeenCalledTimes(1)
       })
 
       it('should call `removeNodeOutputs()` with the given node', () => {
@@ -97,10 +90,10 @@ describe('Circuit', () => {
       })
 
       it('should step the circuit', () => {
-        jest.spyOn(circuit, 'next')
+        jest.spyOn(circuit, 'advance')
         circuit.removeNode(node)
 
-        expect(circuit.next).toHaveBeenCalledTimes(1)
+        expect(circuit.advance).toHaveBeenCalledTimes(1)
       })
 
       it('should remove it from, the nodes list', () => {
@@ -152,13 +145,21 @@ describe('Circuit', () => {
       dummyNode = new Nor('NOR_2')
 
       jest
-        .spyOn(circuit, 'next')
+        .spyOn(circuit, 'advance')
         .mockImplementation(jest.fn())
 
       circuit.addNode(sourceNode)
       circuit.addNode(targetNode)
       circuit.addNode(dummyNode)
       circuit.addConnection(sourceNode, dummyNode, dummyNode.name)
+    })
+
+    it('should not add a new connection to the outputs if the target does not exist', () => {
+      expect(sourceNode.outputs).toHaveLength(1)
+
+      circuit.addConnection(sourceNode, null!, targetNode.name)
+
+      expect(sourceNode.outputs).toHaveLength(1)
     })
 
     it('should add a new connection entry to the source node outputs list', () => {
@@ -208,7 +209,7 @@ describe('Circuit', () => {
       sourceNode.outputs.push(new Connection(targetNode, targetNode.name))
 
       jest
-        .spyOn(circuit, 'next')
+        .spyOn(circuit, 'advance')
         .mockImplementation(jest.fn())
     })
 
@@ -335,18 +336,14 @@ describe('Circuit', () => {
         jest
           .spyOn(circuit, 'dequeue')
           .mockImplementation(jest.fn())
-      jest.spyOn(circuit, 'next')
+      jest.spyOn(circuit, 'advance')
 
       circuit.queue = [node1, node2]
     })
 
     describe('when the circuit is incomplete after processing', () => {
       beforeEach(() => {
-        let nextCallCount = 0
-
-        jest
-          .spyOn(circuit, 'isComplete')
-          .mockImplementation(() => ++nextCallCount > 2)
+        circuit.queue = [new CircuitNode('node1')]
       })
 
       describe('when one of the nodes\' values have changed', () => {
@@ -354,37 +351,37 @@ describe('Circuit', () => {
           node1.isValueChanged = true
           node2.isValueChanged = false
 
-          circuit.next()
+          circuit.advance()
 
-          expect(circuit.next).toHaveBeenCalledTimes(1)
+          expect(circuit.advance).toHaveBeenCalledTimes(1)
         })
+      })
+
+      it('should enqueue nodes when a node is forced to continue', () => {
+        const node = new CircuitNode('node')
+
+        node.forceContinue = true
+        circuit.queue = [node]
+        circuit.advance()
+
+        expect(circuit.enqueue).toHaveBeenCalledTimes(2)
+      })
+
+      it('should not enqueue any nodes if the active node has been removed from the circuit', () => {
+        circuit.queue = [null!]
+        circuit.advance()
+
+        expect(circuit.enqueue).not.toHaveBeenCalled()
       })
     })
 
     describe('when the circuit is complete', () => {
       it('should not step the circuit again', () => {
-        jest
-          .spyOn(circuit, 'isComplete')
-          .mockReturnValue(true)
+        circuit.queue = []
+        circuit.advance()
 
-        circuit.next()
-
-        expect(circuit.next).toHaveBeenCalledTimes(1)
+        expect(circuit.advance).toHaveBeenCalledTimes(1)
       })
-    })
-  })
-
-  describe('isComplete()', () => {
-    it('should return false when the queue is nonempty', () => {
-      circuit.queue = [new Nor('NOR')]
-
-      expect(circuit.isComplete()).toEqual(false)
-    })
-
-    it('should return true when the queue is empty', () => {
-      circuit.queue = []
-
-      expect(circuit.isComplete()).toEqual(true)
     })
   })
 })
