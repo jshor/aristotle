@@ -38,6 +38,8 @@ export default class BinaryWaveService implements Pulse {
     this.initialize(signal)
   }
 
+  toString = () => null
+
   /**
    * Creates an initial segment based on the given signal.
    *

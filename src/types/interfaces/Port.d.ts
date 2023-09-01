@@ -1,3 +1,4 @@
+import BinaryWaveService from '@/services/BinaryWaveService'
 import PortType from '../enums/PortType'
 
 declare global {
@@ -15,6 +16,7 @@ declare global {
     isFreeport: boolean
     isMonitored: boolean
     connectedPortIds: string[]
+    wave?: BinaryWaveService
   }
 }
 

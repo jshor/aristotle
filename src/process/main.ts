@@ -166,10 +166,11 @@ if (!gotTheLock) {
   })
 
   app.on('ready', async () => {
-    // const icon = nativeImage.createFromPath(path.join(__dirname, '../../public/resources/icon.ico'))
+    const icon = nativeImage.createFromPath(path.join(__dirname, '../../public/resources/icon.icns'))
 
     mainWindow = await createMainWindow()
 
+    app.dock.setIcon(icon)
     app.whenReady().then(async () => {
       await boot(app, mainWindow)
 

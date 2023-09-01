@@ -1,7 +1,7 @@
 <template>
-  <div :class="`wire wire--${type}`">
-    <div :class="`wire__connector wire__connector--${type}`" />
-    <div class="wire__port">
+  <div :class="`port-wire port-wire--${type}`">
+    <div :class="`port-wire__connector port-wire__connector--${type}`" />
+    <div class="port-wire__port">
       <slot />
     </div>
   </div>
@@ -22,11 +22,15 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.wire {
+.port-wire {
+  position: absolute;
+  left: 0;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  touch-action: none;
 
   &__connector {
     position: absolute;

@@ -40,6 +40,21 @@ export default class ClockService implements Pulse {
     this.lastUpdate = -interval
   }
 
+  static deserialize (data?: { name: string, interval: number, signal: number }) {
+    if (data instanceof ClockService) return data
+    if (!data) return null
+
+    return new ClockService(data.name, data.interval, data.signal)
+  }
+
+  toString = () => {
+    return {
+      name: this.name,
+      interval: this.interval,
+      signal: this.signal
+    }
+  }
+
   /**
    * Event listener.
    *

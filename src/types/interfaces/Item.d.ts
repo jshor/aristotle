@@ -18,6 +18,7 @@ declare global {
     properties: {
       [propertyName: string]: Property
     }
+    clock?: ClockService
     integratedCircuit?: IntegratedCircuit
   }
 }

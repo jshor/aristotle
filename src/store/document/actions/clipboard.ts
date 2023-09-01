@@ -1,5 +1,7 @@
+import { LogicValue } from '@/circuit'
 import { DocumentStoreInstance } from '..'
 import idMapper from '@/utils/idMapper'
+import ClockService from '@/services/ClockService'
 
 export function cut (this: DocumentStoreInstance) {
   this.copy()
@@ -57,7 +59,10 @@ export function paste (this: DocumentStoreInstance) {
     Object
       .keys(mapped.ports)
       .forEach(portId => {
-        mapped.ports[portId].value = 0
+        mapped.ports[portId].value = LogicValue.UNKNOWN
+        mapped.ports[portId].isMonitored = false
+
+        delete mapped.ports[portId].wave
       })
 
     Object
@@ -66,6 +71,12 @@ export function paste (this: DocumentStoreInstance) {
         item.position.x += 20 * parsed.pasteCount
         item.position.y += 20 * parsed.pasteCount
         item.isSelected = false
+        item.clock = ClockService.deserialize({
+          ...item.clock,
+          name: item.portIds[0]
+        })
+
+        delete item.clock
 
         this.addItem({
           item,

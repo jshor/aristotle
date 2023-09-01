@@ -2,29 +2,29 @@ import { CircuitNode } from '@/circuit'
 import { DocumentStoreInstance } from '..'
 import getConnectionChain from '@/utils/getConnectionChain'
 import PortType from '@/types/enums/PortType'
+import BinaryWaveService from '@/services/BinaryWaveService'
 
+/**
+ * Attaches the given port to an item.
+ */
 export function addPort (this: DocumentStoreInstance, itemId: string, port: Port) {
   const node = Object
-    .values(this.simulation.nodes)
+    .values(this.nodes)
     .find(({ name }) => this.items[itemId].portIds.includes(name))
 
   this.ports[port.id] = port
   this.items[itemId].portIds.push(port.id)
 
-  // if (port.type === PortType.Output) {
-    if (node) {
-      this.simulation.addPort(port.id, node as CircuitNode)
-    } else {
-      this.simulation.addNode(this.items[itemId], this.ports)
-    }
-  // }
+  if (node) {
+    this.nodes[port.id] = node
+  } else {
+    this.addVirtualNode(this.items[itemId])
+  }
 }
 
 /**
  * Removes a port from the state.
  * This will destroy the entire connection chain that it is a part of (if any).
- *
- * @param portId - ID of the port to destroy
  */
 export function removePort (this: DocumentStoreInstance, portId: string) {
   // check to make sure that the element this port is attached to exists in the editor
@@ -47,15 +47,16 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
       freeportIds.forEach(id => {
         // delete all freeports associated with the chain
         this.items[id].portIds.forEach(portId => {
+          this.unmonitorPort(portId)
           delete this.ports[portId]
-          this.simulation.removePort(portId)
+          delete this.nodes[portId]
         })
 
         delete this.items[id]
       })
     })
 
-  this.simulation.removePort(portId)
+  this.unmonitorPort(portId)
 
   const itemId = this.ports[portId].elementId
   const portIndex = this.items[itemId].portIds.indexOf(portId)
@@ -64,6 +65,7 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
     this.items[itemId].portIds.splice(portIndex, 1)
   }
 
+  delete this.nodes[portId]
   delete this.ports[portId]
 }
 
@@ -88,8 +90,6 @@ export function setActivePortId (this: DocumentStoreInstance, portId: string | n
 /**
  * Sets the list of connectable port IDs.
  * This should be invoked whenever a user starts dragging a port.
- *
- * @param portId - the ID of the port being dragged
  */
 export function setConnectablePortIds (this: DocumentStoreInstance, { portId, isDragging }: { portId: string, isDragging?: boolean }) {
   const port = this.ports[portId]
@@ -126,16 +126,21 @@ export function setConnectablePortIds (this: DocumentStoreInstance, { portId, is
  * @param payload.value - new port value
  */
 export function setPortValue (this: DocumentStoreInstance, { id, value }: { id: string, value: number }) {
-  this
-    .simulation
-    .setPortValue(id, value)
+  if (this.nodes[id] && this.nodes[id].value !== value) {
+    this.nodes[id].setValue(value)
+    this.ports[id].wave?.drawPulseChange(value)
+    this.circuit.enqueue(this.nodes[id])
+    this.isCircuitEvaluated = false
 
-
-  if (this.isDebugging) {
-    this.isCircuitEvaluated = !this.simulation.canContinue
+    if (!this.isDebugging) {
+      this.advanceSimulation()
+    }
   }
 }
 
+/**
+ * Toggles the monitoring of a port in the oscilloscope.
+ */
 export function togglePortMonitoring (this: DocumentStoreInstance, portId: string) {
   if (this.ports[portId].isMonitored) {
     this.unmonitorPort(portId)
@@ -144,27 +149,33 @@ export function togglePortMonitoring (this: DocumentStoreInstance, portId: strin
   }
 }
 
+/**
+ * Monitors a port in the oscolloscope.
+ */
 export function monitorPort (this: DocumentStoreInstance, portId: string) {
   const port = this.ports[portId]
+  const name = this.items[port.elementId].name
 
   port.hue = port.hue ||  ~~(360 * Math.random())
   port.isMonitored = true
+  port.wave = new BinaryWaveService(portId, `${name} ${port.name}`, port.value, port.hue)
 
-  this
-    .simulation
-    .monitorPort(portId, port.value, port.hue)
-
+  this.oscillator.add(port.wave)
   this.isOscilloscopeOpen = true
 }
 
+/**
+ * Removes a port from being monitored from the oscolloscope.
+ */
 export function unmonitorPort (this: DocumentStoreInstance, portId: string) {
   const port = this.ports[portId]
 
   port.isMonitored = false
 
-  this
-    .simulation
-    .unmonitorPort(portId)
+  this.oscillator.remove(port.wave)
+
+  delete this.oscillogram[portId]
+  delete port.wave
 
   this.isOscilloscopeOpen = Object.keys(this.oscillogram).length > 0
 }

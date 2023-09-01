@@ -2,7 +2,6 @@ import CircuitNode from '../base/CircuitNode'
 import Connection from '../types/Connection'
 import LogicValue from '../types/LogicValue'
 import InputNode from './InputNode'
-import OutputNode from './OutputNode'
 
 class Circuit {
   /**
@@ -51,7 +50,6 @@ class Circuit {
       if (inputIndex !== -1) {
         this.inputNodes.splice(inputIndex, 1)
       }
-      // this.reset() // TODO: why?
     }
 
     const index = this.nodes.findIndex(({ name }) => name === node.name)
@@ -61,7 +59,7 @@ class Circuit {
       this.nodes.splice(index, 1)
     }
 
-    this.next()
+    this.advance()
   }
 
   /**
@@ -72,6 +70,8 @@ class Circuit {
    * @param {Number} targetId - entry port id on the target node for the connection
    */
   public addConnection = (source: CircuitNode, target: CircuitNode, targetId: string, sourceValue: number = LogicValue.UNKNOWN): void => {
+    if (!source || !target) return
+
     source.outputs.push(new Connection(target, targetId))
     source.value = sourceValue
 
@@ -153,7 +153,7 @@ class Circuit {
    * Advances the circuit simulation one step. If none of the node values have changed,
    * it continues stepping through until either a value changes or the queue is empty.
    */
-  public next = (): void => {
+  public advance = (): void => {
     let isValueChanged = false
     let localQueue: CircuitNode[] = []
 
@@ -179,33 +179,6 @@ class Circuit {
     if (isValueChanged) {
       this.enqueue(...localQueue)
     }
-  }
-
-  /**
-   * Returns true when the queue is finished processing.
-   *
-   * @returns {Boolean}
-   */
-  public isComplete = (): boolean => {
-    let isComplete = true
-
-    if (this.queue.length === 0) {
-      return true
-    }
-
-    this.queue.forEach(node => {
-      const nextValue = node.getProjectedValue()
-
-      if (nextValue !== node.value && !(node instanceof OutputNode)) {
-        isComplete = false
-      }
-    })
-
-    if (isComplete) {
-      this.queue = []
-    }
-
-    return isComplete
   }
 }
 

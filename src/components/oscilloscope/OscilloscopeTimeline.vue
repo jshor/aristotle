@@ -10,7 +10,7 @@
         :style="{ color: `hsla(${v.hue}, var(--lightness), var(--saturation), 0.8)` }"
         class="oscilloscope-timeline__label"
       >
-        {{ key }}
+        {{ `${items[ports[key]?.elementId]?.name || ''} ${ports[key]?.name}` }}
       </div>
     </div>
 
@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, onBeforeUnmount, onMounted, ref } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   name: 'OscilloscopeTimeline',
@@ -57,6 +57,16 @@ export default defineComponent({
     /** The oscillogram displayed in the timeline. */
     oscillogram: {
       type: Object as PropType<Oscillogram>,
+      required: true
+    },
+    /** The oscillogram displayed in the timeline. */
+    items: {
+      type: Object as PropType<Record<string, Item>>,
+      required: true
+    },
+    /** The oscillogram displayed in the timeline. */
+    ports: {
+      type: Object as PropType<Record<string, Port>>,
       required: true
     }
   },

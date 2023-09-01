@@ -9,6 +9,7 @@ import * as itemActions from './actions/item'
 import * as panningActions from './actions/panning'
 import * as portActions from './actions/port'
 import * as positioningActions from './actions/positioning'
+import * as oscillatorActions from './actions/oscillator'
 import * as rotationActions from './actions/rotation'
 import * as selectionActions from './actions/selection'
 import * as simulationActions from './actions/simulation'
@@ -78,6 +79,7 @@ export const createDocumentStore = (documentId: string) => defineStore({
     ...panningActions,
     ...portActions,
     ...positioningActions,
+    ...oscillatorActions,
     ...rotationActions,
     ...selectionActions,
     ...simulationActions,

@@ -209,6 +209,8 @@ export function deleteSelection (this: DocumentStoreInstance) {
   this
     .selectedGroupIds
     .forEach(id => id !== null && delete this.groups[id])
+
+
   this.deselectAll()
 }
 

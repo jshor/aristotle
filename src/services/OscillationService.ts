@@ -1,4 +1,3 @@
-import { TinyEmitter } from 'tiny-emitter'
 import BinaryWaveService from './BinaryWaveService'
 
 /**
@@ -25,8 +24,8 @@ export default class OscillationService {
   /** Offset wave time, in milliseconds. */
   public timeMsOffset: number = 0
 
-  /** Event emitter. */
-  private emitter: TinyEmitter = new TinyEmitter()
+  /** Change event on oscillogram generation. */
+  public onTick?: (oscillogram: Oscillogram) => void
 
   /**
    * Starts the oscillator.
@@ -73,12 +72,12 @@ export default class OscillationService {
     const displays: Oscillogram = {}
     const getPoints = (segments: Point[]) => segments.map(({ x, y }) => `${x},${y}`)
 
-    for (const name in waves) {
-      if (waves[name] instanceof BinaryWaveService) {
-        const wave = waves[name] as BinaryWaveService
+    for (const id in waves) {
+      if (waves[id] instanceof BinaryWaveService) {
+        const wave = waves[id] as BinaryWaveService
         const points = getPoints(wave.segments)
 
-        displays[name] = {
+        displays[id] = {
           points: points.join(' '),
           width: wave.width,
           hue: wave.hue
@@ -87,16 +86,6 @@ export default class OscillationService {
     }
 
     return displays
-  }
-
-  /**
-   * Event listener.
-   *
-   * @param event - available values: `change`
-   * @param fn - callback function, taking the oscillogram data as its sole argument
-   */
-  on = (event: string, fn: (oscillogram: Oscillogram) => void) => {
-    this.emitter.on(event, fn)
   }
 
   /**
@@ -122,7 +111,7 @@ export default class OscillationService {
         })
     }
 
-    this.emitter.emit('change', this.computeWaveGeometry(this.waves))
+    this.onTick?.(this.computeWaveGeometry(this.waves))
   }
 
   /**
@@ -188,12 +177,16 @@ export default class OscillationService {
    *
    * @param {Pulse} wave
    */
-  remove = ({ id }: Pulse): void => {
-    delete this.waves[id]
+  remove = (wave?: Pulse): void => {
+    if (!wave) return
+
+    delete this.waves[wave.id]
 
     if (Object.keys(this.waves).length === 0) {
       this.stop()
       this.clear()
     }
+
+    this.broadcast()
   }
 }
