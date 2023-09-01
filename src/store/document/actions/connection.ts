@@ -109,10 +109,10 @@ export function connect (this: DocumentStoreInstance, data: { source: string, ta
   this.createConnection(data)
 
   this
-    .simulation
-    .addConnection(data.source, data.target)
+    .circuit
+    .addConnection(this.nodes[data.source], this.nodes[data.target], data.target)
 
-  this.simulation.circuit.next()
+  this.advanceSimulation()
 }
 
 /**
@@ -140,10 +140,9 @@ export function destroyConnection (this: DocumentStoreInstance, { source, target
 
 export function disconnect (this: DocumentStoreInstance, { source, target }: { source: string, target: string }) {
   this
-    .simulation
-    .removeConnection(source, target)
+    .circuit
+    .removeConnection(this.nodes[source], this.nodes[target])
 
-  this.simulation.circuit.next()
-
+  this.advanceSimulation()
   this.destroyConnection({ source, target })
 }

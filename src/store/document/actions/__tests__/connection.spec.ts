@@ -7,6 +7,7 @@ import {
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
+import { CircuitNode } from '@/circuit'
 
 setActivePinia(createPinia())
 
@@ -17,6 +18,8 @@ describe('connection actions', () => {
     const store = createDocumentStore('document')()
     const source = 'source-id'
     const target = 'target-id'
+    const node1 = new CircuitNode(source)
+    const node2 = new CircuitNode(target)
 
     beforeEach(() => {
       store.$reset()
@@ -24,11 +27,15 @@ describe('connection actions', () => {
         ports: {
           [source]: createPort(source, 'item1', PortType.Output),
           [target]: createPort(target, 'item2', PortType.Input)
+        },
+        nodes: {
+          [source]: node1,
+          [target]: node2
         }
       })
 
       jest
-        .spyOn(store.simulation, 'addConnection')
+        .spyOn(store.circuit, 'addConnection')
         .mockImplementation(jest.fn())
     })
 
@@ -47,8 +54,8 @@ describe('connection actions', () => {
         zIndex: 2,
         isSelected: false
       })
-      expect(store.simulation.addConnection).toHaveBeenCalledTimes(1)
-      expect(store.simulation.addConnection).toHaveBeenCalledWith(source, target)
+      expect(store.circuit.addConnection).toHaveBeenCalledTimes(1)
+      expect(store.circuit.addConnection).toHaveBeenCalledWith(node1, node2, target)
     })
 
     it('should not add the connection to the state if the source was not found', () => {
@@ -57,7 +64,7 @@ describe('connection actions', () => {
       const connections = Object.keys(store.connections)
 
       expect(connections).toHaveLength(0)
-      expect(store.simulation.addConnection).not.toHaveBeenCalled()
+      expect(store.circuit.addConnection).not.toHaveBeenCalled()
     })
 
     // it('should set the connection preview ID if isPreview is true', () => {
@@ -97,6 +104,8 @@ describe('connection actions', () => {
     const store = createDocumentStore('document')()
     const source = 'source-id'
     const target = 'target-id'
+    const node1 = new CircuitNode(source)
+    const node2 = new CircuitNode(target)
     const connection = createConnection('connection', source, target)
 
     beforeEach(() => {
@@ -106,11 +115,15 @@ describe('connection actions', () => {
         ports: {
           [source]: createPort(source, 'item1', PortType.Output, { connectedPortIds: [target] }),
           [target]: createPort(target, 'item2', PortType.Input, { connectedPortIds: [source] })
+        },
+        nodes: {
+          [source]: node1,
+          [target]: node2
         }
       })
 
       jest
-        .spyOn(store.simulation, 'removeConnection')
+        .spyOn(store.circuit, 'removeConnection')
         .mockImplementation(jest.fn())
     })
 
@@ -139,8 +152,8 @@ describe('connection actions', () => {
       store.disconnect({ source, target })
 
       expect(store.connections).not.toHaveProperty('connection')
-      expect(store.simulation.removeConnection).toHaveBeenCalledTimes(1)
-      expect(store.simulation.removeConnection).toHaveBeenCalledWith(source, target)
+      expect(store.circuit.removeConnection).toHaveBeenCalledTimes(1)
+      expect(store.circuit.removeConnection).toHaveBeenCalledWith(node1, node2)
     })
   })
 

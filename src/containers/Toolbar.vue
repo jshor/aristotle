@@ -31,7 +31,7 @@
         <toolbar-button :icon="faBug" :active="documentStore.isDebugging" @click="documentStore.toggleDebugger" text="Debug" />
         <toolbar-separator />
         <toolbar-button :icon="faArrowsRotate" @click="documentStore.resetCircuit" text="Reset" />
-        <toolbar-button :icon="faForwardStep" :disabled="!documentStore.isDebugging || documentStore.isCircuitEvaluated" @click="documentStore.stepThroughCircuit" text="Next" />
+        <toolbar-button :icon="faForwardStep" :disabled="!documentStore.isDebugging || documentStore.isCircuitEvaluated" @click="documentStore.advanceSimulation" text="Next" />
         <toolbar-separator />
         <toolbar-button :icon="faWaveSquare" :disabled="documentStore.isDebugging" :active="!documentStore.isDebugging && documentStore.isOscilloscopeOpen" @click="documentStore.toggleOscilloscope" text="Analyze" />
       </div>
@@ -111,12 +111,10 @@ export default defineComponent({
   setup (props) {
     const rootStore = useRootStore()
     const documentStore = props.store()
-    const isComplete = computed(() => documentStore.simulation.circuit.isComplete())
 
     return {
       rootStore,
-      documentStore,
-      isComplete
+      documentStore
     }
   }
 })

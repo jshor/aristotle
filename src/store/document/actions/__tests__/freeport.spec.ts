@@ -11,6 +11,7 @@ import {
 } from './__helpers__'
 import { createDocumentStore } from '../..'
 import ItemSubtype from '@/types/enums/ItemSubtype'
+import { CircuitNode } from '@/circuit'
 
 setActivePinia(createPinia())
 
@@ -122,6 +123,10 @@ describe('freeport actions', () => {
     const connectionChainId = 'connection-chain'
     const inputPortId = 'freeport-input-port'
     const outputPortId = 'freeport-output-port'
+    const node1 = new CircuitNode(sourceId)
+    const node2 = new CircuitNode(targetId)
+    const node3 = new CircuitNode(inputPortId)
+    const node4 = new CircuitNode(outputPortId)
     const position: Point = { x: 0, y: 0 }
 
     beforeEach(() => {
@@ -137,6 +142,12 @@ describe('freeport actions', () => {
         items: {
           'item1': createItem('item1', ItemType.InputNode, { portIds: ['port1'] }),
           'item2': createItem('item2', ItemType.OutputNode, { portIds: ['port2'] })
+        },
+        nodes: {
+          [sourceId]: node1,
+          [targetId]: node2,
+          [inputPortId]: node3,
+          [outputPortId]: node4
         }
       })
 
@@ -145,15 +156,13 @@ describe('freeport actions', () => {
         'deselectAll',
         'setItemBoundingBox',
         'setSelectionState',
-        'incrementZIndex'
+        'incrementZIndex',
+        'advanceSimulation'
       ])
-      stubAll(store.simulation, [
+      stubAll(store.circuit, [
         'addNode',
         'addConnection',
         'removeConnection'
-      ])
-      stubAll(store.simulation.circuit, [
-        'next'
       ])
 
       jest.spyOn(store, 'addFreeportItem')
@@ -225,14 +234,14 @@ describe('freeport actions', () => {
       })
 
       it('should add the two new connections to the simulation', () => {
-        expect(store.simulation.addConnection).toHaveBeenCalledTimes(2)
-        expect(store.simulation.addConnection).toHaveBeenCalledWith(sourceId, inputPortId, store.ports[sourceId].value)
-        expect(store.simulation.addConnection).toHaveBeenCalledWith(outputPortId, targetId, store.ports[sourceId].value)
+        expect(store.circuit.addConnection).toHaveBeenCalledTimes(2)
+        expect(store.circuit.addConnection).toHaveBeenCalledWith(node1, expect.any(CircuitNode), inputPortId, store.ports[sourceId].value)
+        expect(store.circuit.addConnection).toHaveBeenCalledWith(expect.any(CircuitNode), node2, targetId, store.ports[sourceId].value)
       })
 
       it('should remove the original connection from the simulation', () => {
-        expect(store.simulation.removeConnection).toHaveBeenCalledTimes(1)
-        expect(store.simulation.removeConnection).toHaveBeenCalledWith(sourceId, targetId, store.ports[sourceId].value)
+        expect(store.circuit.removeConnection).toHaveBeenCalledTimes(1)
+        expect(store.circuit.removeConnection).toHaveBeenCalledWith(node1, node2, store.ports[sourceId].value)
       })
 
       it('should bring the freeport item to the front', () => {
@@ -244,7 +253,7 @@ describe('freeport actions', () => {
       })
 
       it('should advance the circuit', () => {
-        expect(store.simulation.circuit.next).toHaveBeenCalledTimes(1)
+        expect(store.advanceSimulation).toHaveBeenCalledTimes(1)
       })
     })
 
@@ -473,9 +482,7 @@ describe('freeport actions', () => {
         }
       })
 
-      jest
-        .spyOn(store.simulation, 'addNode')
-        .mockImplementation(jest.fn())
+      stubAll(store, ['addVirtualNode'])
     })
 
     it('should add an input port if its ID is defined', () => {
@@ -548,8 +555,8 @@ describe('freeport actions', () => {
     it('should add the freeport to the circuit with its evaluation forced', () => {
       store.addFreeportItem({ itemId, inputPortId, outputPortId, value })
 
-      expect(store.simulation.addNode).toHaveBeenCalledTimes(1)
-      expect(store.simulation.addNode).toHaveBeenCalledWith(store.items[itemId], store.ports, true)
+      expect(store.addVirtualNode).toHaveBeenCalledTimes(1)
+      expect(store.addVirtualNode).toHaveBeenCalledWith(store.items[itemId])
     })
   })
 })

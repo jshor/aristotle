@@ -8,6 +8,8 @@ export default class FileService {
     const { files } = await zip.loadAsync(compressedContent)
     const data = await files.content.async('text')
 
+    console.log('DATA: ', data)
+
     return data
   }
 

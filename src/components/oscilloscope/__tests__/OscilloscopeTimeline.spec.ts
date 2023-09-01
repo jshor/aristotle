@@ -1,10 +1,18 @@
 import { mount, VueWrapper } from '@vue/test-utils'
 import { ComponentPublicInstance } from 'vue'
 import OscilloscopeTimeline from '../OscilloscopeTimeline.vue'
+import { createItem, createPort } from '@/store/document/actions/__tests__/__helpers__'
+import ItemType from '@/types/enums/ItemType'
+import PortType from '@/types/enums/PortType'
 
 describe('Oscilloscope Timeline', () => {
+  const port = createPort('port', 'item', PortType.Output, { name: 'Input Port' })
+  const item = createItem('item', ItemType.InputNode, {
+    portIds: ['port'],
+    name: 'Inpit 1'
+  })
   const oscillogram: Oscillogram = {
-    wave: {
+    [port.id]: {
       points: '0,0 10,0 10,1 20,1 20,0 30,0',
       hue: 340,
       width: 30
@@ -18,7 +26,9 @@ describe('Oscilloscope Timeline', () => {
   beforeEach(() => {
     wrapper = mount(OscilloscopeTimeline, {
       props: {
-        oscillogram
+        oscillogram,
+        items: { item },
+        ports: { port }
       },
       attachTo: document.body
     })

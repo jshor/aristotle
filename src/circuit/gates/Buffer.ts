@@ -2,8 +2,6 @@ import CircuitNode from '../base/CircuitNode'
 import LogicValue from '../types/LogicValue'
 
 class Buffer extends CircuitNode {
-  public forceContinue: boolean = true
-
   /**
    * Updates the input value at the given index with the given value.
    *

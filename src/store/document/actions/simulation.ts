@@ -1,154 +1,271 @@
-import SimulationService from '@/services/SimulationService'
 import { DocumentStoreInstance } from '..'
 
-/**
- * Restarts the simulation (if not in debugging mode).
- */
-export function toggleOscillatorRecording (this: DocumentStoreInstance) {
-  if (this.simulation.oscillator.isPaused) {
-    this.simulation.oscillator.start()
-  } else {
-    this.simulation.oscillator.stop()
-  }
-
-  this.isOscilloscopeRecording = !this.simulation.oscillator.isPaused
-}
+import { Circuit, CircuitNode, LogicValue } from '@/circuit'
+import { TinyEmitter } from 'tiny-emitter'
+import BinaryWaveService from '@/services/BinaryWaveService'
+import ClockService from '@/services/ClockService'
+import OscillationService from '@/services/OscillationService'
+import ItemType from '@/types/enums/ItemType'
+import ItemSubtype from '@/types/enums/ItemSubtype'
+import PortType from '@/types/enums/PortType'
+import circuitNodeMapper from '@/utils/circuitNodeMapper'
 
 /**
- * Updates the store according to the port-value mapping provided.
- * This also accepts oscillogram to update the visual oscilloscope.
+ * Toggles all item clocks on or off.
  */
-export function onSimulationUpdate (this: DocumentStoreInstance, valueMap: Record<string, number>) {
-  for (const portId in valueMap) {
-    if (this.ports[portId]) {
-      const port = this.ports[portId]
-      const item = this.items[port.elementId]
-
-      if (item && port.value !== valueMap[portId]) {
-        this.debugger.hasUpdated = true
-      }
-
-      port.value = valueMap[portId]
-    }
-  }
-
-  this.isCircuitEvaluated = !this.simulation.canContinue
-
-  clearTimeout(this.debugger.timeout)
-
-  this.debugger.timeout = window.setTimeout(() => {
-    // if the user can still advance a step and the circuit hasn't finished evaluating yet, step over again
-    // this is in a timeout in order to wait for the next JS frame (by which time all events will have been emitted)
-    if (!this.debugger.hasUpdated && this.simulation.canContinue && this.isDebugging) {
-      this.debugger.hasUpdated = false
-      this.simulation.advanceDebuggerStep()
-    }
-  })
-}
-
-export function onError (this: DocumentStoreInstance, error: string) {
-  window.api.showMessageBox({
-    message: 'An infinite loop was detected! Entering debugger mode.',
-    type: 'error'
-  })
-
-  this.isDebugging = true
-  this.simulation.startDebugging()
-}
-
-export function resetCircuit (this: DocumentStoreInstance) {
-  const items = Object.values(this.items)
-  const connections = Object.values(this.connections)
-
+export function toggleClocks (this: DocumentStoreInstance, fn: 'start' | 'stop') {
   Object
-    .values(this.ports)
-    .forEach(port => {
-      port.value = 0
-    })
+    .values(this.items)
+    .forEach(item => item.clock?.[fn]())
+}
 
-  this.simulation.stop()
-  this.simulation = new SimulationService(items, connections, this.ports)
-  this.simulation.onChange(this.onSimulationUpdate)
-  this.simulation.onError(this.onError)
+/**
+ * Starts the simulation.
+ * This will not start clocks if the debugger is on.
+ */
+export function startSimulation (this: DocumentStoreInstance) {
+  if (!this.isDebugging) {
+    this.toggleClocks('start')
+  }
+  this.oscillator.start()
+}
 
-  // set the callback to update the oscilloscope when the oscillogram updates
-  this.simulation.oscillator.on('change', oscillogram => {
-    this.oscillogram = oscillogram
-  })
+/**
+ * Stops the simulation.
+ */
+export function stopSimulation (this: DocumentStoreInstance) {
+  this.toggleClocks('stop')
+  this.oscillator.stop()
+}
+
+/**
+ * Advances the circuit simulation by one visual step.
+ */
+export function advanceSimulation (this: DocumentStoreInstance) {
+  this.isCircuitEvaluated = true
+  this.evaluateCircuitStep()
+}
+
+/**
+ * Toggles the debugger to the opposite of its current state.
+ * If `force` is provided as `true`, then the debugger will be forced to turn on.
+ */
+export function toggleDebugger (this: DocumentStoreInstance, force = false) {
+  this.isDebugging = !this.isDebugging
+
+  if (this.isDebugging || force) {
+    this.stopSimulation()
+    this.isDebugging = true
+  } else {
+    this.startSimulation()
+    this.advanceSimulation()
+  }
+}
+
+/**
+ * Flushes all circuit values such that no values are "trapped" in any circuits.
+ * This is useful to flush stored values out of flip-flops or other memory items.
+ */
+export function flushCircuit (this: DocumentStoreInstance) {
+  // force the evaluation of the entire circuit with the new initialized values
+  const isDebugging = this.isDebugging
+
+  this.isDebugging = false
+  this.advanceSimulation()
+  this.isDebugging = isDebugging // if the circuit was in debugging mode before, then re-enable it
+  this.isCircuitEvaluated = true
+}
+
+/**
+ * Advances the circuit by one visual iteration step.
+ *
+ * When the debugger is on, this will continue advancing until either the circuit is fully evaluated,
+ * or until some visual value change has occurred.
+ *
+ * When the debugger is off, this will continue advancing until the circuit is fully evaluated.
+ */
+export function evaluateCircuitStep (this: DocumentStoreInstance, iteration: number = 0) {
+  this.circuit.advance()
+
+  if (iteration > 1000) { // TODO: make this number configurable in settings
+    // TODO: show a dialog to the user to warn them
+    return this.toggleDebugger()
+  }
+
+  if (this.circuit.queue.length > 0 && !(this.isDebugging && !this.isCircuitEvaluated)) {
+    this.evaluateCircuitStep(++iteration)
+  }
+}
+
+/**
+ * Resets the virtual circuit back to its original state.
+ */
+export function resetCircuit (this: DocumentStoreInstance) {
+  this.oscillator.clear()
+  this.circuit.reset()
 
   // apply the initial port values
   Object
     .values(this.items)
-    .forEach(({ properties, portIds }) => {
-      if (properties?.startValue) {
-        portIds.forEach(portId => this.setPortValue({
-          id: portId,
-          value: properties.startValue.value as number
-        }))
+    .forEach(({ type, properties, portIds }) => {
+      if (type === ItemType.InputNode) {
+        portIds.forEach(portId => {
+          // if this is an input node, initialize all values to false
+          // this is to propagate the initial value to all connected nodes
+          // TODO: this really ought to be user-configurable - some users may prefer to start with high impedance
+          this.setPortValue({
+            id: portId,
+            value: LogicValue.UNKNOWN
+          })
+          this.flushCircuit()
+          this.setPortValue({
+            id: portId,
+            value: LogicValue.FALSE // TODO: if they start with hi-Z, then don't do this part
+          })
+          this.flushCircuit()
+
+          if (properties?.startValue) {
+            // if a default start value is defined, apply that value
+            this.setPortValue({
+              id: portId,
+              value: properties.startValue.value as number
+            })
+          }
+        })
       }
     })
 
-  this.simulation.start()
-
-  if (this.isDebugging) {
-    this.simulation.startDebugging()
-    this.isCircuitEvaluated = !this.simulation.canContinue
-  }
+  this.flushCircuit()
 }
 
-export function stepThroughCircuit (this: DocumentStoreInstance) {
-  this.debugger.hasUpdated = false
-  this.simulation.advanceDebuggerStep()
-  this.isCircuitEvaluated = !this.simulation.canContinue
-}
+/**
+ * Adds an integrated circuit to the simulation.
+ *
+ * @param item - the high-level integrated circuit item
+ */
+export function addIntegratedCircuitNode (this: DocumentStoreInstance, icItem: Item) {
+  if (!icItem.integratedCircuit) return
 
-export function toggleDebugger (this: DocumentStoreInstance) {
+  const { items, connections, ports } = icItem.integratedCircuit
 
-
-  if (this.isDebugging) {
-    this.simulation.stopDebugging()
-  } else {
-    this.simulation.startDebugging()
-  }
-
-  this.isDebugging = !this.isDebugging
-}
-
-export function toggleOscilloscope (this: DocumentStoreInstance) {
-  if (this.isOscilloscopeOpen) {
-    this.closeOscilloscope()
-  } else {
-    this.openOscilloscope()
-  }
-}
-
-export function openOscilloscope (this: DocumentStoreInstance) {
   Object
-    .values(this.ports)
-    .forEach(port => {
-      if (port.isMonitored) {
-        this.simulation.monitorPort(port.id, port.value, port.hue)
-      }
+    .values(items)
+    .forEach(item => {
+      this.addVirtualNode(item, ports)
     })
 
-  this.isOscilloscopeOpen = true
-}
-
-export function closeOscilloscope (this: DocumentStoreInstance, lastHeight?: number) {
-  if (!this.isOscilloscopeOpen) return
-
   Object
-    .keys(this.ports)
-    .forEach(this.simulation.unmonitorPort)
-
-  this.simulation.oscillator.clear()
-  this.isOscilloscopeOpen = false
-
-  if (lastHeight) {
-    this.oscilloscopeHeight = lastHeight
-  }
+    .values(connections)
+    .forEach(c => {
+      this
+        .circuit
+        .addConnection(this.nodes[c.source], this.nodes[c.target], c.target)
+    })
 }
 
-export function clearOscilloscope (this: DocumentStoreInstance) {
-  this.simulation.oscillator.clear()
+/**
+ * Given an Item, adds a virtual node and related simulation references to the circuit.
+ */
+export function addVirtualNode (this: DocumentStoreInstance, item: Item, ports: Record<string, Port> = this.ports) {
+  if (item.portIds.length === 0) return // if there are no ports, then there is nothing to add to the simulation
+
+    if (item.integratedCircuit) {
+      return this.addIntegratedCircuitNode(item)
+    }
+
+    const inputIds = item.portIds.filter(portId => ports[portId].type === PortType.Input)
+    const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
+    const node = circuitNodeMapper.getCircuitNode(item, inputIds)
+
+    node.forceContinue = item.type === ItemType.Freeport // freeport value changes are immaterial to the debugger, so always allow it to advance
+    node.on('change', this.onVirtualNodeChange.bind(this, node, outputIds))
+
+    item.portIds.forEach(portId => {
+      this.nodes[portId] = node
+    })
+
+    if (item.type === ItemType.InputNode && item.subtype === ItemSubtype.Clock) {
+      const interval = item.properties.interval?.value as number
+
+
+      item.clock = new ClockService(outputIds[0], interval, 1) // TODO: should clock start at 1? should be configurable in properties?
+      item.clock.on('change', (value: number) => this.setPortValue({ id: outputIds[0], value }))
+
+      this.oscillator.add(item.clock)
+    }
+
+    this.circuit.addNode(node)
+
+    item
+      .portIds
+      .forEach(portId => {
+        const port = ports[portId]
+
+        if (port.isMonitored) {
+          this.monitorPort(portId)
+        }
+      })
+}
+
+/**
+ * Removes the Item having the given ID and all its virtual references from the simulation.
+ */
+export function removeVirtualNode (this: DocumentStoreInstance, itemId: string) {
+  const item = this.items[itemId]
+
+  /**
+   * Returns the port IDs of all ports that are related to the given integrated circuit.
+   */
+  const getIntegratedCircuitPortIds = (ic: Item): string[] => {
+    if (!ic.integratedCircuit) return []
+
+    return Object
+      .values(ic.integratedCircuit.items)
+      .reduce((portIds, i) => {
+        if (i.integratedCircuit) {
+          return portIds
+            .concat(getIntegratedCircuitPortIds(i))
+            .concat(i.portIds)
+        }
+        return portIds.concat(i.portIds)
+      }, [] as string[])
+  }
+
+  // remove all nodes that are referenced to port IDs of the given item
+  item
+    .portIds
+    .concat(getIntegratedCircuitPortIds(item)) // ...including IC ports
+    .forEach(portId => {
+      const node = this.nodes[portId]
+
+      if (node) {
+        this.circuit.removeNode(node)
+        this.removePort(portId)
+      }
+    })
+}
+
+/**
+ * Updates the state for the given virtual node value change.
+ */
+export function onVirtualNodeChange (this: DocumentStoreInstance, node: CircuitNode, outputIds: string[], value: number, outputs: string[]) {
+  outputs
+    .concat(outputIds) // include all output ports
+    .forEach(portId => {
+      if (this.ports[portId]) {
+        const port = this.ports[portId]
+
+        if (this.items[port.elementId] && port.value !== value) {
+          // only accept that the circuit has changed if the value of a port that's visible on the canvas has changed
+          if (!node.forceContinue) {
+            // if a node is not marked to be forceContinue, then it's either internal to an IC, or it's a freeport and its change is immaterial
+            // if the value of a material port that's visible on the canvas has changed, then the circuit has not been fully evaluated
+            this.isCircuitEvaluated = false
+          }
+        }
+
+        port.value = value
+        port.wave?.drawPulseChange(value)
+      }
+    })
 }

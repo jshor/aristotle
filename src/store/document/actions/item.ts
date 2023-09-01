@@ -28,16 +28,31 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
         this.ports[port.id] = port
 
         if (port.isMonitored) {
-          this.monitorPort(port.id)
+          // any existing wave is now be disconnected from signal changes since this is a new instance of Item
+          delete port.wave
+
+          // unmonitor the existing wave, if applicable
+          this.unmonitorPort(port.id)
+
+          // wait for next JS frame so that the oscillogram broadcast (with the port wave removed) completes first
+          // then the port can be re-monitored with the new wave
+          setTimeout(() => this.monitorPort(port.id))
         }
       }
     })
 
-  let name = item.name
-  let c = 0
+  // TODO: the naming scheme here is really messed up - sometimes copy+pasting items will create names like 'Clock 2 2 2'
+  // think of a better way to autoname items
+  const itemNames = Object
+    .values(this.items)
+    .map(({ name }) => name)
+  const originalName = item.name || item.subtype
 
-  while (this.itemNames.includes(name)) {
-    name = `${item.name} ${++c}`
+  let name = originalName
+  let c = 1
+
+  while (itemNames.includes(name)) {
+    name = `${originalName} ${++c}`
   }
 
   item.name = name
@@ -46,10 +61,7 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
   this.items[item.id] = item
   this.items[item.id].zIndex = ++this.zIndex
 
-  this
-    .simulation
-    .addNode(item, this.ports)
-
+  this.addVirtualNode(item)
   this.resetItemValue(item)
   this.setProperties(item.id, item.properties)
   this.setItemBoundingBox(item.id)
@@ -104,9 +116,7 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
     this.disconnectFreeport(id)
   }
 
-  this
-    .simulation
-    .removeNode(item)
+  this.removeVirtualNode(item.id)
 
   // remove all ports associated with the item
   const ids = [...item.portIds]
@@ -187,7 +197,9 @@ export function setProperties (this: DocumentStoreInstance, id: string, properti
         this.setInputCount(id, property.value as number)
         break
       case 'interval':
-        this.simulation.setClockInterval(item.portIds.slice(-1)[0], property.value as number)
+        if (item.clock) {
+          item.clock.interval = property.value as number
+        }
         break
     }
 

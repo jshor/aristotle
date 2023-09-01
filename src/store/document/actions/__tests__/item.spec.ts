@@ -20,10 +20,7 @@ describe('item actions', () => {
 
     beforeEach(() => {
       store.$reset()
-
-      jest
-        .spyOn(store.simulation, 'addNode')
-        .mockImplementation(jest.fn())
+      stubAll(store, ['addVirtualNode'])
     })
 
     describe('when the item is not an integrated circuit', () => {
@@ -45,8 +42,8 @@ describe('item actions', () => {
       })
 
       it('should add the item as a node to the circuit', () => {
-        expect(store.simulation.addNode).toHaveBeenCalledTimes(1)
-        expect(store.simulation.addNode).toHaveBeenCalledWith(item, store.ports)
+        expect(store.addVirtualNode).toHaveBeenCalledTimes(1)
+        expect(store.addVirtualNode).toHaveBeenCalledWith(item)
       })
     })
 
@@ -78,8 +75,8 @@ describe('item actions', () => {
       })
 
       it('should install the integrated circuit onto the active circuit', () => {
-        expect(store.simulation.addNode).toHaveBeenCalledTimes(1)
-        expect(store.simulation.addNode).toHaveBeenCalledWith(icItem, store.ports)
+        expect(store.addVirtualNode).toHaveBeenCalledTimes(1)
+        expect(store.addVirtualNode).toHaveBeenCalledWith(icItem)
       })
     })
   })
@@ -108,12 +105,10 @@ describe('item actions', () => {
           ports: { port1, port2, port3 }
         })
 
-        jest
-          .spyOn(store.simulation, 'removeNode')
-          .mockImplementation(jest.fn())
-        jest
-          .spyOn(store, 'removePort')
-          .mockImplementation(jest.fn())
+        stubAll(store, [
+          'removeVirtualNode',
+          'removePort'
+        ])
 
         store.removeElement('icItem')
       })
@@ -125,8 +120,8 @@ describe('item actions', () => {
       })
 
       it('should remove each embedded IC item from the circuit', () => {
-        expect(store.simulation.removeNode).toHaveBeenCalledTimes(1)
-        expect(store.simulation.removeNode).toHaveBeenCalledWith(icItem)
+        expect(store.removeVirtualNode).toHaveBeenCalledTimes(1)
+        expect(store.removeVirtualNode).toHaveBeenCalledWith(icItem.id)
       })
 
       it('should not remove ports that are not associated to the IC', () => {
@@ -150,17 +145,13 @@ describe('item actions', () => {
           ports: { port1, port2, port3 }
         })
 
-        jest
-          .spyOn(store.simulation, 'removeNode')
-          .mockImplementation(jest.fn())
-        jest
-          .spyOn(store, 'removePort')
-          .mockImplementation(jest.fn())
-
+        stubAll(store, [
+          'removeVirtualNode',
+          'removePort'
+        ])
 
         store.removeElement('item1')
       })
-
 
       it('should remove each port associated to the IC', () => {
         expect(store.removePort).toHaveBeenCalledTimes(2)
@@ -169,8 +160,8 @@ describe('item actions', () => {
       })
 
       it('should remove the node from the circuit', () => {
-        expect(store.simulation.removeNode).toHaveBeenCalledTimes(1)
-        expect(store.simulation.removeNode).toHaveBeenCalledWith(item1)
+        expect(store.removeVirtualNode).toHaveBeenCalledTimes(1)
+        expect(store.removeVirtualNode).toHaveBeenCalledWith(item1.id)
       })
 
       it('should not remove ports that are not associated to the item', () => {

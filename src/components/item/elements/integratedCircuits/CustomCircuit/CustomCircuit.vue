@@ -62,6 +62,7 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     padding: 1em;
+    color: var(--color-primary);
   }
 
   &__center {
