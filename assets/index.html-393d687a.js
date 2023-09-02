@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-8daa1a0e","path":"/","title":"","lang":"en-US","frontmatter":{"home":true,"pageClass":"homepage","footer":"© 2022 Aristotle."},"headers":[],"git":{"updatedTime":1693687805000,"contributors":[{"name":"Josh Shor","email":"jpshor@gmail.com","commits":1}]},"filePathRelative":"README.md"}');export{e as data};
