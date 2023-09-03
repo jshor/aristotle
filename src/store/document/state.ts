@@ -36,6 +36,8 @@ export interface DocumentState extends SerializableState {
   isDebugging: boolean
   /** Whether or not the document is dirty (i.e., has unsaved changes). */
   isDirty: boolean
+  /** Whether or not the document is busy processing something. Useful to debounce CPU-intensive actions. */
+  isBusy: boolean
   /** The ID of the actively-dragged freeport. */
   activeFreeportId: string | null
   /** List of IDs of selected items. */
@@ -78,6 +80,7 @@ export const state = (): DocumentState => ({
   isCircuitEvaluated: false,
   isDebugging: false,
   isDirty: false,
+  isBusy: false,
   hasLoaded: false,
   isPrinting: false,
   isCreatingImage: false,

@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, MenuItemConstructorOptions, FileFilter, clipboard, MessageBoxSyncOptions } from 'electron'
+import { contextBridge, ipcRenderer, MenuItemConstructorOptions, FileFilter, clipboard, MessageBoxSyncOptions, shell } from 'electron'
 import { Menu, dialog, app, screen, getCurrentWindow } from '@electron/remote'
 import path from 'path'
 import fs from 'fs'
@@ -6,7 +6,7 @@ import os from 'os'
 
 const defaultPath = path.resolve(app.getPath('desktop'))
 
-export const api = {
+export const api: typeof window.api = {
   showContextMenu (menuItems: MenuItemConstructorOptions[]) {
     const point = screen.getCursorScreenPoint()
 
@@ -72,28 +72,37 @@ export const api = {
   openFile (filePath: string) {
     return fs
       .readFileSync(filePath)
-      // .toString()
+      .toString()
   },
   saveFile (filePath: string, data: ArrayBuffer) {
     const buf = Buffer.from(data)
 
     fs.writeFileSync(filePath, buf)
   },
-  copy (data: string) {
+  setClipboardContents (data: string) {
     const buffer = Buffer.from(data, 'utf8')
 
-    clipboard.writeBuffer('public/utf8-plain-text', buffer)
+    clipboard.writeBuffer('public/aristotle', buffer)
   },
-  paste () {
+  getClipboardContents () {
     return clipboard
-      .readBuffer('public/utf8-plain-text')
+      .readBuffer('public/aristotle')
       .toString()
+  },
+  clearClipboard () {
+    return clipboard.clear()
+  },
+  canPaste () {
+    return clipboard.has('public/aristotle')
   },
   setFullscreen (isFullscreen: boolean) {
     getCurrentWindow().setFullScreen(isFullscreen)
   },
   getDefaultSavePath () {
     return os.homedir()
+  },
+  beep () {
+    shell.beep()
   }
 }
 

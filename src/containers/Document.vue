@@ -40,7 +40,7 @@
         :key="baseItem.id"
         :is-selected="baseItem.isSelected"
         :flash="store.isDebugging && store.isCircuitEvaluated"
-        :z-index="baseItem.zIndex + 1000"
+        :z-index="baseItem.zIndex + (baseItem.type !== 'Freeport' ? 2000 : 1000)"
         @contextmenu="onContextMenu"
       />
       <!-- Note: z-index of items will be offset by +1000 to ensure it always overlaps wires -->
@@ -123,18 +123,12 @@ export default defineComponent({
     onMounted(() => {
       document.addEventListener('keydown', onKeyDown)
       document.addEventListener('keyup', onKeyUp)
-      document.addEventListener('cut', onClipboard('cut'))
-      document.addEventListener('copy', onClipboard('copy'))
-      document.addEventListener('paste', onClipboard('paste'))
       window.addEventListener('blur', clearKeys)
     })
 
     onBeforeUnmount(() => {
       document.removeEventListener('keydown', onKeyDown)
       document.removeEventListener('keyup', onKeyUp)
-      document.addEventListener('cut', onClipboard('cut'))
-      document.addEventListener('copy', onClipboard('copy'))
-      document.addEventListener('paste', onClipboard('paste'))
       window.removeEventListener('blur', clearKeys)
     })
 
@@ -169,16 +163,6 @@ export default defineComponent({
       })
     }
 
-
-    function onClipboard (action: 'cut' | 'copy' | 'paste') {
-      return function ($event: ClipboardEvent) {
-        if ($event.target instanceof HTMLInputElement) return
-
-        store[action]()
-        $event.preventDefault()
-      }
-    }
-
     function onKeyDown ($event: KeyboardEvent) {
       if ($event.target instanceof HTMLInputElement) return
 
@@ -186,6 +170,8 @@ export default defineComponent({
         case 'Escape':
           return store.deselectAll()
         case 'a':
+          // the CommandOrControl+A accelerator doesn't work with Electron's menu
+          // this is a workaround for that
           return $event.ctrlKey && store.selectAll()
         default:
           return moveItemsByArrowKey($event)

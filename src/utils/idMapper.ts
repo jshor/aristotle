@@ -87,9 +87,8 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
             serializedState: item.integratedCircuit.serializedState,
             ...mapStandardCircuitIds(cloneDeep(item.integratedCircuit), idMap)
           }
-        } else {
-          items[newId].id = newId
         }
+          items[newId].id = newId
 
         items[newId].portIds = item.portIds.map(oldId => idMap[oldId])
 
@@ -141,6 +140,7 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
 }
 
 function mapIntegratedCircuitIds (item: Item) {
+  // TODO: this function can probably be removed
   if (!item.integratedCircuit) return item
 
   const { items } = mapStandardCircuitIds({

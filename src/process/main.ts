@@ -170,7 +170,7 @@ if (!gotTheLock) {
 
     mainWindow = await createMainWindow()
 
-    app.dock.setIcon(icon)
+    app.dock?.setIcon(icon)
     app.whenReady().then(async () => {
       await boot(app, mainWindow)
 

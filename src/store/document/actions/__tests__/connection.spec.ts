@@ -237,7 +237,7 @@ describe('connection actions', () => {
 
       beforeEach(() => {
         stubAll(store, [
-          'disconnect'
+          'disconnectById'
         ])
 
         store.$patch({
@@ -248,8 +248,8 @@ describe('connection actions', () => {
       })
 
       it('should disconnect the active connection', () => {
-        expect(store.disconnect).toHaveBeenCalledTimes(1)
-        expect(store.disconnect).toHaveBeenCalledWith(connection)
+        expect(store.disconnectById).toHaveBeenCalledTimes(1)
+        expect(store.disconnectById).toHaveBeenCalledWith(connection.id)
       })
 
       it('should clear the connection preview id', () => {
@@ -267,18 +267,20 @@ describe('connection actions', () => {
   describe('commitPreviewedConnection ', () => {
     const store = createDocumentStore('document')()
 
+    beforeEach(() => {
+      stubAll(store, [
+        'connect',
+        'disconnectById',
+        'commitState'
+      ])
+    })
+
     describe('when there is a connection preview set', () => {
       const source = createPort('source-id', 'item-id', PortType.Output)
       const target = createPort('target-id', 'item-id', PortType.Input)
       const connection = createConnection('connection', 'source-id', 'target-id')
 
       beforeEach(() => {
-        stubAll(store, [
-          'connect',
-          'disconnect',
-          'commitState'
-        ])
-
         store.$patch({
           connectionPreviewId: connection.id,
           connections: { connection },
@@ -295,8 +297,8 @@ describe('connection actions', () => {
       })
 
       it('should disconnect the existing connection', () => {
-        expect(store.disconnect).toHaveBeenCalledTimes(1)
-        expect(store.disconnect).toHaveBeenCalledWith({ source: source.id, target: target.id })
+        expect(store.disconnectById).toHaveBeenCalledTimes(1)
+        expect(store.disconnectById).toHaveBeenCalledWith(connection.id)
       })
 
       it('should re-connect the connection without a preview ID set', () => {
@@ -389,4 +391,53 @@ describe('connection actions', () => {
     })
   })
 
+  describe('disconnectById', () => {
+    const store = createDocumentStore('document')()
+    const node1 = new CircuitNode('source-id')
+    const node2 = new CircuitNode('target-id')
+    const connection = createConnection('connection', 'source-id', 'target-id')
+
+    beforeEach(() => {
+      store.$reset()
+      store.$patch({
+        connections: { connection },
+        nodes: {
+          'source-id': node1,
+          'target-id': node2
+        }
+      })
+
+      stubAll(store, [
+        'advanceSimulation',
+        'destroyConnectionById'
+      ])
+      stubAll(store.circuit, ['removeConnection'])
+    })
+
+    it('should not do anything if the connection does not exist', () => {
+      store.disconnectById('invalid-id')
+
+      expect(store.circuit.removeConnection).not.toHaveBeenCalled()
+      expect(store.advanceSimulation).not.toHaveBeenCalled()
+      expect(store.destroyConnectionById).not.toHaveBeenCalled()
+    })
+
+    describe('when the connection exists', () => {
+      beforeEach(() => store.disconnectById(connection.id))
+
+      it('should remove the connection from the circuit', () => {
+        expect(store.circuit.removeConnection).toHaveBeenCalledTimes(1)
+        expect(store.circuit.removeConnection).toHaveBeenCalledWith(node1, node2)
+      })
+
+      it('should advance the simulation', () => {
+        expect(store.advanceSimulation).toHaveBeenCalledTimes(1)
+      })
+
+      it('should destroy the connection', () => {
+        expect(store.destroyConnectionById).toHaveBeenCalledTimes(1)
+        expect(store.destroyConnectionById).toHaveBeenCalledWith(connection.id)
+      })
+    })
+  })
 })

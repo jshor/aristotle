@@ -3,6 +3,7 @@ import PortType from '@/types/enums/PortType'
 import ItemType from '@/types/enums/ItemType'
 import {
   createConnection,
+  createGroup,
   createIntegratedCircuit,
   createItem,
   createPort,
@@ -23,7 +24,7 @@ describe('undo/redo actions', () => {
       store.$reset()
 
       stubAll(store, [
-        'applyState'
+        'applySerializedState'
       ])
     })
 
@@ -42,8 +43,8 @@ describe('undo/redo actions', () => {
       })
 
       it('should apply the undo-able state on the top of the undo stack', () => {
-        expect(store.applyState).toHaveBeenCalledTimes(1)
-        expect(store.applyState).toHaveBeenCalledWith(undoState)
+        expect(store.applySerializedState).toHaveBeenCalledTimes(1)
+        expect(store.applySerializedState).toHaveBeenCalledWith(undoState)
       })
 
       it('should remove the redo-able state from the top of the redo stack', () => {
@@ -56,7 +57,7 @@ describe('undo/redo actions', () => {
       store.undo()
 
       expect(store.redoStack).toHaveLength(0)
-      expect(store.applyState).not.toHaveBeenCalled()
+      expect(store.applySerializedState).not.toHaveBeenCalled()
     })
   })
 
@@ -67,7 +68,7 @@ describe('undo/redo actions', () => {
       store.$reset()
 
       stubAll(store, [
-        'applyState'
+        'applySerializedState'
       ])
     })
 
@@ -86,7 +87,7 @@ describe('undo/redo actions', () => {
       })
 
       it('should apply the undo-able state on the top of the redo stack', () => {
-        expect(store.applyState).toHaveBeenCalledWith(redoState)
+        expect(store.applySerializedState).toHaveBeenCalledWith(redoState)
       })
 
       it('should remove the redo-able state from the top of the redo stack', () => {
@@ -98,7 +99,7 @@ describe('undo/redo actions', () => {
       store.redo()
 
       expect(store.undoStack).toHaveLength(0)
-      expect(store.applyState).not.toHaveBeenCalled()
+      expect(store.applySerializedState).not.toHaveBeenCalled()
     })
   })
 
@@ -159,7 +160,7 @@ describe('undo/redo actions', () => {
     })
   })
 
-  describe.skip('applyState', () => {
+  describe('applyDeserializedState', () => {
     const store = createDocumentStore('document')()
 
     const addedItem1 = createItem('addedItem1', ItemType.InputNode)
@@ -170,6 +171,7 @@ describe('undo/redo actions', () => {
     const addedPort1 = createPort('addedPort1', 'addedItem1', PortType.Output)
     const addedPort2 = createPort('addedPort2', 'addedItem2', PortType.Input)
     const addedConnection = createConnection('addedConnection', 'addedPort1', 'addedPort2')
+    const addedGroup = createGroup('addedGroup', [addedItem1.id, addedItem2.id])
 
     const removedItem1 = createItem('removedItem1', ItemType.InputNode)
     const removedItem2 = createItem('removedItem2', ItemType.InputNode)
@@ -182,26 +184,33 @@ describe('undo/redo actions', () => {
       store.$patch({
         items: { removedItem1, removedItem2 },
         ports: { removedPort1, removedPort2 },
-        connections: { removedConnection }
+        connections: { removedConnection },
+        groups: {}
       })
+
+      jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation(cb => {
+          cb(0)
+          return 0
+        })
 
       stubAll(store, [
         'addItem',
-        'removeElement',
+        'deselectAll',
         'connect',
-        'disconnect'
+        'disconnectById',
+        'removeElement',
+        'setItemBoundingBox',
+        'setGroupBoundingBox'
       ])
 
-      store.applyState(JSON.stringify({
+      store.applyDeserializedState({
         items: { addedItem1, addedItem2, addedIc },
         ports: { addedPort1, addedPort2 },
-        connections: { addedConnection }
-      }))
-    })
-
-    it('should add the items that are not present in the old state but are in the new one', () => {
-      expect(store.items).not.toHaveProperty('removedItem1')
-      expect(store.items).not.toHaveProperty('removedItem2')
+        connections: { addedConnection },
+        groups: { addedGroup }
+      })
     })
 
     it('should remove the items from the old state that are not present in the new one', () => {
@@ -213,16 +222,64 @@ describe('undo/redo actions', () => {
     })
 
     it('should commit removeElement for each item that will be lost between states', () => {
+      expect(store.removeElement).toHaveBeenCalledTimes(2)
       expect(store.removeElement).toHaveBeenCalledWith('removedItem1')
       expect(store.removeElement).toHaveBeenCalledWith('removedItem2')
     })
 
     it('should commit disconnect for each connection that will be lost between states', () => {
-      expect(store.disconnect).toHaveBeenCalledWith(store.connections.removedConnection)
+      expect(store.disconnectById).toHaveBeenCalledTimes(1)
+      expect(store.disconnectById).toHaveBeenCalledWith('removedConnection')
     })
 
     it('should commit connect for each connection that will be gained between states', () => {
       expect(store.connect).toHaveBeenCalledWith(addedConnection)
+    })
+
+    it('should set the group and its bounding box', () => {
+      expect(store.groups).toHaveProperty(addedGroup.id)
+      expect(store.groups.addedGroup).toEqual(addedGroup)
+      expect(store.setGroupBoundingBox).toHaveBeenCalledTimes(1)
+      expect(store.setGroupBoundingBox).toHaveBeenCalledWith(addedGroup.id)
+    })
+  })
+
+  describe('applySerializedState', () => {
+    it('should call applyDeserializedState()', () => {
+      jest.restoreAllMocks()
+
+      const store = createDocumentStore('document')()
+      const state = {
+        items: {},
+        connections: {},
+        ports: {},
+        groups: {}
+      }
+
+      stubAll(store, [
+        'applyDeserializedState'
+      ])
+
+      store.applySerializedState(JSON.stringify(state))
+
+      expect(store.applyDeserializedState).toHaveBeenCalledTimes(1)
+      expect(store.applyDeserializedState).toHaveBeenCalledWith(state)
+    })
+  })
+
+  describe('commitState', () => {
+    const store = createDocumentStore('document')()
+
+    it('should cache the current state', () => {
+      stubAll(store, [
+        'cacheState',
+        'commitCachedState'
+      ])
+
+      store.commitState()
+
+      expect(store.cacheState).toHaveBeenCalledTimes(1)
+      expect(store.commitCachedState).toHaveBeenCalledTimes(1)
     })
   })
 })

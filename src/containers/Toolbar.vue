@@ -19,9 +19,9 @@
         <toolbar-button @click="documentStore.group" :disabled="!documentStore.canGroup" :icon="faObjectGroup" text="Group" />
         <toolbar-button @click="documentStore.ungroup" :disabled="!documentStore.canUngroup" :icon="faObjectUngroup" text="Ungroup" />
         <toolbar-separator />
-        <toolbar-button :icon="faScissors" text="Cut" />
-        <toolbar-button :icon="faCopy" text="Copy" />
-        <toolbar-button :icon="faPaste" text="Paste" />
+        <toolbar-button @click="rootStore.invokeClipboardAction('cut')" :icon="faScissors" :disabled="!documentStore.hasSelectedItems" text="Cut" />
+        <toolbar-button @click="rootStore.invokeClipboardAction('copy')" :icon="faCopy" :disabled="!documentStore.hasSelectedItems" text="Copy" />
+        <toolbar-button @click="rootStore.invokeClipboardAction('paste')" :disabled="!rootStore.canPaste" :icon="faPaste" text="Paste" />
         <toolbar-button @click="documentStore.deleteSelection" :disabled="!documentStore.hasSelection" :icon="faBan" text="Delete" />
         <toolbar-separator />
         <toolbar-button @click="rootStore.launchIntegratedCircuitBuilder" :icon="faMicrochip" text="Export" />

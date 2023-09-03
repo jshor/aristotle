@@ -1,8 +1,10 @@
 import { MenuItemConstructorOptions } from 'electron/main'
 import { DocumentStore } from '@/store/document'
+import { useRootStore } from '@/store/root'
 
 export default function edit (useDocumentStore: DocumentStore, submenus: MenuItemConstructorOptions[] = []): MenuItemConstructorOptions[] {
   const store = useDocumentStore()
+  const rootStore = useRootStore()
 
   let menu: MenuItemConstructorOptions[] = [
     {
@@ -14,15 +16,15 @@ export default function edit (useDocumentStore: DocumentStore, submenus: MenuIte
     { type: 'separator' },
     {
       role: 'cut',
-      enabled: store.hasSelection
+      enabled: store.hasSelectedItems
     },
     {
       role: 'copy',
-      enabled: store.hasSelection
+      enabled: store.hasSelectedItems
     },
     {
       role: 'paste',
-      enabled: store.hasSelection
+      enabled: rootStore.canPaste
     },
     {
       label: 'Delete',
@@ -32,8 +34,10 @@ export default function edit (useDocumentStore: DocumentStore, submenus: MenuIte
     },
     { type: 'separator' },
     {
-      role: 'selectAll',
-      enabled: store.baseItems.length > 0
+      label: '&Select All',
+      accelerator: 'CommandOrControl+A',
+      enabled: store.baseItems.length > 0,
+      click: store.selectAll
     }
   ]
 

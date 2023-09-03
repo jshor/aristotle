@@ -464,7 +464,7 @@ describe('selection actions', () => {
       stubAll(store, [
         'commitState',
         'deselectAll',
-        'disconnect',
+        'disconnectById',
         'removeElement'
       ])
     })
@@ -480,24 +480,21 @@ describe('selection actions', () => {
         expect(store.commitState).toHaveBeenCalledTimes(1)
       })
 
-      it('should disconnect selected connections', () => {
-        expect(store.disconnect).toHaveBeenCalledWith(store.connections['connection3'])
-      })
-
-      it('should not disconnect non-selected connections', () => {
-        expect(store.disconnect).not.toHaveBeenCalledWith({ source: 'port1', target: 'port2' })
-        expect(store.disconnect).not.toHaveBeenCalledWith({ source: 'port3', target: 'port4' })
+      it('should disconnect selected connections and their entire chain', () => {
+        expect(store.disconnectById).toHaveBeenCalledWith('connection3')
+        expect(store.disconnectById).toHaveBeenCalledWith('connection1')
+        expect(store.disconnectById).toHaveBeenCalledWith('connection2')
       })
 
       it('should remove selected items', () => {
         expect(store.removeElement).toHaveBeenCalledWith('item1')
+        expect(store.removeElement).toHaveBeenCalledWith('freeport')
       })
 
       it('should not remove non-selected items', () => {
         expect(store.removeElement).not.toHaveBeenCalledWith('item2')
         expect(store.removeElement).not.toHaveBeenCalledWith('item3')
         expect(store.removeElement).not.toHaveBeenCalledWith('item4')
-        expect(store.removeElement).not.toHaveBeenCalledWith('freeport')
       })
     })
 
@@ -506,7 +503,7 @@ describe('selection actions', () => {
       store.deleteSelection()
 
       expect(store.commitState).not.toHaveBeenCalled()
-      expect(store.disconnect).not.toHaveBeenCalled()
+      expect(store.disconnectById).not.toHaveBeenCalled()
       expect(store.removeElement).not.toHaveBeenCalled()
       expect(store.deselectAll).not.toHaveBeenCalled()
     })

@@ -78,7 +78,7 @@ describe('port actions', () => {
       })
 
       stubAll(store, [
-        'disconnect',
+        'disconnectById',
         'unmonitorPort'
       ])
     })
@@ -86,7 +86,7 @@ describe('port actions', () => {
     it('should not do anything if the port does not exist', () => {
       store.removePort('non-existent-port')
 
-      expect(store.disconnect).not.toHaveBeenCalled()
+      expect(store.disconnectById).not.toHaveBeenCalled()
       expect(store.unmonitorPort).not.toHaveBeenCalled()
     })
 
@@ -95,9 +95,9 @@ describe('port actions', () => {
         beforeEach(() => store.removePort(portId))
 
         it('should remove all connections associated to the connection chain', () => {
-          expect(store.disconnect).toHaveBeenCalledTimes(2)
-          expect(store.disconnect).toHaveBeenCalledWith(connectionPart1)
-          expect(store.disconnect).toHaveBeenCalledWith(connectionPart2)
+          expect(store.disconnectById).toHaveBeenCalledTimes(2)
+          expect(store.disconnectById).toHaveBeenCalledWith(connectionPart1.id)
+          expect(store.disconnectById).toHaveBeenCalledWith(connectionPart2.id)
         })
 
         it('should remove the freeport item in the connection chain', () => {
