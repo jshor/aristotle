@@ -2,11 +2,10 @@
   <draggable
     class="toolbox-item"
     :tabindex="0"
-    @touchhold="onDragStart"
+    @drag-start="onDragStart"
     @drag="onDrag"
     @drag-end="onDragEnd"
     @click="$emit('drop', factory)"
-    :allow-touch-drag="isDragging"
   >
     <div class="toolbox-item__parent">
       <resizable

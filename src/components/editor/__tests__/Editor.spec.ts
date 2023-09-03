@@ -2,6 +2,7 @@ import boundaries from '@/store/document/geometry/boundaries'
 import { mount, VueWrapper } from '@vue/test-utils'
 import { ComponentPublicInstance } from 'vue'
 import Editor from '../Editor.vue'
+import { PANNING_FRICTION } from '@/constants'
 
 describe('Editor component', () => {
   let wrapper: VueWrapper<ComponentPublicInstance<typeof Editor>>
@@ -14,22 +15,31 @@ describe('Editor component', () => {
     x: 10,
     y: 22
   }
+  const props = {
+    gridSize,
+    zoom,
+    canvas: {
+      left: offset.x,
+      top: offset.y,
+      right: offset.x + width,
+      bottom: offset.y + height
+    }
+  }
 
   beforeEach(() => {
-    wrapper = mount(Editor, {
-      props: {
-        width,
-        height,
-        gridSize,
-        zoom,
-        offset
-      }
-    })
+    wrapper = mount(Editor, { props })
+
+    jest
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(cb => {
+        cb(1)
+        return 0
+      })
   })
 
   afterEach(() => {
     jest.resetAllMocks()
-    jest.useRealTimers()
+    jest.restoreAllMocks()
   })
 
   describe('style', () => {
@@ -46,9 +56,10 @@ describe('Editor component', () => {
 
     it('should default to the origin point offset', async () => {
       await wrapper.setProps({
-        offset: {
-          x: 0,
-          y: 0
+        canvas: {
+          ...props.canvas,
+          left: 0,
+          top: 0
         }
       })
 
@@ -84,32 +95,41 @@ describe('Editor component', () => {
 
     describe('when the mouse is released', () => {
       beforeEach(() => {
-        jest.useFakeTimers()
-
         window.dispatchEvent(new MouseEvent('mousemove', {
           clientX: x + deltaX,
           clientY: y + deltaY
         }))
       })
 
-      it('should continue to pan with momentum once the mouse is released', () => {
-        jest
-          .spyOn(boundaries, 'isInNeighborhood')
-          .mockReturnValue(false)
-
+      it('should continue to pan with momentum in the same direction once the mouse is released', async() => {
         window.dispatchEvent(new MouseEvent('mouseup', {
           clientX: x + deltaX,
-          clientY: y + deltaY,
-          button: 2
+          clientY: y + deltaY
         }))
 
-        jest.advanceTimersByTime(1000)
-
         expect(wrapper.emitted()).toHaveProperty('pan')
-        expect(wrapper.emitted().pan.length).toBeGreaterThan(1)
+
+        const magnitude = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2))
+        const angle = Math.atan2(deltaY, deltaX)
+        const result = wrapper.emitted().pan[1] as Point[]
+
+        expect(Math.ceil(result[0].x)).toEqual(Math.ceil(magnitude * Math.cos(angle) * PANNING_FRICTION))
+        expect(Math.ceil(result[0].y)).toEqual(Math.ceil(magnitude * Math.sin(angle) * PANNING_FRICTION))
+        expect((wrapper.emitted().pan[1] as any)[1]).toBe(true)
       })
 
-      it('should emit `contextmenu` when the mouse has not moved 5 or more pixels', () => {
+      it('should not continue panning if no user-directed panning occurred', async() => {
+        wrapper = mount(Editor, { props })
+
+        window.dispatchEvent(new MouseEvent('mouseup', {
+          clientX: x,
+          clientY: y
+        }))
+
+        expect(wrapper.emitted()).not.toHaveProperty('pan')
+      })
+
+      it('should emit `contextmenu` when the mouse has not moved 5 or more pixels using right click', () => {
         jest
           .spyOn(boundaries, 'isInNeighborhood')
           .mockReturnValue(true)
@@ -140,12 +160,12 @@ describe('Editor component', () => {
   })
 
   describe('when the mouse wheel moves', () => {
-    it('should not zoom when the shift key is not held down', async () => {
+    it('should not zoom when the ctrl key is not held down', async () => {
       await wrapper
         .find('.editor')
         .trigger('mousewheel', {
           deltaY: -20,
-          shiftKey: false,
+          ctrlKey: false,
           x: 10,
           y: 20
         })
@@ -158,7 +178,7 @@ describe('Editor component', () => {
         .find('.editor')
         .trigger('mousewheel', {
           deltaY: -20,
-          shiftKey: true,
+          ctrlKey: true,
           x: 10,
           y: 20
         })
@@ -178,7 +198,7 @@ describe('Editor component', () => {
         .find('.editor')
         .trigger('mousewheel', {
           deltaY: 20,
-          shiftKey: true,
+          ctrlKey: true,
           x: 10,
           y: 20
         })
@@ -192,43 +212,84 @@ describe('Editor component', () => {
         }
       }])
     })
+
+    it('should not zoom when deltaY has not changed', async () => {
+      await wrapper
+        .find('.editor')
+        .trigger('mousewheel', {
+          deltaY: 0,
+          ctrlKey: true,
+          x: 10,
+          y: 20
+        })
+
+      expect(wrapper.emitted()).not.toHaveProperty('zoom')
+    })
   })
 
   describe('when the editor is touched', () => {
-    it('should not emit `deselect` when an element other than the selector is touched', async () => {
+    it('should not emit `pan` when an element other than the editor is touched', async () => {
       await wrapper
         .find('.editor')
         .trigger('touchend', {
           changedTouches: [new TouchEvent('touchend')]
         })
 
-        expect(wrapper.emitted()).not.toHaveProperty('deselect')
+        expect(wrapper.emitted()).not.toHaveProperty('pan')
     })
 
-    it('should emit `deselect` when the finger has moved substantially', async () => {
-      await wrapper
-        .findComponent({ name: 'Selector' })
-        .trigger('touchend', {
-          changedTouches: [new TouchEvent('touchend')]
-        })
-
-      expect(wrapper.emitted()).toHaveProperty('deselect')
-    })
-
-    it('should emit `zoom` when two fingers pinch the editor', async () => {
+    it('should not emit any events when more than two fingers are used', async () => {
       const editor = await wrapper.find('.editor')
+      const getTouch = (clientX: number, clientY: number) => ({
+        clientX,
+        clientY
+      }) as Touch
+
       const trigger = (e: 'touchstart' | 'touchmove' | 'touchend') => editor.trigger(e, {
         touches: [
-          new TouchEvent(e),
-          new TouchEvent(e)
+          getTouch(10, 10),
+          getTouch(20, 20),
+          getTouch(30, 30)
         ],
         changedTouches: [
-          new TouchEvent(e),
-          new TouchEvent(e)
+          getTouch(10, 10),
+          getTouch(20, 20),
+          getTouch(30, 30)
         ],
         targetTouches: [
-          new TouchEvent(e),
-          new TouchEvent(e)
+          getTouch(10, 10),
+          getTouch(20, 20),
+          getTouch(30, 30)
+        ]
+      })
+
+      await trigger('touchstart')
+      await trigger('touchmove')
+      await trigger('touchend')
+
+      expect(wrapper.emitted()).not.toHaveProperty('zoom')
+      expect(wrapper.emitted()).not.toHaveProperty('pan')
+    })
+
+    it('should emit `zoom` and `pan` when two fingers pinch the editor', async () => {
+      const editor = await wrapper.find('.editor')
+      const getTouch = (clientX: number, clientY: number) => ({
+        clientX,
+        clientY
+      }) as Touch
+
+      const trigger = (e: 'touchstart' | 'touchmove' | 'touchend') => editor.trigger(e, {
+        touches: [
+          getTouch(10, 10),
+          getTouch(20, 20)
+        ],
+        changedTouches: [
+          getTouch(10, 10),
+          getTouch(20, 20)
+        ],
+        targetTouches: [
+          getTouch(10, 10),
+          getTouch(20, 20)
         ]
       })
 
@@ -237,6 +298,7 @@ describe('Editor component', () => {
       await trigger('touchend')
 
       expect(wrapper.emitted()).toHaveProperty('zoom')
+      expect(wrapper.emitted()).toHaveProperty('pan')
     })
 
     it('should pan when only one touch is present', async () => {
@@ -258,24 +320,6 @@ describe('Editor component', () => {
       await trigger('touchend')
 
       expect(wrapper.emitted()).toHaveProperty('pan')
-    })
-  })
-
-  describe('when selection changes', () => {
-    it('should emit `deselect` when the shift key is not held down', async () => {
-      await wrapper
-        .findComponent({ name: 'Selector' })
-        .vm.$emit('selection-start', { ctrlKey: false })
-
-      expect(wrapper.emitted()).toHaveProperty('deselect')
-    })
-
-    it('should emit `selection` when the selection is terminated', async () => {
-      await wrapper
-        .findComponent({ name: 'Selector' })
-        .vm.$emit('selection-end', { ctrlKey: false })
-
-      expect(wrapper.emitted()).toHaveProperty('selection')
     })
   })
 

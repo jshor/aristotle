@@ -8,7 +8,6 @@
     :position="item.position"
     :is-selected="isSelected"
     :allow-touch-drag="isSelected"
-    @resize="onResize"
     @keydown.esc="onEscapeKey"
     @drag="onDrag"
     @drag-start="onDragStart"
@@ -46,11 +45,11 @@
       @signal="store.setPortValue"
     >
       <template
-        v-for="(port, o) in 4"
+        v-for="(portList, o) in ports"
         v-slot:[o]
       >
         <port-item
-          v-for="port in ports.filter(p => p.orientation === o)"
+          v-for="port in portList"
           :tabindex="0"
           :store="$props.store"
           :id="port.id"
@@ -74,7 +73,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, computed, ComponentPublicInstance, watch } from 'vue'
+import { defineComponent, PropType, ref, computed, ComponentPublicInstance, watch, onMounted } from 'vue'
 import CircuitComponent from '@/components/item/CircuitComponent.vue'
 import Properties from '@/components/item/Properties.vue'
 import PortItem from './PortItem.vue'
@@ -84,6 +83,7 @@ import { DocumentStore } from '@/store/document'
 import Draggable from '@/components/interactive/Draggable.vue'
 import { useRootStore } from '@/store/root'
 import editorContextMenu from '@/menus/context/editor'
+import Direction from '@/types/enums/Direction'
 
 /**
  * This component represents a two-dimensional item in the editor.
@@ -129,43 +129,59 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, { emit }) {
+  setup (props) {
     const store = props.store()
     const item = computed(() => store.items[props.id])
     const viewport = computed(() => store.viewport)
     const itemRef = ref<ComponentPublicInstance<HTMLElement>>()
     const portUpdates = ref(0)
 
-    /** watch for any updates that cause the ports to move its position (relative to the item) */
-    watch(() => item.value?.rotation, () => portUpdates.value++)
-    watch(() => item.value?.properties.inputCount?.value, () => portUpdates.value++)
+    // watch for any updates that cause the ports to move their position (relative to the item)
+    watch(() => store.items[props.id]?.rotation, () => portUpdates.value++)
+    watch(() => store.items[props.id]?.properties.inputCount?.value, () => {
+      updateSize()
+      portUpdates.value++
+    })
 
-    /* list of all ports that belong to this item */
+    onMounted(updateSize)
+
+    /** A list of all ports that belong to this item. */
     const ports = computed(() => {
-      return store
+      const ports: Record<Direction, Port[]> = {
+        [Direction.Left]: [],
+        [Direction.Top]: [],
+        [Direction.Right]: [],
+        [Direction.Bottom]: []
+      }
+
+      store
         .items[props.id]
         .portIds
-        .map(portId => store.ports[portId])
+        .forEach(portId => {
+          ports[store.ports[portId].orientation].push(store.ports[portId])
+        })
+
+      return ports
     })
 
     /* whether or not the properties trigger button should be visible */
     const isPropertiesEnabled = computed(() => {
-      return props.isSelected && store.selectedItemIds.length === 1 && item.value.type !== ItemType.Freeport
+      return props.isSelected && store.selectedItemIds.length === 1 && store.items[props.id].type !== ItemType.Freeport
     })
 
     /**
      * Places the window focus on the item element.
      */
     function focus () {
-      itemRef.value?.$el.focus()
+      itemRef.value!.$el.focus()
     }
 
     /**
      * Opens the custom circuit (if any) in a new file tab.
      */
     function revealCustomCircuit () {
-      if (item.value?.subtype === ItemSubtype.CustomCircuit) {
-        useRootStore().openIntegratedCircuit(item.value)
+      if (store.items[props.id].subtype === ItemSubtype.CustomCircuit) {
+        useRootStore().openIntegratedCircuit(store.items[props.id])
       }
     }
 
@@ -183,8 +199,8 @@ export default defineComponent({
      */
     function onDrag (position: Point, offset: Point) {
       store.dragItem(props.id, {
-        x: position.x - offset.x - item.value.width / 2 * store.zoomLevel,
-        y: position.y - offset.y - item.value.height / 2 * store.zoomLevel
+        x: position.x - offset.x - store.items[props.id].width / 2 * store.zoomLevel,
+        y: position.y - offset.y - store.items[props.id].height / 2 * store.zoomLevel
       })
     }
 
@@ -193,8 +209,8 @@ export default defineComponent({
      * This will blur the element if neither it nor any of its children are focused.
      */
     function onEscapeKey ($event: KeyboardEvent) {
-      if (document.activeElement === itemRef.value?.$el) {
-        itemRef.value.$el.blur()
+      if (document.activeElement === itemRef.value!.$el) {
+        itemRef.value!.$el.blur()
       } else {
         $event.preventDefault()
       }
@@ -202,8 +218,6 @@ export default defineComponent({
 
     /**
      * Port blur event handler.
-     *
-     * @param portId - ID of the port blurred
      */
     function onPortBlur (portId: string) {
       if (store.activePortId === portId) {
@@ -212,21 +226,25 @@ export default defineComponent({
     }
 
     /**
-     * Item resize event handler. This will inform the store of the new size of the item.
+     * Shows the context menu.
+     * If the item is not already selected, this will select it.
      */
-    function onResize (rect: DOMRect) {
-      store.setItemSize({
-        id: props.id,
-        rect
-      })
-    }
-
     function onContextMenu () {
       if (!props.isSelected) {
         store.selectItem(props.id)
       }
 
       window.api.showContextMenu(editorContextMenu(props.store))
+    }
+
+    /**
+     * Updates the store with the item's DOM size.
+     */
+    function updateSize () {
+      store.setItemSize({
+        id: props.id,
+        rect: itemRef.value?.$el.getBoundingClientRect()!
+      })
     }
 
     return {
@@ -241,7 +259,6 @@ export default defineComponent({
       onDrag,
       onDragStart,
       onEscapeKey,
-      onResize,
       onPortBlur,
       onContextMenu,
       revealCustomCircuit,

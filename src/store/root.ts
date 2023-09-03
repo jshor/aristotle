@@ -2,8 +2,8 @@
 import { defineStore } from 'pinia'
 import { v4 as uuid } from 'uuid'
 import basic from '../containers/fixtures/basic.json'
-// import flipFlop from '../containers/fixtures/flipflop.json'
-import flipFlop from '../containers/fixtures/counter.json'
+import flipFlop from '../containers/fixtures/flipflop.json'
+// import flipFlop from '../containers/fixtures/counter.json'
 import integratedCircuit from '../containers/fixtures/ic.json'
 import testIc from '../containers/fixtures/test.json'
 
@@ -31,6 +31,7 @@ export type RootStore = {
   isFullscreen: boolean
   isBuilderOpen: boolean
   isToolboxOpen: boolean
+  navigationAnimationFrameId: number
 }
 
 export const useRootStore = defineStore({
@@ -45,7 +46,8 @@ export const useRootStore = defineStore({
     isBuilderOpen: false,
     isToolboxOpen: false,
     isSettingsOpen: false,
-    isDocumentSelectOpen: false
+    isDocumentSelectOpen: false,
+    navigationAnimationFrameId: 0
   }),
   getters: {
     hasOpenDocuments (state) {
@@ -325,6 +327,7 @@ export const useRootStore = defineStore({
       this.activeDocument?.store().startSimulation()
     },
     activateDocument (id: string) {
+      console.log('ACTIVATE...')
       this.pauseActivity()
       this.activeDocumentId = id
       this.resumeActivity()
@@ -344,14 +347,20 @@ export const useRootStore = defineStore({
     },
 
     navigateDocumentList (direction: number) {
-      const documentIds = Object.keys(this.documents)
-      const currentIndex = documentIds.findIndex(id => id === this.activeDocumentId)
-      let nextIndex = currentIndex + direction
+      if (this.navigationAnimationFrameId) return
 
-      if (nextIndex < 0) nextIndex = documentIds.length - 1
-      if (nextIndex >= documentIds.length) nextIndex = 0
+      this.navigationAnimationFrameId = requestAnimationFrame(() => {
+        this.navigationAnimationFrameId = 0
 
-      this.activateDocument(documentIds[nextIndex])
+        const documentIds = Object.keys(this.documents)
+        const currentIndex = documentIds.findIndex(id => id === this.activeDocumentId)
+        let nextIndex = currentIndex + direction
+
+        if (nextIndex < 0) nextIndex = documentIds.length - 1
+        if (nextIndex >= documentIds.length) nextIndex = 0
+
+        this.activateDocument(documentIds[nextIndex])
+      })
     },
 
     toggleFullscreen () {
@@ -370,7 +379,6 @@ export const useRootStore = defineStore({
 
     checkPastability () {
       this.canPaste = window.api.canPaste()
-      console.log('can paste? ', this.canPaste)
     }
   }
 })

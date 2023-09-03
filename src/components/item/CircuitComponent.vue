@@ -34,6 +34,7 @@ import LogicGate from '@/components/item/elements/LogicGate.vue'
 import OutputNode from '@/components/item/elements/OutputNode.vue'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
+import Direction from '@/types/enums/Direction'
 
 const components = {
   Freeport,
@@ -71,8 +72,8 @@ export default defineComponent({
       default: ''
     },
     ports: {
-      type: Array as PropType<Port[]>,
-      default: () => []
+      type: Object as PropType<Record<Direction, Port[]>>,
+      default: () => {}
     },
     properties: {
       type: Object as PropType<PropertySet>,

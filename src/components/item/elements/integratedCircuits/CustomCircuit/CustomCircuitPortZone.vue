@@ -1,5 +1,7 @@
 <template>
-  <div :class="`custom-circuit-port-zone custom-circuit-port-zone--${orientation}`">
+  <div
+    :class="`custom-circuit-port-zone custom-circuit-port-zone--${orientation}`"
+  >
     <div
       v-for="port in ports"
       :key="port.id"

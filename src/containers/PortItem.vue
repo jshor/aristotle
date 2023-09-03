@@ -3,10 +3,11 @@
     :rotation="rotation"
     @blur="onBlur"
     @keydown.esc="onEscapeKey"
-    @resize="onResize"
     @keydown.space="store.cycleConnectionPreviews(id)"
     @keydown.enter="store.commitPreviewedConnection"
     @contextmenu="store.setActivePortId(id)"
+    allow-touch-drag
+    ref="pivotRef"
   >
     <draggable
       v-if="!isFreeport"
@@ -20,7 +21,7 @@
       <port-handle
         :type="type"
         :hue="hue"
-        :active="store.activePortId === id || store.connectablePortIds.includes(id)"
+        :active="isActive"
         touch-friendly
       />
     </draggable>
@@ -28,13 +29,13 @@
       v-else
       :type="type"
       :hue="hue"
-      :active="store.activePortId === id || store.connectablePortIds.includes(id)"
+      :active="isActive"
     />
   </port-pivot>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { computed, defineComponent, onMounted, PropType, ref } from 'vue'
 import { v4 as uuid } from 'uuid'
 import PortHandle from '@/components/port/PortHandle.vue'
 import PortPivot from '@/components/port/PortPivot.vue'
@@ -113,10 +114,20 @@ export default defineComponent({
   setup (props, { emit }) {
     const store = props.store()
     const snapMode = SnapMode.Radial
+    const pivotRef = ref<typeof PortPivot>()
+    const isActive = computed(() => store.activePortId === props.id || store.connectablePortIds.includes(props.id))
 
     let newFreeport: Freeport | null = null
     let draggedPortId = ''
     let isAdded = false
+
+    onMounted(() => {
+      setTimeout(() => {
+        // compute the relative (w.r.t. the parent item) position of the port on the canvas
+        // this is wrapped in a setTimeout() to wait for its parent component (Item) to be mounted first
+        store.setPortRelativePosition(pivotRef.value!.$el.getBoundingClientRect(), props.id)
+      })
+    })
 
     function onEscapeKey ($event: KeyboardEvent) {
       $event.preventDefault()
@@ -189,10 +200,6 @@ export default defineComponent({
       store.togglePortMonitoring(props.id)
     }
 
-    function onResize (rect: DOMRect) {
-      store.setPortRelativePosition(rect, props.id)
-    }
-
     function onDoubleClick ($event: MouseEvent) {
       $event.stopPropagation()
       $event.preventDefault()
@@ -203,13 +210,14 @@ export default defineComponent({
     return {
       store,
       snapMode,
+      pivotRef,
+      isActive,
       onDragStart,
       onDrag,
       onDragEnd,
       onEscapeKey,
       onBlur,
       onTouchHold,
-      onResize,
       onDoubleClick,
       PortType
     }

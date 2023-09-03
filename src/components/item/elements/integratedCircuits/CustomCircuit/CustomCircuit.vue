@@ -1,14 +1,22 @@
 <template>
-  <div class="custom-circuit">
+  <div
+    class="custom-circuit"
+    :class="{
+      'custom-circuit--no-left': !ports[Direction.Left].length,
+      'custom-circuit--no-right': !ports[Direction.Right].length,
+      'custom-circuit--no-top': !ports[Direction.Top].length,
+      'custom-circuit--no-bottom': !ports[Direction.Bottom].length
+    }"
+  >
     <custom-circuit-port-zone
-      :ports="ports.filter(p => p.orientation === 1)"
+      :ports="ports[Direction.Top]"
       orientation="horizontal"
       type="top"
     />
 
     <div class="custom-circuit__center">
       <custom-circuit-port-zone
-        :ports="ports.filter(p => p.orientation === 0)"
+        :ports="ports[Direction.Left]"
         orientation="vertical"
         type="left"
       />
@@ -16,14 +24,14 @@
         {{ name }}
       </div>
       <custom-circuit-port-zone
-        :ports="ports.filter(p => p.orientation === 2)"
+        :ports="ports[Direction.Right]"
         orientation="vertical"
         type="right"
       />
     </div>
 
     <custom-circuit-port-zone
-      :ports="ports.filter(p => p.orientation === 3)"
+      :ports="ports[Direction.Bottom]"
       orientation="horizontal"
       type="bottom"
     />
@@ -33,19 +41,23 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import CustomCircuitPortZone from './CustomCircuitPortZone.vue'
+import Direction from '@/types/enums/Direction';
 
 export default defineComponent({
   name: 'CustomCircuit',
   components: { CustomCircuitPortZone },
   props: {
     ports: {
-      type: Array as PropType<Port[]>,
-      default: () => []
+      type: Object as PropType<Record<Direction, Port[]>>,
+      default: () => {}
     },
     name: {
       type: String,
       default: 'circuit'
     }
+  },
+  setup () {
+    return { Direction }
   }
 })
 </script>
@@ -57,6 +69,22 @@ export default defineComponent({
   background-color: #1D1E25CC;
   pointer-events: all;
   margin: 40px;
+
+  &--no-left {
+    margin-left: 0;
+  }
+
+  &--no-top {
+    margin-top: 0;
+  }
+
+  &--no-right {
+    margin-right: 0;
+  }
+
+  &--no-bottom {
+    margin-bottom: 0;
+  }
 
   &__name {
     display: flex;

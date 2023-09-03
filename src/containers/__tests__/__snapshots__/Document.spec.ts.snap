@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Document container should match the snapshot 1`] = `
+"<div class="editor" tabindex="0" style="--color-on: #4bc567; --color-off: #c0c0c0; --color-hi-i: #ff0000;">
+  <div style="background-size: 20px 20px; transform: scale(1); left: 0px; top: 0px; width: 0px; height: 0px;" class="editor__grid">
+    <div class="selector">
+      <!--v-if-->
+    </div><!-- when tabbed into, this resets the selection back to the last item -->
+    <div tabindex="0"></div>
+    <div class="draggable" style="left: 0px; top: 0px; outline: none; pointer-events: none; z-index: 2000;" data-test="item" tabindex="0">
+      <!--v-if-->
+      <div class="circuit-component" style="transform: rotate(0deg);">
+        <div class="input-node" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]"><button type="button" class="input-node__flipper input-node__flipper--high-z" tabindex="0"><span>?</span></button></div>
+        <div class="circuit-component__ports--left circuit-component__ports">
+          <div class="port-pivot" style="transform: rotate(-0deg);" allow-touch-drag="" tabindex="0" title="" data-test="port-item">
+            <div class="draggable" style="left: 0px; top: 0px;" tabindex="-1">
+              <div class="port-handle" type="1" touch-friendly="">
+                <div class="port-handle__display">
+                  <div class="port-handle__hue"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="circuit-component__ports--top circuit-component__ports"></div>
+        <div class="circuit-component__ports--right circuit-component__ports"></div>
+        <div class="circuit-component__ports--bottom circuit-component__ports"></div>
+      </div>
+    </div>
+    <div class="draggable" style="left: 0px; top: 0px; outline: none; pointer-events: none; z-index: 1000;" data-test="item" tabindex="0">
+      <!--v-if-->
+      <div class="circuit-component" style="transform: rotate(0deg);">
+        <div class="port-handle" type="Freeport" subtype="None" isselected="false" flash="false" name="" ports="[object Object]" properties="[object Object]">
+          <div class="port-handle__display">
+            <div class="port-handle__hue"></div>
+          </div>
+        </div>
+        <!--v-if-->
+      </div>
+    </div><!-- Note: z-index of items will be offset by +1000 to ensure it always overlaps wires -->
+    <div class="draggable" style="left: -7.5px; top: -7.5px; z-index: 1;" tabindex="0"><svg class="wire" width="15" height="15" data-test="wire">
+        <title>TODO</title>
+        <path class="wire__outline" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+        <path class="wire__display" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+        <!--v-if-->
+        <path class="wire__clickable" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+      </svg></div><!-- when tabbed into, this resets the selection back to the first item -->
+    <div tabindex="0"></div>
+  </div>
+</div>"
+`;

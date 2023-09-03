@@ -29,9 +29,7 @@ export default defineComponent({
     const observer = new ResizeObserver(onSizeChanged)
 
     onMounted(() => {
-      if (resizable.value) {
-        observer.observe(resizable.value)
-      }
+      observer.observe(resizable.value!)
     })
 
     return {

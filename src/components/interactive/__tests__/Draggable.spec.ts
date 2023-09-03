@@ -11,14 +11,24 @@ describe('Draggable component', () => {
   })
 
   afterEach(() => {
+    jest.restoreAllMocks()
     jest.resetAllMocks()
+    jest.clearAllMocks()
     jest.useRealTimers()
   })
 
   describe('when the element is focused', () => {
-    beforeEach(() => jest.useFakeTimers())
+    beforeEach(() => {
+      jest.useFakeTimers()
+      jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation(cb => {
+          cb(1)
+          return 0
+        })
+    })
 
-    xit('should emit `select` when the item is already selected', async () => {
+    it('should emit `select` when the item is not already selected', async () => {
       await wrapper.setProps({ isSelected: false })
       await wrapper.trigger('focus')
 
@@ -39,6 +49,15 @@ describe('Draggable component', () => {
   })
 
   describe('when applying mouse events', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation(cb => {
+          cb(1)
+          return 0
+        })
+    })
+
     describe('when the mouse drags the item', () => {
       const x = 13
       const y = 21
@@ -62,24 +81,42 @@ describe('Draggable component', () => {
         }, { x: 0, y: 0 }])
       })
 
-      xit('should emit `drag` after subsequent drags', async () => {
+      it('should emit `dragStart` when the horizontal position changes', async () => {
         window.dispatchEvent(new MouseEvent('mousemove', {
+          clientX: x + deltaX,
+          clientY: y
+        }))
+
+        expect(wrapper.emitted()).toHaveProperty('dragStart')
+      })
+
+      it('should emit `dragStart` when the vertical position changes', async () => {
+        window.dispatchEvent(new MouseEvent('mousemove', {
+          clientX: x,
+          clientY: y + deltaY
+        }))
+
+        expect(wrapper.emitted()).toHaveProperty('dragStart')
+      })
+
+      it('should emit `drag` after subsequent drags', async () => {
+        await window.dispatchEvent(new MouseEvent('mousemove', {
           clientX: x + deltaX + 1,
           clientY: y + deltaY + 1
         }))
-        window.dispatchEvent(new MouseEvent('mousemove', {
+        await window.dispatchEvent(new MouseEvent('mousemove', {
           clientX: x + deltaX + 2,
           clientY: y + deltaY + 2
         }))
 
         expect(wrapper.emitted()).toHaveProperty('drag')
         expect(wrapper.emitted().drag[0]).toEqual([{
-          x: x + deltaX + 1,
-          y: y + deltaY + 1
+          x: x + deltaX + 2,
+          y: y + deltaY + 2
         }, { x: 0, y: 0 }])
       })
 
-      xit('should emit `dragEnd` with the last position when the mouse button is released', async () => {
+      it('should emit `dragEnd` with the last position when the mouse button is released', async () => {
         window.dispatchEvent(new MouseEvent('mousemove', {
           clientX: x + deltaX,
           clientY: y + deltaY
@@ -93,7 +130,7 @@ describe('Draggable component', () => {
         }, { x: 0, y: 0 }])
       })
 
-      xit('should not emit `select` when the mouse is released from the element', async () => {
+      it('should not emit `select` when the mouse is released from the element', async () => {
         window.dispatchEvent(new MouseEvent('mousemove', {
           clientX: x + deltaX,
           clientY: y + deltaY
@@ -105,9 +142,48 @@ describe('Draggable component', () => {
       })
     })
 
+    describe('when the mouse button is released', () => {
+      it('should not emit `select` if a drag operation occurred', async () => {
+        await wrapper.trigger('mousedown', { x: 0, y: 0 })
+
+        window.dispatchEvent(new MouseEvent('mousemove', {
+          clientX: 10,
+          clientY: 10
+        }))
+
+        await wrapper.trigger('mouseup', { x: 0, y: 0 })
+
+        expect(wrapper.emitted()).not.toHaveProperty('select')
+      })
+
+      it('should emit `select` if no drag operation occurred', async () => {
+        wrapper = mount(Draggable)
+
+        await wrapper.trigger('mouseup', { x: 0, y: 0 })
+
+        expect(wrapper.emitted()).toHaveProperty('select')
+      })
+    })
+
+    it('should not emit any events if the position is unchanged', async () => {
+      wrapper = mount(Draggable)
+
+      await wrapper.trigger('mousedown', { x: 0, y: 0 })
+
+      window.dispatchEvent(new MouseEvent('mousemove', {
+        clientX: 0,
+        clientY: 0
+      }))
+
+      expect(wrapper.emitted()).not.toHaveProperty('drag')
+      expect(wrapper.emitted()).not.toHaveProperty('dragStart')
+      expect(wrapper.emitted()).not.toHaveProperty('dragEnd')
+    })
+
     it('should not emit drag events when the mouse moves without having mousedown on the element first', async () => {
+      wrapper = mount(Draggable)
+
       window.dispatchEvent(new MouseEvent('mousemove'))
-      window.dispatchEvent(new MouseEvent('mouseup'))
 
       expect(wrapper.emitted()).not.toHaveProperty('drag')
       expect(wrapper.emitted()).not.toHaveProperty('dragStart')
@@ -145,6 +221,12 @@ describe('Draggable component', () => {
 
       beforeEach(async () => {
         jest.useFakeTimers()
+        jest
+          .spyOn(window, 'requestAnimationFrame')
+          .mockImplementation(cb => {
+            cb(1)
+            return 0
+          })
 
         await wrapper.trigger('touchstart', {
           touches: [getTouchEvent(x, y)]
@@ -181,9 +263,6 @@ describe('Draggable component', () => {
 
       it('should emit `dragStart`', async () => {
         await wrapper.trigger('touchmove', {
-          touches: [getTouchEvent(x, y)]
-        })
-        await wrapper.trigger('touchmove', {
           touches: [getTouchEvent(x + 10, y + 10)]
         })
 
@@ -204,7 +283,7 @@ describe('Draggable component', () => {
         expect(wrapper.emitted()).toHaveProperty('drag')
       })
 
-      it('should emit `dragEnd` with the last position when the touch finger is released', async () => {
+      it('should emit `dragEnd` with the last position when the touch finger is released', async () => { // bad
         await wrapper.trigger('touchmove', {
           touches: [new TouchEvent('touchmove')]
         })

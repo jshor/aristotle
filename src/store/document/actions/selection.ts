@@ -197,7 +197,6 @@ export function recycleSelection (this: DocumentStoreInstance, backToFirstItem: 
  * Deletes all selected items and connections.
  */
 export function deleteSelection (this: DocumentStoreInstance) {
-  // TODO: this function is a disaster - never works properly
   if (!this.hasSelection) return
 
   this.commitState()

@@ -164,22 +164,22 @@ export function computeBezier (sourceDirection: number, targetDirection: number,
   const dx = Math.max(Math.abs(x1 - x4) / 2, 10)
   const dy = Math.max(Math.abs(y1 - y4) / 2, 10)
 
-  const x2 = [x1, x1 + dx, x1, x1 - dx][sourceDirection].toFixed(3)
-  const y2 = [y1 - dy, y1, y1 + dy, y1][sourceDirection].toFixed(3)
-  const x3 = [x4, x4 + dx, x4, x4 - dx][targetDirection].toFixed(3)
-  const y3 = [y4 - dy, y4, y4 + dy, y4][targetDirection].toFixed(3)
+  const round = (n: number) => Math.round(n * 1000) / 1000
+
+  const x2 = round([x1, x1 + dx, x1, x1 - dx][sourceDirection])
+  const y2 = round([y1 - dy, y1, y1 + dy, y1][sourceDirection])
+  const x3 = round([x4, x4 + dx, x4, x4 - dx][targetDirection])
+  const y3 = round([y4 - dy, y4, y4 + dy, y4][targetDirection])
 
   const path = [
-    'M', x1.toFixed(3), y1.toFixed(3),
-    'C', x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)
+    'M', round(x1), round(y1),
+    'C', x2, y2, x3, y3, round(x4), round(y4)
   ].join(' ')
 
-  const toNumArr = (...n: Array<string | number>) => n.map(k => parseInt(k.toString(), 10))
-
-  const minX = Math.min(...toNumArr(x1, x2, x3, x4)) - WIRE_PADDING / 2
-  const maxX = Math.max(...toNumArr(x1, x2, x3, x4)) + WIRE_PADDING / 2
-  const minY = Math.min(...toNumArr(y1, y2, y3, y4)) - WIRE_PADDING / 2
-  const maxY = Math.max(...toNumArr(y1, y2, y3, y4)) + WIRE_PADDING / 2
+  const minX = Math.min(x1, x2, x3, x4) - WIRE_PADDING / 2
+  const maxX = Math.max(x1, x2, x3, x4) + WIRE_PADDING / 2
+  const minY = Math.min(y1, y2, y3, y4) - WIRE_PADDING / 2
+  const maxY = Math.max(y1, y2, y3, y4) + WIRE_PADDING / 2
 
   const width = maxX - minX + WIRE_PADDING
   const height = maxY - minY + WIRE_PADDING
