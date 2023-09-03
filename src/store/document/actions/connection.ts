@@ -31,7 +31,7 @@ export function setConnectionPreview (this: DocumentStoreInstance, portId: strin
  */
 export function unsetConnectionPreview (this: DocumentStoreInstance) {
   if (this.connectionPreviewId) {
-    this.disconnect(this.connections[this.connectionPreviewId])
+    this.disconnectById(this.connectionPreviewId)
   }
   this.connectionPreviewId = null
 }
@@ -43,7 +43,7 @@ export function commitPreviewedConnection (this: DocumentStoreInstance) {
   if (this.connectionPreviewId) {
     const { source, target } = this.connections[this.connectionPreviewId]
 
-    this.disconnect({ source, target })
+    this.disconnectById(this.connectionPreviewId)
     this.commitState()
     this.connect({ source, target })
     this.connectionPreviewId = null
@@ -116,11 +116,7 @@ export function connect (this: DocumentStoreInstance, data: { source: string, ta
 }
 
 /**
- * Disconnects two ports.
- *
- * @param payload
- * @param payload.source - source port ID
- * @param payload.target - target port ID
+ * Removes the given connection from the document.
  */
 export function destroyConnection (this: DocumentStoreInstance, { source, target }: { source: string, target: string }) {
   const connection = Object
@@ -128,16 +124,27 @@ export function destroyConnection (this: DocumentStoreInstance, { source, target
     .find(c => c.source === source && c.target === target)
 
   if (connection) {
-    const sourceIndex = this.ports[source].connectedPortIds.findIndex(id => id === target)
-    const targetIndex = this.ports[target].connectedPortIds.findIndex(id => id === source)
-
-    this.ports[source].connectedPortIds.splice(sourceIndex, 1)
-    this.ports[target].connectedPortIds.splice(targetIndex, 1)
-
-    delete this.connections[connection.id]
+    this.destroyConnectionById(connection.id)
   }
 }
 
+/**
+ * Removes a connection from the document by its connection ID.
+ */
+export function destroyConnectionById (this: DocumentStoreInstance, id: string) {
+  const { source, target } = this.connections[id]
+  const sourceIndex = this.ports[source].connectedPortIds.findIndex(id => id === target)
+  const targetIndex = this.ports[target].connectedPortIds.findIndex(id => id === source)
+
+  this.ports[source].connectedPortIds.splice(sourceIndex, 1)
+  this.ports[target].connectedPortIds.splice(targetIndex, 1)
+
+  delete this.connections[id]
+}
+
+/**
+ * Disconnects the given ports in the simulation.
+ */
 export function disconnect (this: DocumentStoreInstance, { source, target }: { source: string, target: string }) {
   this
     .circuit
@@ -145,4 +152,20 @@ export function disconnect (this: DocumentStoreInstance, { source, target }: { s
 
   this.advanceSimulation()
   this.destroyConnection({ source, target })
+}
+
+/**
+ * Disconnects two ports for the given connection ID in the simulation.
+ */
+export function disconnectById (this: DocumentStoreInstance, id: string) {
+  if (!this.connections[id]) return
+
+  const { source, target } = this.connections[id]
+
+  this
+    .circuit
+    .removeConnection(this.nodes[source], this.nodes[target])
+
+  this.advanceSimulation()
+  this.destroyConnectionById(id)
 }

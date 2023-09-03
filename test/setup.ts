@@ -20,15 +20,17 @@ global.window.api = {
   showMessageBox: jest.fn(() => 0),
   beep: jest.fn(),
   quit: jest.fn(),
-  copy: jest.fn(),
-  paste: jest.fn(() => ''),
   onBeforeClose: jest.fn(),
   onOpenFile: jest.fn(),
   openFile: jest.fn(() => ''),
   saveFile: jest.fn(),
   setFullscreen: jest.fn(),
   getFilePaths: jest.fn(() => []),
-  getDefaultSavePath: jest.fn(() => '')
+  getDefaultSavePath: jest.fn(() => ''),
+  setClipboardContents: jest.fn(),
+  getClipboardContents: jest.fn(() => ''),
+  canPaste: jest.fn(() => true),
+  clearClipboard: jest.fn()
 }
 
 global.DOMRect = class DOMRect {

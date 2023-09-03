@@ -10,8 +10,6 @@ declare global {
       showMessageBox: ({ message, type, buttons, title }: MessageBoxSyncOptions) => number
       beep: () => void
       quit: () => void
-      copy: (data: string) => void
-      paste: () => string
       onBeforeClose (fn: () => Promise<boolean>)
       onOpenFile (fn: (filePath: string) => void)
       openFile: (filePath: string) => string
@@ -19,6 +17,10 @@ declare global {
       getFilePaths: (directoryPath: string, filter: string) => string[]
       setFullscreen: (isFullscreen: boolean) => void
       getDefaultSavePath: () => string
+      setClipboardContents: (data: string) => void
+      getClipboardContents: () => string
+      clearClipboard: () => void
+      canPaste: () => boolean
     }
   }
 }

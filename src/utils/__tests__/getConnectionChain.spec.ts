@@ -39,7 +39,7 @@ describe('getConnectionChain()', () => {
 
   describe('description', () => {
     const ports = { inputPort, outputPort, startPort, endPort }
-    const connections = [connectionPart1, connectionPart2, otherConnection]
+    const connections = { connectionPart1, connectionPart2, otherConnection }
 
     it('should return the connection ids and any associated freeport ids', () => {
       const { connectionIds, freeportIds } = getConnectionChain(connections, ports, 'connectionPart1')

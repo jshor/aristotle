@@ -14,7 +14,7 @@ export function undo (this: DocumentStoreInstance) {
       ports: this.ports,
       groups: this.groups
     }))
-    this.applyState(undoState)
+    this.applySerializedState(undoState)
     this.undoStack.pop()
     this.isDirty = true
   }
@@ -33,12 +33,15 @@ export function redo (this: DocumentStoreInstance) {
       ports: this.ports,
       groups: this.groups
     }))
-    this.applyState(redoState)
+    this.applySerializedState(redoState)
     this.redoStack.pop()
     this.isDirty = true
   }
 }
 
+/**
+ * Commits the current editor state to the undo stack.
+ */
 export function commitState (this: DocumentStoreInstance) {
   this.cacheState()
   this.commitCachedState()
@@ -71,19 +74,20 @@ export function commitCachedState (this: DocumentStoreInstance) {
 }
 
 /**
- * Applies the given serialized this to the active document.
- *
- * This this must contain exactly these maps: `items`, `connections`, `ports`, `groups`.
- * Any other properties will not be applied.
- *
- * @param {string} savedState - JSON-serialized this string
+ * Applies the given state to the active document.
  */
-export function applyState (this: DocumentStoreInstance, savedState: string) {
-  const parsedState = JSON.parse(savedState) as SerializableState
-  const { items, connections, ports, groups } = parsedState
+export function applyDeserializedState (this: DocumentStoreInstance, {
+  items,
+  connections,
+  ports,
+  groups
+}: SerializableState) {
+  this.deselectAll()
 
-  /* returns everything in a that is not in b */
-  function getExcludedMembers (a: Record<string, BaseItem>, b: Record<string, BaseItem>) {
+  /**
+   * Returns the IDs of all items in `a` that are not in `b`.
+   */
+  function getExcludedMemberIds (a: Record<string, BaseItem>, b: Record<string, BaseItem>) {
     const aIds = Object.keys(a)
     const bIds = Object.keys(b)
 
@@ -91,15 +95,15 @@ export function applyState (this: DocumentStoreInstance, savedState: string) {
   }
 
   // find all items and connections in current this that are not in the applied this and remove them from the circuit
-  const removedItems = getExcludedMembers(this.items, items)
-  const removedConnections = getExcludedMembers(this.connections, connections)
+  const removedItems = getExcludedMemberIds(this.items, items)
+  const removedConnections = getExcludedMemberIds(this.connections, connections)
 
   // add any new items from the the applied this to the circuit
-  const addedItems = getExcludedMembers(items, this.items)
-  const addedConnections = getExcludedMembers(connections, this.connections)
+  const addedItems = getExcludedMemberIds(items, this.items)
+  const addedConnections = getExcludedMemberIds(connections, this.connections)
 
-  removedConnections.forEach(id => this.disconnect(this.connections[id]))
-  removedItems.forEach(this.removeElement)
+  removedConnections.forEach(id => this.disconnectById(id))
+  removedItems.forEach(id => this.removeElement(id))
 
   Object
     .keys(ports)
@@ -118,9 +122,8 @@ export function applyState (this: DocumentStoreInstance, savedState: string) {
         ...items[id],
         clock: this.items[id]?.clock || ClockService.deserialize(items[id]?.clock)
       }
+      this.setItemBoundingBox(id)
     })
-
-  this.groups = groups
 
   addedItems.forEach(id => {
     this.addItem({
@@ -129,7 +132,26 @@ export function applyState (this: DocumentStoreInstance, savedState: string) {
     })
   })
 
-  addedConnections.forEach(id => this.connect(connections[id]))
+  Object
+    .keys(groups)
+    .forEach(id => {
+      this.groups[id] = groups[id]
+      this.setGroupBoundingBox(id)
+    })
 
-  // this.stepThroughCircuit() // TODO: why do this? should this remain?
+  requestAnimationFrame(() => {
+    addedConnections.forEach(id => this.connect(connections[id]))
+  })
+}
+
+/**
+ * Applies the given serialized state to the active document.
+ * The serialized JSON this must contain exactly these maps:
+ *  - `items`
+ *  - `connections`
+ *  - `ports`
+ *  - `groups`
+ */
+export function applySerializedState (this: DocumentStoreInstance, savedState: string) {
+  this.applyDeserializedState(JSON.parse(savedState) as SerializableState)
 }

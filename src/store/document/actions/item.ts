@@ -6,6 +6,7 @@ import Direction from '@/types/enums/Direction'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
 import ItemType from '@/types/enums/ItemType'
+import ClockService from '@/services/ClockService'
 
 /**
  * Adds any non-IC component to the state.
@@ -36,6 +37,7 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
 
           // wait for next JS frame so that the oscillogram broadcast (with the port wave removed) completes first
           // then the port can be re-monitored with the new wave
+          // TODO: this may not be needed anymore now that tiny-emitter has been replaced
           setTimeout(() => this.monitorPort(port.id))
         }
       }
@@ -56,6 +58,8 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
   }
 
   item.name = name
+  item.clock = ClockService.deserialize(item.clock)
+  item.isSelected = false
 
   // add the item to the document and create its corresponding circuit node
   this.items[item.id] = item

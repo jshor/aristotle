@@ -1,40 +1,96 @@
 import { LogicValue } from '@/circuit'
 import { DocumentStoreInstance } from '..'
 import idMapper from '@/utils/idMapper'
-import ClockService from '@/services/ClockService'
+import ItemType from '@/types/enums/ItemType'
+import getConnectionChain from '@/utils/getConnectionChain'
 
+/**
+ * Performs a clipboard cut operation.
+ */
 export function cut (this: DocumentStoreInstance) {
   this.copy()
   this.deleteSelection()
 }
 
+/**
+ * Copies selected editor elements to the clipboard.
+ */
 export function copy (this: DocumentStoreInstance) {
-  if (!this.hasSelection) return
+  if (!this.hasSelectedItems) {
+    return window.api.beep()
+  }
 
   const items: Record<string, Item> = {}
   const ports: Record<string, Port> = {}
+  const connections: Record<string, Connection> = {}
+  const orphanedConnectionChainIds = new Set<string>()
+  const connectedPortIds = new Set<string>()
+  const freeportIds = new Set<string>()
 
   this.selectedItemIds.forEach(id => {
     items[id] = this.items[id]
     items[id].portIds.forEach(portId => {
       ports[portId] = this.ports[portId]
     })
+
+    if (items[id].type === ItemType.Freeport) {
+      freeportIds.add(id)
+    }
   })
 
-  const connections = Object
-    .values(this.connections)
-    .reduce((map, connection) => {
+  Object
+    .values(this.selectedConnectionIds)
+    .forEach(id => {
+      const connection = this.connections[id]
+
+      connections[id] = connection
+
       if (ports[connection.source] && ports[connection.target]) {
-        map[connection.id] = connection
+        // this is a valid connection (i.e., connected at both the source and target to selected items)
+        // take note that these are valid port IDs
+        connectedPortIds.add(connection.source)
+        connectedPortIds.add(connection.target)
+      } else {
+        // the connection is orphaned (i.e., not connected to any selected item at its source and/or its target)
+        // the entire chain is therefore invalid
+        orphanedConnectionChainIds.add(connection.connectionChainId)
       }
+    })
 
-      return map
-    }, {} as Record<string, Connection>)
 
-  const groups = Object
-    .values(this.groups)
-    .filter(({ isSelected }) => isSelected)
-    .reduce((map, group) => ({ ...map, [group.id]: group }), {})
+  // prune connections and freeports (and their ports) from orphaned connection chains
+  orphanedConnectionChainIds.forEach(chainId => {
+    const chain = getConnectionChain(connections, ports, chainId)
+
+    chain.connectionIds.forEach(id => delete connections[id])
+    chain.freeportIds.forEach(id => {
+      items[id]
+        ?.portIds
+        .forEach(portId => delete ports[portId])
+
+      freeportIds.delete(id)
+      delete items[id]
+    })
+  })
+
+  // prune any remaining freeports that are not connected to anything selected
+  freeportIds.forEach(id => {
+    const isConnected = !!items[id]
+      .portIds
+      .find(id => connectedPortIds.has(id))
+
+    if (!isConnected) {
+      delete items[id]
+    }
+  })
+
+  const groups = this
+    .selectedGroupIds
+    .filter(id => id !== null)
+    .reduce((map, id) => ({
+      ...map,
+      [id!]: this.groups[id!]
+    }), {})
 
   const clipboardData: ClipboardData = {
     items,
@@ -44,68 +100,90 @@ export function copy (this: DocumentStoreInstance) {
     pasteCount: 1
   }
 
-  window.api.copy(JSON.stringify(clipboardData))
+  if (Object.keys(clipboardData.items).length) {
+    window.api.setClipboardContents(JSON.stringify(clipboardData))
+  } else {
+    window.api.beep()
+  }
 }
 
+/**
+ * Pastes clipboard elements to the editor.
+ */
 export function paste (this: DocumentStoreInstance) {
+  if (!window.api.canPaste()) {
+    return window.api.beep()
+  }
+
   try {
-    const state = window.api.paste()
+    const state = window.api.getClipboardContents()
     const parsed = JSON.parse(state as string) as ClipboardData
     const mapped = idMapper.mapStandardCircuitIds(parsed) as ClipboardData
 
     this.commitState()
-    this.deselectAll()
 
+    // reset the ports
     Object
       .keys(mapped.ports)
       .forEach(portId => {
-        mapped.ports[portId].value = LogicValue.UNKNOWN
-        mapped.ports[portId].isMonitored = false
+        const port = mapped.ports[portId]
 
-        delete mapped.ports[portId].wave
+        port.value = LogicValue.UNKNOWN
+        port.isMonitored = false
+
+        delete port.wave
       })
 
+    this.applyDeserializedState({
+      items: {
+        ...this.items,
+        ...mapped.items
+      },
+      connections: {
+        ...this.connections,
+        ...mapped.connections
+      },
+      ports: {
+        ...this.ports,
+        ...mapped.ports
+      },
+      groups: {
+        ...this.groups,
+        ...mapped.groups
+      }
+    })
+
+    // select all pasted items
     Object
+      .keys(mapped.items)
+      .concat(Object.keys(mapped.groups))
+      .concat(Object.keys(mapped.connections))
+      .forEach(id => this.setSelectionState({ id, value: true }))
+
+    // move the newly-pasted items 20 pixels to the right and down
+    const item = Object
       .values(mapped.items)
-      .forEach(item => {
-        item.position.x += 20 * parsed.pasteCount
-        item.position.y += 20 * parsed.pasteCount
-        item.isSelected = false
-        item.clock = ClockService.deserialize({
-          ...item.clock,
-          name: item.portIds[0]
-        })
+      .find(item => item.type !== ItemType.Freeport)!
 
-        delete item.clock
-
-        this.addItem({
-          item,
-          ports: mapped.ports
-        })
-        this.setSelectionState({ id: item.id, value: true })
+    requestAnimationFrame(() => {
+      this.setSelectionPosition({
+        id: item.id,
+        position: {
+          x: item.position.x + (parsed.pasteCount * 20),
+          y: item.position.y + (parsed.pasteCount * 20)
+        }
       })
+    })
 
-    Object
-      .values(mapped.connections)
-      .forEach(connection => this.connect(connection))
-
-    Object
-      .values(mapped.groups)
-      .forEach(group => {
-        this.groups[group.id] = group
-
-        this.setGroupBoundingBox(group.id)
-        this.setSelectionState({ id: group.id, value: true })
-      })
-
+    // update the clipboard data with the paste count incremented
     const clipboardData: ClipboardData = {
       ...JSON.parse(state),
       pasteCount: parsed.pasteCount + 1
     }
 
-    window.api.copy(JSON.stringify(clipboardData))
-  } catch (error) {
-    console.log('ERROR: ', error)
-    // TODO: clear clipboard?
+    window.api.setClipboardContents(JSON.stringify(clipboardData))
+  } catch (_) {
+    window.api.clearClipboard()
+    window.api.beep()
   }
 }
