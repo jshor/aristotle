@@ -131,7 +131,7 @@ export function updateSelectionList (this: DocumentStoreInstance, { id, isSelect
     const {
       connectionIds,
       freeportIds
-    } = getConnectionChain(Object.values(this.connections), this.ports, connectionChainId)
+    } = getConnectionChain(this.connections, this.ports, connectionChainId)
 
     // select all connection segments that are part of this connection chain
     connectionIds.forEach(id => {
@@ -197,19 +197,64 @@ export function recycleSelection (this: DocumentStoreInstance, backToFirstItem: 
  * Deletes all selected items and connections.
  */
 export function deleteSelection (this: DocumentStoreInstance) {
+  // TODO: this function is a disaster - never works properly
   if (!this.hasSelection) return
 
   this.commitState()
-  this
-    .selectedConnectionIds
-    .forEach(id => this.disconnect(this.connections[id]))
-  this
+
+  // get a list of all ports associated to all selected items
+  const portIds = this
     .selectedItemIds
+    .reduce((portIds, itemId) => {
+      this
+        .items[itemId]
+        .portIds
+        .forEach(portId => portIds.add(portId))
+
+      return portIds
+    }, new Set<string>())
+
+  // get all connection chain IDs that are associated to all selected items
+  const connectionChainIds = Object
+    .values(this.connections)
+    .reduce((ids, { source, target, connectionChainId }) => {
+      if (portIds.has(source) || portIds.has(target)) {
+        ids.add(connectionChainId)
+      }
+      return ids
+    }, new Set<string>())
+
+  // get a list of all freeports and connections associated with all applicable connection chains
+  const { freeportIds, connectionIds } = Array
+    .from(connectionChainIds)
+    .reduce((chains, chainId) => {
+      const { freeportIds, connectionIds } = getConnectionChain(this.connections, this.ports, chainId)
+
+      return {
+        freeportIds: chains.freeportIds.concat(freeportIds),
+        connectionIds: chains.connectionIds.concat(connectionIds)
+      }
+    }, {
+      freeportIds: [] as string[],
+      connectionIds: [] as string[]
+    })
+
+  // first, remove all connections that should be removed
+  this
+    .selectedConnectionIds // the user-selected connections
+    .concat(connectionIds) // the connections in related connection chains
+    .forEach(id => this.disconnectById(id))
+
+  // then remove the items
+  this
+    .selectedItemIds // the user-selected items
+    .concat(freeportIds) // the freeports in related connection chains
     .forEach(id => this.removeElement(id))
+
+  // then remove the selected groups
   this
     .selectedGroupIds
     .forEach(id => id !== null && delete this.groups[id])
-
 
   this.deselectAll()
 }

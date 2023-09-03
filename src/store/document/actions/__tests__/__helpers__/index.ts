@@ -93,6 +93,46 @@ export const createGroup = (id: string, itemIds: string[] = [], payload: Partial
   ...payload
 })
 
+export const createConnectionChain = (id: string, sourceId: string, targetId: string, segments: number) => {
+  const connections: Record<string, Connection> = {}
+  const items: Record<string, Item> = {}
+  const ports: Record<string, Port> = {}
+  const connectionChainId = `${id}ConnectionChain`
+
+  let prevSourceId = sourceId
+
+  for (let i = 1; i < segments; i++) {
+    const freeportItem = createItem(`${id}Freeport${i}`, ItemType.Freeport, {
+      portIds: [
+        `${id}FreeportInputPort${i}`,
+        `${id}FreeportOutputPort${i}`
+      ]
+    })
+    const inputPort = createPort(`${id}FreeportInputPort${i}`, `${id}FreeportItem${i}`, PortType.Input, { isFreeport: true })
+    const outputPort = createPort(`${id}FreeportOutputPort${i}`, `${id}FreeportItem${i}`, PortType.Input, { isFreeport: true })
+    const connection = createConnection(`${id}ConnectionSegment${i}`, prevSourceId, `${id}FreeportOutputPort${i}`, { connectionChainId })
+
+    items[freeportItem.id] = freeportItem
+    ports[inputPort.id] = inputPort
+    ports[outputPort.id] = outputPort
+    connections[connection.id] = connection
+
+    prevSourceId = `${id}FreeportInputPort${i}`
+  }
+
+  const lastConnection = createConnection(`${id}ConnectionSegment${segments}`, prevSourceId, targetId, { connectionChainId })
+
+  connections[lastConnection.id] = lastConnection
+
+  return {
+    connections,
+    items,
+    ports,
+    getConnection: (index: number) => connections[`${id}ConnectionSegment${index}`],
+    getFreeport: (index: number) => items[`${id}FreeportItem${index}`]
+  }
+}
+
 export const stubAll = <T extends {}>(store: T, methods: (keyof T & string)[]) => {
   methods.forEach(method => {
     jest

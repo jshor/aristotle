@@ -7,7 +7,7 @@ import { DocumentStoreInstance } from '..'
  *
  * @param id - ID of the item or port being dragged
  */
-  export function setSnapBoundaries (this: DocumentStoreInstance, id: string) {
+export function setSnapBoundaries (this: DocumentStoreInstance, id: string) {
   this.snapBoundaries = ((): BoundingBox[] => {
     if (this.connectablePortIds.length) {
       // if there are connectable port ids, then use those for boundaries

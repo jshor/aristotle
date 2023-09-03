@@ -14,15 +14,17 @@ if (!window.api) {
     showMessageBox () { return 0 },
     beep () {},
     quit () {},
-    copy () {},
-    paste () { return '' },
     onBeforeClose () {},
     onOpenFile () {},
     openFile () { return '' },
     saveFile () {},
     setFullscreen () {},
     getFilePaths () { return [] },
-    getDefaultSavePath () { return ''}
+    getDefaultSavePath () { return ''},
+    setClipboardContents () {},
+    getClipboardContents () { return '' },
+    clearClipboard () {},
+    canPaste () { return false }
   }
 }
 

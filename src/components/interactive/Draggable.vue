@@ -94,7 +94,8 @@ export default defineComponent({
 
     watchEffect(() => {
       if (props.isSelected) {
-        draggable.value?.$el.focus()
+        // TODO: this competes for other focus - should be a better way to do this
+        // draggable.value?.$el.focus()
       }
     })
 
@@ -104,7 +105,7 @@ export default defineComponent({
      * @emits `select` if not already selected
      */
     function onFocus () {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (!props.isSelected) {
           emit('select', false)
         }

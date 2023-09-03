@@ -189,6 +189,10 @@ export default defineComponent({
       document.addEventListener('dragover', onDragOver)
       document.addEventListener('dragleave', onDragLeave)
       document.addEventListener('drop', onDrop)
+      document.addEventListener('cut', onClipboard('cut'))
+      document.addEventListener('copy', onClipboard('copy'))
+      document.addEventListener('paste', onClipboard('paste'))
+      window.addEventListener('focus', store.checkPastability)
     })
 
     onBeforeUnmount(() => {
@@ -196,7 +200,22 @@ export default defineComponent({
       document.removeEventListener('dragover', onDragOver)
       document.removeEventListener('dragleave', onDragLeave)
       document.removeEventListener('drop', onDrop)
+      document.removeEventListener('cut', onClipboard('cut'))
+      document.removeEventListener('copy', onClipboard('copy'))
+      document.removeEventListener('paste', onClipboard('paste'))
+      window.removeEventListener('focus', store.checkPastability)
     })
+
+    function onClipboard (action: 'cut' | 'copy' | 'paste') {
+      return function ($event: ClipboardEvent) {
+        if (!($event.target instanceof HTMLInputElement)) {
+          store.invokeClipboardAction(action)
+          $event.preventDefault()
+        }
+
+        store.checkPastability()
+      }
+    }
 
     function onDragOver ($event: DragEvent) {
       $event.stopPropagation()

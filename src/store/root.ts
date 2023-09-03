@@ -25,6 +25,7 @@ export type RootStore = {
   clipboard: string | null
   activeDocumentId: string | null
   canExit: boolean
+  canPaste: boolean
   isSettingsOpen: boolean
   isDocumentSelectOpen: boolean
   isFullscreen: boolean
@@ -39,6 +40,7 @@ export const useRootStore = defineStore({
     clipboard: null,
     activeDocumentId: null,
     canExit: false,
+    canPaste: false,
     isFullscreen: false,
     isBuilderOpen: false,
     isToolboxOpen: false,
@@ -360,6 +362,15 @@ export const useRootStore = defineStore({
 
     toggleToolbox () {
       this.isToolboxOpen = !this.isToolboxOpen
+    },
+
+    invokeClipboardAction (action: 'cut' | 'copy' | 'paste') {
+      this.activeDocument?.store()[action]()
+    },
+
+    checkPastability () {
+      this.canPaste = window.api.canPaste()
+      console.log('can paste? ', this.canPaste)
     }
   }
 })

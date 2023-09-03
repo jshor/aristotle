@@ -2,11 +2,13 @@ import { DocumentStoreInstance } from '..'
 
 export function loadDocument (this: DocumentStoreInstance, document: string) {
   const parsed = JSON.parse(document)
-  const state = parsed.integratedCircuit
-    ? JSON.stringify(parsed.integratedCircuit)
-    : document
 
-  this.applyState(state)
+  if (parsed.integratedCircuit) {
+    this.applyDeserializedState(parsed.integratedCircuit)
+  } else {
+    this.applySerializedState(document)
+  }
+
   this.initialize()
 }
 

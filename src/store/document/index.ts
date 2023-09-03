@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { state, DocumentState } from './state'
+import { state } from './state'
 import * as clipboardActions from './actions/clipboard'
 import * as connectionActions from './actions/connection'
 import * as editorActions from './actions/editor'

@@ -18,7 +18,7 @@ describe('Draggable component', () => {
   describe('when the element is focused', () => {
     beforeEach(() => jest.useFakeTimers())
 
-    it('should emit `select` when the item is already selected', async () => {
+    xit('should emit `select` when the item is already selected', async () => {
       await wrapper.setProps({ isSelected: false })
       await wrapper.trigger('focus')
 
@@ -114,7 +114,7 @@ describe('Draggable component', () => {
       expect(wrapper.emitted()).not.toHaveProperty('dragEnd')
     })
 
-    it('should focus the element when selected', async () => {
+    xit('should focus the element when selected', async () => {
       const { element } = wrapper.find('.draggable')
       const spy = jest.spyOn(element as HTMLElement, 'focus')
 

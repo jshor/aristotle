@@ -53,7 +53,8 @@ export default defineComponent({
 <style lang="scss">
 .custom-circuit {
   border: 1px solid var(--color-secondary);
-  background-color: var(--color-bg-primary);
+  // background-color: var(--color-bg-primary);
+  background-color: #1D1E25CC;
   pointer-events: all;
   margin: 40px;
 

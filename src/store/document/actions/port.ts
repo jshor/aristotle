@@ -1,4 +1,3 @@
-import { CircuitNode } from '@/circuit'
 import { DocumentStoreInstance } from '..'
 import getConnectionChain from '@/utils/getConnectionChain'
 import PortType from '@/types/enums/PortType'
@@ -40,14 +39,13 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
       const {
         connectionIds,
         freeportIds
-      } = getConnectionChain(Object.values(this.connections), this.ports, c.connectionChainId)
+      } = getConnectionChain(this.connections, this.ports, c.connectionChainId)
 
-      connectionIds.forEach(id => this.disconnect(this.connections[id]))
+      connectionIds.forEach(id => this.disconnectById(id))
 
       freeportIds.forEach(id => {
         // delete all freeports associated with the chain
         this.items[id].portIds.forEach(portId => {
-          this.unmonitorPort(portId)
           delete this.ports[portId]
           delete this.nodes[portId]
         })
