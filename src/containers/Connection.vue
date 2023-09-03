@@ -82,17 +82,17 @@ export default defineComponent({
     const store = props.store()
     const connection = ref(store.connections[props.id])
     const root = ref<ComponentPublicInstance<HTMLElement>>()
-
-    const source = computed(() => store.ports[connection.value.source])
-    const target = computed(() => store.ports[connection.value.target])
-    const topLeft = computed(() => {
-      return boundaries.getExtremePoint('min', source.value.position, target.value.position)
-    })
+    const source = computed(() => store.ports[store.connections[props.id].source])
+    const target = computed(() => store.ports[store.connections[props.id].target])
     const geometry = computed(() => renderLayout(source.value, target.value))
-    const position = computed(() => ({
-      y: topLeft.value.y + geometry.value.minY,
-      x: topLeft.value.x + geometry.value.minX
-    }))
+    const position = computed(() => {
+      const topLeft = boundaries.getExtremePoint('min', source.value.position, target.value.position)
+
+      return {
+        y: topLeft.y + geometry.value.minY,
+        x: topLeft.x + geometry.value.minX
+      }
+    })
 
     const freeportId = ref<string | null>(null)
 

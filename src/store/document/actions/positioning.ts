@@ -71,6 +71,10 @@ export function setItemPosition (this: DocumentStoreInstance, { id, position }: 
     })
 }
 
+/**
+ * Drags selected item(s) to the given position.
+ * This handles snapping and grid alignment when applicable.
+ */
 export function dragItem (this: DocumentStoreInstance, id: string, position: Point, snapMode?: SnapMode) {
   const { snapping, grid } = usePreferencesStore()
   const { x, y } = fromDocumentToEditorCoordinates(this.canvas, this.viewport, position, this.zoom)
@@ -96,7 +100,7 @@ export function dragItem (this: DocumentStoreInstance, id: string, position: Poi
   const offset = boundaries.getSnapOffset(
     this.snapBoundaries,
     boundingBox,
-    snapMode || snapPreference,
+    snapPreference,
     snapTolerance
   )
 

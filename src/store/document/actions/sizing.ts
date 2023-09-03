@@ -5,6 +5,13 @@ const MIN_SCALE = 0.1
 const MAX_SCALE = 2
 const SCALE_STEP = 0.1
 
+/**
+ * Updates the canvas size such that all items:
+ *
+ *  (1) fit within the canvas (which is expanded to twice the size of the bounding box of all items if not),
+ *  (2) are centered, and
+ *  (3) are zoomed to visually fit within the viewport
+ */
 export function updateCanvasSize (this: DocumentStoreInstance) {
   const boundingBoxes = Object
     .values(this.items)
@@ -29,7 +36,8 @@ export function updateCanvasSize (this: DocumentStoreInstance) {
     this.panToCenter()
   }
 
-  // zoom to fit everything on the screen (within the editor viewport)
+  // zoom out to fit everything on the screen (within the editor viewport)
+  // if everything fits, then zoom is defaulted to 100%
   setTimeout(() => {
     this.setZoom({
       zoom: Math.min(this.viewport.width / width, this.viewport.height / height, 1)
@@ -52,7 +60,7 @@ export function setViewerSize (this: DocumentStoreInstance, rect: DOMRect) {
     this.updateCanvasSize()
     this.centerAll()
     this.panToCenter()
-    // this.setZoom({ zoom: 1.4 }) // TODO: set the user-defined default zoom like this
+    // this.setZoom({ zoom: 1.4 }) // TODO: set the user-defined default zoom like this (may need setTimeout)
   }
 }
 
@@ -66,6 +74,8 @@ export function setViewerSize (this: DocumentStoreInstance, rect: DOMRect) {
  */
 export function setItemSize (this: DocumentStoreInstance, { rect, id }: { rect: DOMRectReadOnly, id: string }) {
   const item = this.items[id]
+
+  if (!item) return
 
   const width = rect.width / this.zoomLevel
   const height = rect.height / this.zoomLevel

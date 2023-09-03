@@ -14,6 +14,8 @@
 </template>
 
 <script lang="ts">
+import { LogicValue } from '@/circuit'
+import Direction from '@/types/enums/Direction'
 import { defineComponent, PropType, computed, CSSProperties } from 'vue'
 
 /**
@@ -64,15 +66,17 @@ export default defineComponent({
   name: 'DigitDisplay',
   props: {
     ports: {
-      type: Array as PropType<Port[]>,
-      default: () => []
+      type: Object as PropType<Record<Direction, Port[]>>,
+      default: () => {}
     }
   },
   setup (props) {
     const segments = computed(() => {
+      console.log('SEGMENT: ', props.ports)
       const binaryString = props
         .ports
-        .map(node => node.value === 1 ? 1 : 0)
+        ?.[Direction.Left]
+        ?.map(node => node.value === LogicValue.TRUE ? 1 : 0)
         .join('')
       const hexString = parseInt(binaryString, 2)
         .toString(16)

@@ -47,5 +47,11 @@ export default function createApplicationMenu (): MenuItemConstructorOptions[] {
     })
   }
 
+  menus.push({
+    label: 'Help',
+    role: 'help',
+    submenu: []
+  })
+
   return menus
 }

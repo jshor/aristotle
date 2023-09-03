@@ -5,7 +5,7 @@ exports[`Wire Layout renderLayout() should render a bottom-left (a) to top-right
   "height": 65,
   "minX": -22.5,
   "minY": -7.5,
-  "path": "M 30.000 0.000 C 15.000 0.000 -15.000 35.000 0.000 35.000",
+  "path": "M 30 0 C 15 0 -15 35 0 35",
   "width": 75,
 }
 `;
@@ -15,7 +15,7 @@ exports[`Wire Layout renderLayout() should render a bottom-left (b) to top-right
   "height": 65,
   "minX": -22.5,
   "minY": -7.5,
-  "path": "M 30.000 0.000 C 15.000 0.000 -15.000 35.000 0.000 35.000",
+  "path": "M 30 0 C 15 0 -15 35 0 35",
   "width": 75,
 }
 `;
@@ -25,7 +25,7 @@ exports[`Wire Layout renderLayout() should render a top-left (a) to bottom-right
   "height": 65,
   "minX": -17.5,
   "minY": -7.5,
-  "path": "M 0.000 35.000 C -10.000 35.000 0.000 0.000 10.000 0.000",
+  "path": "M 0 35 C -10 35 0 0 10 0",
   "width": 50,
 }
 `;
@@ -35,7 +35,7 @@ exports[`Wire Layout renderLayout() should render a top-left (b) to bottom-right
   "height": 65,
   "minX": -17.5,
   "minY": -7.5,
-  "path": "M 20.000 35.000 C 10.000 35.000 -10.000 0.000 0.000 0.000",
+  "path": "M 20 35 C 10 35 -10 0 0 0",
   "width": 60,
 }
 `;

@@ -206,11 +206,18 @@ export default defineComponent({
       window.removeEventListener('focus', store.checkPastability)
     })
 
+    let requestAnimationFrameId = 0
+
     function onClipboard (action: 'cut' | 'copy' | 'paste') {
       return function ($event: ClipboardEvent) {
         if (!($event.target instanceof HTMLInputElement)) {
-          store.invokeClipboardAction(action)
-          $event.preventDefault()
+          if (requestAnimationFrameId) return
+
+          requestAnimationFrameId = requestAnimationFrame(() => {
+            requestAnimationFrameId = 0
+            store.invokeClipboardAction(action)
+            cancelAnimationFrame(requestAnimationFrameId)
+          })
         }
 
         store.checkPastability()
@@ -295,7 +302,21 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+// html {
+//   overflow: hidden;
+//   width: 100vw;
+// }
+
+// body {
+//   height: 100vh;
+//   width: 100vw;
+//   overflow: hidden;
+// }
+
 .app {
+  // height: 100vh;
+  // overflow: hidden;
+
   &__dropzone {
     position: absolute;
     top: 0;

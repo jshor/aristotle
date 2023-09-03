@@ -1,27 +1,27 @@
 <template>
   <editor
     ref="editor"
-    :zoom="store.zoomLevel"
+    :zoom="store.zoom"
     :grid-size="grid.showGrid.value ? grid.gridSize.value : 0"
     :tabindex="0"
-    :offset="{
-      x: store.canvas.left,
-      y: store.canvas.top
-    }"
+    :canvas="store.canvas"
     :style="{
       '--color-on': colors.onColor.value,
       '--color-off': colors.offColor.value,
       '--color-hi-i': colors.unknownColor.value
     }"
-    :width="store.canvas.right - store.canvas.left"
-    :height="store.canvas.bottom - store.canvas.top"
-    @pan="store.panTo"
-    @deselect="store.deselectAll"
-    @selection="store.createSelection"
+    @pan="store.panDelta"
     @zoom="store.setZoom"
     @contextmenu="onContextMenu"
     @resize="store.setViewerSize"
   >
+    <selector
+      :zoom="store.zoom"
+      @selection-end="store.createSelection"
+      @selection-start="onDeselect"
+      ref="selector"
+    />
+
     <!-- when tabbed into, this resets the selection back to the last item -->
     <div
       :tabindex="0"
@@ -39,7 +39,7 @@
         :id="baseItem.id"
         :key="baseItem.id"
         :is-selected="baseItem.isSelected"
-        :flash="store.isDebugging && store.isCircuitEvaluated"
+        :flash="flash"
         :z-index="baseItem.zIndex + (baseItem.type !== 'Freeport' ? 2000 : 1000)"
         @contextmenu="onContextMenu"
       />
@@ -53,7 +53,7 @@
         :key="`c${baseItem.id}`"
         :is-selected="baseItem.isSelected"
         :is-preview="store.connectionPreviewId === baseItem.id"
-        :flash="store.isDebugging && store.isCircuitEvaluated"
+        :flash="flash"
         :z-index="baseItem.zIndex"
         @contextmenu="onContextMenu"
       />
@@ -78,10 +78,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, ComponentPublicInstance, watchEffect } from 'vue'
+import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, watchEffect, computed } from 'vue'
 import Connection from './Connection.vue'
 import Item from './Item.vue'
 import Editor from '@/components/editor/Editor.vue'
+import Selector from '@/components/editor/Selector.vue'
 import Group from '@/components/Group.vue'
 import editorContextMenu from '@/menus/context/editor'
 import boundaries from '@/store/document/geometry/boundaries'
@@ -90,12 +91,14 @@ import { DocumentStore } from '@/store/document'
 import { useRootStore } from '@/store/root'
 import { storeToRefs } from 'pinia'
 import { usePreferencesStore } from '@/store/preferences'
+import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING } from '@/constants'
 
 export default defineComponent({
   name: 'Document',
   components: {
     Group,
     Editor,
+    Selector,
     Connection,
     Item
   },
@@ -108,12 +111,13 @@ export default defineComponent({
   setup (props) {
     const store = props.store()
     const rootStore = useRootStore()
-    const editor = ref<ComponentPublicInstance<HTMLElement>>()
+    const editor = ref<typeof Editor>()
     const updates = ref(0)
     const { colors, grid } = storeToRefs(usePreferencesStore())
+    const flash = computed(() => store.isDebugging && store.isCircuitEvaluated)
 
     let acceleration = 1
-    let keys: Record<string, boolean> = {}
+    let requestAnimationFrameId = 0
 
     watchEffect(() => {
       if (store.isPrinting) printImage()
@@ -123,27 +127,33 @@ export default defineComponent({
     onMounted(() => {
       document.addEventListener('keydown', onKeyDown)
       document.addEventListener('keyup', onKeyUp)
-      window.addEventListener('blur', clearKeys)
+      window.addEventListener('blur', onKeyUp)
     })
 
     onBeforeUnmount(() => {
       document.removeEventListener('keydown', onKeyDown)
       document.removeEventListener('keyup', onKeyUp)
-      window.removeEventListener('blur', clearKeys)
+      window.removeEventListener('blur', onKeyUp)
     })
 
+    /**
+     * Invokes the given callback with the editor and its computed bounding box of all elements.
+     * This is used for rendering the document as an image that can be printed or exported to a file.
+     */
     function initiatePrint (callback: (editorElement: HTMLElement, boundingBox: BoundingBox) => Promise<void>) {
-      if (editor.value) {
-        const boundingBoxes = Object
-          .values(store.items)
-          .map(({ boundingBox }) => boundingBox)
-        const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
-        const editorElement = editor.value.$el.querySelector('.editor__grid') as HTMLElement
+      if (!editor.value) return
 
-        callback(editorElement, boundingBox)
-      }
+      const boundingBoxes = Object
+        .values(store.items)
+        .map(({ boundingBox }) => boundingBox)
+      const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
+
+      callback(editor.value.grid, boundingBox)
     }
 
+    /**
+     * Prints the document using a physical printer.
+     */
     async function printImage () {
       initiatePrint(async (editorElement, boundingBox) => {
         await printing.printImage(store.zoom, editorElement, boundingBox)
@@ -152,9 +162,12 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Exports the document as an image.
+     */
     async function exportImage () {
       initiatePrint(async (editorElement, boundingBox) => {
-        const { printArea } = printing.createPrintArea(1 / store.zoom, editorElement, boundingBox, 20, '')
+        const { printArea } = printing.createPrintArea(1 / store.zoom, editorElement, boundingBox, IMAGE_PADDING, '')
         const image = await printing.createImage<Blob>(printArea, 'toBlob')
 
         await rootStore.saveImage(image)
@@ -163,33 +176,39 @@ export default defineComponent({
       })
     }
 
+    /**
+     * Key down event handler, for document-specific commands that cannot be handled via a menu accelerator.
+     */
     function onKeyDown ($event: KeyboardEvent) {
       if ($event.target instanceof HTMLInputElement) return
+      if (requestAnimationFrameId) return
 
-      switch ($event.key) {
-        case 'Escape':
-          return store.deselectAll()
-        case 'a':
-          // the CommandOrControl+A accelerator doesn't work with Electron's menu
-          // this is a workaround for that
-          return $event.ctrlKey && store.selectAll()
-        default:
-          return moveItemsByArrowKey($event)
-      }
+      requestAnimationFrameId = requestAnimationFrame(() => {
+        requestAnimationFrameId = 0
+
+        switch ($event.key) {
+          case 'Escape':
+            return store.deselectAll()
+          case 'a':
+            // the CommandOrControl+A accelerator doesn't work with Electron's menu
+            // this is a workaround for that
+            return $event.ctrlKey && store.selectAll()
+          default:
+            return moveItemsByArrowKey($event)
+        }
+      })
     }
 
-    function onKeyUp ($event: KeyboardEvent) {
-      keys[$event.key] = false
+    /**
+     * Resets the arrow key momentum when the key is released.
+     */
+    function onKeyUp () {
       acceleration = 1
     }
 
-    function onContextMenu ($event: Event) {
-      window.api.showContextMenu(editorContextMenu(props.store))
-
-      $event.preventDefault()
-      $event.stopPropagation()
-    }
-
+    /**
+     * Moves the selected items by the given delta, based on the arrow key that was pressed.
+     */
     function moveItemsByArrowKey ($event: KeyboardEvent) {
       const delta = (() => {
         switch ($event.key) {
@@ -211,12 +230,28 @@ export default defineComponent({
           x: delta.x * i,
           y: delta.y * i
         })
-        acceleration *= 1.05
+        acceleration *= ARROW_KEY_MOMENTUM_MULTIPLIER
       }
     }
 
-    function clearKeys () {
-      keys = {}
+    /**
+     * Shows the editor context menu.
+     */
+    function onContextMenu ($event: Event) {
+      window.api.showContextMenu(editorContextMenu(props.store))
+
+      $event.preventDefault()
+      $event.stopPropagation()
+    }
+
+    /**
+     * Deselects all items when clicking on the background, unless the shift key is held down.
+     * This is to allow a selection event to add to an existing selection by using the shift key.
+     */
+    function onDeselect ($event: MouseEvent){
+      if (!$event.ctrlKey) {
+        store.deselectAll()
+      }
     }
 
     return {
@@ -225,11 +260,12 @@ export default defineComponent({
       updates,
       colors,
       grid,
+      flash,
       storeDefinition: props.store,
       onKeyDown,
       onKeyUp,
       onContextMenu,
-      clearKeys
+      onDeselect
     }
   }
 })

@@ -20,14 +20,16 @@
 </template>
 
 <script lang="ts">
+import { LogicValue } from '@/circuit'
+import Direction from '@/types/enums/Direction'
 import { defineComponent, PropType, ref, watchEffect } from 'vue'
 
 export default defineComponent({
   name: 'InputNode',
   props: {
     ports: {
-      type: Array as PropType<Port[]>,
-      default: () => []
+      type: Object as PropType<Record<Direction, Port[]>>,
+      default: () => {}
     },
     // subtype: {
     //   type: String as PropType<ItemSubtype>,
@@ -39,19 +41,22 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const model = ref(0)
+    const port = props.ports[Direction.Right]?.[0]
 
     watchEffect(() => {
-      model.value = props.ports[0]?.value || 0
+      model.value = port?.value || LogicValue.UNKNOWN
     })
 
     function onInput ($event: Event) {
       $event.preventDefault()
       $event.stopPropagation()
 
-      model.value = model.value === 1 ? -1 : 1
+      model.value = model.value === LogicValue.TRUE
+        ? LogicValue.FALSE
+        : LogicValue.TRUE
 
       emit('signal', {
-        id: props.ports[0].id,
+        id: port.id,
         value: model.value
       })
     }

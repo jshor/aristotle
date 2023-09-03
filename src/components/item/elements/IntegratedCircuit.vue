@@ -9,7 +9,8 @@
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import CustomCircuit from './integratedCircuits/CustomCircuit/CustomCircuit.vue'
 import DigitDisplay from './integratedCircuits/DigitDisplay.vue'
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, watch } from 'vue'
+import Direction from '@/types/enums/Direction'
 
 const components = {
   CustomCircuit,
@@ -21,8 +22,8 @@ export default defineComponent({
   components,
   props: {
     ports: {
-      type: Array as PropType<Port[]>,
-      default: () => []
+      type: Object as PropType<Record<Direction, Port[]>>,
+      default: () => {}
     },
     subtype: {
       type: String as PropType<ItemSubtype>,
@@ -32,6 +33,11 @@ export default defineComponent({
       type: String,
       default: ''
     }
+  },
+  setup (props) {
+    watch(() => props.ports, () => {
+      console.log('ports changed', props.ports)
+    })
   }
 })
 </script>

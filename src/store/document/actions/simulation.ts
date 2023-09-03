@@ -26,8 +26,8 @@ export function toggleClocks (this: DocumentStoreInstance, fn: 'start' | 'stop')
 export function startSimulation (this: DocumentStoreInstance) {
   if (!this.isDebugging) {
     this.toggleClocks('start')
+    this.oscillator.start()
   }
-  this.oscillator.start()
 }
 
 /**

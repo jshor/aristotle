@@ -9,6 +9,10 @@ import {
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
+import BinaryWaveService from '@/services/BinaryWaveService'
+import { LogicValue } from '@/circuit'
+import { setItemBoundingBox } from '../sizing'
+import ClockService from '@/services/ClockService'
 
 setActivePinia(createPinia())
 
@@ -25,7 +29,7 @@ describe('item actions', () => {
 
     describe('when the item is not an integrated circuit', () => {
       const item = createItem('item', ItemType.InputNode, { portIds: ['port'] })
-      const port = createPort('port', 'item1', PortType.Output)
+      const port = createPort('port', 'item', PortType.Output)
 
       beforeEach(() => {
         store.addItem({ item, ports: { port } })
@@ -44,6 +48,41 @@ describe('item actions', () => {
       it('should add the item as a node to the circuit', () => {
         expect(store.addVirtualNode).toHaveBeenCalledTimes(1)
         expect(store.addVirtualNode).toHaveBeenCalledWith(item)
+      })
+    })
+
+    describe('when the item has at least one monitored port', () => {
+      const item = createItem('item1', ItemType.InputNode, { portIds: ['port'] })
+      const port = createPort('port', 'item', PortType.Output, {
+        isMonitored: true,
+        wave: new BinaryWaveService('port', 'port', LogicValue.TRUE, 0)
+      })
+
+      beforeEach(() => {
+        stubAll(store, [
+          'monitorPort',
+          'unmonitorPort'
+        ])
+
+        jest.useFakeTimers()
+        store.addItem({ item, ports: { port } })
+      })
+
+      afterEach(() => jest.useRealTimers())
+
+      it('should delete the wave associated with the port', () => {
+        expect(store.ports.port).not.toHaveProperty('wave')
+      })
+
+      it('should re-monitor the port', () => {
+        expect(store.unmonitorPort).toHaveBeenCalledTimes(1)
+        expect(store.unmonitorPort).toHaveBeenCalledWith('port')
+
+        jest.runAllTimers()
+
+        expect(store.monitorPort).toHaveBeenCalledTimes(1)
+        expect(store.monitorPort).toHaveBeenCalledWith('port')
+
       })
     })
 
@@ -78,6 +117,137 @@ describe('item actions', () => {
         expect(store.addVirtualNode).toHaveBeenCalledTimes(1)
         expect(store.addVirtualNode).toHaveBeenCalledWith(icItem)
       })
+    })
+  })
+
+  describe('insertItemAtPosition', () => {
+    const item = createItem('item', ItemType.InputNode, {
+      portIds: ['port'],
+      width: 10,
+      height: 20
+    })
+    const port = createPort('port', 'item', PortType.Output)
+    const store = createDocumentStore('document')()
+    const getMockedViewport = (width: number, height: number): DOMRect => ({
+      x: 0,
+      y: 0,
+      width,
+      height,
+      left: 0,
+      top: 0,
+      right: width,
+      bottom: height,
+      toJSON: () => null
+    })
+
+    beforeEach(() => {
+      stubAll(store, [
+        'commitState',
+        'addItem',
+        'setItemBoundingBox',
+        'setSelectionState'
+      ])
+    })
+
+    describe('when a document position is provided that is outside of the viewport range', () => {
+      beforeEach(() => {
+        store.viewport = getMockedViewport(100, 100)
+      })
+
+      function testPosition (position: Point, text: string) {
+        it(`should not add the item if the item is ${text} of the viewport`, () => {
+          store.insertItemAtPosition({ item, ports: [port] }, position)
+
+          expect(store.addItem).not.toHaveBeenCalled()
+          expect(store.commitState).not.toHaveBeenCalled()
+          expect(store.setItemBoundingBox).not.toHaveBeenCalled()
+          expect(store.setSelectionState).not.toHaveBeenCalled()
+        })
+      }
+
+      testPosition({ x: -100, y: 20 }, 'to the left')
+      testPosition({ x: 1000, y: 20 }, 'to the right')
+      testPosition({ x: 0, y: -2000 }, 'above')
+      testPosition({ x: 0, y: 2000 }, 'below')
+    })
+
+    describe('when a document position within the viewport range is provided', () => {
+      const documentPosition = { x: 50, y: 50 }
+
+      beforeEach(() => {
+        store.viewport = getMockedViewport(1000, 1000)
+        store.insertItemAtPosition({ item, ports: [port] }, documentPosition)
+      })
+
+      it('should add the item at the provided position', () => {
+        expect(store.addItem).toHaveBeenCalledWith({ item, ports: { port } })
+        expect(item.position.x).toEqual(documentPosition.x - item.width / 2)
+        expect(item.position.y).toEqual(documentPosition.y - item.height / 2)
+      })
+
+      it('should set the item bounding box', () => {
+        expect(store.setItemBoundingBox).toHaveBeenCalledWith(item.id)
+      })
+
+      it('should set the selection state of the item', () => {
+        expect(store.setSelectionState).toHaveBeenCalledWith({ id: item.id, value: true })
+      })
+    })
+
+    describe('when no document position was specified', () => {
+      const width = 1000
+      const height = 2000
+
+      beforeEach(() => {
+        store.viewport = getMockedViewport(width, height)
+        store.insertItemAtPosition({ item, ports: [port] })
+      })
+
+      it('should add the item at the midpoint of the viewport', () => {
+        expect(store.addItem).toHaveBeenCalledWith({ item, ports: { port } })
+        expect(item.position.x).toEqual(width / 2 - item.width / 2)
+        expect(item.position.y).toEqual(height / 2 - item.height / 2)
+      })
+
+      it('should set the item bounding box', () => {
+        expect(store.setItemBoundingBox).toHaveBeenCalledWith(item.id)
+      })
+
+      it('should set the selection state of the item', () => {
+        expect(store.setSelectionState).toHaveBeenCalledWith({ id: item.id, value: true })
+      })
+    })
+  })
+
+  describe('resetItemValue', () => {
+    const store = createDocumentStore('document')()
+
+    beforeEach(() => stubAll(store, ['setPortValue']))
+
+    it('should not do anything if the item has no start value', () => {
+      const item = createItem('item', ItemType.InputNode, { portIds: ['port'] })
+
+      store.resetItemValue(item)
+
+      expect(store.setPortValue).not.toHaveBeenCalled()
+    })
+
+    it('should set the port value to the start value', () => {
+      const item = createItem('item', ItemType.InputNode, {
+        portIds: ['port'],
+        properties: {
+          startValue: {
+            value: 1,
+            label: 'Start value',
+            type: 'number'
+          }
+        }
+      })
+
+      store.resetItemValue(item)
+
+      expect(store.setPortValue).toHaveBeenCalledTimes(1)
+      expect(store.setPortValue).toHaveBeenCalledWith({ id: 'port', value: 1 })
     })
   })
 
@@ -173,6 +343,39 @@ describe('item actions', () => {
         expect(store.items).not.toHaveProperty('item1')
       })
     })
+
+    it('should not do anything if the item does not exist', () => {
+      stubAll(store, [
+        'removeVirtualNode',
+        'removePort'
+      ])
+
+      store.removeElement('item-that-does-not-exist')
+
+      expect(store.removeVirtualNode).not.toHaveBeenCalled()
+      expect(store.removePort).not.toHaveBeenCalled()
+    })
+
+    it('should disconnect the freeport if the item is a freeport', () => {
+      const freeport = createItem('freeport', ItemType.Freeport, { portIds: ['port'] })
+      const port = createPort('port', 'freeport', PortType.Output)
+
+      store.$patch({
+        items: { freeport },
+        ports: { port }
+      })
+
+      stubAll(store, [
+        'disconnectFreeport',
+        'removeVirtualNode',
+        'removePort'
+      ])
+
+      store.removeElement('freeport')
+
+      expect(store.disconnectFreeport).toHaveBeenCalledTimes(1)
+      expect(store.disconnectFreeport).toHaveBeenCalledWith('freeport')
+    })
   })
 
 
@@ -237,7 +440,7 @@ describe('item actions', () => {
       })
     })
 
-    describe.skip('when the input count is decreased', () => {
+    describe('when the input count is decreased', () => {
       beforeEach(() => {
         store.setInputCount(id, 1)
       })
@@ -290,7 +493,7 @@ describe('item actions', () => {
       expect(store.setInputCount).not.toHaveBeenCalled()
     })
 
-    it('should dispatch setInputCount when the inputCount has changed', () => {
+    it('should invoke setInputCount() when the `inputCount` property has changed', () => {
       const item1 = createItem(id, ItemType.LogicGate, { properties: createProperties() })
       const properties = createProperties()
 
@@ -302,6 +505,58 @@ describe('item actions', () => {
       store.setProperties(id, properties)
 
       expect(store.setInputCount).toHaveBeenCalledWith(id, 3)
+    })
+
+    describe('when the `interval` property has changed', () => {
+      const properties: PropertySet = {
+        ...createProperties(),
+        interval: {
+          value: 1000,
+          label: 'Interval',
+          type: 'number'
+        }
+      }
+      const value = 2000
+
+      it('should set the clock interval', () => {
+        const item = createItem('item', ItemType.InputNode, {
+          properties,
+          clock: new ClockService('item', 1000, LogicValue.TRUE)
+        })
+
+        store.$patch({
+          items: { item }
+        })
+        store.setProperties('item', {
+          ...properties,
+          interval: {
+            ...properties.interval,
+            value
+          }
+        })
+
+        expect(store.items.item.clock.interval).toEqual(value)
+      })
+
+      it('should not do anything if the item has no clock', () => {
+        const item = createItem('item', ItemType.InputNode, {
+          properties,
+          clock: null
+        })
+
+        store.$patch({
+          items: { item }
+        })
+        store.setProperties('item', {
+          ...properties,
+          interval: {
+            ...properties.interval,
+            value
+          }
+        })
+
+        expect(store.items.item.clock).toBeNull()
+      })
     })
 
     it('should set the new item property value', () => {

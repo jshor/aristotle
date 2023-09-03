@@ -33,7 +33,9 @@ import {
 export default defineComponent({
   name: 'Selector',
   emits: {
+    /** When the user has begun a two-dimensional selection. */
     selectionStart: ($event: MouseEvent) => true,
+    /** When the user has finished selecting items. */
     selectionEnd: (boundingBox: BoundingBox) => true
   },
   props: {
@@ -78,9 +80,6 @@ export default defineComponent({
 
     /**
      * Returns the screen position of the given mouse event.
-     *
-     * @param {MouseEvent} $event
-     * @returns {Point}
      */
     function getPosition ($event: MouseEvent): Point {
       if (!selector.value) {

@@ -1,10 +1,7 @@
 import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
-
-const MIN_SCALE = 0.1
-const MAX_SCALE = 2
-const SCALE_STEP = 0.1
+import { MIN_ZOOM, MAX_ZOOM, ZOOM_STEP } from '@/constants'
 
 /**
  * Increments the current zoom by one scale step (in the positive or negative direction).
@@ -13,7 +10,7 @@ const SCALE_STEP = 0.1
  */
 export function incrementZoom (this: DocumentStoreInstance, direction = 1) {
   this.setZoom({
-    zoom: this.zoomLevel + (SCALE_STEP * direction)
+    zoom: this.zoomLevel + (ZOOM_STEP * direction)
   })
 }
 
@@ -25,8 +22,9 @@ export function incrementZoom (this: DocumentStoreInstance, direction = 1) {
  * @param [point] - focal point to zoom on
  */
 export function setZoom (this: DocumentStoreInstance, { zoom, point }: { zoom: number, point?: Point }) {
-  if (zoom < MIN_SCALE) zoom = MIN_SCALE
-  if (zoom > MAX_SCALE) zoom = MAX_SCALE
+  if (zoom < MIN_ZOOM) zoom = MIN_ZOOM
+  if (zoom > MAX_ZOOM) zoom = MAX_ZOOM
+
 
   zoom = Math.round(zoom * 100) / 100
 

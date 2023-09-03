@@ -1,5 +1,5 @@
 <template>
-  <resizable
+  <div
     class="draggable"
     ref="draggable"
     :style="style"
@@ -12,7 +12,7 @@
     @focus="onFocus"
   >
     <slot />
-  </resizable>
+  </div>
 </template>
 
 <script lang="ts">
@@ -24,16 +24,11 @@ import {
   PropType,
   computed,
   ref,
-  ComponentPublicInstance,
-  watchEffect
+  ComponentPublicInstance
 } from 'vue'
-import Resizable from './Resizable.vue'
 
 export default defineComponent({
   name: 'Draggable',
-  components: {
-    Resizable
-  },
   props: {
     /** Whether or not this connection is selected. */
     position: {
@@ -43,12 +38,6 @@ export default defineComponent({
 
     /** Whether or not this connection is selected. */
     isSelected: {
-      type: Boolean,
-      default: false
-    },
-
-    /** Whether or not the device is a mobile device. */
-    isMobile: {
       type: Boolean,
       default: false
     },
@@ -74,8 +63,9 @@ export default defineComponent({
     }))
     const draggable = ref<ComponentPublicInstance<HTMLElement>>()
 
+    let requestAnimationFrameId = 0
     let touchTimeout = 0
-    let isDragging = false // whether or not this element was dragged
+    let isDragging = false // whether or not this element is being dragged
     let hasMovedSubstantially = false
     let hasEmittedDragStart = false
     let initialTouchPosition: Point = { x: 0, y: 0 }
@@ -92,12 +82,13 @@ export default defineComponent({
       window.removeEventListener('mouseup', dragEnd)
     })
 
-    watchEffect(() => {
-      if (props.isSelected) {
-        // TODO: this competes for other focus - should be a better way to do this
-        // draggable.value?.$el.focus()
-      }
-    })
+    // watchEffect(() => {
+    //   if (props.isSelected) {
+    //     // TODO: this sometimes causes an infinite loop, as this instance may compete
+    //     // with other focused Draggable instances for the user's focus
+    //     // draggable.value?.$el.focus()
+    //   }
+    // })
 
     /**
      * Focus event handler.
@@ -119,7 +110,9 @@ export default defineComponent({
      * @emits `drag` when the element is actively dragged, with position and pointer offset
      * @param {MouseEvent | Touch} $event - event that triggered the dragging operation
      */
-    function drag ({ clientX, clientY }: MouseEvent | Touch) {
+    function drag ($event: MouseEvent | Touch) {
+      const { clientX, clientY } = $event
+
       if (!isDragging) return
       if (position.x === clientX && position.y === clientY) return
 
@@ -144,7 +137,7 @@ export default defineComponent({
     function dragStart ({ clientX, clientY }: MouseEvent | Touch) {
       if (!draggable.value) return
 
-      const { x, y, width, height } = draggable.value.$el.getBoundingClientRect()
+      const { x, y, width, height } = draggable.value.getBoundingClientRect()
 
       position = {
         x: clientX,
@@ -181,6 +174,9 @@ export default defineComponent({
      * @param {MouseEvent} $event - event that triggered the dragging operation
      */
     function onMouseDown ($event: MouseEvent) {
+      $event.stopPropagation()
+      $event.preventDefault()
+
       dragStart($event)
     }
 
@@ -190,12 +186,17 @@ export default defineComponent({
      * @param {MouseEvent} $event - event that triggered the dragging operation
      */
     function onMouseMove ($event: MouseEvent) {
-      if (isDragging) {
-        $event.stopImmediatePropagation()
+      if (!isDragging) return
+      if (requestAnimationFrameId) return
+
+      requestAnimationFrameId = window.requestAnimationFrame(() => {
+        requestAnimationFrameId = 0
+
+        $event.stopPropagation()
         $event.preventDefault()
 
         drag($event)
-      }
+      })
     }
 
     /**
@@ -205,7 +206,7 @@ export default defineComponent({
      */
     function onMouseUp ($event: MouseEvent) {
       if (!hasEmittedDragStart) {
-        // emit('select', $event.ctrlKey) // TODO
+        emit('select', $event.ctrlKey)
       }
     }
 
@@ -217,6 +218,9 @@ export default defineComponent({
      * @param {TouchEvent} $event
      */
     function onTouchStart ($event: TouchEvent) {
+      $event.stopPropagation()
+      $event.preventDefault()
+
       hasMovedSubstantially = false
       initialTouchPosition = {
         x: $event.touches[0].clientX,
@@ -234,28 +238,27 @@ export default defineComponent({
      * @param {TouchEvent} $event
      */
     function onTouchMove ($event: TouchEvent) {
-      const newPosition: Point = {
-        x: $event.touches[0].clientX,
-        y: $event.touches[0].clientY
+      if (requestAnimationFrameId) return
+      if ($event.touches.length > 1) {
+        return onTouchEnd($event)
       }
 
-      if (!boundaries.isInNeighborhood(initialTouchPosition, newPosition, 5) && $event.touches.length === 1) {
-        hasMovedSubstantially = true
-        clearTimeout(touchTimeout)
-      }
+      requestAnimationFrameId = window.requestAnimationFrame(() => {
+        requestAnimationFrameId = 0
 
-      if (props.allowTouchDrag) {
-        $event.stopPropagation()
-        $event.preventDefault()
-
-        if (!isDragging) {
-          dragStart($event.touches[0])
+        if (!boundaries.isInNeighborhood(initialTouchPosition, {
+          x: $event.touches[0].clientX,
+          y: $event.touches[0].clientY
+        }, 5)) {
+          hasMovedSubstantially = true
+          clearTimeout(touchTimeout)
         }
-      }
 
-      if (isDragging) {
+        if (!props.allowTouchDrag) return
+
+        isDragging = true
         drag($event.touches[0])
-      }
+      })
     }
 
     /**
@@ -267,7 +270,7 @@ export default defineComponent({
      * @emits `deselect` if the element is currently selected
      * @param {TouchEvent} $event
      */
-    function onTouchEnd () {
+    function onTouchEnd ($event: TouchEvent) {
       clearTimeout(touchTimeout)
 
       if (isDragging) {
