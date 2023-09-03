@@ -1,8 +1,13 @@
 import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
+import {
+  PANNING_EASING_FUNCTION,
+  PANNING_FRICTION,
+  PANNING_SPEED
+} from '@/constants'
 
 /**
- * Pans to the given point.
+ * Pans to the given canvas point w.r.t. the top left of the viewport.
  */
 export function panTo (this: DocumentStoreInstance, pan: Point, animate = false) {
   this.panDelta({
@@ -11,36 +16,45 @@ export function panTo (this: DocumentStoreInstance, pan: Point, animate = false)
   }, animate)
 }
 
+/**
+ * Pans by the given amount.
+ * Provide negative values to navigate down or to the right.
+ * Provide positive values to navigate up or to the left.
+ */
 export function panDelta (this: DocumentStoreInstance, delta: Point, animate = false) {
-  this.animatePan = animate
+  let requestAnimationFrameId = 0
 
   const from: BoundingBox = { ...this.canvas }
+  const momentum = Math.max(Math.abs(delta.x), Math.abs(delta.y), 1) * PANNING_FRICTION
+  const speed = PANNING_SPEED
 
   const animatePan = (c = 0) => {
-    const easeOut = (x: number) => 1 - (1 - x) * (1 - x)
-    const percent = easeOut(c / 100)
+    const percent = PANNING_EASING_FUNCTION(c / momentum)
     const deltaX = delta.x * percent
     const deltaY = delta.y * percent
 
-    this.canvas.left = from.left + deltaX
-    this.canvas.right = from.right + deltaX
-    this.canvas.top = from.top + deltaY
-    this.canvas.bottom = from.bottom + deltaY
+    this.setCanvasBoundingBox({
+      left: from.left + deltaX,
+      right: from.right + deltaX,
+      top: from.top + deltaY,
+      bottom: from.bottom + deltaY
+    })
 
-    if (c < 100 && this.animatePan) {
-      requestAnimationFrame(animatePan.bind(this, c + 5))
-    } else {
-      this.animatePan = false
+    if (c < momentum) {
+      cancelAnimationFrame(requestAnimationFrameId)
+      requestAnimationFrameId = requestAnimationFrame(animatePan.bind(this, c + speed))
     }
   }
 
-  if (animate) {
-    requestAnimationFrame(animatePan.bind(this, 0))
+  if (animate) { // TODO: make this configurable so that users can opt out of momentum
+    animatePan()
   } else {
-    this.canvas.left += delta.x
-    this.canvas.right += delta.x
-    this.canvas.top += delta.y
-    this.canvas.bottom += delta.y
+    this.setCanvasBoundingBox({
+      left: this.canvas.left + delta.x,
+      right: this.canvas.right + delta.x,
+      top: this.canvas.top + delta.y,
+      bottom: this.canvas.bottom + delta.y
+    })
   }
 }
 
@@ -49,10 +63,16 @@ export function panDelta (this: DocumentStoreInstance, delta: Point, animate = f
  */
 export function panToCenter (this: DocumentStoreInstance) {
   const midpoint = boundaries.getBoundingBoxMidpoint(this.canvas)
-  const pan = {
-    x: (this.viewport.width / 2) - midpoint.x,
-    y: (this.viewport.height / 2) - midpoint.y
-  }
 
-  this.panTo(pan)
+  this.panTo({
+    x: (this.viewport.width / 2) - (midpoint.x * this.zoomLevel),
+    y: (this.viewport.height / 2) - (midpoint.y * this.zoomLevel)
+  })
+}
+
+/**
+ * Sets the canvas bounding box.
+ */
+export function setCanvasBoundingBox (this: DocumentStoreInstance, boundingBox: BoundingBox) {
+  this.canvas = { ...boundingBox }
 }

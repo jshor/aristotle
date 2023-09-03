@@ -9,6 +9,8 @@ import {
 } from './__helpers__'
 import { createDocumentStore } from '../..'
 import rotation from '../../geometry/rotation'
+import { usePreferencesStore } from '@/store/preferences'
+import SnapMode from '@/types/enums/SnapMode'
 
 setActivePinia(createPinia())
 
@@ -106,6 +108,111 @@ describe('positioning actions', () => {
       expect(store.ports[port1.id].position).toEqual({
         x: port1.position.x + (position.x - item1.position.x),
         y: port1.position.y + (position.y - item1.position.y)
+      })
+    })
+  })
+
+  describe('dragItem', () => {
+    const store = createDocumentStore('document')()
+    const preferencesStore = usePreferencesStore()
+    const item = createItem('item', ItemType.LogicGate, {
+      width: 100,
+      height: 100
+    })
+
+    beforeEach(() => {
+      preferencesStore.$reset()
+      store.$reset()
+      store.$patch({
+        canvas: {
+          left: 0,
+          top: 0,
+          right: 1000,
+          bottom: 1000
+        },
+        viewport: {
+          width: 1000,
+          height: 1000,
+          x: 0,
+          y: 0
+        },
+        items: { item }
+      })
+
+      stubAll(store, [
+        'setSelectionPosition'
+      ])
+    })
+
+    it('should update the position without snapping to anything', () => {
+      const position = { x: 15, y: 15 }
+
+      preferencesStore.snapping.snapToGrid.value = false
+      preferencesStore.snapping.snapToAlign.value = false
+
+      store.dragItem('item', position)
+
+      expect(store.setSelectionPosition).toHaveBeenCalledWith({
+        id: 'item',
+        position
+      })
+    })
+
+    it('should snap the item to a nearby snap boundary', () => {
+      const boundaryX = 20
+
+      preferencesStore.snapping.snapToAlign.value = true
+      preferencesStore.snapping.snapTolerance.value = 10
+
+      store.snapBoundaries = [{
+        left: item.width + boundaryX,
+        top: 0,
+        right: 1000,
+        bottom: Infinity
+      }]
+      store.dragItem('item', { x: 15, y: 15 })
+
+      expect(store.setSelectionPosition).toHaveBeenCalledWith({
+        id: 'item',
+        position: expect.objectContaining({ x: boundaryX })
+      })
+    })
+
+    it('should snap the item to a nearby grid line', () => {
+      preferencesStore.snapping.snapToGrid.value = true
+      preferencesStore.snapping.snapTolerance.value = 10
+      preferencesStore.grid.gridSize.value = 10
+
+      store.dragItem('item', { x: 15, y: 15 })
+
+      expect(store.setSelectionPosition).toHaveBeenCalledWith({
+        id: 'item',
+        position: expect.objectContaining({ x: 20, y: 20 })
+      })
+    })
+
+    it('should snap to a radial boundary', () => {
+      const x = 20
+      const y = 20
+      const freeport = createItem('item', ItemType.Freeport, { width: 0, height: 0 })
+
+      preferencesStore.snapping.snapTolerance.value = 20
+      store.$patch({
+        items: {
+          freeport
+        }
+      })
+      store.snapBoundaries = [{
+        left: freeport.width + x,
+        top: freeport.height + y,
+        right: freeport.width + x,
+        bottom: freeport.height + y
+      }]
+      store.dragItem('freeport', { x: 15, y: 15 }, SnapMode.Radial)
+
+      expect(store.setSelectionPosition).toHaveBeenCalledWith({
+        id: 'freeport',
+        position: expect.objectContaining({ x, y })
       })
     })
   })

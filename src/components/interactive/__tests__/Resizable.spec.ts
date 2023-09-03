@@ -16,4 +16,10 @@ describe('Resizable component', () => {
 
     expect(wrapper.emitted()).toHaveProperty('resize')
   })
+
+  it('should not emit `resize` when there are no children elements', async () => {
+    const wrapper = mount(Resizable)
+
+    expect(wrapper.emitted()).not.toHaveProperty('resize')
+  })
 })

@@ -1,5 +1,5 @@
 <template>
-  <resizable
+  <div
     class="port-pivot"
     :style="{
       transform: `rotate(-${rotation * 90}deg)`
@@ -7,16 +7,14 @@
     @keydown.space="$emit('connect')"
   >
     <slot />
-  </resizable>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Resizable from '@/components/interactive/Resizable.vue'
 
 export default defineComponent({
   name: 'PortPivot',
-  components: { Resizable },
   props: {
     /** Rotation of the port container. */
     rotation: {

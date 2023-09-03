@@ -8,6 +8,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import Lightbulb from './outputs/Lightbulb.vue'
+import Direction from '@/types/enums/Direction';
 
 const components = {
   Lightbulb
@@ -18,8 +19,8 @@ export default defineComponent({
   components,
   props: {
     ports: {
-      type: Array as PropType<Port[]>,
-      default: () => []
+      type: Object as PropType<Record<Direction, Port[]>>,
+      default: () => {}
     },
     subtype: {
       type: String,

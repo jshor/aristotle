@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Item container should match the snapshot 1`] = `
+"<div class="draggable" style="left: 0px; top: 0px; outline: none; pointer-events: none; z-index: 1;" data-test="item">
+  <!--v-if-->
+  <div class="circuit-component" style="transform: rotate(0deg);">
+    <div class="input-node" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]"><button type="button" class="input-node__flipper input-node__flipper--high-z" tabindex="0"><span>?</span></button></div>
+    <div class="circuit-component__ports--left circuit-component__ports">
+      <div class="port-pivot" style="transform: rotate(-0deg);" allow-touch-drag="" tabindex="0" title="" data-test="port-item">
+        <div class="draggable" style="left: 0px; top: 0px;" tabindex="-1">
+          <div class="port-handle" type="1" touch-friendly="">
+            <div class="port-handle__display">
+              <div class="port-handle__hue"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="port-pivot" style="transform: rotate(-0deg);" allow-touch-drag="" tabindex="0" title="" data-test="port-item">
+        <div class="draggable" style="left: 0px; top: 0px;" tabindex="-1">
+          <div class="port-handle" type="0" touch-friendly="">
+            <div class="port-handle__display">
+              <div class="port-handle__hue"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="circuit-component__ports--top circuit-component__ports"></div>
+    <div class="circuit-component__ports--right circuit-component__ports"></div>
+    <div class="circuit-component__ports--bottom circuit-component__ports"></div>
+  </div>
+</div>"
+`;
+
+exports[`Item container when the item rotates should match the new rotation 1`] = `
+"<div class="draggable" style="left: 0px; top: 0px; outline: none; pointer-events: none; z-index: 1;" data-test="item">
+  <!--v-if-->
+  <div class="circuit-component" style="transform: rotate(0deg);">
+    <div class="input-node" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]"><button type="button" class="input-node__flipper input-node__flipper--high-z" tabindex="0"><span>?</span></button></div>
+    <div class="circuit-component__ports--left circuit-component__ports">
+      <div class="port-pivot" style="transform: rotate(-0deg);" allow-touch-drag="" tabindex="0" title="" data-test="port-item">
+        <div class="draggable" style="left: 0px; top: 0px;" tabindex="-1">
+          <div class="port-handle" type="1" touch-friendly="">
+            <div class="port-handle__display">
+              <div class="port-handle__hue"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="port-pivot" style="transform: rotate(-0deg);" allow-touch-drag="" tabindex="0" title="" data-test="port-item">
+        <div class="draggable" style="left: 0px; top: 0px;" tabindex="-1">
+          <div class="port-handle" type="0" touch-friendly="">
+            <div class="port-handle__display">
+              <div class="port-handle__hue"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="circuit-component__ports--top circuit-component__ports"></div>
+    <div class="circuit-component__ports--right circuit-component__ports"></div>
+    <div class="circuit-component__ports--bottom circuit-component__ports"></div>
+  </div>
+</div>"
+`;

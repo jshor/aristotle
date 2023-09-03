@@ -44,7 +44,23 @@ describe('Selector component', () => {
     })
   })
 
-  it('should not emit `selectionEnd` if no drag operation is in progress', () => {
+  it('should not emit `selectionEnd` if the selector has not mounted', async () => {
+    await wrapper.unmount()
+    await wrapper.trigger('mousedown', { x: 10, y: 20 })
+
+    window.dispatchEvent(new MouseEvent('mouseup'))
+
+    expect(wrapper.emitted()).not.toHaveProperty('selectionEnd')
+  })
+
+  it('should not emit `selectionEnd` if no drag operation has begun', () => {
+    window.dispatchEvent(new MouseEvent('mousemove'))
+    window.dispatchEvent(new MouseEvent('mouseup'))
+
+    expect(wrapper.emitted()).not.toHaveProperty('selectionEnd')
+  })
+
+  it('should not emit `selectionEnd` if there is no area selected', () => {
     window.dispatchEvent(new MouseEvent('mouseup'))
 
     expect(wrapper.emitted()).not.toHaveProperty('selectionEnd')

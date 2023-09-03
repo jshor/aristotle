@@ -37,7 +37,6 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
 
           // wait for next JS frame so that the oscillogram broadcast (with the port wave removed) completes first
           // then the port can be re-monitored with the new wave
-          // TODO: this may not be needed anymore now that tiny-emitter has been replaced
           setTimeout(() => this.monitorPort(port.id))
         }
       }
@@ -45,17 +44,17 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
 
   // TODO: the naming scheme here is really messed up - sometimes copy+pasting items will create names like 'Clock 2 2 2'
   // think of a better way to autoname items
-  const itemNames = Object
-    .values(this.items)
-    .map(({ name }) => name)
+  // const itemNames = Object
+  //   .values(this.items)
+  //   .map(({ name }) => name)
   const originalName = item.name || item.subtype
 
   let name = originalName
-  let c = 1
+  // let c = 1
 
-  while (itemNames.includes(name)) {
-    name = `${originalName} ${++c}`
-  }
+  // while (itemNames.includes(name)) {
+  //   name = `${originalName} ${++c}`
+  // }
 
   item.name = name
   item.clock = ClockService.deserialize(item.clock)
@@ -71,6 +70,10 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
   this.setItemBoundingBox(item.id)
 }
 
+/**
+ * Inserts the given item and its ports into the document.
+ * If no document position is given, the item will be placed in the center of the viewport.
+ */
 export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports }: { item: Item, ports: Port[] }, documentPosition: Point | null = null) {
   if (!documentPosition) {
     const midpoint = boundaries.getBoundingBoxMidpoint(this.viewport)
@@ -79,6 +82,11 @@ export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports
       x: midpoint.x + this.viewport.left,
       y: midpoint.y + this.viewport.top
     }
+  }
+
+  if (documentPosition.x < this.viewport.left || documentPosition.x > this.viewport.right ||
+    documentPosition.y < this.viewport.top || documentPosition.y > this.viewport.bottom) {
+    return // do not add the item if it is outside the viewport
   }
 
   const position = fromDocumentToEditorCoordinates(this.canvas, this.viewport, documentPosition, this.zoomLevel)
@@ -97,6 +105,9 @@ export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports
   this.setSelectionState({ id: item.id, value: true })
 }
 
+/**
+ * Resets the item output value to its predefined start value (if any).
+ */
 export function resetItemValue (this: DocumentStoreInstance, item: Item) {
   const property = item.properties?.startValue
 
@@ -109,8 +120,6 @@ export function resetItemValue (this: DocumentStoreInstance, item: Item) {
 
 /**
  * Removes an element and all its associated ports and circuit nodes from the state.
- *
- * @param id - ID of the item to remove
  */
 export function removeElement (this: DocumentStoreInstance, id: string) {
   const item = this.items[id]

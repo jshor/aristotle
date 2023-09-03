@@ -1,5 +1,6 @@
 import BinaryWaveService from '@/services/BinaryWaveService'
 import PortType from '../enums/PortType'
+import Direction from '../enums/Direction'
 
 declare global {
   interface Port {
@@ -10,7 +11,7 @@ declare global {
     position: Point
     type: PortType
     rotation: number
-    orientation: number
+    orientation: Direction
     value: number
     hue: number
     isFreeport: boolean

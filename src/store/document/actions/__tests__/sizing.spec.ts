@@ -13,6 +13,94 @@ setActivePinia(createPinia())
 describe('sizing actions', () => {
   beforeEach(() => jest.restoreAllMocks())
 
+  describe('updateCanvasSize', () => {
+    const store = createDocumentStore('document')()
+
+    beforeEach(() => {
+      store.$reset()
+
+      stubAll(store, [
+        'centerAll',
+        'panToCenter'
+      ])
+    })
+
+    describe('when the bounding box surrounding the items exceeds the viewport dimensions', () => {
+      const boundingBox = {
+        left: 0,
+        top: 0,
+        right: 1000,
+        bottom: 1000
+      }
+
+      beforeEach(() => {
+        jest
+          .spyOn(boundaries, 'getGroupBoundingBox')
+          .mockReturnValue(boundingBox)
+
+        store.$patch({
+          items: {
+            item1: createItem('item1', ItemType.InputNode)
+          }
+        })
+        store.updateCanvasSize()
+      })
+
+      it('should update the canvas size to be twice the dimensions of the bounding box', () => {
+        expect(store.canvas).toEqual({
+          left: 0,
+          top: 0,
+          right: 2000,
+          bottom: 2000
+        })
+      })
+
+      it('should center all items', () => {
+        expect(store.centerAll).toHaveBeenCalledTimes(1)
+      })
+
+      it('should pan to the center of the canvas', () => {
+        expect(store.panToCenter).toHaveBeenCalledTimes(1)
+      })
+
+      it('should zoom to fit all items on the screen', () => {
+        const boundingBox = {
+          left: 0,
+          top: 0,
+          right: 750,
+          bottom: 750
+        }
+
+        jest
+          .spyOn(boundaries, 'getGroupBoundingBox')
+          .mockReturnValue(boundingBox)
+        jest.useFakeTimers()
+
+        store.$patch({
+          items: {
+            item1: createItem('item1', ItemType.InputNode)
+          },
+          canvas: {
+            left: 0,
+            top: 0,
+            right: 1000,
+            bottom: 1000
+          },
+          viewport: {
+            width: 500,
+            height: 500
+          }
+        })
+        store.updateCanvasSize()
+        jest.runAllTimers()
+
+        expect(store.zoomLevel).toEqual(0.67)
+
+        jest.useRealTimers()
+      })
+    })
+  })
+
   describe('setViewerSize', () => {
     const store = createDocumentStore('document')()
 
@@ -90,6 +178,14 @@ describe('sizing actions', () => {
       ])
 
       store.setItemSize({ id, rect })
+    })
+
+    it('should not do anything if the item does not exist', () => {
+      jest.resetAllMocks()
+      store.setItemSize({ id: 'item-does-not-exist', rect })
+
+      expect(store.setItemBoundingBox).not.toHaveBeenCalled()
+      expect(store.setGroupBoundingBox).not.toHaveBeenCalled()
     })
 
     it('should re-position the item with respect to its center', () => {

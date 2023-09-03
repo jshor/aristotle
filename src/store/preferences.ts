@@ -8,7 +8,7 @@ export const usePreferencesStore = defineStore({
       onColor: {
         type: 'color',
         label: 'High state',
-        value: '#0000ff',
+        value: '#4bc567',
         description: 'When a signal is present.'
       },
       offColor: {

@@ -110,6 +110,7 @@ async function boot (app: App, mainWindow: BrowserWindow) {
             // when the main window is about to close, inform the renderer
             // this gives it time to prompt the user to save any unsaved files before exiting
             if (!canClose) {
+              console.log('ABOUT TO CLOSE...')
               mainWindow.webContents.send('about-to-close')
               $event.preventDefault()
             } else {
