@@ -9,11 +9,12 @@ import {
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
-import { CircuitNode, LogicValue } from '@/circuit'
+import LogicValue from '@/types/enums/LogicValue'
+import CircuitNode from '../../circuit/CircuitNode'
 import circuitNodeMapper from '@/utils/circuitNodeMapper'
 import ItemSubtype from '@/types/enums/ItemSubtype'
-import ClockService from '@/services/ClockService'
-import BinaryWaveService from '@/services/BinaryWaveService'
+import ClockPulse from '../../oscillator/ClockPulse'
+import BinaryWavePulse from '../../oscillator/BinaryWavePulse'
 
 setActivePinia(createPinia())
 
@@ -23,7 +24,7 @@ describe('simulation actions', () => {
   describe('toggleClocks()', () => {
     const store = createDocumentStore('document')()
     const item = createItem('item', ItemType.InputNode, {
-      clock: new ClockService('clock', 1000, LogicValue.TRUE)
+      clock: new ClockPulse('clock', 1000, LogicValue.TRUE)
     })
 
     beforeEach(() => {
@@ -35,22 +36,22 @@ describe('simulation actions', () => {
 
     it('should start all clocks when the action is "start"', () => {
       jest
-        .spyOn(item.clock, 'start')
+        .spyOn(item.clock!, 'start')
         .mockImplementation(jest.fn())
 
       store.toggleClocks('start')
 
-      expect(item.clock.start).toHaveBeenCalledTimes(1)
+      expect(item.clock!.start).toHaveBeenCalledTimes(1)
     })
 
     it('should stop all clocks when the action is "stop"', () => {
       jest
-        .spyOn(item.clock, 'stop')
+        .spyOn(item.clock!, 'stop')
         .mockImplementation(jest.fn())
 
       store.toggleClocks('stop')
 
-      expect(item.clock.stop).toHaveBeenCalledTimes(1)
+      expect(item.clock!.stop).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -446,15 +447,15 @@ describe('simulation actions', () => {
       })
 
       it('should add a clock element using the first output port', () => {
-        expect(item.clock).toBeInstanceOf(ClockService)
-        expect(item.clock.interval).toEqual(item.properties.interval.value)
+        expect(item.clock!).toBeInstanceOf(ClockPulse)
+        expect(item.clock!.interval).toEqual(item.properties.interval.value)
         // expect(item.clock.value).toEqual(LogicValue.TRUE) // TODO
         expect(store.oscillator.add).toHaveBeenCalledTimes(1)
         expect(store.oscillator.add).toHaveBeenCalledWith(item.clock)
       })
 
       it('should invoke setPortValue() when the clock value changes', () => {
-        item.clock.update(1500)
+        item.clock!.update(1500)
 
         expect(store.setPortValue).toHaveBeenCalledTimes(1)
         expect(store.setPortValue).toHaveBeenCalledWith({
@@ -569,7 +570,7 @@ describe('simulation actions', () => {
 
   describe('onVirtualNodeChange()', () => {
     const store = createDocumentStore('document')()
-    const wave = new BinaryWaveService('wave', 'wave', 1000, 1)
+    const wave = new BinaryWavePulse('wave', 'wave', 1000, 1)
     const port1 = createPort('port1', 'item', PortType.Input, { value: LogicValue.FALSE })
     const port2 = createPort('port2', 'item', PortType.Input, { value: LogicValue.FALSE, wave })
     const node1 = new CircuitNode('port1')

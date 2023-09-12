@@ -1,5 +1,8 @@
 
 import Direction from '@/types/enums/Direction'
+import BoundingBox from '@/types/types/BoundingBox'
+import Item from '@/types/interfaces/Item'
+import Point from '@/types/interfaces/Point'
 
 /**
  * Normalizes the given rotation with respect to any additional rotation to augment by.

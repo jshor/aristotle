@@ -19,6 +19,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import CustomCircuitPort from './CustomCircuitPort.vue'
+import Port from '@/types/interfaces/Port'
 
 export default defineComponent({
   name: 'CustomCircuitPortZone',

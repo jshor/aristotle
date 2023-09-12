@@ -1,3 +1,5 @@
+import BoundingBox from '@/types/types/BoundingBox'
+import Point from '@/types/interfaces/Point'
 import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
 import {

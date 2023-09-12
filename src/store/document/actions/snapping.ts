@@ -1,6 +1,8 @@
 import ItemType from '@/types/enums/ItemType'
 import boundaries from '../geometry/boundaries'
 import { DocumentStoreInstance } from '..'
+import BoundingBox from '@/types/types/BoundingBox'
+import Connection from '@/types/interfaces/Connection'
 
 /**
  * Sets the computed boundaries that an actively-dragged item to snap to.

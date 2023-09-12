@@ -11,6 +11,7 @@ import CustomCircuit from './integratedCircuits/CustomCircuit/CustomCircuit.vue'
 import DigitDisplay from './integratedCircuits/DigitDisplay.vue'
 import { defineComponent, PropType, watch } from 'vue'
 import Direction from '@/types/enums/Direction'
+import Port from '@/types/interfaces/Port'
 
 const components = {
   CustomCircuit,

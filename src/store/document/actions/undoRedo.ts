@@ -1,5 +1,7 @@
-import ClockService from '@/services/ClockService'
+import ClockPulse from '../oscillator/ClockPulse'
 import { DocumentStoreInstance } from '..'
+import BaseItem from '@/types/interfaces/BaseItem'
+import SerializableState from '@/types/interfaces/SerializableState'
 
 /**
  * Reverts to the most-recently committed document this.
@@ -120,7 +122,7 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
     .forEach(id => {
       this.items[id] = {
         ...items[id],
-        clock: this.items[id]?.clock || ClockService.deserialize(items[id]?.clock)
+        clock: this.items[id]?.clock || ClockPulse.deserialize(items[id]?.clock)
       }
       this.setItemBoundingBox(id)
     })

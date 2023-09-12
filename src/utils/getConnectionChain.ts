@@ -1,3 +1,6 @@
+import Connection from "@/types/interfaces/Connection"
+import Port from "@/types/interfaces/Port"
+
 /**
  * Returns all connections and any associated freeport items within a connection chain.
  *

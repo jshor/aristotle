@@ -20,9 +20,10 @@
 </template>
 
 <script lang="ts">
-import { LogicValue } from '@/circuit'
+import LogicValue from '@/types/enums/LogicValue'
 import Direction from '@/types/enums/Direction'
 import { defineComponent, PropType, ref, watchEffect } from 'vue'
+import Port from '@/types/interfaces/Port'
 
 export default defineComponent({
   name: 'InputNode',

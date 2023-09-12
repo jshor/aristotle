@@ -4,7 +4,7 @@ import { ComponentPublicInstance } from 'vue'
 import Draggable from '../Draggable.vue'
 
 describe('Draggable component', () => {
-  let wrapper: VueWrapper<ComponentPublicInstance<typeof Draggable>>
+  let wrapper: VueWrapper
 
   beforeEach(() => {
     wrapper = mount(Draggable)

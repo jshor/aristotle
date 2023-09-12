@@ -1,8 +1,8 @@
 <template>
   <editor
-    ref="editor"
+    ref="editorRef"
     :zoom="store.zoom"
-    :grid-size="grid.showGrid.value ? grid.gridSize.value : 0"
+    :grid-size="gridSize"
     :tabindex="0"
     :canvas="store.canvas"
     :style="{
@@ -92,6 +92,7 @@ import { useRootStore } from '@/store/root'
 import { storeToRefs } from 'pinia'
 import { usePreferencesStore } from '@/store/preferences'
 import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING } from '@/constants'
+import BoundingBox from '@/types/types/BoundingBox'
 
 export default defineComponent({
   name: 'Document',
@@ -111,10 +112,12 @@ export default defineComponent({
   setup (props) {
     const store = props.store()
     const rootStore = useRootStore()
-    const editor = ref<typeof Editor>()
+    const preferencesStore = usePreferencesStore()
+    const editorRef = ref<typeof Editor>()
     const updates = ref(0)
-    const { colors, grid } = storeToRefs(usePreferencesStore())
+    const { colors } = storeToRefs(preferencesStore)
     const flash = computed(() => store.isDebugging && store.isCircuitEvaluated)
+    const gridSize = computed(() => preferencesStore.grid.showGrid.value ? preferencesStore.grid.gridSize.value as number : 0)
 
     let acceleration = 1
     let requestAnimationFrameId = 0
@@ -141,14 +144,14 @@ export default defineComponent({
      * This is used for rendering the document as an image that can be printed or exported to a file.
      */
     function initiatePrint (callback: (editorElement: HTMLElement, boundingBox: BoundingBox) => Promise<void>) {
-      if (!editor.value) return
+      if (!editorRef.value) return
 
       const boundingBoxes = Object
         .values(store.items)
         .map(({ boundingBox }) => boundingBox)
       const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
 
-      callback(editor.value.grid, boundingBox)
+      callback(editorRef.value.grid, boundingBox)
     }
 
     /**
@@ -256,10 +259,10 @@ export default defineComponent({
 
     return {
       store,
-      editor,
+      editorRef,
       updates,
       colors,
-      grid,
+      gridSize,
       flash,
       storeDefinition: props.store,
       onKeyDown,

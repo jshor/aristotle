@@ -1,14 +1,15 @@
+import BoundingBox from '@/types/types/BoundingBox'
 import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
 import getConnectionChain from '@/utils/getConnectionChain'
-import ItemType from '@/types/enums/ItemType'
 
-
-export function deselectItem (this: DocumentStoreInstance, id: string) {
+export function deselectBaseItem (this: DocumentStoreInstance, id: string) {
   this.setSelectionState({ id, value: false })
 }
 
-export function selectItem (this: DocumentStoreInstance, id: string, keepSelection: boolean = false) {
+export function selectBaseItem (this: DocumentStoreInstance, id: string, keepSelection: boolean = false) {
+  if (this.items[id]?.isSelected || this.connections[id]?.isSelected || this.groups[id]?.isSelected) return
+
   if (!keepSelection) {
     this.deselectAll()
   }
@@ -78,7 +79,7 @@ export function createSelection (this: DocumentStoreInstance, selection: Boundin
       this.updateSelectionList({ id, isSelected: true })
     })
 
-  this.selectItemConnections(itemIds)
+  this.selectBaseItemConnections(itemIds)
 }
 
 /**
@@ -86,7 +87,7 @@ export function createSelection (this: DocumentStoreInstance, selection: Boundin
  *
  * @param itemIds - list of items to select their connections for
  */
-export function selectItemConnections (this: DocumentStoreInstance, itemIds: string[]) {
+export function selectBaseItemConnections (this: DocumentStoreInstance, itemIds: string[]) {
   const portIds = itemIds.reduce((portIds: string[], itemId: string) => {
     return portIds.concat(this.items[itemId].portIds)
   }, [])

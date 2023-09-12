@@ -5,12 +5,20 @@ import itemFactory from './itemFactory'
 import portFactory from './portFactory'
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
+import PropertySet from '@/types/interfaces/PropertySet'
+import ItemFactory from '@/types/types/ItemFactory'
+import Port from '@/types/interfaces/Port'
 
 const inputFactory: ItemFactory = (type: ItemSubtype, width: number, height: number, properties: PropertySet = {}) => {
   const elementId = uuid()
-  const ports = [
-    portFactory(elementId, uuid(), Direction.Right, PortType.Output, 'Output Port')
-  ]
+  const ports: Record<Direction, Port[]> = {
+    [Direction.Left]: [],
+    [Direction.Top]: [],
+    [Direction.Bottom]: [],
+    [Direction.Right]: [
+      portFactory(elementId, uuid(), Direction.Right, PortType.Output, 'Output Port')
+    ]
+  }
   const item = itemFactory(elementId, ItemType.InputNode, type, width, height, ports)
 
   item.properties = {

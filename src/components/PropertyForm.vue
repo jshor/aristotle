@@ -39,10 +39,10 @@
         class="property-form__switch"
       >
         <property-switch
-          v-model.boolean="data.value"
+          v-model.boolean="(data.value as boolean)"
           :id="`${id}_${propertyName}`"
           :disabled="data.disabled"
-          @update:modelValue="onSwitch(propertyName)"
+          @update:modelValue="onSwitch(propertyName as string)"
         />
       </div>
 
@@ -75,6 +75,7 @@ import cloneDeep from 'lodash.clonedeep'
 import PropertySwitch from '@/components/properties/PropertySwitch.vue'
 import Icon from '@/components/Icon.vue'
 import isMobile from '@/utils/isMobile'
+import PropertySet from '@/types/interfaces/PropertySet'
 
 export default defineComponent({
   name: 'PropertyForm',

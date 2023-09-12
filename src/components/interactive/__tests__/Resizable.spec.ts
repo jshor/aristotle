@@ -12,7 +12,7 @@ describe('Resizable component', () => {
     target.style.width = '40px'
     target.style.height = '40px'
 
-    wrapper.vm.onSizeChanged([ { target } ])
+    wrapper.vm.onSizeChanged([ { target } as unknown as ResizeObserverEntry ])
 
     expect(wrapper.emitted()).toHaveProperty('resize')
   })

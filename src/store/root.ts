@@ -12,6 +12,8 @@ import { useIntegratedCircuitStore } from './integratedCircuit'
 import FileService from '@/services/FileService'
 import getFileName from '@/utils/getFileName'
 import idMapper from '@/utils/idMapper'
+import Oscillogram from '@/types/types/Oscillogram'
+import Item from '@/types/interfaces/Item'
 
 export type RootStore = {
   documents: {
@@ -89,7 +91,7 @@ export const useRootStore = defineStore({
 
 
 
-          store.insertItemAtPosition({ item: idMappedIcItem, ports: [] })
+          store.insertItemAtPosition({ item: idMappedIcItem })
           store.setItemBoundingBox(idMappedIcItem.id)
           store.setSelectionState({ id: idMappedIcItem.id, value: true })
 
@@ -327,7 +329,6 @@ export const useRootStore = defineStore({
       this.activeDocument?.store().startSimulation()
     },
     activateDocument (id: string) {
-      console.log('ACTIVATE...')
       this.pauseActivity()
       this.activeDocumentId = id
       this.resumeActivity()

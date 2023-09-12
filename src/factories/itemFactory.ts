@@ -1,13 +1,18 @@
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import ItemType from '@/types/enums/ItemType'
+import Port from '@/types/interfaces/Port'
+import Item from '@/types/interfaces/Item'
+import Direction from '@/types/enums/Direction'
 
-export default function itemFactory (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports: Port[] = []): Item {
+export default function itemFactory (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports?: Record<Direction, Port[]>): Item {
   return {
     id,
     name: '',
     type,
     subtype,
-    portIds: ports.map(({ id }) => id),
+    portIds: Object
+      .values(ports || {})
+      .reduce((portIds, ports) => portIds.concat(ports.map(({ id }) => id)), [] as string[]),
     groupId: null,
     rotation: 0,
     boundingBox: {

@@ -9,9 +9,10 @@
 </template>
 
 <script lang="ts">
-import { LogicValue } from '@/circuit'
+import LogicValue from '@/types/enums/LogicValue'
 import Direction from '@/types/enums/Direction'
 import { defineComponent, PropType, computed } from 'vue'
+import Port from '@/types/interfaces/Port'
 
 export default defineComponent({
   name: 'Lightbulb',

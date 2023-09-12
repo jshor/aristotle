@@ -49,6 +49,9 @@
 </template>
 
 <script lang="ts">
+import Port from '@/types/interfaces/Port'
+import Oscillogram from '@/types/types/Oscillogram'
+import Item from '@/types/interfaces/Item'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({

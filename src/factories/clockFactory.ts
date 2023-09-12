@@ -1,5 +1,6 @@
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import inputFactory from './inputFactory'
+import ItemFactory from '@/types/types/ItemFactory'
 
 const clockFactory: ItemFactory = () => inputFactory(ItemSubtype.Clock, 60, 60, {
   interval: {

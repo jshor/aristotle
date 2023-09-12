@@ -1,9 +1,6 @@
+import { MIN_ZOOM } from '@/constants'
 import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
-
-const MIN_SCALE = 0.1
-const MAX_SCALE = 2
-const SCALE_STEP = 0.1
 
 /**
  * Updates the canvas size such that all items:
@@ -52,8 +49,8 @@ export function updateCanvasSize (this: DocumentStoreInstance) {
  */
 export function setViewerSize (this: DocumentStoreInstance, rect: DOMRect) {
   this.viewport = rect
-  this.canvas.right = screen.width / MIN_SCALE
-  this.canvas.bottom =  screen.height / MIN_SCALE
+  this.canvas.right = screen.width / MIN_ZOOM
+  this.canvas.bottom =  screen.height / MIN_ZOOM
 
   if (!this.hasLoaded && rect.width > 0 && rect.height > 0) {
     this.hasLoaded = true

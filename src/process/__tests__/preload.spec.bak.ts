@@ -80,7 +80,7 @@ describe('Remote Service', () => {
         buttons: ['Yes', 'No']
       }
 
-      api.showMessageBox(params)
+      // api.showMessageBox(params)
 
       expect(dialog.showMessageBoxSync).toHaveBeenCalledTimes(1)
       expect(dialog.showMessageBoxSync).toHaveBeenCalledWith(expect.anything(), params)

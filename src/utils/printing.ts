@@ -1,3 +1,4 @@
+import BoundingBox from '@/types/types/BoundingBox'
 import domToImage from 'dom-to-image'
 
 /**

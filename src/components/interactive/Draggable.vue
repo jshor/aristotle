@@ -4,7 +4,6 @@
     ref="draggable"
     :style="style"
     @mousedown.left="onMouseDown"
-    @mouseup="onMouseUp"
     @touchstart="onTouchStart"
     @touchmove="onTouchMove"
     @touchend="onTouchEnd"
@@ -17,6 +16,7 @@
 
 <script lang="ts">
 import boundaries from '@/store/document/geometry/boundaries'
+import Point from '@/types/interfaces/Point'
 import {
   defineComponent,
   onBeforeUnmount,
@@ -177,6 +177,7 @@ export default defineComponent({
       $event.stopPropagation()
       $event.preventDefault()
 
+      emit('select', $event.ctrlKey)
       dragStart($event)
     }
 
@@ -197,17 +198,6 @@ export default defineComponent({
 
         drag($event)
       })
-    }
-
-    /**
-     * Mouse up event handler.
-     *
-     * @param {MouseEvent} $event - event that triggered the dragging operation
-     */
-    function onMouseUp ($event: MouseEvent) {
-      if (!hasEmittedDragStart) {
-        emit('select', $event.ctrlKey)
-      }
     }
 
     /**
@@ -286,7 +276,6 @@ export default defineComponent({
       style,
       draggable,
       onMouseDown,
-      onMouseUp,
       onTouchStart,
       onTouchMove,
       onTouchEnd,

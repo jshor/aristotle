@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import PortWire from '@/components/port/PortWire.vue'
 
 export default defineComponent({

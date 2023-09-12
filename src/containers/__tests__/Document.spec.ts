@@ -10,11 +10,15 @@ import printing from '@/utils/printing'
 import { useRootStore } from '@/store/root'
 import editorContextMenu from '@/menus/context/editor'
 import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING } from '@/constants'
+import Connection from '@/types/interfaces/Connection'
+import Port from '@/types/interfaces/Port'
+import Item from '@/types/interfaces/Item'
+import Point from '@/types/interfaces/Point'
 
 setActivePinia(createPinia())
 
 describe('Document container', () => {
-  let wrapper: VueWrapper<ComponentPublicInstance<typeof Document>>
+  let wrapper: VueWrapper
   let storeDefinition: DocumentStore
   let store: DocumentStoreInstance
   let item1: Item, item2: Item
@@ -171,7 +175,7 @@ describe('Document container', () => {
 
       await wrapper.vm.$nextTick()
 
-      wrapper.vm.onKeyDown({ key: 'a', ctrlKey: true, target: input })
+      ;(wrapper.vm as any).onKeyDown({ key: 'a', ctrlKey: true, target: input })
 
       expect(store.selectAll).not.toHaveBeenCalled()
     })

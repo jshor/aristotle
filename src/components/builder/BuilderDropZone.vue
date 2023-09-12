@@ -34,6 +34,7 @@ import { Container, Draggable } from 'vue3-smooth-dnd'
 import BuilderEditableLabel from './BuilderEditableLabel.vue'
 import PortHandle from '@/components/port/PortHandle.vue'
 import PortWire from '@/components/port/PortWire.vue'
+import Port from '@/types/interfaces/Port'
 
 type DragResult = {
   removedIndex: number

@@ -9,6 +9,7 @@
 import { defineComponent, PropType } from 'vue'
 import Lightbulb from './outputs/Lightbulb.vue'
 import Direction from '@/types/enums/Direction';
+import Port from '@/types/interfaces/Port';
 
 const components = {
   Lightbulb

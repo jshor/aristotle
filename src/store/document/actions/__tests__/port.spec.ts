@@ -8,8 +8,10 @@ import {
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
-import { CircuitNode, LogicValue } from '@/circuit'
-import BinaryWaveService from '@/services/BinaryWaveService'
+import CircuitNode from '../../circuit/CircuitNode'
+import BinaryWavePulse from '../../oscillator/BinaryWavePulse'
+import LogicValue from '@/types/enums/LogicValue'
+import Port from '@/types/interfaces/Port'
 
 setActivePinia(createPinia())
 
@@ -117,7 +119,7 @@ describe('port actions', () => {
 
   describe('setPortValue', () => {
     const store = createDocumentStore('document')()
-    const wave = new BinaryWaveService('port2', 'item1 port2', 0, 0)
+    const wave = new BinaryWavePulse('port2', 'item1 port2', 0, 0)
     const port1 = createPort('port1', 'item1', PortType.Input)
     const port2 = createPort('port2', 'item1', PortType.Output, { wave })
     const node1 = new CircuitNode('node1')
@@ -432,7 +434,7 @@ describe('port actions', () => {
     it('should create a new wave instance on the port', () => {
       const port = store.ports[portId]
 
-      expect(port.wave).toBeInstanceOf(BinaryWaveService)
+      expect(port.wave).toBeInstanceOf(BinaryWavePulse)
       expect(port.wave!.name).toEqual(`${store.items[itemId].name} ${port.name}`)
       expect(port.wave!.hue).toEqual(port.hue)
     })

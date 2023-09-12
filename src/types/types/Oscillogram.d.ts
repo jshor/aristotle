@@ -1,10 +1,8 @@
-declare global {
-  type Oscillogram = {
-    [id: string]: {
-      points: string
-      width: number
-      hue: number
-    }
+type Oscillogram = {
+  [id: string]: {
+    points: string
+    width: number
+    hue: number
   }
 }
 

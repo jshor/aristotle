@@ -7,16 +7,17 @@ import { createItem, createPort, stubAll } from '@/store/document/actions/__test
 import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
-import editorContextMenu from '@/menus/context/editor'
 import { useRootStore } from '@/store/root'
+import type ItemInterface from '@/types/interfaces/Item'
+import Port from '@/types/interfaces/Port'
 
 setActivePinia(createPinia())
 
 describe('Item container', () => {
-  let wrapper: VueWrapper<ComponentPublicInstance<typeof Item>>
+  let wrapper: VueWrapper
   let storeDefinition: DocumentStore
   let store: DocumentStoreInstance
-  let item1: Item, item2: Item
+  let item1: ItemInterface
   let port1: Port, port2: Port
 
   const props = {
@@ -227,21 +228,21 @@ describe('Item container', () => {
 
   describe('when the item is right-clicked', () => {
     it('should select the item if not already selected', async () => {
-      stubAll(store, ['selectItem'])
+      stubAll(store, ['selectBaseItem'])
 
       await wrapper.trigger('contextmenu')
 
-      expect(store.selectItem).toHaveBeenCalledTimes(1)
-      expect(store.selectItem).toHaveBeenCalledWith('item1')
+      expect(store.selectBaseItem).toHaveBeenCalledTimes(1)
+      expect(store.selectBaseItem).toHaveBeenCalledWith('item1')
     })
 
     it('should not select the item if it is already selected', async () => {
-      stubAll(store, ['selectItem'])
+      stubAll(store, ['selectBaseItem'])
 
       await wrapper.setProps({ isSelected: true })
       await wrapper.trigger('contextmenu')
 
-      expect(store.selectItem).not.toHaveBeenCalled()
+      expect(store.selectBaseItem).not.toHaveBeenCalled()
     })
 
     it('should show the context menu', async () => {
