@@ -1,4 +1,6 @@
 import SnapMode from "@/types/enums/SnapMode"
+import Point from "@/types/interfaces/Point"
+import BoundingBox from "@/types/types/BoundingBox"
 
 /**
  * Rounds x to the nearest n.

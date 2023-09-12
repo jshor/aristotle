@@ -8,6 +8,7 @@ import {
   createPort
 } from './__helpers__'
 import { createDocumentStore } from '../..'
+import BoundingBox from '@/types/types/BoundingBox'
 
 setActivePinia(createPinia())
 

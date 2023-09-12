@@ -41,6 +41,8 @@
 </template>
 
 <script lang="ts">
+import Port from '@/types/interfaces/Port'
+import WireGeometry from '@/types/types/WireGeometry';
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({

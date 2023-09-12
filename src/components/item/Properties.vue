@@ -87,6 +87,8 @@ import { defineComponent, nextTick, PropType, ref, watch } from 'vue'
 import { faClose, faWrench } from '@fortawesome/free-solid-svg-icons'
 import cloneDeep from 'lodash.clonedeep'
 import Icon from '@/components/Icon.vue'
+import PropertySet from '@/types/interfaces/PropertySet'
+import Point from '@/types/interfaces/Point'
 
 export default defineComponent({
   name: 'Properties',

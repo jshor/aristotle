@@ -19,6 +19,7 @@ import * as undoRedoActions from './actions/undoRedo'
 import * as zIndexActions from './actions/zIndex'
 import * as zoomingActions from './actions/zooming'
 import sortByZIndex from '@/utils/sortByZIndex'
+import BaseItem from '@/types/interfaces/BaseItem'
 
 export const createDocumentStore = (documentId: string) => defineStore({
   id: documentId,

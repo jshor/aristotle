@@ -1,5 +1,8 @@
-import { CircuitNode, Circuit } from '@/circuit'
-import OscillationService from '@/services/OscillationService'
+import SerializableState from '@/types/interfaces/SerializableState'
+import BoundingBox from '@/types/types/BoundingBox'
+import Circuit from './circuit'
+import CircuitNode from './circuit/CircuitNode'
+import Oscillator from './oscillator'
 import Oscillogram from '@/types/types/Oscillogram'
 
 export interface DocumentState extends SerializableState {
@@ -63,7 +66,7 @@ export interface DocumentState extends SerializableState {
   /** Logical circuit instance. */
   circuit: Circuit
   /** Circuit oscillator. */
-  oscillator: OscillationService
+  oscillator: Oscillator
   /** Oscillogram data, containing each BinaryWave instance observed in the oscilloscope. */
   oscillogram: Oscillogram
 }
@@ -88,7 +91,7 @@ export const state = (): DocumentState => ({
 
   nodes: {},
   circuit: new Circuit(),
-  oscillator: new OscillationService(),
+  oscillator: new Oscillator(),
 
   /* canvas dimensions */
   viewport: new DOMRect(),

@@ -1,4 +1,6 @@
+import BoundingBox from '@/types/types/BoundingBox'
 import boundaries from '../boundaries'
+import Point from '@/types/interfaces/Point'
 
 describe('Boundaries geometry utility', () => {
   describe('isInNeighborhood()', () => {

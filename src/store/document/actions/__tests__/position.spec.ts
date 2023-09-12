@@ -11,6 +11,7 @@ import { createDocumentStore } from '../..'
 import rotation from '../../geometry/rotation'
 import { usePreferencesStore } from '@/store/preferences'
 import SnapMode from '@/types/enums/SnapMode'
+import Point from '@/types/interfaces/Point'
 
 setActivePinia(createPinia())
 

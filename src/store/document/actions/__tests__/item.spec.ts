@@ -9,10 +9,13 @@ import {
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
-import BinaryWaveService from '@/services/BinaryWaveService'
-import { LogicValue } from '@/circuit'
+import BinaryWavePulse from '../../oscillator/BinaryWavePulse'
+import LogicValue from '@/types/enums/LogicValue'
 import { setItemBoundingBox } from '../sizing'
-import ClockService from '@/services/ClockService'
+import ClockPulse from '../../oscillator/ClockPulse'
+import Point from '@/types/interfaces/Point'
+import PropertySet from '@/types/interfaces/PropertySet'
+import Port from '@/types/interfaces/Port'
 
 setActivePinia(createPinia())
 
@@ -55,7 +58,7 @@ describe('item actions', () => {
       const item = createItem('item1', ItemType.InputNode, { portIds: ['port'] })
       const port = createPort('port', 'item', PortType.Output, {
         isMonitored: true,
-        wave: new BinaryWaveService('port', 'port', LogicValue.TRUE, 0)
+        wave: new BinaryWavePulse('port', 'port', LogicValue.TRUE, 0)
       })
 
       beforeEach(() => {
@@ -139,6 +142,12 @@ describe('item actions', () => {
       bottom: height,
       toJSON: () => null
     })
+    const getPortDictionary = (...ports: Port[]) => ({
+      [Direction.Left]: ports,
+      [Direction.Right]: [],
+      [Direction.Top]: [],
+      [Direction.Bottom]: []
+    })
 
     beforeEach(() => {
       stubAll(store, [
@@ -156,7 +165,7 @@ describe('item actions', () => {
 
       function testPosition (position: Point, text: string) {
         it(`should not add the item if the item is ${text} of the viewport`, () => {
-          store.insertItemAtPosition({ item, ports: [port] }, position)
+          store.insertItemAtPosition({ item, ports: getPortDictionary(port) }, position)
 
           expect(store.addItem).not.toHaveBeenCalled()
           expect(store.commitState).not.toHaveBeenCalled()
@@ -176,7 +185,7 @@ describe('item actions', () => {
 
       beforeEach(() => {
         store.viewport = getMockedViewport(1000, 1000)
-        store.insertItemAtPosition({ item, ports: [port] }, documentPosition)
+        store.insertItemAtPosition({ item, ports: getPortDictionary(port) }, documentPosition)
       })
 
       it('should add the item at the provided position', () => {
@@ -200,7 +209,7 @@ describe('item actions', () => {
 
       beforeEach(() => {
         store.viewport = getMockedViewport(width, height)
-        store.insertItemAtPosition({ item, ports: [port] })
+        store.insertItemAtPosition({ item, ports: getPortDictionary(port) })
       })
 
       it('should add the item at the midpoint of the viewport', () => {
@@ -521,7 +530,7 @@ describe('item actions', () => {
       it('should set the clock interval', () => {
         const item = createItem('item', ItemType.InputNode, {
           properties,
-          clock: new ClockService('item', 1000, LogicValue.TRUE)
+          clock: new ClockPulse('item', 1000, LogicValue.TRUE)
         })
 
         store.$patch({
@@ -535,7 +544,7 @@ describe('item actions', () => {
           }
         })
 
-        expect(store.items.item.clock.interval).toEqual(value)
+        expect(store.items.item.clock!.interval).toEqual(value)
       })
 
       it('should not do anything if the item has no clock', () => {

@@ -13,6 +13,8 @@
 </template>
 
 <script lang="ts">
+import BoundingBox from '@/types/types/BoundingBox'
+import Point from '@/types/interfaces/Point'
 import {
   defineComponent,
   StyleValue,

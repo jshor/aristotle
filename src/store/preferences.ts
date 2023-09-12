@@ -1,4 +1,4 @@
-import FileService from '@/services/FileService'
+import PropertySet from '@/types/interfaces/PropertySet'
 import { defineStore } from 'pinia'
 
 export const usePreferencesStore = defineStore({

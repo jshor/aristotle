@@ -11,8 +11,9 @@ import {
 } from './__helpers__'
 import { createDocumentStore } from '../..'
 import PortType from '@/types/enums/PortType'
-import { LogicValue } from '@/circuit'
+import LogicValue from '@/types/enums/LogicValue'
 import idMapper from '@/utils/idMapper'
+import ClipboardData from '@/types/interfaces/ClipboardData'
 
 setActivePinia(createPinia())
 

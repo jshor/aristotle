@@ -1,3 +1,4 @@
+import BaseItem from '@/types/interfaces/BaseItem'
 import { DocumentStoreInstance } from '..'
 import sortByZIndex from '@/utils/sortByZIndex'
 

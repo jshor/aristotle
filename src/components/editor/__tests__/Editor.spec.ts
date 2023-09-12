@@ -3,9 +3,10 @@ import { mount, VueWrapper } from '@vue/test-utils'
 import { ComponentPublicInstance } from 'vue'
 import Editor from '../Editor.vue'
 import { PANNING_FRICTION } from '@/constants'
+import Point from '@/types/interfaces/Point'
 
 describe('Editor component', () => {
-  let wrapper: VueWrapper<ComponentPublicInstance<typeof Editor>>
+  let wrapper: VueWrapper
 
   const width = 1000
   const height = 1500
@@ -44,7 +45,7 @@ describe('Editor component', () => {
 
   describe('style', () => {
     it('should apply the styles according to the props provided', async () => {
-      expect(wrapper.vm.style).toEqual(expect.objectContaining({
+      expect((wrapper.vm as any).style).toEqual(expect.objectContaining({
         backgroundSize: `${gridSize}px ${gridSize}px`,
         transform: `scale(${zoom})`,
         left: `${offset.x}px`,
@@ -63,7 +64,7 @@ describe('Editor component', () => {
         }
       })
 
-      expect(wrapper.vm.style).toEqual(expect.objectContaining({
+      expect((wrapper.vm as any).style).toEqual(expect.objectContaining({
         left: '0px',
         top: '0px'
       }))

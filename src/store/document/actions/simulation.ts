@@ -1,14 +1,14 @@
 import { DocumentStoreInstance } from '..'
 
-import { Circuit, CircuitNode, LogicValue } from '@/circuit'
-import { TinyEmitter } from 'tiny-emitter'
-import BinaryWaveService from '@/services/BinaryWaveService'
-import ClockService from '@/services/ClockService'
-import OscillationService from '@/services/OscillationService'
+import LogicValue from '@/types/enums/LogicValue'
+import CircuitNode from '../circuit/CircuitNode'
+import ClockPulse from '../oscillator/ClockPulse'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import PortType from '@/types/enums/PortType'
 import circuitNodeMapper from '@/utils/circuitNodeMapper'
+import Port from '@/types/interfaces/Port'
+import Item from '@/types/interfaces/Item'
 
 /**
  * Toggles all item clocks on or off.
@@ -188,7 +188,7 @@ export function addVirtualNode (this: DocumentStoreInstance, item: Item, ports: 
       const interval = item.properties.interval?.value as number
 
 
-      item.clock = new ClockService(outputIds[0], interval, 1) // TODO: should clock start at 1? should be configurable in properties?
+      item.clock = new ClockPulse(outputIds[0], interval, 1) // TODO: should clock start at 1? should be configurable in properties?
       item.clock.on('change', (value: number) => this.setPortValue({ id: outputIds[0], value }))
 
       this.oscillator.add(item.clock)

@@ -41,6 +41,8 @@ import { Container } from 'vue3-smooth-dnd'
 import BuilderDropZone from './BuilderDropZone.vue'
 import BuilderEditableLabel from './BuilderEditableLabel.vue'
 import PortType from '@/types/enums/PortType'
+import Port from '@/types/interfaces/Port'
+import Item from '@/types/interfaces/Item'
 
 type DragResult = {
   removedIndex: number | null

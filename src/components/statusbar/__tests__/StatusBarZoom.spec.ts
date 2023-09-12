@@ -3,10 +3,14 @@ import { ComponentPublicInstance } from 'vue'
 import StatusBarZoom from '../StatusBarZoom.vue'
 
 describe('Oscilloscope Title Bar', () => {
-  let wrapper: VueWrapper<ComponentPublicInstance<typeof StatusBarZoom>>
+  let wrapper: VueWrapper
 
   beforeEach(() => {
-    wrapper = shallowMount(StatusBarZoom)
+    wrapper = shallowMount(StatusBarZoom, {
+      props: {
+        zoom: 1
+      }
+    })
   })
 
   it('should match the snapshot', async () => {

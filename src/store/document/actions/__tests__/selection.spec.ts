@@ -17,7 +17,7 @@ setActivePinia(createPinia())
 describe('selection actions', () => {
   beforeEach(() => jest.restoreAllMocks())
 
-  describe('deselectItem', () => {
+  describe('deselectBaseItem', () => {
     it('should deselect the given item', () => {
       const store = createDocumentStore('document')()
 
@@ -25,7 +25,7 @@ describe('selection actions', () => {
         .spyOn(store, 'setSelectionState')
         .mockImplementation(jest.fn())
 
-      store.deselectItem('item1')
+      store.deselectBaseItem('item1')
 
       expect(store.setSelectionState).toHaveBeenCalledTimes(1)
       expect(store.setSelectionState).toHaveBeenCalledWith({
@@ -35,7 +35,7 @@ describe('selection actions', () => {
     })
   })
 
-  describe('selectItem', () => {
+  describe('selectBaseItem', () => {
     const store = createDocumentStore('document')()
     const item1 = createItem('item1', ItemType.LogicGate)
 
@@ -50,7 +50,7 @@ describe('selection actions', () => {
     })
 
     it('should select the given item', () => {
-      store.selectItem('item1')
+      store.selectBaseItem('item1')
 
       expect(store.setSelectionState).toHaveBeenCalledTimes(1)
       expect(store.setSelectionState).toHaveBeenCalledWith({
@@ -60,13 +60,13 @@ describe('selection actions', () => {
     })
 
     it('should deselect all other items when keepSelection is false', () => {
-      store.selectItem('item1')
+      store.selectBaseItem('item1')
 
       expect(store.deselectAll).toHaveBeenCalledTimes(1)
     })
 
     it('should not deselect anything when keepSelection is true', () => {
-      store.selectItem('item1', true)
+      store.selectBaseItem('item1', true)
 
       expect(store.deselectAll).not.toHaveBeenCalled()
     })
@@ -163,7 +163,7 @@ describe('selection actions', () => {
 
       stubAll(store, [
         'updateSelectionList',
-        'selectItemConnections'
+        'selectBaseItemConnections'
       ])
     })
 
@@ -176,7 +176,7 @@ describe('selection actions', () => {
       })
 
       expect(store.updateSelectionList).not.toHaveBeenCalled()
-      expect(store.selectItemConnections).not.toHaveBeenCalled()
+      expect(store.selectBaseItemConnections).not.toHaveBeenCalled()
     })
 
     describe('when the selection is a two-dimensional rectangle', () => {
@@ -232,12 +232,12 @@ describe('selection actions', () => {
       })
 
       it('should select the connections of all items that lie within the selection boundary', () => {
-        expect(store.selectItemConnections).toHaveBeenCalledWith([item1.id])
+        expect(store.selectBaseItemConnections).toHaveBeenCalledWith([item1.id])
       })
     })
   })
 
-  describe('selectItemConnections', () => {
+  describe('selectBaseItemConnections', () => {
     const store = createDocumentStore('document')()
     const item1 = createItem('item1', ItemType.LogicGate, { portIds: ['port1'] })
     const item2 = createItem('item2', ItemType.LogicGate, { portIds: ['port2'] })
@@ -265,25 +265,25 @@ describe('selection actions', () => {
     })
 
     it('should select a connection whose source and target are both attached to selected items', () => {
-      store.selectItemConnections([item4.id, item3.id])
+      store.selectBaseItemConnections([item4.id, item3.id])
 
       expect(store.updateSelectionList).toHaveBeenCalledWith({ id: connection3.id, isSelected: true })
     })
 
     it('should not select a connection if only its source is among the item ports selected', () => {
-      store.selectItemConnections([item1.id])
+      store.selectBaseItemConnections([item1.id])
 
       expect(store.updateSelectionList).not.toHaveBeenCalledWith({ id: connection1.id, isSelected: true })
     })
 
     it('should not select a connection if only its targt is among the item ports selected', () => {
-      store.selectItemConnections([item2.id])
+      store.selectBaseItemConnections([item2.id])
 
       expect(store.updateSelectionList).not.toHaveBeenCalledWith({ id: connection1.id, isSelected: true })
     })
 
     it('should not select a connection where neither its target nor its source is an item in the given list', () => {
-      store.selectItemConnections([item1.id, item2.id])
+      store.selectBaseItemConnections([item1.id, item2.id])
 
       expect(store.updateSelectionList).not.toHaveBeenCalledWith({ id: connection2.id, isSelected: true })
     })

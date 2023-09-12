@@ -12,7 +12,7 @@ describe('Toolbox Item', () => {
   })
 
   describe('when the element is dragged', () => {
-    let wrapper: VueWrapper<ComponentPublicInstance<typeof ToolboxItem>>
+    let wrapper: VueWrapper
 
     beforeEach(() => {
       wrapper = mount(ToolboxItem, {

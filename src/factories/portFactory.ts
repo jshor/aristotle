@@ -1,5 +1,6 @@
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
+import Port from '@/types/interfaces/Port'
 
 export default function portFactory (elementId: string, id: string, orientation: Direction, type: PortType, name: string): Port {
   return {

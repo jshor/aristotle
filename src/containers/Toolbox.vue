@@ -25,6 +25,8 @@ import ToolboxItem from '@/components/toolbox/ToolboxItem.vue'
 import ToolboxLayout from '@/components/toolbox/ToolboxLayout.vue'
 import factories from '@/factories'
 import ItemType from '@/types/enums/ItemType'
+import ItemFactory from '@/types/types/ItemFactory'
+import Point from '@/types/interfaces/Point'
 
 export default defineComponent({
   name: 'Toolbox',

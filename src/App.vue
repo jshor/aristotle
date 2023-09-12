@@ -1,5 +1,5 @@
 <template>
-  <theme :dark="experience.darkMode.value">
+  <theme :dark="(experience.darkMode.value as boolean)">
     <div
       class="app__dropzone"
       :class="{
@@ -33,8 +33,8 @@
               :label="document.displayName"
               :dirty="document.store().isDirty"
               :active="activeDocumentId === id"
-              @activate="activateDocument(id)"
-              @close="closeDocument(id)"
+              @activate="activateDocument(id as string)"
+              @close="closeDocument(id as string)"
             />
           </mobile-popout-menu>
         </template>
@@ -59,8 +59,8 @@
               :label="document.displayName"
               :active="activeDocumentId === id"
               :dirty="document.store().isDirty"
-              @activate="activateDocument(id)"
-              @close="closeDocument(id)"
+              @activate="activateDocument(id as string)"
+              @close="closeDocument(id as string)"
             />
           </template>
           <template #default>
@@ -103,7 +103,6 @@
 
 <script lang="ts">
 // TODO: the document/toolbox/toolbar stuff should be moved into a separate view called "Workspace.vue"
-/// <reference path="./types/index.d.ts" />
 import { faFile } from '@fortawesome/free-solid-svg-icons'
 import { storeToRefs } from 'pinia'
 import { defineComponent, onBeforeUnmount, onMounted, watchEffect, ref, computed } from 'vue'

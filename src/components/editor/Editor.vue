@@ -27,12 +27,13 @@ import {
   computed,
   onMounted,
   onBeforeUnmount,
-  ref,
-  watch
+  ref
 } from 'vue'
 import Resizable from '../interactive/Resizable.vue'
 import boundaries from '@/store/document/geometry/boundaries'
 import { MIN_ZOOM, MAX_ZOOM, PANNING_FRICTION } from '@/constants'
+import BoundingBox from '@/types/types/BoundingBox'
+import Point from '@/types/interfaces/Point'
 
 /**
  * The editor canvas component, including the viewable container parent.

@@ -11,7 +11,8 @@ import {
 } from './__helpers__'
 import { createDocumentStore } from '../..'
 import ItemSubtype from '@/types/enums/ItemSubtype'
-import { CircuitNode } from '@/circuit'
+import CircuitNode from '../../circuit/CircuitNode'
+import Point from '@/types/interfaces/Point'
 
 setActivePinia(createPinia())
 

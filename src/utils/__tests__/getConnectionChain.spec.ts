@@ -1,6 +1,8 @@
 import '../getConnectionChain'
 import PortType from '@/types/enums/PortType'
 import getConnectionChain from '../getConnectionChain'
+import Connection from '@/types/interfaces/Connection'
+import Port from '@/types/interfaces/Port'
 
 const createConnection = (id: string, source: string, target: string, payload: any = {}): Connection => ({
   id,

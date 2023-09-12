@@ -1,3 +1,8 @@
+import Connection from '@/types/interfaces/Connection'
+import Group from '@/types/interfaces/Group'
+import Port from '@/types/interfaces/Port'
+import SerializableState from '@/types/interfaces/SerializableState'
+import Item from '@/types/interfaces/Item'
 import cloneDeep from 'lodash.clonedeep'
 import { v4 as uuid } from 'uuid'
 

@@ -5,6 +5,8 @@ import PortType from '@/types/enums/PortType'
 import Direction from '@/types/enums/Direction'
 import itemFactory from './itemFactory'
 import ItemSubtype from '@/types/enums/ItemSubtype'
+import SerializableState from '@/types/interfaces/SerializableState'
+import Port from '@/types/interfaces/Port'
 
 /**
  * Creates an integrated circuit item.

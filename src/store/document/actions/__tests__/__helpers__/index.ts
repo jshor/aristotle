@@ -1,6 +1,11 @@
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'
+import Connection from '@/types/interfaces/Connection'
+import Group from '@/types/interfaces/Group'
+import IntegratedCircuit from '@/types/interfaces/IntegratedCircuit'
+import Port from '@/types/interfaces/Port'
+import Item from '@/types/interfaces/Item'
 
 export const createConnection = (id: string, source: string, target: string, payload: Partial<Connection> = {}): Connection => ({
   id,

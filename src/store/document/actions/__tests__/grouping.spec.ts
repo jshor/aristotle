@@ -7,6 +7,9 @@ import {
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
+import Connection from '@/types/interfaces/Connection'
+import Item from '@/types/interfaces/Item'
+import Group from '@/types/interfaces/Group'
 
 setActivePinia(createPinia())
 

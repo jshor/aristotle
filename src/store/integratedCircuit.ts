@@ -3,6 +3,12 @@ import { v4 as uuid } from 'uuid'
 import integratedCircuitFactory from '@/factories/integratedCircuitFactory'
 import FileService from '@/services/FileService'
 import idMapper from '@/utils/idMapper'
+import Port from '@/types/interfaces/Port'
+import SerializableState from '@/types/interfaces/SerializableState'
+import ItemFactory from '@/types/types/ItemFactory'
+import Item from '@/types/interfaces/Item'
+import Direction from '@/types/enums/Direction'
+import PortType from '@/types/enums/PortType'
 
 type IntegratedCircuitState = {
   isBuilderOpen: boolean
@@ -49,7 +55,20 @@ export const useIntegratedCircuitStore = defineStore('integratedCircuit', {
           const item = idMapper.mapIntegratedCircuitIds(parsed)
           const ports = item
             .portIds
-            .map(portId => item.integratedCircuit?.ports[portId] as Port)
+            .reduce((map, portId) => {
+              const port = item.integratedCircuit?.ports[portId]
+
+              if (port) {
+                map[port.orientation].push(port)
+              }
+
+              return map
+            }, {
+              [Direction.Left]: [],
+              [Direction.Top]: [],
+              [Direction.Right]: [],
+              [Direction.Bottom]: [],
+            } as Record<Direction, Port[]>)
 
           return { item, ports }
         }

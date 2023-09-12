@@ -6,7 +6,11 @@ import Direction from '@/types/enums/Direction'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
 import ItemType from '@/types/enums/ItemType'
-import ClockService from '@/services/ClockService'
+import ClockPulse from '../oscillator/ClockPulse'
+import Port from '@/types/interfaces/Port'
+import PropertySet from '@/types/interfaces/PropertySet'
+import Item from '@/types/interfaces/Item'
+import Point from '@/types/interfaces/Point'
 
 /**
  * Adds any non-IC component to the state.
@@ -57,7 +61,7 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
   // }
 
   item.name = name
-  item.clock = ClockService.deserialize(item.clock)
+  item.clock = ClockPulse.deserialize(item.clock)
   item.isSelected = false
 
   // add the item to the document and create its corresponding circuit node
@@ -74,7 +78,7 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
  * Inserts the given item and its ports into the document.
  * If no document position is given, the item will be placed in the center of the viewport.
  */
-export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports }: { item: Item, ports: Port[] }, documentPosition: Point | null = null) {
+export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports }: { item: Item, ports?: Record<Direction, Port[]> }, documentPosition: Point | null = null) {
   if (!documentPosition) {
     const midpoint = boundaries.getBoundingBoxMidpoint(this.viewport)
 
@@ -99,7 +103,11 @@ export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports
   this.commitState()
   this.addItem({
     item,
-    ports: ports.reduce((map: Record<string, Port>, port) => ({ ...map, [port.id]: port }), {})
+    ports: Object
+      .values(ports || {})
+      .reduce((map: Record<string, Port>, ports) => {
+        return ports.reduce((m, port) => ({ ...m, [port.id]: port }), map)
+      }, {})
   })
   this.setItemBoundingBox(item.id)
   this.setSelectionState({ id: item.id, value: true })
