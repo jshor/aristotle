@@ -3,7 +3,7 @@ import { ComponentPublicInstance } from 'vue'
 import OscilloscopeTitleBar from '../OscilloscopeTitleBar.vue'
 
 describe('Oscilloscope Title Bar', () => {
-  let wrapper: VueWrapper<ComponentPublicInstance<typeof OscilloscopeTitleBar>>
+  let wrapper: VueWrapper
 
   beforeEach(() => {
     wrapper = shallowMount(OscilloscopeTitleBar)

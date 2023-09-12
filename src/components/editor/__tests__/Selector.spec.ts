@@ -3,7 +3,7 @@ import { ComponentPublicInstance } from 'vue'
 import Selector from '../Selector.vue'
 
 describe('Selector component', () => {
-  let wrapper: VueWrapper<ComponentPublicInstance<typeof Selector>>
+  let wrapper: VueWrapper
 
   beforeEach(() => {
     wrapper = mount(Selector, {

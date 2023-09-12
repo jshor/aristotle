@@ -44,6 +44,8 @@ import PortType from '@/types/enums/PortType'
 import SnapMode from '@/types/enums/SnapMode'
 import Draggable from '@/components/interactive/Draggable.vue'
 import Resizable from '@/components/interactive/Resizable.vue'
+import Freeport from '@/types/types/Freeport'
+import Point from '@/types/interfaces/Point'
 
 export default defineComponent({
   name: 'PortItem',
@@ -178,7 +180,6 @@ export default defineComponent({
      */
     function onDragEnd () {
       if (newFreeport === null) return
-
       if (newFreeport.inputPortId) {
         store.connectFreeport({
           portId: newFreeport.inputPortId,

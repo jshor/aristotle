@@ -17,7 +17,7 @@ export default defineComponent({
   props: {
     icon: {
       type: Object as PropType<IconDefinition>,
-      required: true
+        default: null
     }
   },
   setup (props) {

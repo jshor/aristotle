@@ -1,11 +1,10 @@
 import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
-import rotation from '../geometry/rotation'
-import Direction from '@/types/enums/Direction'
 import SnapMode from '@/types/enums/SnapMode'
 import ItemType from '@/types/enums/ItemType'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
 import { usePreferencesStore } from '@/store/preferences'
+import Point from '@/types/interfaces/Point'
 
 /**
  * Centers all items (together as a group) to the center of the canvas.

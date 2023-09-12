@@ -39,6 +39,8 @@ import { defineComponent, ref, PropType, ComponentPublicInstance } from 'vue'
 import CircuitComponent from '../item/CircuitComponent.vue'
 import Draggable from '../interactive/Draggable.vue'
 import Resizable from '../interactive/Resizable.vue'
+import ItemFactory from '@/types/types/ItemFactory'
+import Point from '@/types/interfaces/Point'
 
 export default defineComponent({
   name: 'ToolboxItem',

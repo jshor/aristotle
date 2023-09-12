@@ -1,9 +1,11 @@
+import Point from '@/types/interfaces/Point'
 import {
   inflectDirection,
   getPortDirection,
   getEndpoints,
   default as renderLayout
 } from '../wire'
+import Port from '@/types/interfaces/Port'
 
 describe('Wire Layout', () => {
   const createPort = (position: Point): Port => ({

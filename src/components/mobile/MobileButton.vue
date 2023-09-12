@@ -30,7 +30,7 @@ export default defineComponent({
       default: ''
     },
     icon: {
-      type: Object as PropType<IconDefinition>,
+      type: Object as PropType<any>, // TODO: fix this type
       required: true
     },
     chevron: {

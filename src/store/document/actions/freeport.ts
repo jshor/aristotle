@@ -7,6 +7,8 @@ import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import PortType from '@/types/enums/PortType'
 import { usePreferencesStore } from '@/store/preferences'
+import Port from '@/types/interfaces/Port'
+import Freeport from '@/types/types/Freeport'
 
 /**
  * Adds a new freeport element. This can be used in either of two scenarios:
@@ -27,20 +29,27 @@ export function addFreeportItem (this: DocumentStoreInstance, { itemId, inputPor
   inputPortId?: string
   value?: number
 }) {
-  const ports: Port[] = []
+  const ports: Record<Direction, Port[]> = {
+    [Direction.Left]: [],
+    [Direction.Top]: [],
+    [Direction.Right]: [],
+    [Direction.Bottom]: []
+  }
 
   if (outputPortId) {
     this.ports[outputPortId] = portFactory(itemId, outputPortId, Direction.Left, PortType.Output, outputPortId)
     this.ports[outputPortId].value = value
     this.ports[outputPortId].isFreeport = true
-    ports.push(this.ports[outputPortId])
+
+    ports[Direction.Left].push(this.ports[outputPortId])
   }
 
   if (inputPortId) {
     this.ports[inputPortId] = portFactory(itemId, inputPortId, Direction.Right, PortType.Input, inputPortId)
     this.ports[inputPortId].value = value
     this.ports[inputPortId].isFreeport = true
-    ports.push(this.ports[inputPortId])
+
+    ports[Direction.Right].push(this.ports[inputPortId])
   }
 
   this.items[itemId] = itemFactory(itemId, ItemType.Freeport, ItemSubtype.None, 1, 1, ports)

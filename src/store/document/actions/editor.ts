@@ -1,3 +1,4 @@
+import Oscillogram from '@/types/types/Oscillogram'
 import { DocumentStoreInstance } from '..'
 
 export function loadDocument (this: DocumentStoreInstance, document: string) {

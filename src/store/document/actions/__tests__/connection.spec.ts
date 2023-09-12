@@ -7,7 +7,7 @@ import {
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
-import { CircuitNode } from '@/circuit'
+import CircuitNode from '../../circuit/CircuitNode'
 
 setActivePinia(createPinia())
 

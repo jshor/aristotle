@@ -15,8 +15,8 @@
     @dblclick="revealCustomCircuit"
     @touchhold="revealCustomCircuit"
     @drag-end="store.commitCachedState"
-    @select="k => store.selectItem(id, k)"
-    @deselect="store.deselectItem(id)"
+    @select="k => store.selectBaseItem(id, k)"
+    @deselect="store.deselectBaseItem(id)"
     ref="itemRef"
     data-test="item"
   >
@@ -84,6 +84,8 @@ import Draggable from '@/components/interactive/Draggable.vue'
 import { useRootStore } from '@/store/root'
 import editorContextMenu from '@/menus/context/editor'
 import Direction from '@/types/enums/Direction'
+import Point from '@/types/interfaces/Point'
+import Port from '@/types/interfaces/Port'
 
 /**
  * This component represents a two-dimensional item in the editor.
@@ -231,7 +233,7 @@ export default defineComponent({
      */
     function onContextMenu () {
       if (!props.isSelected) {
-        store.selectItem(props.id)
+        store.selectBaseItem(props.id)
       }
 
       window.api.showContextMenu(editorContextMenu(props.store))

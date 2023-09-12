@@ -1,8 +1,12 @@
-import { LogicValue } from '@/circuit'
+import LogicValue from '@/types/enums/LogicValue'
 import { DocumentStoreInstance } from '..'
 import idMapper from '@/utils/idMapper'
 import ItemType from '@/types/enums/ItemType'
 import getConnectionChain from '@/utils/getConnectionChain'
+import ClipboardData from '@/types/interfaces/ClipboardData'
+import Port from '@/types/interfaces/Port'
+import Item from '@/types/interfaces/Item'
+import Connection from '@/types/interfaces/Connection'
 
 /**
  * Performs a clipboard cut operation.

@@ -1,3 +1,5 @@
+import BaseItem from "@/types/interfaces/BaseItem"
+
 /**
  * Sorting function to sort BaseItems by their zIndex values in ascending order.
  */

@@ -2,6 +2,7 @@ import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
 import { MIN_ZOOM, MAX_ZOOM, ZOOM_STEP } from '@/constants'
+import Point from '@/types/interfaces/Point'
 
 /**
  * Increments the current zoom by one scale step (in the positive or negative direction).
@@ -25,13 +26,12 @@ export function setZoom (this: DocumentStoreInstance, { zoom, point }: { zoom: n
   if (zoom < MIN_ZOOM) zoom = MIN_ZOOM
   if (zoom > MAX_ZOOM) zoom = MAX_ZOOM
 
-
   zoom = Math.round(zoom * 100) / 100
 
   if (!point) {
     point = boundaries.getBoundingBoxMidpoint(this.viewport)
-    point.x += this.viewport.left
-    point.y += this.viewport.top
+    point!.x += this.viewport.left
+    point!.y += this.viewport.top
   }
 
   const zoomedPoint = fromDocumentToEditorCoordinates(this.canvas, this.viewport, point, this.zoomLevel)
@@ -40,8 +40,8 @@ export function setZoom (this: DocumentStoreInstance, { zoom, point }: { zoom: n
     y: zoomedPoint.y * zoom
   }
   const viewportPoint = { // the point w.r.t. the top left offset of the viewport
-    x: point.x - this.viewport.x,
-    y: point.y - this.viewport.y
+    x: point!.x - this.viewport.x,
+    y: point!.y - this.viewport.y
   }
 
   this.panTo({

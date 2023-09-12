@@ -7,8 +7,8 @@
     @touchhold="onDragStart"
     @drag="onDrag"
     @drag-end="onDragEnd"
-    @select="k => selectItem(id, k)"
-    @deselect="deselectItem(id)"
+    @select="k => selectBaseItem(id, k)"
+    @deselect="deselectBaseItem(id)"
     @contextmenu="onContextMenu"
   >
     <wire
@@ -34,6 +34,7 @@ import { DocumentStore } from '@/store/document'
 import boundaries from '@/store/document/geometry/boundaries'
 import renderLayout from '@/store/document/geometry/wire'
 import editorContextMenu from '@/menus/context/editor'
+import Point from '@/types/interfaces/Point'
 
 export default defineComponent({
   name: 'Connection',
@@ -102,7 +103,6 @@ export default defineComponent({
      * This will inform the component that the mouse is down and ready to create a new freeport, if it moves.
      */
     function onDragStart ({ touches }: TouchEvent) {
-      // TODO: bug: if the cursor drags only 1px (or some insufficient amount to create a new freeport) then the connection will inadvertantly be deleted
       createFreeport({
         x: touches[0].clientX,
         y: touches[0].clientY
@@ -151,7 +151,7 @@ export default defineComponent({
      * Mouse up event handler.
      */
     function onDragEnd () {
-      if (freeportId) {
+      if (freeportId.value) {
         // after dragging has finished, two new connections are established
         // this connection is now ready to destroy itself
         store.destroyConnection({
@@ -165,7 +165,7 @@ export default defineComponent({
 
     function onContextMenu () {
       if (!props.isSelected) {
-        store.selectItem(props.id)
+        store.selectBaseItem(props.id)
       }
 
       window.api.showContextMenu(editorContextMenu(props.store))
@@ -175,15 +175,15 @@ export default defineComponent({
       root,
       geometry,
       position,
+      source,
+      target,
+      freeportId,
       onDragStart,
       onDrag,
       onDragEnd,
       onContextMenu,
-      source,
-      target,
-      freeportId,
-      selectItem: store.selectItem,
-      deselectItem: store.deselectItem
+      selectBaseItem: store.selectBaseItem,
+      deselectBaseItem: store.deselectBaseItem
     }
   }
 })

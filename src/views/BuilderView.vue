@@ -28,6 +28,7 @@ import Builder from '@/components/builder/Builder.vue'
 import { useIntegratedCircuitStore } from '@/store/integratedCircuit'
 import Modal from '@/components/modal/Modal.vue'
 import ModalButton from '@/components/modal/ModalButton.vue'
+import Item from '@/types/interfaces/Item'
 
 export default defineComponent({
   name: 'BuilderView',

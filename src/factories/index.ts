@@ -5,6 +5,7 @@ import lightbulbFactory from './lightbulbFactory'
 import logicGateFactory from './logicGateFactory'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
+import ItemFactory from '@/types/types/ItemFactory'
 
 type FactoryDictionary = {
   [type: string]: {
@@ -29,4 +30,4 @@ export default {
     [ItemSubtype.Or]: logicGateFactory.bind(this, ItemSubtype.Or, 140, 50),
     [ItemSubtype.Not]: logicGateFactory.bind(this, ItemSubtype.Not, 140, 50, 1)
   }
-} as FactoryDictionary
+} //as FactoryDictionary

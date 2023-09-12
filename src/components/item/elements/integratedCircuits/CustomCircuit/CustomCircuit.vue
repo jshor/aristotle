@@ -41,7 +41,8 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import CustomCircuitPortZone from './CustomCircuitPortZone.vue'
-import Direction from '@/types/enums/Direction';
+import Direction from '@/types/enums/Direction'
+import Port from '@/types/interfaces/Port'
 
 export default defineComponent({
   name: 'CustomCircuit',

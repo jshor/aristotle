@@ -3,7 +3,7 @@ import { ComponentPublicInstance } from 'vue'
 import StatusBarButton from '../StatusBarButton.vue'
 
 describe('Status Bar Button', () => {
-  let wrapper: VueWrapper<ComponentPublicInstance<typeof StatusBarButton>>
+  let wrapper: VueWrapper
 
   beforeEach(() => {
     wrapper = shallowMount(StatusBarButton)

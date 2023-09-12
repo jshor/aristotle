@@ -46,7 +46,7 @@ export default defineComponent({
       default: false
     },
     icon: {
-      type: Object as PropType<IconDefinition>,
+      type: Object as PropType<any>, // TODO: fix this type
       default: null
     },
     text: {

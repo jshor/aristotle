@@ -1,5 +1,8 @@
 import Direction from '@/types/enums/Direction'
 import rotation from './rotation'
+import Port from '@/types/interfaces/Port'
+import Point from '@/types/interfaces/Point'
+import WireGeometry from '@/types/types/WireGeometry'
 
 const WIRE_PADDING = 15
 

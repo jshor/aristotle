@@ -49,6 +49,7 @@ import Nand from './gates/Nand.vue'
 import Xnor from './gates/Xnor.vue'
 import Xor from './gates/Xor.vue'
 import ItemSubtype from '@/types/enums/ItemSubtype'
+import PropertySet from '@/types/interfaces/PropertySet'
 
 export default defineComponent({
   name: 'LogicGate',

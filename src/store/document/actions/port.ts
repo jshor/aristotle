@@ -1,7 +1,9 @@
 import { DocumentStoreInstance } from '..'
 import getConnectionChain from '@/utils/getConnectionChain'
 import PortType from '@/types/enums/PortType'
-import BinaryWaveService from '@/services/BinaryWaveService'
+import BinaryWavePulse from '../oscillator/BinaryWavePulse'
+import Port from '@/types/interfaces/Port'
+import Connection from '@/types/interfaces/Connection'
 
 /**
  * Attaches the given port to an item.
@@ -156,7 +158,7 @@ export function monitorPort (this: DocumentStoreInstance, portId: string) {
 
   port.hue = port.hue ||  ~~(360 * Math.random())
   port.isMonitored = true
-  port.wave = new BinaryWaveService(portId, `${name} ${port.name}`, port.value, port.hue)
+  port.wave = new BinaryWavePulse(portId, `${name} ${port.name}`, port.value, port.hue)
 
   this.oscillator.add(port.wave)
   this.isOscilloscopeOpen = true

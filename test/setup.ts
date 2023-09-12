@@ -1,5 +1,3 @@
-import '../src/types/index.d'
-
 global.console = {
   ...console,
   // uncomment to ignore a specific log level

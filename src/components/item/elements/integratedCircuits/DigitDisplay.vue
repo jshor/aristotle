@@ -14,9 +14,10 @@
 </template>
 
 <script lang="ts">
-import { LogicValue } from '@/circuit'
+import LogicValue from '@/types/enums/LogicValue'
 import Direction from '@/types/enums/Direction'
 import { defineComponent, PropType, computed, CSSProperties } from 'vue'
+import Port from '@/types/interfaces/Port'
 
 /**
  * Mapping of characters to numeric digit line.
@@ -72,7 +73,6 @@ export default defineComponent({
   },
   setup (props) {
     const segments = computed(() => {
-      console.log('SEGMENT: ', props.ports)
       const binaryString = props
         .ports
         ?.[Direction.Left]

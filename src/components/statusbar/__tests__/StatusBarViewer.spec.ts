@@ -3,7 +3,7 @@ import { ComponentPublicInstance } from 'vue'
 import StatusBarViewer from '../StatusBarViewer.vue'
 
 describe('Status Bar Viewer', () => {
-  let wrapper: VueWrapper<ComponentPublicInstance<typeof StatusBarViewer>>
+  let wrapper: VueWrapper
 
   beforeEach(() => {
     wrapper = shallowMount(StatusBarViewer)
