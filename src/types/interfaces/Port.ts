@@ -7,6 +7,7 @@ interface Port {
   id: string
   name: string
   elementId: string
+  integratedCircuitItemId?: string
   virtualElementId?: string
   position: Point
   type: PortType

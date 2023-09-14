@@ -1,6 +1,8 @@
 import PortType from '@/types/enums/PortType'
 import { v4 as uuid } from 'uuid'
 import { DocumentStoreInstance } from '..'
+import ItemType from '@/types/enums/ItemType'
+import LogicValue from '@/types/enums/LogicValue'
 
 /**
  * Establishes a 'preview' of a connection (i.e., not saved in the current document this).
@@ -68,6 +70,7 @@ export function cycleConnectionPreviews (this: DocumentStoreInstance, portId: st
 
   const previewPortId = this.connectablePortIds[index]
 
+  // TODO: this is the only place where connectedPortIds is really used - find an alternative and remove this property from Port
   if (previewPortId && !this.ports[portId]?.connectedPortIds.includes(previewPortId)) {
     this.setConnectionPreview(previewPortId)
   } else {
@@ -138,6 +141,9 @@ export function destroyConnectionById (this: DocumentStoreInstance, id: string) 
 
   this.ports[source].connectedPortIds.splice(sourceIndex, 1)
   this.ports[target].connectedPortIds.splice(targetIndex, 1)
+
+  this.ports[target].value = LogicValue.UNKNOWN
+  this.ports[target].wave?.drawPulseChange(LogicValue.UNKNOWN)
 
   delete this.connections[id]
 }

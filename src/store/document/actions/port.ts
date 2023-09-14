@@ -32,6 +32,8 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
   // (note: some ports may be embedded in ICs and therefore not in the editor directly)
   if (!this.items[this.ports[portId]?.elementId]) return
 
+  this.unmonitorPort(portId)
+
   // remove all connections associated with this port
   Object
     .values(this.connections)
@@ -55,8 +57,6 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
         delete this.items[id]
       })
     })
-
-  this.unmonitorPort(portId)
 
   const itemId = this.ports[portId].elementId
   const portIndex = this.items[itemId].portIds.indexOf(portId)
@@ -154,7 +154,7 @@ export function togglePortMonitoring (this: DocumentStoreInstance, portId: strin
  */
 export function monitorPort (this: DocumentStoreInstance, portId: string) {
   const port = this.ports[portId]
-  const name = this.items[port.elementId].name
+  const name = this.items[port.elementId]?.name
 
   port.hue = port.hue ||  ~~(360 * Math.random())
   port.isMonitored = true

@@ -21,7 +21,6 @@ export const createConnection = (id: string, source: string, target: string, pay
 export const createPort = (id: string, elementId: string, type: PortType, payload: Partial<Port> = {}): Port => ({
   id,
   elementId,
-  virtualElementId: elementId,
   name: '',
   connectedPortIds: [],
   position: {

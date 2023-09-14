@@ -60,7 +60,7 @@ export interface DocumentState extends SerializableState {
   /** Whether or not an image is being rendered from the document. */
   isCreatingImage: boolean
   /** Whether or not to animate panning. */
-  animatePan: boolean
+  panningAnimationFrameId: number
   /** Mapping of port IDs to their respective virtual circuit nodes. */
   nodes: Record<string, CircuitNode>
   /** Logical circuit instance. */
@@ -87,7 +87,7 @@ export const state = (): DocumentState => ({
   hasLoaded: false,
   isPrinting: false,
   isCreatingImage: false,
-  animatePan: false,
+  panningAnimationFrameId: 0,
 
   nodes: {},
   circuit: new Circuit(),

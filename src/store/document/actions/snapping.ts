@@ -45,7 +45,7 @@ export function setSnapBoundaries (this: DocumentStoreInstance, id: string) {
         // this an item that can snap to align with the outer edge of any non-freeport item
         return Object
           .values(this.items)
-          .filter(e => e.id !== id && e.type !== ItemType.Freeport)
+          .filter(e => e.id !== id && e.type !== ItemType.Freeport && !e.isSelected)
           .map(e => e.boundingBox)
       }
     }

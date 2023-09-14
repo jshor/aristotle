@@ -168,10 +168,13 @@ export default class Oscillator {
   add = (wave: Pulse): void => {
     if (!this.waves.hasOwnProperty(wave.id)) {
       this.waves[wave.id] = wave
+      this.start()
 
       if (this.timeMsElapsed === 0) {
         this.broadcast()
       }
+    } else {
+      console.log('ALREADY HAVE IT')
     }
   }
 

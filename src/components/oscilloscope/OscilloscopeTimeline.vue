@@ -10,7 +10,7 @@
         :style="{ color: `hsla(${v.hue}, var(--lightness), var(--saturation), 0.8)` }"
         class="oscilloscope-timeline__label"
       >
-        {{ `${items[ports[key]?.elementId]?.name || ''} ${ports[key]?.name}` }}
+        {{ ports[key]?.name }}
       </div>
     </div>
 
@@ -86,6 +86,8 @@ export default defineComponent({
 
     list.addEventListener('scroll', this.onTimelineScroll)
     timeline.addEventListener('scroll', this.onTimelineScroll)
+
+    console.log(Object.keys(this.items))
   },
   beforeUnmount () {
     const timeline = this.$refs.timeline as HTMLElement

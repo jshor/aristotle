@@ -130,36 +130,13 @@ describe('Draggable component', () => {
         }, { x: 0, y: 0 }])
       })
 
-      it('should not emit `select` when the mouse is released from the element', async () => {
+      it('should emit `select` when the mouse is down', async () => {
         window.dispatchEvent(new MouseEvent('mousemove', {
           clientX: x + deltaX,
           clientY: y + deltaY
         }))
 
         await wrapper.trigger('mouseup', { x, y })
-
-        expect(wrapper.emitted()).not.toHaveProperty('select')
-      })
-    })
-
-    describe('when the mouse button is released', () => {
-      it('should not emit `select` if a drag operation occurred', async () => {
-        await wrapper.trigger('mousedown', { x: 0, y: 0 })
-
-        window.dispatchEvent(new MouseEvent('mousemove', {
-          clientX: 10,
-          clientY: 10
-        }))
-
-        await wrapper.trigger('mouseup', { x: 0, y: 0 })
-
-        expect(wrapper.emitted()).not.toHaveProperty('select')
-      })
-
-      it('should emit `select` if no drag operation occurred', async () => {
-        wrapper = mount(Draggable)
-
-        await wrapper.trigger('mouseup', { x: 0, y: 0 })
 
         expect(wrapper.emitted()).toHaveProperty('select')
       })

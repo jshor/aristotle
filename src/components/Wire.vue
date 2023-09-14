@@ -5,7 +5,9 @@
       'wire--flash': flash,
       'wire--preview': isPreview
     }"
-  :width="geometry.width" :height="geometry.height"
+    :width="geometry.width"
+    :height="geometry.height"
+    aria-roledescription="connection"
   >
     <title>{{ label }}</title>
     <path
@@ -17,8 +19,8 @@
     <path
       class="wire__display"
       :class="{
-        'wire__display--on': source.value === 1,
-        'wire__display--off': source.value === -1
+        'wire__display--on': sourceValue === LogicValue.TRUE,
+        'wire__display--off': sourceValue === LogicValue.FALSE
       }"
       fill="none"
       :transform="`translate(${Math.abs(geometry.minX)}, ${Math.abs(geometry.minY)})`"
@@ -41,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import Port from '@/types/interfaces/Port'
+import LogicValue from '@/types/enums/LogicValue';
 import WireGeometry from '@/types/types/WireGeometry';
 import { defineComponent, PropType } from 'vue'
 
@@ -52,12 +54,8 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    source: {
-      type: Object as PropType<Port>,
-      required: true
-    },
-    target: {
-      type: Object as PropType<Port>,
+    sourceValue: {
+      type: Number as PropType<LogicValue>,
       required: true
     },
     label: {
@@ -82,6 +80,9 @@ export default defineComponent({
       type: Object as PropType<WireGeometry>,
       required: true
     }
+  },
+  setup () {
+    return { LogicValue }
   }
 })
 </script>

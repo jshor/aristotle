@@ -251,8 +251,8 @@ export default defineComponent({
      * Deselects all items when clicking on the background, unless the shift key is held down.
      * This is to allow a selection event to add to an existing selection by using the shift key.
      */
-    function onDeselect ($event: MouseEvent){
-      if (!$event.ctrlKey) {
+    function onDeselect (ctrlKey: boolean) {
+      if (!ctrlKey) {
         store.deselectAll()
       }
     }

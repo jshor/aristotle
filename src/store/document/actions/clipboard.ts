@@ -173,7 +173,7 @@ export function paste (this: DocumentStoreInstance) {
       this.setSelectionPosition({
         id: item.id,
         position: {
-          x: item.position.x + (parsed.pasteCount * 20),
+          x: item.position.x + (parsed.pasteCount * 20), // TODO: 20 should be a constant and should be a multiple of the grid size
           y: item.position.y + (parsed.pasteCount * 20)
         }
       })

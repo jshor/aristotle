@@ -235,28 +235,24 @@ describe('Document container', () => {
   })
 
   describe('when the selector has begun a new selection', () => {
-    it('should deselect all items when the shift key is not held', async () => {
+    it('should deselect all items when the `keepSelection` value is `false`', async () => {
       stubAll(store, ['deselectAll'])
 
       await wrapper
         .findComponent({ name: 'Selector' })
         .vm
-        .$emit('selectionStart', {
-          ctrlKey: false
-        })
+        .$emit('selectionStart', false)
 
       expect(store.deselectAll).toHaveBeenCalled()
     })
 
-    it('should not deselect anything when the shift key is held', async () => {
+    it('should not deselect anything when the `keepSelection` value is `true`', async () => {
       stubAll(store, ['deselectAll'])
 
       await wrapper
         .findComponent({ name: 'Selector' })
         .vm
-        .$emit('selectionStart', {
-          ctrlKey: true
-        })
+        .$emit('selectionStart', true)
 
       expect(store.deselectAll).not.toHaveBeenCalled()
     })

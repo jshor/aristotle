@@ -58,7 +58,6 @@
           :type="port.type"
           :position="port.position"
           :orientation="port.orientation + item.rotation"
-          :connected-port-ids="port.connectedPortIds"
           :hue="port.isMonitored ? port.hue : 0"
           :rotation="item.rotation"
           @keypress.esc="onEscapeKey"

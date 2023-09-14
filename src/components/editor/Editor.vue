@@ -277,17 +277,20 @@ export default defineComponent({
      * If only one finger is present, this will begin panning.
      */
     function onTouchStart ($event: TouchEvent) {
+      $event.preventDefault()
+      $event.stopPropagation()
+
       if ($event.touches.length > 2) return
 
-      startPanning(getTouchCenter($event))
+      isPanning = false
+      firstPinchDistance = 0
       initialZoom = props.zoom
+
+      requestAnimationFrame(() => startPanning(getTouchCenter($event)))
 
       if ($event.touches.length === 2) {
         firstPinchDistance = getTouchDistance($event)
       }
-
-      $event.preventDefault()
-      $event.stopPropagation()
     }
 
     /**
@@ -306,10 +309,6 @@ export default defineComponent({
         requestAnimationFrameId = window.requestAnimationFrame(() => onTouchStart($event))
         return
       }
-
-      // if ($event.target === selector.value?.$el) {
-      //   emit('deselect')
-      // }
 
       if (firstPinchDistance === 0) {
         // if panning using a single finger, provide momentum at the end
