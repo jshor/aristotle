@@ -12,13 +12,12 @@
     @contextmenu="onContextMenu"
   >
     <wire
-      :source="source"
-      :target="target"
+      :source-value="sourceValue"
       :geometry="geometry"
       :is-selected="isSelected"
       :is-preview="isPreview"
       :flash="flash"
-      :label="'TODO'"
+      :label="label"
       ref="root"
       data-test="wire"
     />
@@ -27,7 +26,7 @@
 
 <script lang="ts">
 import { v4 as uuid } from 'uuid'
-import { ComponentPublicInstance, defineComponent, PropType, ref, computed } from 'vue'
+import { ComponentPublicInstance, defineComponent, PropType, ref, computed, watchEffect } from 'vue'
 import Draggable from '@/components/interactive/Draggable.vue'
 import Wire from '@/components/Wire.vue'
 import { DocumentStore } from '@/store/document'
@@ -35,6 +34,7 @@ import boundaries from '@/store/document/geometry/boundaries'
 import renderLayout from '@/store/document/geometry/wire'
 import editorContextMenu from '@/menus/context/editor'
 import Point from '@/types/interfaces/Point'
+import WireGeometry from '@/types/types/WireGeometry'
 
 export default defineComponent({
   name: 'Connection',
@@ -82,14 +82,25 @@ export default defineComponent({
   setup (props) {
     const store = props.store()
     const connection = ref(store.connections[props.id])
+    const { source: sourceId, target: targetId } = connection.value || {}
+    const sourceValue = computed(() => store.ports[sourceId].value)
     const root = ref<ComponentPublicInstance<HTMLElement>>()
-    const source = computed(() => store.ports[store.connections[props.id].source])
-    const target = computed(() => store.ports[store.connections[props.id].target])
-    const geometry = computed(() => renderLayout(source.value, target.value))
-    const position = computed(() => {
-      const topLeft = boundaries.getExtremePoint('min', source.value.position, target.value.position)
+    const geometry = ref<WireGeometry>()
+    const position = ref<Point>({ x: 0, y: 0 })
+    const label = ref('')
 
-      return {
+    watchEffect(() => {
+      const source = store.ports[sourceId]
+      const target = store.ports[targetId]
+
+      if (!source || !target) return
+
+      const topLeft = boundaries.getExtremePoint('min', source.position, target.position)
+
+      label.value = `Connection from ${store.ports[sourceId].name} to ${store.ports[targetId].name}`
+      connection.value = store.connections[props.id]
+      geometry.value = renderLayout(source, target)
+      position.value = {
         y: topLeft.y + geometry.value.minY,
         x: topLeft.x + geometry.value.minX
       }
@@ -110,7 +121,9 @@ export default defineComponent({
     }
 
     function createFreeport (position: Point) {
-      if (!root.value?.$el || connection.value.groupId !== null) return
+      const connection = store.connections[props.id]
+
+      if (!root.value?.$el || connection.groupId !== null) return
 
       // directly change the DOM style (as opposed to using v-show/refs) to avoid "flickering" while VDOM updates
       root.value.$el.style.opacity = '0'
@@ -121,10 +134,10 @@ export default defineComponent({
         itemId: freeportId.value,
         inputPortId: uuid(),
         outputPortId: uuid(),
-        connectionChainId: connection.value.connectionChainId,
-        sourceId: source.value.id,
-        targetId: target.value.id,
-        value: source.value.value
+        connectionChainId: connection.connectionChainId,
+        sourceId: connection.source,
+        targetId: connection.target,
+        value: sourceValue.value
       })
 
       store.setSnapBoundaries(freeportId.value)
@@ -175,9 +188,9 @@ export default defineComponent({
       root,
       geometry,
       position,
-      source,
-      target,
       freeportId,
+      sourceValue,
+      label,
       onDragStart,
       onDrag,
       onDragEnd,

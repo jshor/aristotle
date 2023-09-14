@@ -254,8 +254,9 @@ export function onVirtualNodeChange (this: DocumentStoreInstance, node: CircuitN
     .forEach(portId => {
       if (this.ports[portId]) {
         const port = this.ports[portId]
+        const item = this.items[port.elementId]
 
-        if (this.items[port.elementId] && port.value !== value) {
+        if (item && port.value !== value) {
           // only accept that the circuit has changed if the value of a port that's visible on the canvas has changed
           if (!node.forceContinue) {
             // if a node is not marked to be forceContinue, then it's either internal to an IC, or it's a freeport and its change is immaterial

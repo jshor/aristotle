@@ -26,6 +26,7 @@ import {
   ref,
   ComponentPublicInstance
 } from 'vue'
+import { TOUCH_HOLD_TIMEOUT } from '@/constants'
 
 export default defineComponent({
   name: 'Draggable',
@@ -219,7 +220,7 @@ export default defineComponent({
 
       touchTimeout = window.setTimeout(() => {
         emit('touchhold', $event)
-      }, 500) // TODO: make 500 configurable?
+      }, TOUCH_HOLD_TIMEOUT) // TODO: make 500 configurable?
     }
 
     /**
@@ -228,6 +229,9 @@ export default defineComponent({
      * @param {TouchEvent} $event
      */
     function onTouchMove ($event: TouchEvent) {
+      $event.stopPropagation()
+      $event.preventDefault()
+
       if (requestAnimationFrameId) return
       if ($event.touches.length > 1) {
         return onTouchEnd($event)
@@ -262,6 +266,9 @@ export default defineComponent({
      */
     function onTouchEnd ($event: TouchEvent) {
       clearTimeout(touchTimeout)
+
+      $event.stopPropagation()
+      $event.preventDefault()
 
       if (isDragging) {
         dragEnd()

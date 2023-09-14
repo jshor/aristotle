@@ -120,11 +120,13 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
   Object
     .keys(items)
     .forEach(id => {
-      this.items[id] = {
-        ...items[id],
-        clock: this.items[id]?.clock || ClockPulse.deserialize(items[id]?.clock)
+      if (this.items[id]) {
+        this.items[id] = {
+          ...items[id],
+          clock: items[id].clock ? ClockPulse.deserialize(items[id]?.clock) : null
+        }
+        this.setItemBoundingBox(id)
       }
-      this.setItemBoundingBox(id)
     })
 
   addedItems.forEach(id => {

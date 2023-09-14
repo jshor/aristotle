@@ -1,6 +1,8 @@
 <template>
   <div
     @mousedown.left.self="onMouseDown"
+    @touchstart="onTouchStart"
+    @touchend="onTouchEnd"
     class="selector"
     ref="selector"
   >
@@ -23,6 +25,7 @@ import {
   onBeforeUnmount,
   ref
 } from 'vue'
+import boundaries from '@/store/document/geometry/boundaries'
 
 /**
  * The selection boundary component.
@@ -36,7 +39,7 @@ export default defineComponent({
   name: 'Selector',
   emits: {
     /** When the user has begun a two-dimensional selection. */
-    selectionStart: ($event: MouseEvent) => true,
+    selectionStart: (keepSelection: boolean) => true,
     /** When the user has finished selecting items. */
     selectionEnd: (boundingBox: BoundingBox) => true
   },
@@ -58,7 +61,6 @@ export default defineComponent({
       width: Math.abs(start.value.x - end.value.x),
       height: Math.abs(start.value.y - end.value.y)
     })
-
     const style = computed((): StyleValue => {
       const bbox = getBoundingBox()
 
@@ -69,6 +71,9 @@ export default defineComponent({
         height: `${bbox.height}px`,
       }
     })
+
+    let touch = { x: 0, y: 0 }
+    let isTouching = false
 
     onMounted(() => {
       window.addEventListener('mousemove', onMouseMove)
@@ -124,7 +129,7 @@ export default defineComponent({
       start.value = position
       end.value = position
 
-      emit('selectionStart', $event)
+      emit('selectionStart', $event.ctrlKey)
     }
 
     /**
@@ -155,11 +160,35 @@ export default defineComponent({
       }
     }
 
+    function onTouchStart ($event: TouchEvent) {
+      touch.x = $event.touches[0].clientX
+      touch.y = $event.touches[0].clientY
+      isTouching = true
+    }
+
+    function onTouchEnd ($event: TouchEvent) {
+      if (!isTouching) return
+
+      if (boundaries.isInNeighborhood(touch, {
+        x: $event.changedTouches[0].clientX,
+        y: $event.changedTouches[0].clientY
+      }, 5)) {
+        // emit selection start to deselect all items if the user tapped on the editor
+        emit('selectionStart', false)
+      }
+
+      touch.x = 0
+      touch.y = 0
+      isTouching = false
+    }
+
     return {
       selector,
       hasSelection,
       style,
-      onMouseDown
+      onMouseDown,
+      onTouchStart,
+      onTouchEnd
     }
   }
 })

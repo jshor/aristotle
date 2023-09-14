@@ -20,7 +20,7 @@ export default {
   },
   [ItemType.OutputNode]: {
     [ItemSubtype.Lightbulb]: lightbulbFactory,
-    [ItemSubtype.DigitDisplay]: digitDisplayFactory
+    // [ItemSubtype.DigitDisplay]: digitDisplayFactory
   },
   [ItemType.LogicGate]: {
     [ItemSubtype.And]: logicGateFactory.bind(this, ItemSubtype.And, 140, 50),

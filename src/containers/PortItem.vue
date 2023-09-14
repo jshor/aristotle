@@ -101,12 +101,6 @@ export default defineComponent({
       default: 0
     },
 
-    /** List of IDs of ports that are connected to this port. */
-    connectedPortIds: {
-      type: Object as PropType<string[]>,
-      default: []
-    },
-
     /** Document store instance. */
     store: {
       type: Function as PropType<DocumentStore>,
@@ -127,7 +121,9 @@ export default defineComponent({
       setTimeout(() => {
         // compute the relative (w.r.t. the parent item) position of the port on the canvas
         // this is wrapped in a setTimeout() to wait for its parent component (Item) to be mounted first
-        store.setPortRelativePosition(pivotRef.value!.$el.getBoundingClientRect(), props.id)
+        if (pivotRef.value) {
+          store.setPortRelativePosition(pivotRef.value.$el.getBoundingClientRect(), props.id)
+        }
       })
     })
 
