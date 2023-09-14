@@ -23,6 +23,39 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
   // add all ports associated to this item
   // if the item is an integrated circuit, only add the ports that it defines (ones visible to the user)
   const portList = item.integratedCircuit?.ports || ports
+  const portNames = new Set<string>()
+  const itemNames = new Set(
+    Object
+      .values(this.items)
+      .map(({ name }) => name)
+  )
+  const getNumericName = (originalName: string, existingNames: Set<string>) => {
+    let name = originalName
+    let c = 1
+
+    while (existingNames.has(name)) {
+      name = `${originalName} ${++c}`
+    }
+
+    return name
+  }
+
+  item.name = getNumericName(item.properties?.name?.value as string || item.name, itemNames)
+  item
+    .portIds
+    .forEach(portId => {
+      const port = portList[portId]
+
+      if (port) {
+        const type = port.type === PortType.Input ? 'I' : 'O'
+
+        port.name = port.name
+          ? `${item.name} ${port.name}`
+          : getNumericName(`${item.name} ${type}`, portNames).replace(/(I|O)$/, '$11')
+
+        portNames.add(port.name)
+      }
+    })
 
   item
     .portIds
@@ -46,23 +79,12 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
       }
     })
 
-  // TODO: the naming scheme here is really messed up - sometimes copy+pasting items will create names like 'Clock 2 2 2'
-  // think of a better way to autoname items
-  // const itemNames = Object
-  //   .values(this.items)
-  //   .map(({ name }) => name)
-  const originalName = item.name || item.subtype
-
-  let name = originalName
-  // let c = 1
-
-  // while (itemNames.includes(name)) {
-  //   name = `${originalName} ${++c}`
-  // }
-
-  item.name = name
-  item.clock = ClockPulse.deserialize(item.clock)
   item.isSelected = false
+
+  if (item.clock) {
+    item.clock = ClockPulse.deserialize(item.clock)
+    this.oscillator.add(item.clock!)
+  }
 
   // add the item to the document and create its corresponding circuit node
   this.items[item.id] = item
@@ -138,6 +160,7 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
   }
 
   this.removeVirtualNode(item.id)
+  this.oscillator.remove(item.clock!)
 
   // remove all ports associated with the item
   const ids = [...item.portIds]
@@ -177,7 +200,6 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
         connectedPortIds: [],
         type: PortType.Input,
         elementId: id,
-        virtualElementId: id,
         orientation: Direction.Left,
         isFreeport: false,
         isMonitored: false,

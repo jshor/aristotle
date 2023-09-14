@@ -30,7 +30,11 @@ export function panDelta (this: DocumentStoreInstance, delta: Point, animate = f
   const momentum = Math.max(Math.abs(delta.x), Math.abs(delta.y), 1) * PANNING_FRICTION
   const speed = PANNING_SPEED
 
+  cancelAnimationFrame(this.panningAnimationFrameId)
+
   const animatePan = (c = 0) => {
+    cancelAnimationFrame(this.panningAnimationFrameId)
+
     const percent = PANNING_EASING_FUNCTION(c / momentum)
     const deltaX = delta.x * percent
     const deltaY = delta.y * percent
@@ -43,12 +47,11 @@ export function panDelta (this: DocumentStoreInstance, delta: Point, animate = f
     })
 
     if (c < momentum) {
-      cancelAnimationFrame(requestAnimationFrameId)
-      requestAnimationFrameId = requestAnimationFrame(animatePan.bind(this, c + speed))
+      this.panningAnimationFrameId = requestAnimationFrame(animatePan.bind(this, c + speed))
     }
   }
 
-  if (animate) { // TODO: make this configurable so that users can opt out of momentum
+  if (animate && momentum >= PANNING_SPEED) { // TODO: make this configurable so that users can opt out of momentum
     animatePan()
   } else {
     this.setCanvasBoundingBox({
@@ -64,6 +67,7 @@ export function panDelta (this: DocumentStoreInstance, delta: Point, animate = f
  * Pans to the center of the available canvas, such that its center is visible in the center of the viewport.
  */
 export function panToCenter (this: DocumentStoreInstance) {
+  // TODO: this pans to the literal center of the canvas, but better usability would be to pan to the center of the items
   const midpoint = boundaries.getBoundingBoxMidpoint(this.canvas)
 
   this.panTo({

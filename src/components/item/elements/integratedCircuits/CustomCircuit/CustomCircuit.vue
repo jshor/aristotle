@@ -10,6 +10,7 @@
   >
     <custom-circuit-port-zone
       :ports="ports[Direction.Top]"
+      :circuit-name="name"
       orientation="horizontal"
       type="top"
     />
@@ -17,6 +18,7 @@
     <div class="custom-circuit__center">
       <custom-circuit-port-zone
         :ports="ports[Direction.Left]"
+        :circuit-name="name"
         orientation="vertical"
         type="left"
       />
@@ -25,6 +27,7 @@
       </div>
       <custom-circuit-port-zone
         :ports="ports[Direction.Right]"
+        :circuit-name="name"
         orientation="vertical"
         type="right"
       />
@@ -32,6 +35,7 @@
 
     <custom-circuit-port-zone
       :ports="ports[Direction.Bottom]"
+      :circuit-name="name"
       orientation="horizontal"
       type="bottom"
     />

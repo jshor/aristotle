@@ -19,5 +19,8 @@ export const IMAGE_PADDING = 20
 /** The amount of momentum to build with each key press while moving an object using arrow keys. */
 export const ARROW_KEY_MOMENTUM_MULTIPLIER = 1.05
 
+/** The amount of time, in milliseconds, that the user must be touching something before emitting a `touchhold` event. */
+export const TOUCH_HOLD_TIMEOUT = 100
+
 /** The easing function for each animation frame to ease out after panning. */
 export const PANNING_EASING_FUNCTION = (x: number) => 1 - Math.pow(1 - x, 3)

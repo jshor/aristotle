@@ -2,7 +2,6 @@ export default {
   collectCoverage: true,
   coverageDirectory: '<rootDir>/test/.coverage',
   coveragePathIgnorePatterns: [
-    '<rootDir>/src/.*/__spec__',
     '<rootDir>/src/.*/__tests__'
   ],
   moduleNameMapper: {
@@ -15,7 +14,7 @@ export default {
     '<rootDir>/src/**/*.spec.ts'
   ],
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.ts$': 'ts-jest',
     '^.+\\.vue$': '@vue/vue3-jest'
   },
   testEnvironment: 'jsdom',

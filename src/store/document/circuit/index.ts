@@ -89,8 +89,8 @@ class Circuit {
    */
   public removeConnection = (sourceNode: CircuitNode, targetNode: CircuitNode, sourceValue: number = LogicValue.UNKNOWN): void => {
     sourceNode
-      .outputs
-      .concat()
+      ?.outputs
+      ?.concat()
       .forEach(({ node, id }: Connection, i: number) => {
         if (targetNode === node) {
           // reset the input of the target for this connection to hi-Z

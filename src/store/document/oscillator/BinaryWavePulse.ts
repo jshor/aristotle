@@ -35,7 +35,7 @@ export default class BinaryWavePulse implements Pulse {
    */
   constructor (id: string, name: string, signal: number, hue: number) {
     this.id = id
-    this.name = name
+    this.name = name // TODO: deprecate this
     this.hue = hue
     this.initialize(signal)
   }

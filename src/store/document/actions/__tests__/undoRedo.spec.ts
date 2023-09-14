@@ -213,26 +213,25 @@ describe('undo/redo actions', () => {
       })
     })
 
-    it('should remove the items from the old state that are not present in the new one', () => {
-      expect(store.items).toHaveProperty('addedItem1')
-      expect(store.items).toHaveProperty('addedItem2')
-      expect(store.items.addedItem1).toEqual(addedItem1)
-      expect(store.items.addedItem2).toEqual(addedItem2)
-      expect(store.items.addedIc).toEqual(addedIc)
+    it('should add the items from the old state that are not present in the new one', () => {
+      expect(store.addItem).toHaveBeenCalledTimes(3)
+      expect(store.addItem).toHaveBeenCalledWith({ item: addedItem1, ports: { addedPort1, addedPort2 } })
+      expect(store.addItem).toHaveBeenCalledWith({ item: addedItem2, ports: { addedPort1, addedPort2 } })
+      expect(store.addItem).toHaveBeenCalledWith({ item: addedIc, ports: { addedPort1, addedPort2 } })
     })
 
-    it('should commit removeElement for each item that will be lost between states', () => {
+    it('should remove all items that will be lost between states', () => {
       expect(store.removeElement).toHaveBeenCalledTimes(2)
       expect(store.removeElement).toHaveBeenCalledWith('removedItem1')
       expect(store.removeElement).toHaveBeenCalledWith('removedItem2')
     })
 
-    it('should commit disconnect for each connection that will be lost between states', () => {
+    it('should disconnect each connection that will be lost between states', () => {
       expect(store.disconnectById).toHaveBeenCalledTimes(1)
       expect(store.disconnectById).toHaveBeenCalledWith('removedConnection')
     })
 
-    it('should commit connect for each connection that will be gained between states', () => {
+    it('should connect each connection that will be gained between states', () => {
       expect(store.connect).toHaveBeenCalledWith(addedConnection)
     })
 

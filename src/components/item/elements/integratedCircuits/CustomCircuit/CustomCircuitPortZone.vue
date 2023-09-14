@@ -9,7 +9,7 @@
       class="custom-circuit-port-zone__io"
     >
       <custom-circuit-port
-        :label="port.name"
+        :label="port.name.replace(circuitName, '')"
         :type="type"
       />
     </div>
@@ -31,6 +31,10 @@ export default defineComponent({
     },
     orientation: {
       type: String as PropType<'horizontal' | 'vertical'>,
+      required: true
+    },
+    circuitName: {
+      type: String,
       required: true
     },
     type: {

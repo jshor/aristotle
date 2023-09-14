@@ -433,7 +433,6 @@ describe('item actions', () => {
           connectedPortIds: [],
           type: PortType.Input,
           elementId: id,
-          virtualElementId: id,
           orientation: Direction.Left,
           isFreeport: false,
           isMonitored: false,

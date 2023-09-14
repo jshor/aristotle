@@ -1,6 +1,7 @@
 <template>
   <div
     class="group"
+    aria-roledescription="group"
     :class="{
       'group--is-selected': isSelected
     }"

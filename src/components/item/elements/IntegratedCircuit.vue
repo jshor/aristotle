@@ -34,11 +34,6 @@ export default defineComponent({
       type: String,
       default: ''
     }
-  },
-  setup (props) {
-    watch(() => props.ports, () => {
-      console.log('ports changed', props.ports)
-    })
   }
 })
 </script>
