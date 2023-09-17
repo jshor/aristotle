@@ -29,7 +29,7 @@ export default function edit (useDocumentStore: DocumentStore, submenus: MenuIte
     {
       label: 'Delete',
       accelerator: 'Delete',
-      enabled: store.hasSelection,
+      enabled: store.canDelete,
       click: store.deleteSelection
     },
     { type: 'separator' },
@@ -41,7 +41,7 @@ export default function edit (useDocumentStore: DocumentStore, submenus: MenuIte
     }
   ]
 
-  if (store.selectedItemIds.length > 0) {
+  if (store.selectedItemIds.size > 0) {
     menu.push({ type: 'separator' })
     menu.push({
       label: '&Rotate',
@@ -108,7 +108,7 @@ export default function edit (useDocumentStore: DocumentStore, submenus: MenuIte
     menu = menu.concat(submenus)
   }
 
-  if (store.selectedItemIds.length === 1) {
+  if (store.selectedItemIds.size === 1) {
     menu.push({ type: 'separator' })
     menu.push({
       label: '&Item Properties'

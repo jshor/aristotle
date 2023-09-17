@@ -30,11 +30,12 @@ describe('Document container', () => {
     store = storeDefinition()
 
     item1 = createItem('item1', ItemType.InputNode, { portIds: ['port1'] })
-    item2 = createItem('item2', ItemType.Freeport, { portIds: ['port2'] })
+    item2 = createItem('item2', ItemType.InputNode, { portIds: ['port2'] })
     port1 = createPort('port1', item1.id, PortType.Input)
     port2 = createPort('port1', item2.id, PortType.Output)
     connection1 = createConnection('connection1', 'port1', 'port2')
 
+    store.$reset()
     store.ports = { port1, port2 }
     store.items = { item1, item2 }
     store.connections = { connection1 }
@@ -54,7 +55,11 @@ describe('Document container', () => {
       })
   })
 
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => {
+    jest.resetAllMocks()
+    jest.restoreAllMocks()
+    jest.clearAllMocks()
+  })
 
   it('should match the snapshot', () => {
     expect(wrapper.html()).toMatchSnapshot()
@@ -182,12 +187,19 @@ describe('Document container', () => {
   })
 
   describe('when pressing the arrow keys', () => {
-    beforeEach(() => stubAll(store, ['moveSelectionPosition']))
+    beforeEach(() => {
+      stubAll(store, [
+        'setSelectionPosition',
+        'cacheState',
+        'commitCachedState'
+      ])
+    })
+
     const testArrowKey = (direction: string, point: Point) => {
-      it(`should invoke moveSelectionPosition() with the given ${direction} when that key is pressed`, () => {
+      it(`should invoke setSelectionPosition() with the given ${direction} when that key is pressed`, () => {
         document.dispatchEvent(new KeyboardEvent('keydown', { key: `Arrow${direction}` }))
 
-        expect(store.moveSelectionPosition).toHaveBeenCalledWith(point)
+        expect(store.setSelectionPosition).toHaveBeenCalledWith(point)
       })
     }
 
@@ -196,36 +208,45 @@ describe('Document container', () => {
     testArrowKey('Right', { x: 1, y: 0 })
     testArrowKey('Down', { x: 0, y: 1 })
 
-    it('should not invoke moveSelectionPosition() when a non-arrow key is pressed', () => {
+    it('should not invoke setSelectionPosition() when a non-arrow key is pressed', () => {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 't' }))
 
-      expect(store.moveSelectionPosition).not.toHaveBeenCalled()
+      expect(store.setSelectionPosition).not.toHaveBeenCalled()
     })
 
-    it('should reset the momentum when the key is released', () => {
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }))
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }))
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }))
+    describe('when the key is released', () => {
+      beforeEach(() => {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }))
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }))
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }))
 
-      const momentum = Array(3)
-        .fill(0)
-        .reduce((total, i) => total * ARROW_KEY_MOMENTUM_MULTIPLIER, 1)
+        const momentum = Array(3)
+          .fill(0)
+          .reduce(total => total * ARROW_KEY_MOMENTUM_MULTIPLIER, 1)
 
-      expect(store.moveSelectionPosition).toHaveBeenCalledWith({ x: 0, y: -momentum })
+        expect(store.setSelectionPosition).toHaveBeenCalledWith({ x: 0, y: -momentum })
 
-      document.dispatchEvent(new KeyboardEvent('keyup'))
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }))
+        document.dispatchEvent(new KeyboardEvent('keyup'))
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }))
+      })
 
-      expect(store.moveSelectionPosition).toHaveBeenCalledWith({ x: 0, y: -1 })
+      it('should reset the momentum when the key is released', () => {
+        expect(store.setSelectionPosition).toHaveBeenCalledWith({ x: 0, y: -1 })
+      })
+
+      it('should commit the cached state', () => {
+        expect(store.cacheState).toHaveBeenCalled()
+        expect(store.commitCachedState).toHaveBeenCalled()
+      })
     })
   })
 
   describe('when the context menus are requested', () => {
-    it('should show the editor context menu when an item requests it', async () => {
+    it('should show the editor context menu when the editor requests it', async () => {
       stubAll(window.api, ['showContextMenu'])
 
       await wrapper
-        .findComponent({ name: 'Item' })
+        .findComponent({ name: 'Editor' })
         .vm
         .$emit('contextmenu', new Event('contextmenu'))
 

@@ -2,13 +2,14 @@ import { setActivePinia, createPinia } from 'pinia'
 import PortType from '@/types/enums/PortType'
 import ItemType from '@/types/enums/ItemType'
 import {
+  createConnection,
+  createControlPoint,
   createGroup,
   createItem,
   createPort,
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
-import rotation from '../../geometry/rotation'
 import { usePreferencesStore } from '@/store/preferences'
 import SnapMode from '@/types/enums/SnapMode'
 import Point from '@/types/interfaces/Point'
@@ -69,6 +70,41 @@ describe('positioning actions', () => {
           y: 360
         }
       })
+    })
+  })
+
+  describe('setItemPosition', () => {
+    it('should set the port position', () => {
+      const portId = 'port1'
+      const position = { x: 20, y: 30 }
+      const store = createDocumentStore('document')()
+      const port = createPort(portId, 'item', PortType.Input, {
+        position: {
+          x: 10,
+          y: 10
+        }
+      })
+
+      store.$patch({
+        ports: {
+          [portId]: port
+        },
+        canvas: {
+          left: 0,
+          top: 0,
+          right: 1000,
+          bottom: 1000
+        },
+        viewport: {
+          width: 1000,
+          height: 1000,
+          x: 0,
+          y: 0
+        }
+      })
+      store.setPortRelativePosition(position, portId)
+
+      expect(port.position).toEqual(position)
     })
   })
 
@@ -153,10 +189,7 @@ describe('positioning actions', () => {
 
       store.dragItem('item', position)
 
-      expect(store.setSelectionPosition).toHaveBeenCalledWith({
-        id: 'item',
-        position
-      })
+      expect(store.setSelectionPosition).toHaveBeenCalledWith(expect.objectContaining(position))
     })
 
     it('should snap the item to a nearby snap boundary', () => {
@@ -173,10 +206,7 @@ describe('positioning actions', () => {
       }]
       store.dragItem('item', { x: 15, y: 15 })
 
-      expect(store.setSelectionPosition).toHaveBeenCalledWith({
-        id: 'item',
-        position: expect.objectContaining({ x: boundaryX })
-      })
+      expect(store.setSelectionPosition).toHaveBeenCalledWith(expect.objectContaining({ x: boundaryX }))
     })
 
     it('should snap the item to a nearby grid line', () => {
@@ -186,85 +216,100 @@ describe('positioning actions', () => {
 
       store.dragItem('item', { x: 15, y: 15 })
 
-      expect(store.setSelectionPosition).toHaveBeenCalledWith({
-        id: 'item',
-        position: expect.objectContaining({ x: 20, y: 20 })
-      })
+      expect(store.setSelectionPosition).toHaveBeenCalledWith(expect.objectContaining({ x: 20, y: 20 }))
     })
 
     it('should snap to a radial boundary', () => {
       const x = 20
       const y = 20
-      const freeport = createItem('item', ItemType.Freeport, { width: 0, height: 0 })
+      const item = createItem('item', ItemType.InputNode, { width: 0, height: 0 })
 
       preferencesStore.snapping.snapTolerance.value = 20
       store.$patch({
         items: {
-          freeport
+          item
         }
       })
       store.snapBoundaries = [{
-        left: freeport.width + x,
-        top: freeport.height + y,
-        right: freeport.width + x,
-        bottom: freeport.height + y
+        left: item.width + x,
+        top: item.height + y,
+        right: item.width + x,
+        bottom: item.height + y
       }]
-      store.dragItem('freeport', { x: 15, y: 15 }, SnapMode.Radial)
+      store.dragItem('item', { x: 15, y: 15 }, SnapMode.Radial)
 
-      expect(store.setSelectionPosition).toHaveBeenCalledWith({
-        id: 'freeport',
-        position: expect.objectContaining({ x, y })
-      })
+      expect(store.setSelectionPosition).toHaveBeenCalledWith(expect.objectContaining({ x, y }))
     })
   })
 
-  describe('moveSelectionPosition', () => {
+  describe('dragControlPoint', () => {
     const store = createDocumentStore('document')()
+    const position = {
+      x: 4,
+      y: 7
+    }
+    const offset = {
+      x: 1,
+      y: 2
+    }
+    const newPosition = {
+      x: position.x - offset.x,
+      y: position.y - offset.y
+    }
+    const oldPosition = {
+      x: 11,
+      y: 23
+    }
+    const controlPoint1 = createControlPoint({ position: oldPosition })
 
     beforeEach(() => {
+      stubAll(store, ['dragTarget'])
+
       store.$reset()
-
-      stubAll(store, [
-        'setSelectionPosition',
-        'commitState'
-      ])
-    })
-
-    describe('when an item is selected', () => {
-      const position: Point = { x: 7, y: 49 }
-      const delta: Point = { x: 7, y: 49 }
-      const item1 = createItem('item1', ItemType.LogicGate, { position, isSelected: true })
-
-      beforeEach(() => {
-        store.$patch({
-          items: { item1 },
-          selectedItemIds: ['item1', 'item2']
-        })
-        store.moveSelectionPosition(delta)
-      })
-
-      it('should commit the current state', () => {
-        expect(store.commitState).toHaveBeenNthCalledWith(1)
-      })
-
-      it('should move the first selected item according to the delta provided', () => {
-        expect(store.setSelectionPosition).toHaveBeenCalledWith({
-          id: 'item1',
-          position: {
-            x: item1.position.x + delta.x,
-            y: item1.position.y + delta.y
-          }
-        })
+      store.$patch({
+        connections: {
+          connection1: createConnection('connection1', 'item1', 'item2', {
+            controlPoints: [controlPoint1]
+          })
+        },
+        selectedControlPoints: {
+          connection1: new Set([0])
+        }
       })
     })
 
-    describe('when nothing is selected', () => {
-      it('should not dispatch anything', () => {
-        store.moveSelectionPosition({ x: 7, y: 49 })
+    it('should drag the control point to the given position', () => {
+      store.dragControlPoint('connection1', position, offset, 0)
 
-        expect(store.commitState).not.toHaveBeenCalled()
-        expect(store.setSelectionPosition).not.toHaveBeenCalled()
-      })
+      expect(store.dragTarget).toHaveBeenCalledWith(
+        expect.objectContaining({
+          left: newPosition.x,
+          top: newPosition.y,
+          right: newPosition.x,
+          bottom: newPosition.y
+        }),
+        oldPosition,
+        newPosition,
+        SnapMode.Outer
+      )
+    })
+
+
+    it('should not snap the control point if multiple elements are being dragged', () => {
+      store.selectedItemIds.add('item1')
+      store.dragControlPoint('connection1', position, offset, 0)
+
+      expect(store.dragTarget).toHaveBeenCalledWith(
+        expect.objectContaining({
+          left: newPosition.x,
+          top: newPosition.y,
+          right: newPosition.x,
+          bottom: newPosition.y
+        }),
+        oldPosition,
+        newPosition,
+        undefined
+      )
     })
   })
 
@@ -277,7 +322,7 @@ describe('positioning actions', () => {
       y: position.y - oldPosition.y
     }
     const item1 = createItem('item1', ItemType.LogicGate, { position: oldPosition, isSelected: true })
-    const item2 = createItem('item2', ItemType.Freeport, { groupId: 'group1', isSelected: true })
+    const item2 = createItem('item2', ItemType.InputNode, { groupId: 'group1', isSelected: true })
     const group1 = createGroup('group1', ['item1', 'item2'])
 
     beforeEach(() => {
@@ -292,38 +337,11 @@ describe('positioning actions', () => {
       ])
     })
 
-    it('should move only the freeport if it is the reference item', () => {
-      const newPosition: Point = {
-        x: 10,
-        y: 22
-      }
-
+    it('should set the position of each selected item according to the delta moved', () => {
       store.$patch({
-        selectedItemIds: ['item1', 'item2']
+        selectedItemIds: new Set(['item1', 'item2'])
       })
-      store.setSelectionPosition({
-        id: 'item2',
-        position: newPosition
-      })
-
-      expect(store.setItemPosition).toHaveBeenCalledTimes(1)
-      expect(store.setItemPosition).toHaveBeenCalledWith({
-        id: 'item2',
-        position: {
-          x: item2.position.x + newPosition.x,
-          y: item2.position.y + newPosition.y
-        }
-      })
-    })
-
-    it('should set the position of each item according to the delta moved', () => {
-      store.$patch({
-        selectedItemIds: ['item1', 'item2']
-      })
-      store.setSelectionPosition({
-        id: 'item1',
-        position
-      })
+      store.setSelectionPosition(delta)
 
       expect(store.setItemPosition).toHaveBeenCalledTimes(2)
       expect(store.setItemPosition).toHaveBeenCalledWith({
@@ -339,6 +357,35 @@ describe('positioning actions', () => {
           x: item2.position.x + delta.x,
           y: item2.position.y + delta.y
         }
+      })
+    })
+
+    it('should set the position of each selected control point according to the delta moved', () => {
+      const controlPoint1Position = { x: 6, y: 11 }
+      const controlPoint2Position = { x: 8, y: 42 }
+      const controlPoint1 = createControlPoint({ position: controlPoint1Position })
+      const controlPoint2 = createControlPoint({ position: controlPoint2Position })
+
+      store.$patch({
+        selectedControlPoints: {
+          connection1: new Set([1, 0])
+        },
+        connections: {
+          connection1: createConnection('connection1', 'item1', 'item2', {
+            controlPoints: [controlPoint1, controlPoint2]
+          })
+        }
+      })
+
+      store.setSelectionPosition(delta)
+
+      expect(controlPoint1.position).toEqual({
+        x: controlPoint1Position.x + delta.x,
+        y: controlPoint1Position.y + delta.y
+      })
+      expect(controlPoint2.position).toEqual({
+        x: controlPoint2Position.x + delta.x,
+        y: controlPoint2Position.y + delta.y
       })
     })
   })

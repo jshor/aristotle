@@ -5,22 +5,14 @@ import {
   getEndpoints,
   default as renderLayout
 } from '../wire'
-import Port from '@/types/interfaces/Port'
+import ControlPoint from '@/types/interfaces/ControlPoint'
 
 describe('Wire Layout', () => {
-  const createPort = (position: Point): Port => ({
-    id: '',
-    name: '',
-    connectedPortIds: [],
-    elementId: '',
-    value: 0,
-    isFreeport: false,
-    type: 1,
+  const createControlPoint = (position: Point): ControlPoint => ({
+    canInflect: false,
     orientation: 0,
     rotation: 0,
-    position,
-    hue: 0,
-    isMonitored: false
+    position
   })
 
   describe('renderLayout()', () => {
@@ -28,28 +20,28 @@ describe('Wire Layout', () => {
       const a: Point = { x: 20, y: 65 }
       const b: Point = { x: 30, y: 30 }
 
-      expect(renderLayout(createPort(a), createPort(b))).toMatchSnapshot()
+      expect(renderLayout(createControlPoint(a), createControlPoint(b))).toMatchSnapshot()
     })
 
     it('should render a bottom-left (a) to top-right wire (b)', () => {
       const a: Point = { x: 50, y: 30 }
       const b: Point = { x: 20, y: 65 }
 
-      expect(renderLayout(createPort(a), createPort(b))).toMatchSnapshot()
+      expect(renderLayout(createControlPoint(a), createControlPoint(b))).toMatchSnapshot()
     })
 
     it('should render a bottom-left (b) to top-right wire (a)', () => {
       const a: Point = { x: 50, y: 30 }
       const b: Point = { x: 20, y: 65 }
 
-      expect(renderLayout(createPort(a), createPort(b))).toMatchSnapshot()
+      expect(renderLayout(createControlPoint(a), createControlPoint(b))).toMatchSnapshot()
     })
 
     it('should render a top-left (b) to bottom-right wire (a)', () => {
       const a: Point = { x: 50, y: 65 }
       const b: Point = { x: 30, y: 30 }
 
-      expect(renderLayout(createPort(a), createPort(b))).toMatchSnapshot()
+      expect(renderLayout(createControlPoint(a), createControlPoint(b))).toMatchSnapshot()
     })
   })
 
@@ -124,47 +116,47 @@ describe('Wire Layout', () => {
   })
 
   describe('getPortDirection()', () => {
-    const basePort: Port = createPort({ x: 0, y: 0 })
+    const basePort = createControlPoint({ x: 0, y: 0 })
 
-    it('should set the direction to be 1 less than the addition of the port\'s orientation and rotation', () => {
+    it('should set the direction to be 1 less than the addition of the connection point\'s orientation and rotation', () => {
       const a: Point = { x: 10, y: 0 }
       const b: Point = { x: 15, y: 0 }
 
-      const port = {
+      const connectionPoint = {
         ...basePort,
         type: 1,
         orientation: 1,
         rotation: 2
       }
 
-      expect(getPortDirection(port, a, b)).toEqual(2)
+      expect(getPortDirection(connectionPoint, a, b)).toEqual(2)
     })
 
-    describe('when the port is a FreePort', () => {
+    describe('when the connection point\'s direction can be inflected', () => {
       describe('when the rotation is rotated to one of the top two quadrants', () => {
         const a: Point = { x: 10, y: 0 }
         const b: Point = { x: 15, y: 0 }
 
         it('should return 0 when the rotation is in the first quadrant', () => {
-          const port = {
+          const connectionPoint = {
             ...basePort,
             type: 2,
             orientation: 1,
             rotation: 2
           }
 
-          expect(getPortDirection(port, a, b)).toEqual(2)
+          expect(getPortDirection(connectionPoint, a, b)).toEqual(2)
         })
 
         it('should return 0 when the rotation is in the second quadrant', () => {
-          const port = {
+          const connectionPoint = {
             ...basePort,
             type: 2,
             orientation: 1,
             rotation: 0
           }
 
-          expect(getPortDirection(port, a, b)).toEqual(0)
+          expect(getPortDirection(connectionPoint, a, b)).toEqual(0)
         })
       })
 
@@ -173,25 +165,25 @@ describe('Wire Layout', () => {
         const b: Point = { x: 15, y: 0 }
 
         it('should return 0 when the rotation is in the third quadrant', () => {
-          const port = {
+          const connectionPoint = {
             ...basePort,
             type: 2,
             orientation: 2,
             rotation: 1
           }
 
-          expect(getPortDirection(port, a, b)).toEqual(2)
+          expect(getPortDirection(connectionPoint, a, b)).toEqual(2)
         })
 
         it('should return 2 when the rotation is in the fourth quadrant', () => {
-          const port = {
+          const connectionPoint = {
             ...basePort,
             type: 2,
             orientation: 3,
             rotation: 2
           }
 
-          expect(getPortDirection(port, a, b)).toEqual(0)
+          expect(getPortDirection(connectionPoint, a, b)).toEqual(0)
         })
       })
     })

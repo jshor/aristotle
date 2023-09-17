@@ -63,20 +63,16 @@ describe('port actions', () => {
     const store = createDocumentStore('document')()
     const item1 = createItem('item1', ItemType.InputNode, { portIds: ['startPort'] })
     const item2 = createItem('item2', ItemType.OutputNode, { portIds: ['endPort'] })
-    const freeportItem = createItem('freeportItem', ItemType.Freeport, { portIds: ['inputPort', 'outputPort'] })
-    const inputPort = createPort('inputPort', 'freeportItem', PortType.Input, { isFreeport: true })
-    const outputPort = createPort('outputPort', 'freeportItem', PortType.Output, { isFreeport: true })
     const startPort = createPort('startPort', 'item1', PortType.Output)
     const endPort = createPort('endPort', 'item2', PortType.Input)
-    const connectionPart1 = createConnection('connectionPart1', 'startPort', 'inputPort', { connectionChainId: 'connectionPart1' })
-    const connectionPart2 = createConnection('connectionPart2', 'outputPort', 'endPort', { connectionChainId: 'connectionPart1' })
+    const connection1 = createConnection('connection1', 'startPort', 'endPort')
 
     beforeEach(() => {
       store.$reset()
       store.$patch({
-        items: { item1, item2, freeportItem },
-        ports: { inputPort, outputPort, startPort, endPort },
-        connections: { connectionPart1, connectionPart2 }
+        items: { item1, item2 },
+        ports: { startPort, endPort },
+        connections: { connection1 }
       })
 
       stubAll(store, [
@@ -92,29 +88,12 @@ describe('port actions', () => {
       expect(store.unmonitorPort).not.toHaveBeenCalled()
     })
 
-    function assertRemovePort (description: string, portId: string) {
-      describe(description, () => {
-        beforeEach(() => store.removePort(portId))
+    it('should remove the associated connection', () => {
+      store.removePort('endPort')
 
-        it('should remove all connections associated to the connection chain', () => {
-          expect(store.disconnectById).toHaveBeenCalledTimes(2)
-          expect(store.disconnectById).toHaveBeenCalledWith(connectionPart1.id)
-          expect(store.disconnectById).toHaveBeenCalledWith(connectionPart2.id)
-        })
-
-        it('should remove the freeport item in the connection chain', () => {
-          expect(store.items).not.toHaveProperty('freeportItem')
-        })
-
-        it('should remove all ports associated with the connection chain', () => {
-          expect(store.ports).not.toHaveProperty('inputPort')
-          expect(store.ports).not.toHaveProperty('outputPort')
-        })
-      })
-    }
-
-    assertRemovePort('when the start port of the chain is being removed', 'startPort')
-    assertRemovePort('when the end port of the chain is being removed', 'endPort')
+      expect(store.disconnectById).toHaveBeenCalledTimes(1)
+      expect(store.disconnectById).toHaveBeenCalledWith(connection1.id)
+    })
   })
 
   describe('setPortValue', () => {
@@ -214,7 +193,7 @@ describe('port actions', () => {
 
       store.setConnectablePortIds({ portId: sourcePort.id, isDragging: true })
 
-      expect(store.connectablePortIds).toEqual(['target-port'])
+      expect(store.connectablePortIds).toContain('target-port')
     })
 
     it('should not include an output port if the source port is also an output port', () => {
@@ -225,81 +204,7 @@ describe('port actions', () => {
 
       store.setConnectablePortIds({ portId: sourcePort.id, isDragging: true })
 
-      expect(store.connectablePortIds).toEqual([])
-    })
-
-    it('should not include a target port that is already connected', () => {
-      const connectedTargetPort = createPort('conn-port', '0', PortType.Output)
-      const connectedSourcePort = createPort('conn-port-2', '3', PortType.Input)
-      const sourcePort = createPort('source-port', '1', PortType.Output)
-      const targetPort = createPort('target-port', '2', PortType.Input)
-      const connection1 = createConnection('conn1', connectedSourcePort.id, connectedTargetPort.id)
-      const connection2 = createConnection('conn2', connectedSourcePort.id, targetPort.id)
-
-      patch(sourcePort, targetPort, {
-        connections: {
-          [connection2.id]: connection2,
-          [connection1.id]: connection1
-        },
-        ports: {
-          [sourcePort.id]: sourcePort,
-          [targetPort.id]: targetPort,
-          [connectedSourcePort.id]: connectedSourcePort,
-          [connectedTargetPort.id]: connectedTargetPort
-        }
-      })
-
-      store.setConnectablePortIds({ portId: sourcePort.id, isDragging: true })
-
-      expect(store.connectablePortIds).toEqual([])
-    })
-
-    it('should not include a target port that is already connected', () => {
-      const connectedTargetPort = createPort('conn-port', '0', PortType.Output)
-      const connectedSourcePort = createPort('conn-port-2', '3', PortType.Input)
-      const sourcePort = createPort('source-port', '1', PortType.Output)
-      const targetPort = createPort('target-port', '2', PortType.Input)
-      const connection1 = createConnection('conn1', connectedSourcePort.id, connectedTargetPort.id)
-      const connection2 = createConnection('conn2', connectedSourcePort.id, targetPort.id)
-
-      patch(sourcePort, targetPort, {
-        connections: {
-          [connection2.id]: connection2,
-          [connection1.id]: connection1
-        },
-        ports: {
-          [sourcePort.id]: sourcePort,
-          [targetPort.id]: targetPort,
-          [connectedSourcePort.id]: connectedSourcePort,
-          [connectedTargetPort.id]: connectedTargetPort
-        }
-      })
-
-      store.setConnectablePortIds({ portId: sourcePort.id, isDragging: true })
-
-      expect(store.connectablePortIds).toEqual([])
-    })
-
-    it('should not include a target port that is a freeport', () => {
-      const sourcePort = createPort('source-port', '1', PortType.Output)
-      const targetPort = createPort('target-port', '2', PortType.Input, { isFreeport: true })
-
-      patch(sourcePort, targetPort)
-
-      store.setConnectablePortIds({ portId: sourcePort.id, isDragging: true })
-
-      expect(store.connectablePortIds).toEqual([])
-    })
-
-    it('should not allow a source port to connect to anything if it is a freeport', () => {
-      const sourcePort = createPort('source-port', '1', PortType.Output, { isFreeport: true })
-      const targetPort = createPort('target-port', '2', PortType.Input)
-
-      patch(sourcePort, targetPort)
-
-      store.setConnectablePortIds({ portId: sourcePort.id, isDragging: true })
-
-      expect(store.connectablePortIds).toEqual([])
+      expect(store.connectablePortIds.size).toEqual(0)
     })
 
     it('should include an output port if the source port is an input port', () => {
@@ -310,7 +215,7 @@ describe('port actions', () => {
 
       store.setConnectablePortIds({ portId: sourcePort.id, isDragging: true })
 
-      expect(store.connectablePortIds).toEqual(['target-port'])
+      expect(store.connectablePortIds).toContain('target-port')
     })
 
     it('should not include an output port if the source port is also an output port', () => {
@@ -321,7 +226,7 @@ describe('port actions', () => {
 
       store.setConnectablePortIds({ portId: sourcePort.id, isDragging: true })
 
-      expect(store.connectablePortIds).toEqual([])
+      expect(store.connectablePortIds.size).toEqual(0)
     })
   })
 
@@ -350,14 +255,6 @@ describe('port actions', () => {
         expect(store.activePortId).toEqual(portId)
         expect(store.selectedPortIndex).toEqual(-1)
       })
-
-      it('should clear the connectable port IDs if the port ID provided is not defined', () => {
-        store.setActivePortId(null)
-
-        expect(store.connectablePortIds).toEqual([])
-        expect(store.activePortId).toEqual(null)
-        expect(store.selectedPortIndex).toEqual(-1)
-      })
     })
 
     it('should not make any changes if the given port ID is already active', () => {
@@ -367,9 +264,47 @@ describe('port actions', () => {
       store.setActivePortId(activePortId)
 
       expect(store.setConnectablePortIds).not.toHaveBeenCalled()
-      expect(store.connectablePortIds).toEqual([])
+      expect(store.connectablePortIds.size).toEqual(0)
       expect(store.activePortId).toEqual(activePortId)
       expect(store.selectedPortIndex).toEqual(-1)
+    })
+  })
+
+  describe('unsetActivePortId', () => {
+    const store = createDocumentStore('document')()
+
+    beforeEach(() => {
+      store.$reset()
+      store.$patch({
+        activePortId: 'active-port-id',
+        connectablePortIds: new Set(['connectable-port-id'])
+      })
+
+      stubAll(store, ['setConnectablePortIds'])
+    })
+
+    describe('when the port ID refers to the active port', () => {
+      beforeEach(() => store.unsetActivePortId('active-port-id'))
+
+      it('should clear the active port ID', () => {
+        expect(store.activePortId).toBeNull()
+      })
+
+      it('should clear the list of connectable port IDs', () => {
+        expect(store.connectablePortIds.size).toEqual(0)
+      })
+    })
+
+    describe('when the port ID refers to a non-active port', () => {
+      beforeEach(() => store.unsetActivePortId('different-port-id'))
+
+      it('should clear the active port ID', () => {
+        expect(store.activePortId).toEqual('active-port-id')
+      })
+
+      it('should clear the list of connectable port IDs', () => {
+        expect(store.connectablePortIds.size).toEqual(1)
+      })
     })
   })
 

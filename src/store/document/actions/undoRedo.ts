@@ -91,14 +91,15 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
    */
   function getExcludedMemberIds (a: Record<string, BaseItem>, b: Record<string, BaseItem>) {
     const aIds = Object.keys(a)
-    const bIds = Object.keys(b)
+    const bIds = new Set(Object.keys(b))
 
-    return aIds.filter(id => !bIds.includes(id))
+    return aIds.filter(id => !bIds.has(id))
   }
 
   // find all items and connections in current this that are not in the applied this and remove them from the circuit
   const removedItems = getExcludedMemberIds(this.items, items)
   const removedConnections = getExcludedMemberIds(this.connections, connections)
+  const removedGroups = getExcludedMemberIds(this.groups, groups)
 
   // add any new items from the the applied this to the circuit
   const addedItems = getExcludedMemberIds(items, this.items)
@@ -106,14 +107,19 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
 
   removedConnections.forEach(id => this.disconnectById(id))
   removedItems.forEach(id => this.removeElement(id))
+  removedGroups.forEach(id => delete this.groups[id])
 
   Object
     .keys(ports)
     .forEach(id => {
-      this.ports[id] = {
-        ...ports[id],
-        value: this.ports[id]?.value,
-        wave: this.ports[id]?.wave
+      if (this.ports[id]) {
+        delete ports[id].wave
+
+        this.ports[id] = {
+          ...this.ports[id],
+          ...ports[id],
+          value: this.ports[id].value
+        }
       }
     })
 
@@ -123,9 +129,10 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
       if (this.items[id]) {
         this.items[id] = {
           ...items[id],
-          clock: items[id].clock ? ClockPulse.deserialize(items[id]?.clock) : null
+          clock: this.items[id].clock
         }
         this.setItemBoundingBox(id)
+        this.setItemSelectionState(id, items[id].isSelected)
       }
     })
 
@@ -134,18 +141,30 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
       item: items[id],
       ports
     })
+    this.setItemSelectionState(id, items[id].isSelected)
   })
+
+  addedConnections.forEach(id => this.connect(connections[id]))
+
+  Object
+    .keys(connections)
+    .forEach(id => {
+      this.connections[id] = {
+        ...this.connections[id],
+        ...connections[id]
+      }
+      this.setConnectionSelectionState(id, connections[id].isSelected)
+    })
 
   Object
     .keys(groups)
     .forEach(id => {
-      this.groups[id] = groups[id]
+      if (!this.groups[id]) {
+        this.groups[id] = groups[id]
+      }
       this.setGroupBoundingBox(id)
+      this.setGroupSelectionState(id, true)
     })
-
-  requestAnimationFrame(() => {
-    addedConnections.forEach(id => this.connect(connections[id]))
-  })
 }
 
 /**

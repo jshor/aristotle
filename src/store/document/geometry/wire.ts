@@ -3,6 +3,7 @@ import rotation from './rotation'
 import Port from '@/types/interfaces/Port'
 import Point from '@/types/interfaces/Point'
 import WireGeometry from '@/types/types/WireGeometry'
+import ControlPoint from '@/types/interfaces/ControlPoint'
 
 const WIRE_PADDING = 15
 
@@ -12,7 +13,7 @@ const WIRE_PADDING = 15
  * @param source
  * @param target
  */
-export default function renderLayout (source: Port, target: Port): WireGeometry {
+export default function renderLayout (source: ControlPoint, target: ControlPoint): WireGeometry {
   const a = source.position
   const b = target.position
   const { start, end } = getEndpoints(a, b)
@@ -39,8 +40,8 @@ export function computeStraightLine (a: Point, b: Point) {
 }
 
 /**
- * Reverses the orientation of a FreePort by 180 degrees, if the dimension on an axis exceeds that of its wire's opposite end.
- * This gives the visual effect of "pinching the wire" so that weird, unnecessary curves aren't sticking out of FreePorts.
+ * Reverses the orientation of a point by 180 degrees, if the dimension on an axis exceeds that of its wire's opposite end.
+ * This gives the visual effect of "pinching the wire" so that weird, unnecessary curves aren't sticking out of wire connection points.
  *
  * @param {number} direction
  * @returns {number}
@@ -68,13 +69,13 @@ export function inflectDirection (direction: number, a: Point, b: Point): Direct
  * @param {Point} b - the target point
  * @returns {number}
  */
-export function getPortDirection (port: Port, a: Point, b: Point) {
+export function getPortDirection (port: ControlPoint, a: Point, b: Point) {
   // the true direction needs to take into account inherent orientation + its rotation
   // bezier index directions are one integer off (see computeBezier()) -- subtract by 1
   let direction = rotation.rotate(port.orientation + port.rotation - 1)
 
-  if (port.isFreeport) {
-    // inflect direction for FreePorts to give the "pinched" appearance when dragged out of range
+  if (port.canInflect) {
+    // inflect direction to give the "pinched" appearance when dragged out of range
     direction = inflectDirection(direction, a, b)
 
     if (port.rotation % 4 === 1 || port.rotation % 4 === 2) {

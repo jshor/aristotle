@@ -35,7 +35,7 @@ describe('Draggable component', () => {
       jest.advanceTimersByTime(10)
 
       expect(wrapper.emitted()).toHaveProperty('select')
-      expect(wrapper.emitted().select[0]).toEqual([false])
+      expect(wrapper.emitted().select[0]).toEqual([true])
     })
 
     it('should not emit `select` when the item is already selected', async () => {

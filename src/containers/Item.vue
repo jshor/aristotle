@@ -1,13 +1,13 @@
 <template>
   <draggable
     :style="{
-      outline: 'none',
       pointerEvents: 'none',
       zIndex
     }"
     :position="item.position"
     :is-selected="isSelected"
     :allow-touch-drag="isSelected"
+    :tabindex="0"
     @keydown.esc="onEscapeKey"
     @drag="onDrag"
     @drag-start="onDragStart"
@@ -15,8 +15,8 @@
     @dblclick="revealCustomCircuit"
     @touchhold="revealCustomCircuit"
     @drag-end="store.commitCachedState"
-    @select="k => store.selectBaseItem(id, k)"
-    @deselect="store.deselectBaseItem(id)"
+    @select="onSelect"
+    @deselect="store.setItemSelectionState(id, false)"
     ref="itemRef"
     data-test="item"
   >
@@ -26,7 +26,6 @@
       :id="id"
       :viewport="viewport"
       @update="store.setProperties"
-      @focus="store.setActivePortId(null)"
       @pan="store.panDelta"
       aria-label="Properties dialog"
       data-test="properties"
@@ -48,36 +47,37 @@
         v-for="(portList, o) in ports"
         v-slot:[o]
       >
-        <port-item
+        <port-pivot
           v-for="port in portList"
-          :tabindex="0"
-          :store="$props.store"
-          :id="port.id"
-          :key="`${port.id}_${portUpdates}`"
-          :title="port.name"
-          :type="port.type"
-          :position="port.position"
-          :orientation="port.orientation + item.rotation"
-          :hue="port.isMonitored ? port.hue : 0"
-          :rotation="item.rotation"
-          @keypress.esc="onEscapeKey"
-          @focus="store.setActivePortId(port.id)"
-          @blur="onPortBlur(port.id)"
-          @deselect="focus"
-          data-test="port-item"
-        />
+          :data-port-id="port.id"
+          :key="port.id"
+        >
+          <port-handle
+            :id="port.id"
+            :hue="port.isMonitored ? port.hue : 0"
+            :tabindex="0"
+            @keydown.esc="onEscapeKey"
+            @keydown.space="store.cycleConnectionPreviews(port.id)"
+            @keydown.enter="store.commitPreviewedConnection()"
+            @contextmenu="store.setActivePortId(port.id)"
+            @focus="store.setActivePortId(port.id)"
+            @blur="store.unsetActivePortId(port.id)"
+          />
+        </port-pivot>
       </template>
     </circuit-component>
   </draggable>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, computed, ComponentPublicInstance, watch, onMounted } from 'vue'
+import { defineComponent, PropType, ref, computed, ComponentPublicInstance, watch, onMounted, nextTick } from 'vue'
 import CircuitComponent from '@/components/item/CircuitComponent.vue'
 import Properties from '@/components/item/Properties.vue'
 import PortItem from './PortItem.vue'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
+import PortHandle from '@/components/port/PortHandle.vue'
+import PortPivot from '@/components/port/PortPivot.vue'
 import { DocumentStore } from '@/store/document'
 import Draggable from '@/components/interactive/Draggable.vue'
 import { useRootStore } from '@/store/root'
@@ -97,7 +97,9 @@ export default defineComponent({
     CircuitComponent,
     Draggable,
     PortItem,
-    Properties
+    Properties,
+    PortHandle,
+    PortPivot
   },
   props: {
     /** CSS z-index value. */
@@ -130,21 +132,15 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const store = props.store()
     const item = computed(() => store.items[props.id])
     const viewport = computed(() => store.viewport)
     const itemRef = ref<ComponentPublicInstance<HTMLElement>>()
-    const portUpdates = ref(0)
-
-    // watch for any updates that cause the ports to move their position (relative to the item)
-    watch(() => store.items[props.id]?.rotation, () => portUpdates.value++)
-    watch(() => store.items[props.id]?.properties.inputCount?.value, () => {
-      updateSize()
-      portUpdates.value++
-    })
 
     onMounted(updateSize)
+
+    watch(() => store.items[props.id]?.properties.inputCount?.value, size => size ? updateSize() : null)
 
     /** A list of all ports that belong to this item. */
     const ports = computed(() => {
@@ -166,16 +162,7 @@ export default defineComponent({
     })
 
     /* whether or not the properties trigger button should be visible */
-    const isPropertiesEnabled = computed(() => {
-      return props.isSelected && store.selectedItemIds.length === 1 && store.items[props.id].type !== ItemType.Freeport
-    })
-
-    /**
-     * Places the window focus on the item element.
-     */
-    function focus () {
-      itemRef.value!.$el.focus()
-    }
+    const isPropertiesEnabled = computed(() => props.isSelected && store.selectedItemIds.size === 1)
 
     /**
      * Opens the custom circuit (if any) in a new file tab.
@@ -212,39 +199,52 @@ export default defineComponent({
     function onEscapeKey ($event: KeyboardEvent) {
       if (document.activeElement === itemRef.value!.$el) {
         itemRef.value!.$el.blur()
-      } else {
-        $event.preventDefault()
       }
-    }
 
-    /**
-     * Port blur event handler.
-     */
-    function onPortBlur (portId: string) {
-      if (store.activePortId === portId) {
-        store.setActivePortId(null)
-      }
+      $event.preventDefault()
     }
 
     /**
      * Shows the context menu.
      * If the item is not already selected, this will select it.
      */
-    function onContextMenu () {
+    function onContextMenu ($event: MouseEvent) {
       if (!props.isSelected) {
-        store.selectBaseItem(props.id)
+        store.setItemSelectionState(props.id, true)
       }
 
-      window.api.showContextMenu(editorContextMenu(props.store))
+      emit('contextmenu', $event)
+    }
+
+    function onSelect (deselectAll?: boolean) {
+      if (deselectAll) {
+        store.deselectAll()
+      }
+
+      store.setItemSelectionState(props.id, true)
     }
 
     /**
      * Updates the store with the item's DOM size.
      */
     function updateSize () {
+      const element = itemRef.value?.$el
+
       store.setItemSize({
         id: props.id,
-        rect: itemRef.value?.$el.getBoundingClientRect()!
+        rect: element.getBoundingClientRect()!
+      })
+
+      nextTick(() => {
+        element
+          .querySelectorAll('[data-port-id]')
+          .forEach((portElement: HTMLElement) => {
+            // ports may have shifted their positions
+            const portId = portElement.dataset.portId!
+            const { x, y } = portElement.getBoundingClientRect()
+
+            store.setPortRelativePosition({ x, y }, portId)
+          })
       })
     }
 
@@ -255,12 +255,11 @@ export default defineComponent({
       ports,
       viewport,
       isPropertiesEnabled,
-      portUpdates,
       focus,
       onDrag,
       onDragStart,
       onEscapeKey,
-      onPortBlur,
+      onSelect,
       onContextMenu,
       revealCustomCircuit,
       ItemSubtype,

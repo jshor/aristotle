@@ -1,6 +1,7 @@
 import BaseItem from '@/types/interfaces/BaseItem'
 import { DocumentStoreInstance } from '..'
 import { v4 as uuid } from 'uuid'
+import Group from '@/types/interfaces/Group'
 
 /**
  * Groups together all selected items and connections.
@@ -34,11 +35,11 @@ export function group (this: DocumentStoreInstance) {
     return Math.max(item.zIndex, zIndex)
   }, 0)
 
-  const group = {
+  const group: Group = {
     id,
     itemIds: items.map(({ id }) => id),
     connectionIds: connections.map(({ id }) => id),
-    isSelected: true,
+    isSelected: false,
     boundingBox: {
       left: 0,
       top: 0,
@@ -65,6 +66,7 @@ export function group (this: DocumentStoreInstance) {
 
   this.setZIndex(zIndex)
   this.setGroupBoundingBox(id)
+  this.setGroupSelectionState(id, true)
 }
 
 /**
@@ -88,17 +90,24 @@ export function group (this: DocumentStoreInstance) {
 export function destroyGroup (this: DocumentStoreInstance, groupId: string) {
   const group = this.groups[groupId]
 
+  // this.setGroupSelectionState(groupId, false)
+
   // remove the groupId of all items in the group and select them
-  group.itemIds.forEach(id => {
-    this.items[id].groupId = null
-    this.selectedItemIds.push(id)
-  })
+  group
+    .itemIds
+    .forEach(id => {
+      this.items[id].groupId = null
+      this.setItemSelectionState(id, true)
+    })
 
   // remove the groupId of all connections in the group and select them
-  group.connectionIds.forEach(id => {
-    this.connections[id].groupId = null
-    this.selectedConnectionIds.push(id)
-  })
+  group
+    .connectionIds
+    .forEach(id => {
+      this.connections[id].groupId = null
+      this.setConnectionSelectionState(id, true)
+    })
 
+  this.selectedGroupIds.delete(groupId)
   delete this.groups[groupId]
 }

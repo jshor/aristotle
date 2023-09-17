@@ -2,7 +2,6 @@ import { setActivePinia, createPinia } from 'pinia'
 import boundaries from '../../geometry/boundaries'
 import ItemType from '@/types/enums/ItemType'
 import {
-  createConnectionChain,
   createConnection,
   createGroup,
   createItem,
@@ -67,17 +66,11 @@ describe('clipboard actions', () => {
     const port2 = createPort('port2', 'item2', PortType.Input)
     const port3 = createPort('port3', 'item3', PortType.Output)
     const port4 = createPort('port4', 'item4', PortType.Input)
-    const port5 = createPort('port5', 'item5', PortType.Input)
-    const port6 = createPort('port6', 'item6', PortType.Input)
     const item1 = createItem('item1', ItemType.InputNode, { portIds: ['port1'], groupId: 'group' })
     const item2 = createItem('item2', ItemType.OutputNode, { portIds: ['port2'], groupId: 'group' })
     const item3 = createItem('item3', ItemType.InputNode, { portIds: ['port3'] })
     const item4 = createItem('item4', ItemType.OutputNode, { portIds: ['port4'] })
-    const item5 = createItem('item5', ItemType.InputNode, { portIds: ['port5'] })
-    const item6 = createItem('item6', ItemType.OutputNode, { portIds: ['port6'] })
-    const chain2 = createConnectionChain('chain2', 'port3', 'port4', 2)
-    const chain3 = createConnectionChain('chain3', 'port1', 'port2', 3)
-    const chain4 = createConnectionChain('chain4', 'port1', 'port2', 3)
+    const connection1 = createConnection('connection1', 'port3', 'port4')
     const group = createGroup('group', ['item1', 'item2'], { isSelected: true })
 
     beforeEach(() => {
@@ -87,45 +80,27 @@ describe('clipboard actions', () => {
           item1,
           item2,
           item3,
-          item4,
-          item5,
-          item6,
-          ...chain2.items,
-          ...chain3.items,
-          ...chain4.items
+          item4
         },
         ports: {
           port1,
           port2,
           port3,
-          port4,
-          port5,
-          port6,
-          ...chain2.ports,
-          ...chain3.ports,
-          ...chain4.ports
+          port4
         },
         connections: {
-          ...chain2.connections,
-          ...chain3.connections,
-          ...chain4.connections
+          connection1
         },
         groups: {
           group
         },
-        selectedItemIds: [
+        selectedItemIds: new Set([
           'item1',
           'item2',
           'item3',
-          'chain2Freeport1',
-          ...Object.keys(chain3.items),
-          ...Object.keys(chain4.items)
-        ],
-        selectedConnectionIds: [
-          'chain2ConnectionSegment2',
-          ...Object.keys(chain3.connections),
-          ...Object.keys(chain4.connections)
-        ]
+        ]),
+        selectedConnectionIds: new Set(['connection1']),
+        selectedGroupIds: new Set(['group'])
       })
 
       jest
@@ -139,7 +114,7 @@ describe('clipboard actions', () => {
       const store = createDocumentStore('document')()
 
       store.$patch({
-        selectedItemIds: []
+        selectedItemIds: new Set<string>(),
       })
       store.copy()
 
@@ -170,24 +145,12 @@ describe('clipboard actions', () => {
       expect(clipboardData.items).not.toHaveProperty('item4')
     })
 
-    it('should copy all freeports of a chain that is connected to selected items at both ends', () => {
-      expect(clipboardData.items).toHaveProperty('chain3Freeport1')
-      expect(clipboardData.items).toHaveProperty('chain3Freeport2')
-    })
-
     it('should not copy orphaned freeports', () => {
       expect(clipboardData.items).not.toHaveProperty('chain2Freeport1')
     })
 
-    it('should copy all connections of a chain that is connected to selected items at both ends', () => {
-      expect(clipboardData.connections).toHaveProperty('chain3ConnectionSegment1')
-      expect(clipboardData.connections).toHaveProperty('chain3ConnectionSegment2')
-      expect(clipboardData.connections).toHaveProperty('chain3ConnectionSegment3')
-    })
-
-    it('should not copy connections from a chain that is not connected to selected items at both ends', () => {
-      expect(clipboardData.connections).not.toHaveProperty('chain2ConnectionSegment1')
-      expect(clipboardData.connections).not.toHaveProperty('chain2ConnectionSegment2')
+    it('should copy all connections that are connected to selected items at both ends', () => {
+      expect(clipboardData.connections).toHaveProperty('connection1')
     })
 
     it('should copy the group of selected items', () => {
@@ -196,13 +159,14 @@ describe('clipboard actions', () => {
 
     it('should beep if there are no valid items to copy', () => {
       const store = createDocumentStore('document')()
-      const freeport = createItem('freeport', ItemType.Freeport, { isSelected: true })
+      const connection = createConnection('connection', 'item1', 'item2', { isSelected: true })
 
       store.$patch({
-        items: {
-          freeport
+        connections: {
+          connection
         },
-        selectedItemIds: ['freeport']
+        selectedItemIds: new Set<string>(),
+        selectedConnectionIds: new Set(['connection'])
       })
       store.copy()
 
@@ -261,14 +225,13 @@ describe('clipboard actions', () => {
       stubAll(store, [
         'commitState',
         'applyDeserializedState',
-        'setSelectionState',
         'connect',
         'setGroupBoundingBox',
-        'setSelectionState',
+        'setItemSelectionState',
+        'setConnectionSelectionState',
         'setSelectionPosition'
       ])
     })
-
 
     it('should beep and clear the clipboard if the data is invalid', () => {
       jest.clearAllMocks()
@@ -348,19 +311,21 @@ describe('clipboard actions', () => {
         )
       })
 
-      it('should select all added items, connections, and groups', () => {
-        const ids = [
-          ...Object.keys(clipboardData.items),
-          ...Object.keys(clipboardData.connections),
-          ...Object.keys(clipboardData.groups)
-        ]
+      it('should select all added items', () => {
+        const ids = Object.keys(clipboardData.items)
 
-        expect(store.setSelectionState).toHaveBeenCalledTimes(ids.length)
+        expect(store.setItemSelectionState).toHaveBeenCalledTimes(ids.length)
         ids.forEach(id => {
-          expect(store.setSelectionState).toHaveBeenCalledWith({
-            id,
-            value: true
-          })
+          expect(store.setItemSelectionState).toHaveBeenCalledWith(id, true)
+        })
+      })
+
+      it('should select all added connections', () => {
+        const ids = Object.keys(clipboardData.connections)
+
+        expect(store.setConnectionSelectionState).toHaveBeenCalledTimes(ids.length)
+        ids.forEach(id => {
+          expect(store.setConnectionSelectionState).toHaveBeenCalledWith(id, true)
         })
       })
 
@@ -369,11 +334,8 @@ describe('clipboard actions', () => {
 
         expect(store.setSelectionPosition).toHaveBeenCalledTimes(1)
         expect(store.setSelectionPosition).toHaveBeenCalledWith({
-          id: item.id,
-          position: {
-            x: item.position.x + (clipboardData.pasteCount * 20),
-            y: item.position.y + (clipboardData.pasteCount * 20)
-          }
+          x: item.position.x + (clipboardData.pasteCount * 20),
+          y: item.position.y + (clipboardData.pasteCount * 20)
         })
       })
 

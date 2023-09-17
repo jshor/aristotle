@@ -22,5 +22,11 @@ export const ARROW_KEY_MOMENTUM_MULTIPLIER = 1.05
 /** The amount of time, in milliseconds, that the user must be touching something before emitting a `touchhold` event. */
 export const TOUCH_HOLD_TIMEOUT = 100
 
+/**
+ * The minimum CSS z-index value to apply to all items.
+ * This high number is to ensure that all items visually overlap all wires.
+ */
+export const ITEM_BASE_Z_INDEX = 1000
+
 /** The easing function for each animation frame to ease out after panning. */
 export const PANNING_EASING_FUNCTION = (x: number) => 1 - Math.pow(1 - x, 3)

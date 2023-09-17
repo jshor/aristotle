@@ -3,7 +3,8 @@
     <div
       class="port-handle__display"
       :class="{
-        'port-handle__display--active': active
+        'port-handle__display--active': active,
+        'port-handle--selected': isSelected
       }"
     >
       <div
@@ -22,6 +23,12 @@ export default defineComponent({
   props: {
     /** Sets the port handle to be visually active. */
     active: {
+      type: Boolean,
+      default: false
+    },
+
+    /** Whether or not the port is selected. */
+    isSelected: {
       type: Boolean,
       default: false
     },
@@ -64,13 +71,17 @@ export default defineComponent({
     align-items: center;
   }
 
+  &--selected {
+    filter: drop-shadow(0 0 6px var(--color-secondary));
+  }
+
   &__display {
     width: 50%;
     height: 50%;
     border-radius: 50%;
     background-color: var(--color-bg-secondary);
     border: 1px solid var(--color-secondary);
-    transition: all 0.25s;
+    transition: width 0.25s ease, height 0.25s ease;
     cursor: move;
 
     &--active {

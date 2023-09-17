@@ -12,22 +12,19 @@
       v-bind="$props"
       @signal="onChange"
     />
-    <template v-if="type !== ItemType.Freeport">
-      <div
-        v-for="(name, index) in ['left', 'top', 'right', 'bottom']"
-        :key="index"
-        :class="`circuit-component__ports--${name}`"
-        class="circuit-component__ports"
-      >
-        <slot :name="index" />
-      </div>
-    </template>
+    <div
+      v-for="(name, index) in ['left', 'top', 'right', 'bottom']"
+      :key="index"
+      :class="`circuit-component__ports--${name}`"
+      class="circuit-component__ports"
+    >
+      <slot :name="index" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import Freeport from '@/components/item/Freeport.vue'
 import InputNode from '@/components/item/elements/InputNode.vue'
 import IntegratedCircuit from '@/components/item/elements/IntegratedCircuit.vue'
 import LogicGate from '@/components/item/elements/LogicGate.vue'
@@ -39,7 +36,6 @@ import PropertySet from '@/types/interfaces/PropertySet'
 import Port from '@/types/interfaces/Port'
 
 const components = {
-  Freeport,
   InputNode,
   IntegratedCircuit,
   LogicGate,

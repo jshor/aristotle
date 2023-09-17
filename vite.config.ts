@@ -29,11 +29,13 @@ export default defineConfig(({ command }) => {
       vue(),
       electron(
         ['main', 'preload'].map(name => ({
-          entry: `src/process/${name}.ts`,
+          entry: `src/process/${name}.ts`, // TODO: rename 'process' folder to 'app'
           onstart: options => options.startup(),
           vite: {
             build: {
-              sourcemap: command === 'serve',
+              sourcemap: name === 'main'
+                ? (command === 'serve')
+                : (command === 'serve' ? 'inline' : undefined),
               minify: command === 'build',
               outDir: `dist-electron/${name}`,
               rollupOptions: {
@@ -43,7 +45,6 @@ export default defineConfig(({ command }) => {
           }
         }))
       ),
-      // Use Node.js API in the Renderer-process
       renderer()
     ],
     css: {

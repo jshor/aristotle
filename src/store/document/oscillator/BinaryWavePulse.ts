@@ -40,7 +40,7 @@ export default class BinaryWavePulse implements Pulse {
     this.initialize(signal)
   }
 
-  toString = () => null
+  // toString = () => null
 
   /**
    * Creates an initial segment based on the given signal.

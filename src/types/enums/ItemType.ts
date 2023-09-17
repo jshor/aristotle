@@ -1,7 +1,6 @@
 enum ItemType {
   Buffer = 'Buffer',
   CircuitNode = 'CircuitNode',
-  Freeport = 'Freeport',
   InputNode = 'InputNode',
   IntegratedCircuit = 'IntegratedCircuit',
   LogicGate = 'LogicGate',

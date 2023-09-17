@@ -154,7 +154,7 @@ describe('item actions', () => {
         'commitState',
         'addItem',
         'setItemBoundingBox',
-        'setSelectionState'
+        'setItemSelectionState'
       ])
     })
 
@@ -170,7 +170,7 @@ describe('item actions', () => {
           expect(store.addItem).not.toHaveBeenCalled()
           expect(store.commitState).not.toHaveBeenCalled()
           expect(store.setItemBoundingBox).not.toHaveBeenCalled()
-          expect(store.setSelectionState).not.toHaveBeenCalled()
+          expect(store.setItemSelectionState).not.toHaveBeenCalled()
         })
       }
 
@@ -199,7 +199,7 @@ describe('item actions', () => {
       })
 
       it('should set the selection state of the item', () => {
-        expect(store.setSelectionState).toHaveBeenCalledWith({ id: item.id, value: true })
+        expect(store.setItemSelectionState).toHaveBeenCalledWith(item.id, true)
       })
     })
 
@@ -223,7 +223,7 @@ describe('item actions', () => {
       })
 
       it('should set the selection state of the item', () => {
-        expect(store.setSelectionState).toHaveBeenCalledWith({ id: item.id, value: true })
+        expect(store.setItemSelectionState).toHaveBeenCalledWith(item.id, true)
       })
     })
   })
@@ -364,27 +364,6 @@ describe('item actions', () => {
       expect(store.removeVirtualNode).not.toHaveBeenCalled()
       expect(store.removePort).not.toHaveBeenCalled()
     })
-
-    it('should disconnect the freeport if the item is a freeport', () => {
-      const freeport = createItem('freeport', ItemType.Freeport, { portIds: ['port'] })
-      const port = createPort('port', 'freeport', PortType.Output)
-
-      store.$patch({
-        items: { freeport },
-        ports: { port }
-      })
-
-      stubAll(store, [
-        'disconnectFreeport',
-        'removeVirtualNode',
-        'removePort'
-      ])
-
-      store.removeElement('freeport')
-
-      expect(store.disconnectFreeport).toHaveBeenCalledTimes(1)
-      expect(store.disconnectFreeport).toHaveBeenCalledWith('freeport')
-    })
   })
 
 
@@ -434,7 +413,6 @@ describe('item actions', () => {
           type: PortType.Input,
           elementId: id,
           orientation: Direction.Left,
-          isFreeport: false,
           isMonitored: false,
           hue: 0,
           position: {

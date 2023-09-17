@@ -42,16 +42,8 @@ export default class ClockPulse implements Pulse {
   }
 
   static deserialize (data?: { name: string, interval: number, signal: number } | null) {
-    if (data instanceof ClockPulse) {
-      console.log('ALREADY CLOCK!')
-      return data
-    }
-    if (!data) {
-      console.log('NO CLOCK')
-      return
-    }
-
-    console.log('NEW CLOCK!', data.name, data.interval, data.signal)
+    if (data instanceof ClockPulse) return data
+    if (!data) return
 
     return new ClockPulse(data.name, data.interval, data.signal)
   }

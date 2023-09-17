@@ -17,7 +17,6 @@ export default function portFactory (elementId: string, id: string, orientation:
     value: 0,
     hue: 0,
     isMonitored: false,
-    isFreeport: false,
     connectedPortIds: []
   }
 }

@@ -13,7 +13,22 @@
       class="editor__grid"
       ref="grid"
     >
+      <!-- when tabbed into, this resets the selection back to the last focusable element in the editor -->
+      <div
+        :tabindex="0"
+        data-test="first"
+        @focus="recycleFocus(false)"
+      />
+
+      <!-- editor content (items, connections, groups, ports, etc.) -->
       <slot />
+
+      <!-- when tabbed into, this resets the selection back to the first focusable element in the editor -->
+      <div
+        :tabindex="0"
+        data-test="last"
+        @focus="recycleFocus(true)"
+      />
     </div>
   </resizable>
 </template>
@@ -338,6 +353,19 @@ export default defineComponent({
       })
     }
 
+    function recycleFocus (isLast = false) {
+      const elements = grid.value?.querySelectorAll('[tabindex="0"]')
+
+      if (elements) {
+        const index = isLast
+          ? 1 // first element is invisible
+          : elements.length - 2 // length of elements list (-1 for invisible last element)
+        const el = elements[index] as HTMLElement
+
+        el?.focus()
+      }
+    }
+
     return {
       selector,
       style,
@@ -347,7 +375,8 @@ export default defineComponent({
       onTouchEnd,
       onMouseDown,
       onMouseMove,
-      onMouseWheel
+      onMouseWheel,
+      recycleFocus
     }
   }
 })

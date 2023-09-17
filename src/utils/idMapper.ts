@@ -19,6 +19,10 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
         const oldId = group.id
         const newId = uuid()
 
+        group.itemIds = group.itemIds.map(oldId => idMap[oldId])
+        group.connectionIds = group.connectionIds.map(oldId => idMap[oldId])
+        group.id = newId
+
         idMap[oldId] = newId
         groups[newId] = cloneDeep(group)
 
@@ -67,16 +71,6 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
       return connections
   }
 
-  function mapConnectionChainIds (connections: Record<string, Connection>) {
-    Object
-      .values(connections)
-      .forEach(connection => {
-        connections[connection.id].connectionChainId = idMap[connections[connection.id].connectionChainId]
-      })
-
-    return connections
-  }
-
   function mapItems (items: Record<string, Item>) {
     Object
       .values(items)
@@ -100,7 +94,7 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
         delete items[oldId]
       })
 
-      return items
+    return items
   }
 
   function mapItemIds (ports: Record<string, Port>) {
@@ -114,6 +108,7 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
   }
 
   function mapPorts (ports: Record<string, Port>) {
+    // give the ports new IDs
     Object
       .values(ports)
       .forEach(port => {
@@ -127,6 +122,13 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
         delete ports[oldId]
       })
 
+    // apply those IDs to their lists of connected port IDs
+    Object
+      .values(ports)
+      .forEach(port => {
+        ports[port.id].connectedPortIds = port.connectedPortIds.map(oldId => idMap[oldId])
+      })
+
     return ports
   }
 
@@ -134,7 +136,6 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
   items = mapItems(items)
   ports = mapItemIds(ports)
   connections = mapConnections(connections)
-  connections = mapConnectionChainIds(connections)
   groups = mapGroups(groups)
 
   return {

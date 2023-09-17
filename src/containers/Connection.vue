@@ -1,46 +1,67 @@
 <template>
   <draggable
+    v-for="(port, index) in geometries"
+    :key="index"
+    :position="port.portPosition"
     :style="{ zIndex }"
-    :position="position"
-    :is-selected="isSelected"
-    :allow-touch-drag="freeportId !== null"
-    @touchhold="onDragStart"
-    @drag="onDrag"
-    @drag-end="onDragEnd"
-    @select="k => selectBaseItem(id, k)"
-    @deselect="deselectBaseItem(id)"
-    @contextmenu="onContextMenu"
+    @drag-start="p => onDragStart(p, index)"
+    @drag="(p, o) => onPortDrag(p, o, index)"
+    @drag-end="dragEnd"
+    @select="k => selectControlPoint(index, k)"
+    @deselect="setControlPointSelectionState(id, index, false)"
+    @contextmenu="$e => onControlPointContextMenu($e, index)"
   >
-    <wire
-      :source-value="sourceValue"
-      :geometry="geometry"
-      :is-selected="isSelected"
-      :is-preview="isPreview"
-      :flash="flash"
-      :label="label"
-      ref="root"
-      data-test="wire"
-    />
+    <port-handle :is-selected="port.isSelected" />
   </draggable>
+  <wire-draggable
+    v-for="(wire, index) in geometries"
+    :key="index"
+    :geometry="wire.geometry"
+    :ref="wire.ref"
+    :source-value="source.value"
+    :is-selected="isSelected"
+    :style="{
+      left: wire.wirePosition.x + 'px',
+      top: wire.wirePosition.y + 'px'
+    }"
+    @add="p => onPortAdd(p, index)"
+    @move="p => onNewPortMove(p, index)"
+    @added="dragEnd"
+    @select="selectConnection"
+    @deselect="setConnectionSelectionState(id, false)"
+    @contextmenu="onConnectionContextMenu"
+  />
+  <div
+    :style="centroidStyle"
+    :tabindex="0"
+    @focus="hasFocus = true"
+    @blur="hasFocus = false"
+  />
+  <div
+    v-if="hasFocus"
+    class="connection__bounding-box"
+    :style="boundingBox"
+  />
 </template>
 
 <script lang="ts">
-import { v4 as uuid } from 'uuid'
-import { ComponentPublicInstance, defineComponent, PropType, ref, computed, watchEffect } from 'vue'
-import Draggable from '@/components/interactive/Draggable.vue'
-import Wire from '@/components/Wire.vue'
-import { DocumentStore } from '@/store/document'
-import boundaries from '@/store/document/geometry/boundaries'
-import renderLayout from '@/store/document/geometry/wire'
-import editorContextMenu from '@/menus/context/editor'
+import { defineComponent, ref, computed, PropType, Ref, ComponentPublicInstance, StyleValue } from 'vue'
+import PortHandle from '@/components/port/PortHandle.vue'
 import Point from '@/types/interfaces/Point'
+import Draggable from '@/components/interactive/Draggable.vue'
 import WireGeometry from '@/types/types/WireGeometry'
+import renderLayout from '@/store/document/geometry/wire'
+import WireDraggable from './WireDraggable.vue'
+import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
+import ControlPoint from '@/types/interfaces/ControlPoint'
+import { DocumentStore } from '@/store/document'
 
 export default defineComponent({
   name: 'Connection',
   components: {
     Draggable,
-    Wire
+    WireDraggable,
+    PortHandle
   },
   props: {
     /** Whether or not this connection is selected. */
@@ -61,12 +82,6 @@ export default defineComponent({
       default: 0
     },
 
-    /** Whether or not this connection is just for previewing. */
-    isPreview: {
-      type: Boolean,
-      default: false
-    },
-
     /** Whether or not the item should show a flash once to the user. */
     flash: {
       type: Boolean,
@@ -79,125 +94,238 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const store = props.store()
-    const connection = ref(store.connections[props.id])
-    const { source: sourceId, target: targetId } = connection.value || {}
-    const sourceValue = computed(() => store.ports[sourceId].value)
-    const root = ref<ComponentPublicInstance<HTMLElement>>()
-    const geometry = ref<WireGeometry>()
-    const position = ref<Point>({ x: 0, y: 0 })
-    const label = ref('')
+    const connection = store.connections[props.id]
+    const source = computed(() => store.ports[connection.source])
+    const target = computed(() => store.ports[connection.target])
+    const hasFocus = ref(false)
+    let drag = { x: 0, y: 0 }
 
-    watchEffect(() => {
-      const source = store.ports[sourceId]
-      const target = store.ports[targetId]
+    const createControlPoint = (data: Partial<ControlPoint> = {}): ControlPoint => ({
+      position: {
+        x: 0,
+        y: 0
+      },
+      orientation: 0,
+      rotation: 0,
+      canInflect: true,
+      ...data
+    })
 
-      if (!source || !target) return
+    const isPreview = computed(() => store.connectionPreviewId === props.id)
 
-      const topLeft = boundaries.getExtremePoint('min', source.position, target.position)
+    const geometries = computed(() => {
+      const { controlPoints } = store.connections[props.id]
+      const geometries: {
+        geometry: WireGeometry
+        wirePosition: Point
+        portPosition: Point
+        isSelected?: boolean
+        ref: Ref<ComponentPublicInstance<typeof WireDraggable> | undefined>
+      }[] = []
+      let previousPort = createControlPoint({ ...source.value, canInflect: false })
 
-      label.value = `Connection from ${store.ports[sourceId].name} to ${store.ports[targetId].name}`
-      connection.value = store.connections[props.id]
-      geometry.value = renderLayout(source, target)
-      position.value = {
-        y: topLeft.y + geometry.value.minY,
-        x: topLeft.x + geometry.value.minX
+      for (let i = 0; i <= controlPoints.length; i++) {
+        const port = i === controlPoints.length
+          ? createControlPoint({ ...target.value, canInflect: false })
+          : controlPoints[i]
+
+        const geometry = renderLayout(previousPort, {
+          ...port,
+          orientation: i === controlPoints.length
+            ? port.orientation
+            : (port.orientation + 2) % 4
+        })
+
+        geometries.push({
+          geometry,
+          wirePosition: {
+            x: Math.min(previousPort.position.x, port.position.x) + geometry.minX,
+            y: Math.min(previousPort.position.y, port.position.y) + geometry.minY
+          },
+          portPosition: port.position,
+          isSelected: port.isSelected,
+          ref: ref<ComponentPublicInstance<typeof WireDraggable>>()
+        })
+
+        previousPort = port
+      }
+
+      return geometries
+    })
+
+    const centroidStyle = computed<StyleValue>(() => {
+      const a = source.value.position
+      const b = target.value.position
+
+      return {
+        position: 'absolute',
+        left: a.x + (b.x - a.x) / 2,
+        top: a.y + (b.y - a.y) / 2
       }
     })
 
-    const freeportId = ref<string | null>(null)
+    const boundingBox = computed(() => {
+      const g = geometries
+        .value
+        .reduce((b, { ref }) => {
+          const rect = ref.value?.[0]
+            ?.$el
+            ?.querySelector('path')
+            ?.getBoundingClientRect()
 
-    /**
-     * Mouse button down event handler.
-     *
-     * This will inform the component that the mouse is down and ready to create a new freeport, if it moves.
-     */
-    function onDragStart ({ touches }: TouchEvent) {
-      createFreeport({
-        x: touches[0].clientX,
-        y: touches[0].clientY
-      })
-    }
+          if (!rect) {
+            return b
+          }
 
-    function createFreeport (position: Point) {
-      const connection = store.connections[props.id]
-
-      if (!root.value?.$el || connection.groupId !== null) return
-
-      // directly change the DOM style (as opposed to using v-show/refs) to avoid "flickering" while VDOM updates
-      root.value.$el.style.opacity = '0'
-      freeportId.value = uuid()
-      navigator.vibrate(20)
-
-      store.createFreeport({
-        itemId: freeportId.value,
-        inputPortId: uuid(),
-        outputPortId: uuid(),
-        connectionChainId: connection.connectionChainId,
-        sourceId: connection.source,
-        targetId: connection.target,
-        value: sourceValue.value
-      })
-
-      store.setSnapBoundaries(freeportId.value)
-      store.dragItem(freeportId.value, position)
-    }
-
-    /**
-     * Mouse move event handler.
-     *
-     * If the mouse is held down on the wire, then movement in both the x and y directions
-     * will cause a new freeport to be created in that position.
-     *
-     * This will only create a new freeport once per mousedown-move cycle.
-     */
-    async function onDrag (position: Point) {
-      if (!freeportId.value) {
-        createFreeport(position)
-      } else {
-        store.dragItem(freeportId.value, position)
-      }
-    }
-
-    /**
-     * Mouse up event handler.
-     */
-    function onDragEnd () {
-      if (freeportId.value) {
-        // after dragging has finished, two new connections are established
-        // this connection is now ready to destroy itself
-        store.destroyConnection({
-          source: connection.value.source,
-          target: connection.value.target
+          return {
+            top: Math.min(b.top, rect.top),
+            left: Math.min(b.left, rect.left),
+            bottom: Math.max(b.bottom, rect.bottom),
+            right: Math.max(b.right, rect.right)
+          }
+        }, {
+          top: Infinity,
+          left: Infinity,
+          bottom: -Infinity,
+          right: -Infinity
         })
-      }
 
-      freeportId.value = null
+      const { x, y } = fromDocumentToEditorCoordinates(store.canvas, store.viewport, {
+        x: g.left,
+        y: g.top
+      }, store.zoom)
+
+      return {
+        left: `${x}px`,
+        top: `${y}px`,
+        width: `${(g.right - g.left) / store.zoom}px`,
+        height: `${(g.bottom - g.top) / store.zoom}px`
+      }
+    })
+
+    function onDragStart (position: Point, index: number) {
+      store.cacheState()
+
+      if (store.connections[props.id].groupId) {
+        // connection is in a group; keep track of the drag position
+        drag = position
+      } else {
+        // connection is not in a group; set the snap boundaries
+        store.setControlPointSnapBoundaries(props.id, geometries.value, index)
+      }
     }
 
-    function onContextMenu () {
-      if (!props.isSelected) {
-        store.selectBaseItem(props.id)
+    function onPortDrag (position: Point, offset: Point, index: number) {
+      if (store.connections[props.id].groupId) {
+        // connection is in a group; move the group
+        store.setSelectionPosition({
+          x: position.x - drag.x,
+          y: position.y - drag.y
+        })
+
+        drag = position
+      } else {
+        // connection is not in a group; move the control point
+        store.dragControlPoint(props.id, position, offset, index)
+      }
+    }
+
+    function onNewPortMove (position: Point, index: number) {
+      onPortDrag(position, { x: 0, y: 0 }, index)
+    }
+
+    function onPortAdd (position: Point, index: number) {
+      store.cacheState()
+
+      if (store.connections[props.id].groupId) {
+        // connection is in a group; keep track of the drag position
+        drag = position
+      } else {
+        // connection is not in a group; add a new control point
+        store.deselectAll()
+        store.setControlPointSnapBoundaries(props.id, geometries.value, -1)
+        store.addControlPoint(props.id, position, index)
       }
 
-      window.api.showContextMenu(editorContextMenu(props.store))
+      onNewPortMove(position, index)
+    }
+
+    function onConnectionContextMenu ($event: MouseEvent) {
+      if (!props.isSelected) {
+        store.setConnectionSelectionState(props.id, true)
+      }
+
+      emit('contextmenu', $event)
+    }
+
+    function onControlPointContextMenu ($event: MouseEvent, index: number) {
+      if (!store.connections[props.id].controlPoints[index].isSelected) {
+        store.setControlPointSelectionState(props.id, index, true)
+      }
+
+      emit('contextmenu', $event)
+    }
+
+    function selectControlPoint (index: number, deselectAll?: boolean) {
+      if (deselectAll && !store.connections[props.id].controlPoints[index].isSelected) {
+        store.deselectAll()
+      }
+
+      store.setControlPointSelectionState(props.id, index, true)
+    }
+
+    function selectConnection (deselectAll?: boolean) {
+      if (deselectAll && !props.isSelected) {
+        store.deselectAll()
+      }
+
+      store.setConnectionSelectionState(props.id, true)
+    }
+
+    function dragEnd () {
+      store.commitCachedState()
     }
 
     return {
-      root,
-      geometry,
-      position,
-      freeportId,
-      sourceValue,
-      label,
+      isPreview,
+      hasFocus,
+      source,
+      geometries,
+      centroidStyle,
+      boundingBox,
       onDragStart,
-      onDrag,
-      onDragEnd,
-      onContextMenu,
-      selectBaseItem: store.selectBaseItem,
-      deselectBaseItem: store.deselectBaseItem
+      onPortDrag,
+      onPortAdd,
+      onNewPortMove,
+      onConnectionContextMenu,
+      onControlPointContextMenu,
+      dragEnd,
+      selectControlPoint,
+      selectConnection,
+      cacheState: store.cacheState,
+      setConnectionSelectionState: store.setConnectionSelectionState,
+      setControlPointSelectionState: store.setControlPointSelectionState
     }
   }
 })
 </script>
+
+<style lang="scss">
+.connection {
+  &__bounding-box {
+    position: absolute;
+    border: 1px solid var(--color-primary);
+    border-radius: 4px;
+    pointer-events: none;
+    outline: auto 5px -webkit-focus-ring-color;
+    touch-action: none;
+    padding: 10px;
+    margin-left: -10px;
+    margin-top: -10px;
+    z-index: 8000;
+  }
+}
+</style>
+
