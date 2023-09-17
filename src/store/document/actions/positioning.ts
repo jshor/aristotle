@@ -5,6 +5,7 @@ import ItemType from '@/types/enums/ItemType'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
 import { usePreferencesStore } from '@/store/preferences'
 import Point from '@/types/interfaces/Point'
+import BoundingBox from '@/types/types/BoundingBox'
 
 /**
  * Centers all items (together as a group) to the center of the canvas.
@@ -12,7 +13,7 @@ import Point from '@/types/interfaces/Point'
  */
 export function centerAll (this: DocumentStoreInstance) {
   const { grid } = usePreferencesStore()
-  const gridSize = grid.gridSize.value as number
+  const gridSize = grid.gridSize.value
   const boundingBoxes = Object
     .values(this.items)
     .map(({ boundingBox }) => boundingBox)
@@ -35,6 +36,11 @@ export function centerAll (this: DocumentStoreInstance) {
     })
 }
 
+/**
+ * Sets the position of a port.
+ *
+ * @param position - the new position of the port, in document coordinates
+ */
 export function setPortRelativePosition (this: DocumentStoreInstance, position: Point, portId: string) {
   const port = this.ports[portId]
 
@@ -44,9 +50,7 @@ export function setPortRelativePosition (this: DocumentStoreInstance, position: 
 /**
  * Sets the position of an item.
  *
- * @param payload
- * @param payload.id - ID of the item
- * @param payload.position - new position to move to
+ * @param position - the new position of the item, in editor coordinates
  */
 export function setItemPosition (this: DocumentStoreInstance, { id, position }: { id: string, position: Point }) {
   const item = this.items[id]
@@ -71,14 +75,14 @@ export function setItemPosition (this: DocumentStoreInstance, { id, position }: 
 }
 
 /**
- * Drags selected item(s) to the given position.
+ * Drags the given target to the given position.
  * This handles snapping and grid alignment when applicable.
+ *
+ * @param originalPosition - the current position of the target, in editor coordinates
+ * @param newPosition - the new position of the target, in editor coordinates
  */
-export function dragItem (this: DocumentStoreInstance, id: string, position: Point, snapMode?: SnapMode) {
+export function dragTarget (this: DocumentStoreInstance, boundingBox: BoundingBox, originalPosition: Point, newPosition: Point, snapMode?: SnapMode) {
   const { snapping, grid } = usePreferencesStore()
-  const { x, y } = fromDocumentToEditorCoordinates(this.canvas, this.viewport, position, this.zoom)
-  const { width, height, rotation } = this.items[id]
-  const boundingBox = boundaries.getBoundingBox({ x, y }, rotation, width, height)
   const snapPreference = (() => {
     if (snapMode) return snapMode
     if (snapping.snapToGrid.value) return SnapMode.Grid
@@ -104,56 +108,51 @@ export function dragItem (this: DocumentStoreInstance, id: string, position: Poi
   )
 
   this.setSelectionPosition({
-    id,
-    position: {
-      x: x + offset.x,
-      y: y + offset.y
-    }
+    x: newPosition.x + offset.x - originalPosition.x,
+    y: newPosition.y + offset.y - originalPosition.y
   })
 }
 
 /**
- * Moves all selected items according to the delta provided.
+ * Drags selected item(s) to the given position.
+ * This handles snapping and grid alignment when applicable.
  *
- * @param delta - delta to move the items by
+ * @param position - the new position of the item, in editor coordinates
  */
-export function moveSelectionPosition (this: DocumentStoreInstance, delta: Point) {
-  const id: string | undefined = this.selectedItemIds[0]
+export function dragItem (this: DocumentStoreInstance, id: string, position: Point, snapMode?: SnapMode) {
+  const { width, height, rotation } = this.items[id]
+  const newPosition = fromDocumentToEditorCoordinates(this.canvas, this.viewport, position, this.zoom)
+  const boundingBox = boundaries.getBoundingBox(newPosition, rotation, width, height)
 
-  if (id) {
-    const item = this.items[id]
-    const position: Point = {
-      x: item.position.x + delta.x,
-      y: item.position.y + delta.y
-    }
-
-    this.commitState()
-    this.setSelectionPosition({ id, position })
-  }
+  this.dragTarget(boundingBox, this.items[id].position, newPosition, snapMode)
 }
 
 /**
- * Moves all selected items according to the delta that the given item has moved by.
+ * Drags a connnection control point to the given position.
  *
- * @param payload
- * @param payload.id - ID of the reference item moving
- * @param payload.position - new position that the reference item has moved to
+ * @param position - the new position of the control point, in editor coordinates
  */
-export function setSelectionPosition (this: DocumentStoreInstance, { id, position }: { id: string, position: Point }) {
-  const referenceItem = this.items[id]
-  const delta: Point = {
-    x: position.x - referenceItem.position.x,
-    y: position.y - referenceItem.position.y
-  }
+export function dragControlPoint (this: DocumentStoreInstance, id: string, position: Point, offset: Point, index: number) {
+  const controlPoint = this.connections[id].controlPoints[index]
+  const newPosition = fromDocumentToEditorCoordinates(this.canvas, this.viewport, {
+    x: position.x - offset.x,
+    y: position.y - offset.y
+  }, this.zoom)
+  const boundingBox = boundaries.getPointBoundary(newPosition)
+  const snapMode = this.totalSelectionCount > 1
+    ? undefined // don't snap wires when multiple things are being dragged at the same time
+    : SnapMode.Outer
+
+  this.dragTarget(boundingBox, controlPoint.position, newPosition, snapMode)
+}
+
+/**
+ * Moves all selected items and connection points by the given delta.
+ */
+export function setSelectionPosition (this: DocumentStoreInstance, delta: Point) {
   const groupIds = new Set<string>()
 
-  this.setSelectionState({ id, value: true })
-
-  if (referenceItem.type === ItemType.Freeport) {
-    // if this item is a freeport, drag only this and nothing else
-    return this.setItemPosition({ id, position })
-  }
-
+  // move all selected items
   this
     .selectedItemIds
     .forEach((itemId: string) => {
@@ -168,6 +167,24 @@ export function setSelectionPosition (this: DocumentStoreInstance, { id, positio
       }
 
       this.setItemPosition({ id: itemId, position })
+    })
+
+  // move the positions of all selected connection control points
+  Object
+    .keys(this.selectedControlPoints)
+    .forEach(id => {
+      const connection = this.connections[id]
+
+      this
+        .selectedControlPoints[id]
+        .forEach(index => {
+          const controlPoint = connection.controlPoints[index]
+
+          controlPoint.position = {
+            x: controlPoint.position.x + delta.x,
+            y: controlPoint.position.y + delta.y
+          }
+        })
     })
 
   groupIds.forEach(this.setGroupBoundingBox)

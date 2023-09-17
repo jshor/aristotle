@@ -93,7 +93,7 @@ export const useRootStore = defineStore({
 
           store.insertItemAtPosition({ item: idMappedIcItem })
           store.setItemBoundingBox(idMappedIcItem.id)
-          store.setSelectionState({ id: idMappedIcItem.id, value: true })
+          store.setItemSelectionState(idMappedIcItem.id, true)
 
         } catch (e) {
           window.api.showMessageBox({ message: 'That\'s okay.' })

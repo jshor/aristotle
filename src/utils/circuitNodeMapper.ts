@@ -37,7 +37,6 @@ function getCircuitNode ({ id, type, subtype }: Item, inputIds: string[]): Circu
     case ItemType.LogicGate:
       return getLogicGateNode(subtype, id, inputIds)
     case ItemType.Buffer:
-    case ItemType.Freeport:
       return new Buffer(id, inputIds)
     default:
       return new OutputNode(id, inputIds) // TODO: use generic CircuitNode instead?

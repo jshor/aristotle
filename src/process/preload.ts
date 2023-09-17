@@ -5,23 +5,28 @@ import fs from 'fs'
 import os from 'os'
 
 const defaultPath = path.resolve(app.getPath('desktop'))
+const cursorPosition = { x: 0, y: 0 }
+
+window.addEventListener('contextmenu', (e) => {
+  cursorPosition.x = e.x
+  cursorPosition.y = e.y
+}, false)
+
+function addInspectElementItem (menuItems: MenuItemConstructorOptions[]) {
+  return menuItems.concat({
+    label: 'Inspect Element',
+    click: () => {
+      getCurrentWindow()
+        .webContents
+        .inspectElement(cursorPosition.x, cursorPosition.y)
+    }
+  })
+}
 
 export const api: typeof window.api = {
   showContextMenu (menuItems: MenuItemConstructorOptions[]) {
-    const point = screen.getCursorScreenPoint()
-
-    // TODO: put this in a wrapper for dev mode only (not production)
-    menuItems.push({
-      label: 'Inspect Element',
-      click: () => {
-        getCurrentWindow()
-          .webContents
-          .inspectElement(point.x, point.y)
-      }
-    })
-
     Menu
-      .buildFromTemplate(menuItems)
+      .buildFromTemplate(addInspectElementItem(menuItems))
       .popup()
   },
   setApplicationMenu (menuItems: MenuItemConstructorOptions[]) {

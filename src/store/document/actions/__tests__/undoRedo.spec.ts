@@ -11,6 +11,9 @@ import {
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
+import BinaryWavePulse from '../../oscillator/BinaryWavePulse'
+import LogicValue from '@/types/enums/LogicValue'
+import ClockPulse from '../../oscillator/ClockPulse'
 
 setActivePinia(createPinia())
 
@@ -163,10 +166,18 @@ describe('undo/redo actions', () => {
   describe('applyDeserializedState', () => {
     const store = createDocumentStore('document')()
 
+    const item1 = createItem('item1', ItemType.InputNode, {
+      portIds: ['port1'],
+      clock: new ClockPulse('item1', 1000, LogicValue.TRUE)
+    })
     const addedItem1 = createItem('addedItem1', ItemType.InputNode)
     const addedItem2 = createItem('addedItem2', ItemType.InputNode)
     const addedIc = createItem('addedIc', ItemType.IntegratedCircuit, {
       integratedCircuit: createIntegratedCircuit()
+    })
+
+    const port1 = createPort('port1', 'item1', PortType.Output, {
+      wave: new BinaryWavePulse('port1', 'port1', LogicValue.TRUE, 255)
     })
     const addedPort1 = createPort('addedPort1', 'addedItem1', PortType.Output)
     const addedPort2 = createPort('addedPort2', 'addedItem2', PortType.Input)
@@ -178,14 +189,15 @@ describe('undo/redo actions', () => {
     const removedPort1 = createPort('removedPort1', 'removedItem1', PortType.Output)
     const removedPort2 = createPort('removedPort2', 'removedItem2', PortType.Input)
     const removedConnection = createConnection('removedConnection', 'removedPort1', 'removedPort2')
+    const removedGroup = createGroup('removedGroup', [removedItem1.id, removedItem2.id])
 
     beforeEach(() => {
       store.$reset()
       store.$patch({
-        items: { removedItem1, removedItem2 },
-        ports: { removedPort1, removedPort2 },
+        items: { removedItem1, removedItem2, item1 },
+        ports: { removedPort1, removedPort2, port1 },
         connections: { removedConnection },
-        groups: {}
+        groups: { removedGroup }
       })
 
       jest
@@ -206,8 +218,8 @@ describe('undo/redo actions', () => {
       ])
 
       store.applyDeserializedState({
-        items: { addedItem1, addedItem2, addedIc },
-        ports: { addedPort1, addedPort2 },
+        items: { addedItem1, addedItem2, addedIc, item1 },
+        ports: { addedPort1, addedPort2, port1 },
         connections: { addedConnection },
         groups: { addedGroup }
       })
@@ -215,9 +227,21 @@ describe('undo/redo actions', () => {
 
     it('should add the items from the old state that are not present in the new one', () => {
       expect(store.addItem).toHaveBeenCalledTimes(3)
-      expect(store.addItem).toHaveBeenCalledWith({ item: addedItem1, ports: { addedPort1, addedPort2 } })
-      expect(store.addItem).toHaveBeenCalledWith({ item: addedItem2, ports: { addedPort1, addedPort2 } })
-      expect(store.addItem).toHaveBeenCalledWith({ item: addedIc, ports: { addedPort1, addedPort2 } })
+      expect(store.addItem).toHaveBeenCalledWith({ item: addedItem1, ports: { addedPort1, addedPort2, port1 } })
+      expect(store.addItem).toHaveBeenCalledWith({ item: addedItem2, ports: { addedPort1, addedPort2, port1 } })
+      expect(store.addItem).toHaveBeenCalledWith({ item: addedIc, ports: { addedPort1, addedPort2, port1 } })
+    })
+
+    it('should not mutate the wave of a non-removed, non-added port', () => {
+      expect(store.ports.port1.wave).toEqual(port1.wave)
+    })
+
+    it('should not mutate the wave of a non-removed, non-added item', () => {
+      expect(store.items.item1.clock).toEqual(item1.clock)
+    })
+
+    it('should remove the group from the state if it is not present in the new one', () => {
+      expect(store.groups).not.toHaveProperty(removedGroup.id)
     })
 
     it('should remove all items that will be lost between states', () => {

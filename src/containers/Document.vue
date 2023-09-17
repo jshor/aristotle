@@ -8,7 +8,7 @@
     :style="{
       '--color-on': colors.onColor.value,
       '--color-off': colors.offColor.value,
-      '--color-hi-i': colors.unknownColor.value
+      '--color-hi-z': colors.unknownColor.value
     }"
     @pan="store.panDelta"
     @zoom="store.setZoom"
@@ -22,47 +22,37 @@
       ref="selector"
     />
 
-    <!-- when tabbed into, this resets the selection back to the last item -->
-    <div
-      :tabindex="0"
-      @focus="store.recycleSelection(false)"
-    />
-
     <template
       v-if="store.hasLoaded"
       v-for="baseItem in store.baseItems"
     >
       <item
         v-if="'type' in baseItem"
-        :tabindex="0"
         :store="storeDefinition"
         :id="baseItem.id"
         :key="baseItem.id"
         :is-selected="baseItem.isSelected"
         :flash="flash"
-        :z-index="baseItem.zIndex + (baseItem.type !== 'Freeport' ? 2000 : 1000)"
-        @contextmenu="onContextMenu"
+        :z-index="baseItem.zIndex + ITEM_BASE_Z_INDEX"
       />
-      <!-- Note: z-index of items will be offset by +1000 to ensure it always overlaps wires -->
+      <!-- Note: z-index of items will be offset by ITEM_BASE_Z_INDEX to ensure they overlap wires -->
 
       <connection
         v-else
-        :tabindex="0"
         :store="storeDefinition"
         :id="baseItem.id"
         :key="`c${baseItem.id}`"
         :is-selected="baseItem.isSelected"
-        :is-preview="store.connectionPreviewId === baseItem.id"
         :flash="flash"
         :z-index="baseItem.zIndex"
-        @contextmenu="onContextMenu"
       />
     </template>
 
-    <!-- when tabbed into, this resets the selection back to the first item -->
-    <div
-      :tabindex="0"
-      @focus="store.recycleSelection(true)"
+    <port-item
+      v-for="(port, id) in store.ports"
+      :key="id"
+      :port="port"
+      :store="storeDefinition"
     />
 
     <group
@@ -81,6 +71,7 @@
 import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, watchEffect, computed } from 'vue'
 import Connection from './Connection.vue'
 import Item from './Item.vue'
+import PortItem from './PortItem.vue'
 import Editor from '@/components/editor/Editor.vue'
 import Selector from '@/components/editor/Selector.vue'
 import Group from '@/components/Group.vue'
@@ -91,7 +82,7 @@ import { DocumentStore } from '@/store/document'
 import { useRootStore } from '@/store/root'
 import { storeToRefs } from 'pinia'
 import { usePreferencesStore } from '@/store/preferences'
-import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING } from '@/constants'
+import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING, ITEM_BASE_Z_INDEX } from '@/constants'
 import BoundingBox from '@/types/types/BoundingBox'
 
 export default defineComponent({
@@ -101,7 +92,8 @@ export default defineComponent({
     Editor,
     Selector,
     Connection,
-    Item
+    Item,
+    PortItem
   },
   props: {
     store: {
@@ -117,7 +109,7 @@ export default defineComponent({
     const updates = ref(0)
     const { colors } = storeToRefs(preferencesStore)
     const flash = computed(() => store.isDebugging && store.isCircuitEvaluated)
-    const gridSize = computed(() => preferencesStore.grid.showGrid.value ? preferencesStore.grid.gridSize.value as number : 0)
+    const gridSize = computed(() => preferencesStore.grid.showGrid.value ? preferencesStore.grid.gridSize.value : 0)
 
     let acceleration = 1
     let requestAnimationFrameId = 0
@@ -144,14 +136,12 @@ export default defineComponent({
      * This is used for rendering the document as an image that can be printed or exported to a file.
      */
     function initiatePrint (callback: (editorElement: HTMLElement, boundingBox: BoundingBox) => Promise<void>) {
-      if (!editorRef.value) return
-
       const boundingBoxes = Object
         .values(store.items)
         .map(({ boundingBox }) => boundingBox)
       const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
 
-      callback(editorRef.value.grid, boundingBox)
+      callback(editorRef.value!.grid, boundingBox)
     }
 
     /**
@@ -206,7 +196,10 @@ export default defineComponent({
      * Resets the arrow key momentum when the key is released.
      */
     function onKeyUp () {
-      acceleration = 1
+      if (acceleration > 1) {
+        store.commitCachedState()
+        acceleration = 1
+      }
     }
 
     /**
@@ -229,7 +222,11 @@ export default defineComponent({
       if (delta) {
         const i = Math.min(acceleration, 10)
 
-        store.moveSelectionPosition({
+        if (acceleration === 1) {
+          store.cacheState()
+        }
+
+        store.setSelectionPosition({
           x: delta.x * i,
           y: delta.y * i
         })
@@ -265,6 +262,7 @@ export default defineComponent({
       gridSize,
       flash,
       storeDefinition: props.store,
+      ITEM_BASE_Z_INDEX,
       onKeyDown,
       onKeyUp,
       onContextMenu,

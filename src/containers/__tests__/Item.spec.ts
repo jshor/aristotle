@@ -32,7 +32,7 @@ describe('Item container', () => {
     store = storeDefinition()
 
     item1 = createItem('item1', ItemType.InputNode, { portIds: ['port1', 'port2'] })
-    port1 = createPort('port1', item1.id, PortType.Input)
+    port1 = createPort('port1', item1.id, PortType.Input, { isMonitored: true, hue: 12 })
     port2 = createPort('port2', item1.id, PortType.Output)
 
     store.ports = { port1, port2 }
@@ -83,21 +83,12 @@ describe('Item container', () => {
   })
 
   describe('the properties button', () => {
-    it('should be visible on a selected, non-freeport item', async () => {
-      store.selectedItemIds = ['item1']
+    it('should be visible on a selected item', async () => {
+      store.selectedItemIds = new Set(['item1'])
 
       await wrapper.setProps({ isSelected: true })
 
       expect(wrapper.findComponent({ name: 'Properties' }).exists()).toBe(true)
-    })
-
-    it('should not be visible on a freeport item', async () => {
-      store.items.item1.type = ItemType.Freeport
-      store.selectedItemIds = ['item1']
-
-      await wrapper.setProps({ isSelected: true })
-
-      expect(wrapper.findComponent({ name: 'Properties' }).exists()).toBe(false)
     })
 
     it('should not be visible on a non-selected item', async () => {
@@ -107,24 +98,10 @@ describe('Item container', () => {
     })
 
     it('should not be visible when multiple items are selected', async () => {
-      store.selectedItemIds = ['item1', 'item2']
+      store.selectedItemIds = new Set(['item1', 'item2'])
       await wrapper.setProps({ isSelected: true })
 
       expect(wrapper.findComponent({ name: 'Properties' }).exists()).toBe(false)
-    })
-  })
-
-  describe.skip('when the port is deselected', () => {
-    it('should focus the item', async () => {
-      const ref = wrapper.vm.$refs.itemRef as any
-      const spy = jest.spyOn(ref.$el, 'focus')
-
-      await wrapper
-        .findComponent({ name: 'Item' })
-        .vm
-        .$emit('deselect')
-
-      expect(spy).toHaveBeenCalled()
     })
   })
 
@@ -199,58 +176,164 @@ describe('Item container', () => {
     })
   })
 
-  describe('when a port is blurred', () => {
-    it('clear the active port ID', async () => {
-      stubAll(store, ['setActivePortId'])
+  it('should blur the element if it is focused', async () => {
+    const spy = jest.spyOn(wrapper.vm.$el, 'blur')
 
-      store.activePortId = 'port1'
+    jest
+      .spyOn(document, 'activeElement', 'get')
+      .mockReturnValue(wrapper.vm.$el)
 
-      await wrapper
-        .find('.port-pivot')
-        .trigger('blur')
+    await wrapper
+      .find('.port-handle')
+      .trigger('keydown.esc')
 
-      expect(store.setActivePortId).toHaveBeenCalledTimes(1)
-      expect(store.setActivePortId).toHaveBeenCalledWith(null)
-    })
+    await new Promise(r => setTimeout(r))
 
-    it('not change the active port ID when it is not active', async () => {
-      stubAll(store, ['setActivePortId'])
+    expect(spy).toHaveBeenCalled()
+  })
 
-      store.activePortId = 'port2'
+  it('should show the hue of the port if it is monitored', async () => {
+    const portHandle = await wrapper.findComponent({ name: 'PortHandle' })
 
-      await wrapper
-        .find('.port-pivot')
-        .trigger('blur')
+    expect(portHandle.props().hue).toEqual(port1.hue)
+  })
 
-      expect(store.setActivePortId).not.toHaveBeenCalled()
-    })
+  it('should save preview a connection from a port when the space bar is hit', async () => {
+    stubAll(store, ['cycleConnectionPreviews'])
+
+    await wrapper
+      .find('.port-handle')
+      .trigger('keydown.space')
+
+    expect(store.cycleConnectionPreviews).toHaveBeenCalledTimes(1)
+    expect(store.cycleConnectionPreviews).toHaveBeenCalledWith('port1')
+  })
+
+  it('should save the previewed connection generated on a port when the enter key is hit', async () => {
+    stubAll(store, ['commitPreviewedConnection'])
+
+    await wrapper
+      .find('.port-handle')
+      .trigger('keydown.enter')
+
+    expect(store.commitPreviewedConnection).toHaveBeenCalledTimes(1)
+  })
+
+  it('should save the previewed connection generated on a port when the enter key is hit', async () => {
+    stubAll(store, ['commitPreviewedConnection'])
+
+    await wrapper
+      .find('.port-handle')
+      .trigger('keydown.enter')
+
+    expect(store.commitPreviewedConnection).toHaveBeenCalledTimes(1)
+  })
+
+  it('should set the active port ID when its context menu is shown', async () => {
+    stubAll(store, ['setActivePortId'])
+
+    await wrapper
+      .find('.port-handle')
+      .trigger('contextmenu')
+
+    expect(store.setActivePortId).toHaveBeenCalledTimes(1)
+    expect(store.setActivePortId).toHaveBeenCalledWith('port1')
+  })
+
+  it('should set the active port ID when a port is focused', async () => {
+    stubAll(store, ['setActivePortId'])
+
+    await wrapper
+      .find('.port-handle')
+      .trigger('focus')
+
+    expect(store.setActivePortId).toHaveBeenCalledTimes(1)
+    expect(store.setActivePortId).toHaveBeenCalledWith('port1')
+  })
+
+  it('should clear the active port ID when a port is blurred', async () => {
+    stubAll(store, ['unsetActivePortId'])
+
+    store.activePortId = 'port1'
+
+    await wrapper
+      .find('.port-handle')
+      .trigger('blur')
+
+    expect(store.unsetActivePortId).toHaveBeenCalledTimes(1)
+    expect(store.unsetActivePortId).toHaveBeenCalledWith('port1')
   })
 
   describe('when the item is right-clicked', () => {
+    const $event = new MouseEvent('contextmenu')
+
+    beforeEach(() => stubAll(store, ['setItemSelectionState']))
+
     it('should select the item if not already selected', async () => {
-      stubAll(store, ['selectBaseItem'])
+      await wrapper
+        .findComponent({ name: 'Draggable' })
+        .vm
+        .$emit('contextmenu', $event)
 
-      await wrapper.trigger('contextmenu')
-
-      expect(store.selectBaseItem).toHaveBeenCalledTimes(1)
-      expect(store.selectBaseItem).toHaveBeenCalledWith('item1')
+      expect(store.setItemSelectionState).toHaveBeenCalledTimes(1)
+      expect(store.setItemSelectionState).toHaveBeenCalledWith('item1', true)
     })
 
     it('should not select the item if it is already selected', async () => {
-      stubAll(store, ['selectBaseItem'])
-
       await wrapper.setProps({ isSelected: true })
-      await wrapper.trigger('contextmenu')
+      await wrapper
+        .findComponent({ name: 'Draggable' })
+        .vm
+        .$emit('contextmenu', $event)
 
-      expect(store.selectBaseItem).not.toHaveBeenCalled()
+      expect(store.setItemSelectionState).not.toHaveBeenCalled()
     })
 
-    it('should show the context menu', async () => {
-      stubAll(window.api, ['showContextMenu'])
+    it('should emit `contextmenu`', async () => {
+      await wrapper
+        .findComponent({ name: 'Draggable' })
+        .vm
+        .$emit('contextmenu', $event)
 
-      await wrapper.trigger('contextmenu')
+      expect(wrapper.emitted()).toHaveProperty('contextmenu')
+      expect(wrapper.emitted().contextmenu[0]).toEqual([$event])
+    })
+  })
 
-      expect(window.api.showContextMenu).toHaveBeenCalledTimes(1)
+  describe('when the draggable element emits a selection gesture', () => {
+    beforeEach(() => {
+      stubAll(store, [
+        'setItemSelectionState',
+        'deselectAll'
+      ])
+    })
+
+    it('should select the item', async () => {
+      await wrapper
+        .findComponent({ name: 'Draggable' })
+        .vm
+        .$emit('select')
+
+      expect(store.setItemSelectionState).toHaveBeenCalledTimes(1)
+      expect(store.setItemSelectionState).toHaveBeenCalledWith('item1', true)
+    })
+
+    it('should deselect other elements when the draggable component indicated to do so', async () => {
+      await wrapper
+        .findComponent({ name: 'Draggable' })
+        .vm
+        .$emit('select', true)
+
+      expect(store.deselectAll).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not deselect other elements when the draggable component did not indicate to do so', async () => {
+      await wrapper
+        .findComponent({ name: 'Draggable' })
+        .vm
+        .$emit('select')
+
+      expect(store.deselectAll).not.toHaveBeenCalled()
     })
   })
 })

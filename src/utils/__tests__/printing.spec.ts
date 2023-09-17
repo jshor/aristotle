@@ -23,7 +23,7 @@ describe('Printing utility', () => {
     beforeEach(() => {
       jest
         .spyOn(window, 'addEventListener')
-        .mockImplementation((a, fn: any) => setTimeout(fn))
+        .mockImplementation((_, fn) => setTimeout(fn as Function))
       jest
         .spyOn(window, 'print')
         .mockImplementation(jest.fn())

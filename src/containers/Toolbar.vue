@@ -22,7 +22,7 @@
         <toolbar-button @click="rootStore.invokeClipboardAction('cut')" :icon="faScissors" :disabled="!documentStore.hasSelectedItems" text="Cut" />
         <toolbar-button @click="rootStore.invokeClipboardAction('copy')" :icon="faCopy" :disabled="!documentStore.hasSelectedItems" text="Copy" />
         <toolbar-button @click="rootStore.invokeClipboardAction('paste')" :disabled="!rootStore.canPaste" :icon="faPaste" text="Paste" />
-        <toolbar-button @click="documentStore.deleteSelection" :disabled="!documentStore.hasSelection" :icon="faBan" text="Delete" />
+        <toolbar-button @click="documentStore.deleteSelection" :disabled="!documentStore.canDelete" :icon="faBan" text="Delete" />
         <toolbar-separator />
         <toolbar-button @click="rootStore.launchIntegratedCircuitBuilder" :icon="faMicrochip" text="Export" />
       </div>

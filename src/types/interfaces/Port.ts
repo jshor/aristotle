@@ -1,21 +1,16 @@
 import BinaryWavePulse from '@/store/document/oscillator/BinaryWavePulse'
 import PortType from '../enums/PortType'
-import Direction from '../enums/Direction'
-import Point from './Point'
+import ControlPoint from './ControlPoint'
 
-interface Port {
+interface Port extends ControlPoint {
   id: string
   name: string
   elementId: string
   integratedCircuitItemId?: string
   virtualElementId?: string
-  position: Point
   type: PortType
-  rotation: number
-  orientation: Direction
   value: number
   hue: number
-  isFreeport: boolean
   isMonitored: boolean
   connectedPortIds: string[]
   wave?: BinaryWavePulse

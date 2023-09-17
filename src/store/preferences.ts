@@ -23,7 +23,7 @@ export const usePreferencesStore = defineStore({
         value: '#ff0000',
         description: 'High impedance (Hi-Z).'
       }
-    } as PropertySet,
+    },
     snapping: {
       snapToGrid: {
         type: 'boolean',
@@ -39,13 +39,15 @@ export const usePreferencesStore = defineStore({
         description: 'Snap elements together.',
         excludes: ['snapToGrid']
       },
+      /** The distance to the element to snap to. */
       snapTolerance: {
         type: 'number',
         label: 'Snap tolerance',
+        /** The tolerance value. */
         value: 15,
         description: 'Maximum distance from a dragging object to snap to another element.'
       }
-    } as PropertySet,
+    },
     grid: {
       showGrid: {
         type: 'boolean',
@@ -53,14 +55,16 @@ export const usePreferencesStore = defineStore({
         value: true,
         description: 'Display a grid on the canvas.'
       },
+      /** The grid size to display. */
       gridSize: {
         type: 'number',
         label: 'Grid size',
+        /** The width/height of each grid cell. */
         value: 20,
         description: 'Distance between grid lines.',
         excludes: ['snapToAlign']
       }
-    } as PropertySet,
+    },
     simulation: {
       startPaused: {
         type: 'boolean',
@@ -68,7 +72,7 @@ export const usePreferencesStore = defineStore({
         value: true,
         description: 'Start simulation paused.'
       }
-    } as PropertySet,
+    },
     experience: {
       vibration: {
         type: 'boolean',
@@ -89,7 +93,7 @@ export const usePreferencesStore = defineStore({
         label: 'Dark mode',
         value: true
       }
-    } as PropertySet
+    }
   }),
 
   actions: {
