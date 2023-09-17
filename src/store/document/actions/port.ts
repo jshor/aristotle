@@ -1,5 +1,4 @@
 import { DocumentStoreInstance } from '..'
-import getConnectionChain from '@/utils/getConnectionChain'
 import PortType from '@/types/enums/PortType'
 import BinaryWavePulse from '../oscillator/BinaryWavePulse'
 import Port from '@/types/interfaces/Port'
@@ -38,25 +37,7 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
   Object
     .values(this.connections)
     .filter(({ source, target }) => source === portId || target === portId)
-    .forEach(c => {
-      // find all segments and freeports of this connection and remove them
-      const {
-        connectionIds,
-        freeportIds
-      } = getConnectionChain(this.connections, this.ports, c.connectionChainId)
-
-      connectionIds.forEach(id => this.disconnectById(id))
-
-      freeportIds.forEach(id => {
-        // delete all freeports associated with the chain
-        this.items[id].portIds.forEach(portId => {
-          delete this.ports[portId]
-          delete this.nodes[portId]
-        })
-
-        delete this.items[id]
-      })
-    })
+    .forEach(({ id }) => this.disconnectById(id))
 
   const itemId = this.ports[portId].elementId
   const portIndex = this.items[itemId].portIds.indexOf(portId)
@@ -71,15 +52,11 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
 
 /**
  * Sets the ID of the active (i.e., 'previewed'/'enlarged') port.
- *
- * @param portId - ID of the port to activate, or null to remove it
  */
-export function setActivePortId (this: DocumentStoreInstance, portId: string | null) {
+export function setActivePortId (this: DocumentStoreInstance, portId: string) {
   if (this.activePortId !== portId) {
     if (portId) {
       this.setConnectablePortIds({ portId })
-    } else {
-      this.connectablePortIds = []
     }
 
     this.activePortId = portId
@@ -88,35 +65,32 @@ export function setActivePortId (this: DocumentStoreInstance, portId: string | n
 }
 
 /**
- * Sets the list of connectable port IDs.
- * This should be invoked whenever a user starts dragging a port.
+ * Deactivates the port having the given ID if it is active.
+ */
+export function unsetActivePortId (this: DocumentStoreInstance, portId: string) {
+  if (this.activePortId === portId) {
+    this.activePortId = null
+    this.connectablePortIds.clear()
+  }
+}
+
+/**
+ * Sets the list of port IDs that the given port is eligible to be connected to.
+ * This should be invoked whenever a user starts dragging a port or tabbed into one.
  */
 export function setConnectablePortIds (this: DocumentStoreInstance, { portId, isDragging }: { portId: string, isDragging?: boolean }) {
   const port = this.ports[portId]
 
-  if (port.isFreeport) return // freeports cannot connect to anything
-
-  // generate a list of all port IDs that have at least one connection to/from it
-  const connectedPortIds = Object
-    .values(this.connections)
-    .reduce((portIds: string[], connection: Connection) => {
-      return portIds.concat([connection.source, connection.target])
-    }, [])
-
-  if (isDragging) {
-    // if this port is being dragged, then the user intends to establish a new connection with it
-    // remove the last two ports (the two ports on opposite ends of the "preview" connection)
-    connectedPortIds.splice(-2)
-  }
-
   const filter = port.type === PortType.Output
-    ? (p: Port) => p.type === PortType.Input && !p.isFreeport && !connectedPortIds.includes(p.id) && p.elementId !== port.elementId
-    : (p: Port) => p.type === PortType.Output && !p.isFreeport && !connectedPortIds.includes(port.id) && p.elementId !== port.elementId
+    ? (p: Port) => p.type === PortType.Input && p.connectedPortIds.length === 0
+    : (p: Port) => p.type === PortType.Output && port.connectedPortIds.length === 0
 
-  this.connectablePortIds = Object
+  const connectablePortIds = Object
     .values(this.ports)
-    .filter(filter)
+    .filter(p => filter(p) && !p.connectedPortIds.includes(port.id))
     .map(({ id }) => id)
+
+  this.connectablePortIds = new Set(connectablePortIds)
 }
 
 /**

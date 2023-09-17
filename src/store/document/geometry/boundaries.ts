@@ -124,6 +124,23 @@ function hasLinearIntersection (a1: Point, a2: Point, b1: Point, b2: Point): boo
 }
 
 /**
+ * Returns true if the lines between the given connection points intersect with the given bounding box.
+ */
+function areLinesIntersectingRectangle (points: Point[], boundingBox: BoundingBox): boolean {
+  let previousPoint = points[0]
+
+  for (let i = 1; i < points.length; i++) {
+    if (isLineIntersectingRectangle(previousPoint, points[i], boundingBox)) {
+      return true
+    }
+
+    previousPoint = points[i]
+  }
+
+  return false
+}
+
+/**
  * Returns true if the overlaps with the given bounding box.
  *
  * @param a1 - first point of the line
@@ -303,25 +320,12 @@ function getCenteredScreenPoint (parentBox: BoundingBox, childBox: BoundingBox, 
   }
 }
 
-/**
- * Computes the minima or maxima between the given points.
- *
- * @param a
- * @param b
- * @param fn
- */
-function getExtremePoint (fn: 'min' | 'max', ...points: Point[]): Point {
-  const x = Math[fn](...points.map(({ x }) => x))
-  const y = Math[fn](...points.map(({ y }) => y))
-
-  return { x, y }
-}
-
 export default {
   isInNeighborhood,
   getRadialSnapOffset,
   getOuterSnapOffset,
   getGridSnapPosition,
+  areLinesIntersectingRectangle,
   isLineIntersectingRectangle,
   scaleBoundingBox,
   isOneOrTwoDimensional,
@@ -332,6 +336,5 @@ export default {
   getGroupBoundingBox,
   getBoundingBoxMidpoint,
   getCenteredScreenPoint,
-  getSnapOffset,
-  getExtremePoint
+  getSnapOffset
 }

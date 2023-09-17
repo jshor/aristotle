@@ -82,6 +82,7 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
   item.isSelected = false
 
   if (item.clock) {
+    console.log('ADDING CLOCK BACK')
     item.clock = ClockPulse.deserialize(item.clock)
     this.oscillator.add(item.clock!)
   }
@@ -132,7 +133,7 @@ export function insertItemAtPosition (this: DocumentStoreInstance, { item, ports
       }, {})
   })
   this.setItemBoundingBox(item.id)
-  this.setSelectionState({ id: item.id, value: true })
+  this.setItemSelectionState(item.id, true)
 }
 
 /**
@@ -155,12 +156,10 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
   const item = this.items[id]
 
   if (!item) return
-  if (item.type === ItemType.Freeport) {
-    this.disconnectFreeport(id)
-  }
 
   this.removeVirtualNode(item.id)
   this.oscillator.remove(item.clock!)
+  this.selectedItemIds.delete(item.id)
 
   // remove all ports associated with the item
   const ids = [...item.portIds]
@@ -201,7 +200,6 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
         type: PortType.Input,
         elementId: id,
         orientation: Direction.Left,
-        isFreeport: false,
         isMonitored: false,
         hue: 0,
         position: {

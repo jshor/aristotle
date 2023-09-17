@@ -23,15 +23,15 @@ function rotate (rotation: number, additional = 0): Direction {
  * @param direction - rotation direction (1 for CW, -1 for CCW)
  * @returns
  */
-function getGroupedItemRotatedPosition (groupBoundingBox: BoundingBox, item: Item, direction: number): Point {
+function getGroupedItemRotatedPosition (groupBoundingBox: BoundingBox, centroid: Point, width: number, height: number, direction: number): Point {
   const w = groupBoundingBox.right - groupBoundingBox.left
   const h = groupBoundingBox.bottom - groupBoundingBox.top
   const mx = groupBoundingBox.left + (w / 2)
   const my = groupBoundingBox.top + (h / 2)
-  const cx = item.position.x
-  const cy = item.position.y
-  const ax = cx + (item.width / 2)
-  const ay = cy + (item.height / 2)
+  const cx = centroid.x
+  const cy = centroid.y
+  const ax = cx + (width / 2)
+  const ay = cy + (height / 2)
   const L = Math.hypot(mx - ax, my - ay)
   const currentAngleRad = Math.atan2((ay - my), (ax - mx))
   const newAngle = (90 * direction * (Math.PI / 180)) + currentAngleRad
@@ -39,8 +39,8 @@ function getGroupedItemRotatedPosition (groupBoundingBox: BoundingBox, item: Ite
   const newAy = (L * Math.sin(newAngle)) + my
 
   return {
-    x: newAx - (item.width / 2),
-    y: newAy - (item.height / 2)
+    x: newAx - (width / 2),
+    y: newAy - (height / 2)
   }
 }
 

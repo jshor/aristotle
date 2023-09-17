@@ -177,7 +177,6 @@ export function addVirtualNode (this: DocumentStoreInstance, item: Item, ports: 
     const outputIds = item.portIds.filter(portId => ports[portId].type === PortType.Output)
     const node = circuitNodeMapper.getCircuitNode(item, inputIds)
 
-    node.forceContinue = item.type === ItemType.Freeport // freeport value changes are immaterial to the debugger, so always allow it to advance
     node.on('change', this.onVirtualNodeChange.bind(this, node, outputIds))
 
     item.portIds.forEach(portId => {
@@ -259,7 +258,7 @@ export function onVirtualNodeChange (this: DocumentStoreInstance, node: CircuitN
         if (item && port.value !== value) {
           // only accept that the circuit has changed if the value of a port that's visible on the canvas has changed
           if (!node.forceContinue) {
-            // if a node is not marked to be forceContinue, then it's either internal to an IC, or it's a freeport and its change is immaterial
+            // if a node is not marked to be forceContinue, then it's internal to an integrated circuit (forced to evaluate)
             // if the value of a material port that's visible on the canvas has changed, then the circuit has not been fully evaluated
             this.isCircuitEvaluated = false
           }

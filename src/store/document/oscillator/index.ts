@@ -173,8 +173,6 @@ export default class Oscillator {
       if (this.timeMsElapsed === 0) {
         this.broadcast()
       }
-    } else {
-      console.log('ALREADY HAVE IT')
     }
   }
 

@@ -1,12 +1,11 @@
 import LogicValue from '@/types/enums/LogicValue'
 import { DocumentStoreInstance } from '..'
 import idMapper from '@/utils/idMapper'
-import ItemType from '@/types/enums/ItemType'
-import getConnectionChain from '@/utils/getConnectionChain'
 import ClipboardData from '@/types/interfaces/ClipboardData'
 import Port from '@/types/interfaces/Port'
 import Item from '@/types/interfaces/Item'
 import Connection from '@/types/interfaces/Connection'
+import Group from '@/types/interfaces/Group'
 
 /**
  * Performs a clipboard cut operation.
@@ -27,74 +26,22 @@ export function copy (this: DocumentStoreInstance) {
   const items: Record<string, Item> = {}
   const ports: Record<string, Port> = {}
   const connections: Record<string, Connection> = {}
-  const orphanedConnectionChainIds = new Set<string>()
-  const connectedPortIds = new Set<string>()
-  const freeportIds = new Set<string>()
+  const groups: Record<string, Group> = {}
 
   this.selectedItemIds.forEach(id => {
     items[id] = this.items[id]
     items[id].portIds.forEach(portId => {
       ports[portId] = this.ports[portId]
     })
-
-    if (items[id].type === ItemType.Freeport) {
-      freeportIds.add(id)
-    }
   })
 
-  Object
-    .values(this.selectedConnectionIds)
-    .forEach(id => {
-      const connection = this.connections[id]
+  this
+    .selectedConnectionIds
+    .forEach(id => connections[id] = this.connections[id])
 
-      connections[id] = connection
-
-      if (ports[connection.source] && ports[connection.target]) {
-        // this is a valid connection (i.e., connected at both the source and target to selected items)
-        // take note that these are valid port IDs
-        connectedPortIds.add(connection.source)
-        connectedPortIds.add(connection.target)
-      } else {
-        // the connection is orphaned (i.e., not connected to any selected item at its source and/or its target)
-        // the entire chain is therefore invalid
-        orphanedConnectionChainIds.add(connection.connectionChainId)
-      }
-    })
-
-
-  // prune connections and freeports (and their ports) from orphaned connection chains
-  orphanedConnectionChainIds.forEach(chainId => {
-    const chain = getConnectionChain(connections, ports, chainId)
-
-    chain.connectionIds.forEach(id => delete connections[id])
-    chain.freeportIds.forEach(id => {
-      items[id]
-        ?.portIds
-        .forEach(portId => delete ports[portId])
-
-      freeportIds.delete(id)
-      delete items[id]
-    })
-  })
-
-  // prune any remaining freeports that are not connected to anything selected
-  freeportIds.forEach(id => {
-    const isConnected = !!items[id]
-      .portIds
-      .find(id => connectedPortIds.has(id))
-
-    if (!isConnected) {
-      delete items[id]
-    }
-  })
-
-  const groups = this
+  this
     .selectedGroupIds
-    .filter(id => id !== null)
-    .reduce((map, id) => ({
-      ...map,
-      [id!]: this.groups[id!]
-    }), {})
+    .forEach(id => groups[id] = this.groups[id])
 
   const clipboardData: ClipboardData = {
     items,
@@ -125,6 +72,7 @@ export function paste (this: DocumentStoreInstance) {
     const mapped = idMapper.mapStandardCircuitIds(parsed) as ClipboardData
 
     this.commitState()
+    this.deselectAll()
 
     // reset the ports
     Object
@@ -157,25 +105,22 @@ export function paste (this: DocumentStoreInstance) {
       }
     })
 
-    // select all pasted items
+    // select all pasted items (groups and controlPoints are automatically selected)
     Object
       .keys(mapped.items)
-      .concat(Object.keys(mapped.groups))
-      .concat(Object.keys(mapped.connections))
-      .forEach(id => this.setSelectionState({ id, value: true }))
+      .forEach(id => this.setItemSelectionState(id, true))
+
+    Object
+      .keys(mapped.connections)
+      .forEach(id => this.setConnectionSelectionState(id, true))
 
     // move the newly-pasted items 20 pixels to the right and down
-    const item = Object
-      .values(mapped.items)
-      .find(item => item.type !== ItemType.Freeport)!
+    const item = Object.values(mapped.items)[0]
 
     requestAnimationFrame(() => {
       this.setSelectionPosition({
-        id: item.id,
-        position: {
-          x: item.position.x + (parsed.pasteCount * 20), // TODO: 20 should be a constant and should be a multiple of the grid size
-          y: item.position.y + (parsed.pasteCount * 20)
-        }
+        x: parsed.pasteCount * 20, // TODO: 20 should be a constant and should be a multiple of the grid size
+        y: parsed.pasteCount * 20
       })
     })
 

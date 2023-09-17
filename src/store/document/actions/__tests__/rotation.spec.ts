@@ -2,6 +2,8 @@ import { setActivePinia, createPinia } from 'pinia'
 import PortType from '@/types/enums/PortType'
 import ItemType from '@/types/enums/ItemType'
 import {
+  createConnection,
+  createControlPoint,
   createGroup,
   createItem,
   createPort,
@@ -48,7 +50,9 @@ describe('rotation actions', () => {
         store.$patch({
           items: { item1, item2 },
           ports: { port1, port2 },
-          groups: { group1, group2 }
+          groups: { group1, group2 },
+          selectedItemIds: new Set(['item1', 'item2']),
+          selectedGroupIds: new Set(['group1'])
         })
         store.rotate(1)
       })
@@ -81,7 +85,8 @@ describe('rotation actions', () => {
 
       beforeEach(() => {
         store.$patch({
-          items: { item1 }
+          items: { item1 },
+          selectedItemIds: new Set(['item1'])
         })
 
         store.rotate(1)
@@ -94,6 +99,38 @@ describe('rotation actions', () => {
       it('should set the rotation of the item', () => {
         expect(store.items.item1.rotation).toEqual(2)
       })
+    })
+
+    it('should rotate selected control points', () => {
+      const connection = createConnection('connection1', 'item1', 'item2', {
+        controlPoints: [
+          createControlPoint({
+            position: {
+              x: 0,
+              y: 0
+            },
+            rotation: 0
+          }),
+          createControlPoint({
+            position: {
+              x: 10,
+              y: 10
+            },
+            rotation: 0
+          })
+        ]
+      })
+
+      store.$patch({
+        connections: { connection },
+        selectedControlPoints: {
+          connection: new Set([0, 1])
+        }
+      })
+      store.rotate(1)
+
+      expect(connection.controlPoints[0].rotation).toEqual(1)
+      expect(connection.controlPoints[1].rotation).toEqual(1)
     })
   })
 })

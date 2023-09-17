@@ -4,7 +4,6 @@
     :style="{
       transform: `rotate(-${rotation * 90}deg)`
     }"
-    @keydown.space="$emit('connect')"
   >
     <slot />
   </div>

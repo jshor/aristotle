@@ -6,16 +6,28 @@ import Group from '@/types/interfaces/Group'
 import IntegratedCircuit from '@/types/interfaces/IntegratedCircuit'
 import Port from '@/types/interfaces/Port'
 import Item from '@/types/interfaces/Item'
+import ControlPoint from '@/types/interfaces/ControlPoint'
 
 export const createConnection = (id: string, source: string, target: string, payload: Partial<Connection> = {}): Connection => ({
   id,
   source,
   target,
-  connectionChainId: '1',
   groupId: null,
   isSelected: false,
   zIndex: 1,
+  controlPoints: [],
   ...payload
+})
+
+export const createControlPoint = (data: Partial<ControlPoint> = {}): ControlPoint => ({
+  position: {
+    x: 0,
+    y: 0
+  },
+  orientation: 0,
+  rotation: 0,
+  canInflect: true,
+  ...data
 })
 
 export const createPort = (id: string, elementId: string, type: PortType, payload: Partial<Port> = {}): Port => ({
@@ -33,7 +45,6 @@ export const createPort = (id: string, elementId: string, type: PortType, payloa
   value: 0,
   hue: 0,
   isMonitored: false,
-  isFreeport: false,
   ...payload
 })
 
@@ -96,46 +107,6 @@ export const createGroup = (id: string, itemIds: string[] = [], payload: Partial
   isSelected: false,
   ...payload
 })
-
-export const createConnectionChain = (id: string, sourceId: string, targetId: string, segments: number) => {
-  const connections: Record<string, Connection> = {}
-  const items: Record<string, Item> = {}
-  const ports: Record<string, Port> = {}
-  const connectionChainId = `${id}ConnectionChain`
-
-  let prevSourceId = sourceId
-
-  for (let i = 1; i < segments; i++) {
-    const freeportItem = createItem(`${id}Freeport${i}`, ItemType.Freeport, {
-      portIds: [
-        `${id}FreeportInputPort${i}`,
-        `${id}FreeportOutputPort${i}`
-      ]
-    })
-    const inputPort = createPort(`${id}FreeportInputPort${i}`, `${id}FreeportItem${i}`, PortType.Input, { isFreeport: true })
-    const outputPort = createPort(`${id}FreeportOutputPort${i}`, `${id}FreeportItem${i}`, PortType.Input, { isFreeport: true })
-    const connection = createConnection(`${id}ConnectionSegment${i}`, prevSourceId, `${id}FreeportOutputPort${i}`, { connectionChainId })
-
-    items[freeportItem.id] = freeportItem
-    ports[inputPort.id] = inputPort
-    ports[outputPort.id] = outputPort
-    connections[connection.id] = connection
-
-    prevSourceId = `${id}FreeportInputPort${i}`
-  }
-
-  const lastConnection = createConnection(`${id}ConnectionSegment${segments}`, prevSourceId, targetId, { connectionChainId })
-
-  connections[lastConnection.id] = lastConnection
-
-  return {
-    connections,
-    items,
-    ports,
-    getConnection: (index: number) => connections[`${id}ConnectionSegment${index}`],
-    getFreeport: (index: number) => items[`${id}FreeportItem${index}`]
-  }
-}
 
 export const stubAll = <T extends {}>(store: T, methods: (keyof T & string)[]) => {
   methods.forEach(method => {

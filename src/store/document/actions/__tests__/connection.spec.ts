@@ -2,12 +2,14 @@ import { setActivePinia, createPinia } from 'pinia'
 import PortType from '@/types/enums/PortType'
 import {
   createConnection,
+  createControlPoint,
   createPort,
   createSerializedState,
   stubAll
 } from './__helpers__'
 import { createDocumentStore } from '../..'
 import CircuitNode from '../../circuit/CircuitNode'
+import boundaries from '../../geometry/boundaries'
 
 setActivePinia(createPinia())
 
@@ -47,9 +49,9 @@ describe('connection actions', () => {
       expect(connections).toHaveLength(1)
       expect(store.connections[connections[0]]).toEqual({
         id: expect.any(String),
+        controlPoints: [],
         source,
         target,
-        connectionChainId: expect.any(String),
         groupId: null,
         zIndex: 2,
         isSelected: false
@@ -78,25 +80,6 @@ describe('connection actions', () => {
 
       expect(store.ports[source].connectedPortIds).toEqual([target])
       expect(store.ports[target].connectedPortIds).toEqual([source])
-    })
-
-    it('should add the connection to the specified chain if its ID is provided', () => {
-      const connectionChainId = 'connection-chain-id'
-
-      store.connect({ source, target, connectionChainId })
-
-      const connections = Object.keys(store.connections)
-
-      expect(connections).toHaveLength(1)
-      expect(store.connections[connections[0]]).toEqual({
-        id: expect.any(String),
-        source,
-        target,
-        connectionChainId,
-        groupId: null,
-        zIndex: 2,
-        isSelected: false
-      })
     })
   })
 
@@ -360,7 +343,7 @@ describe('connection actions', () => {
     it('should start cycling at index 0 if an index is not defined', () => {
       store.$patch({
         activePortId: portId,
-        connectablePortIds,
+        connectablePortIds: new Set(connectablePortIds),
         selectedPortIndex: -1
       })
       store.cycleConnectionPreviews(portId)
@@ -437,6 +420,265 @@ describe('connection actions', () => {
       it('should destroy the connection', () => {
         expect(store.destroyConnectionById).toHaveBeenCalledTimes(1)
         expect(store.destroyConnectionById).toHaveBeenCalledWith(connection.id)
+      })
+    })
+  })
+
+  describe('addControlPoint', () => {
+    const store = createDocumentStore('document')()
+    const connectionId = 'connection-id'
+
+    beforeEach(() => {
+      store.$reset()
+
+      stubAll(store, ['setControlPointSelectionState'])
+    })
+
+    it('should add a control point in the given index', () => {
+      const connection = createConnection(connectionId, 'source-id', 'target-id', {
+        controlPoints: [
+          createControlPoint(),
+          createControlPoint(),
+          createControlPoint()
+        ]
+      })
+      const position = { x: 20, y: 30 }
+      const index = 2
+
+      store.$patch({
+        connections: {
+          [connectionId]: connection
+        }
+      })
+      store.addControlPoint(connection.id, position, index)
+
+      expect(store.connections[connection.id].controlPoints[index]).toEqual(expect.objectContaining({
+        position,
+        orientation: 0,
+        rotation: 0,
+        canInflect: true
+      }))
+    })
+
+    it('should select the newly-added control point', () => {
+      const connection = createConnection(connectionId, 'source-id', 'target-id')
+      const position = { x: 20, y: 30 }
+
+      store.$patch({
+        connections: {
+          [connectionId]: connection
+        }
+      })
+      store.addControlPoint(connection.id, position, 0)
+
+      expect(store.setControlPointSelectionState).toHaveBeenCalledTimes(1)
+      expect(store.setControlPointSelectionState).toHaveBeenCalledWith(connectionId, 0, true)
+    })
+  })
+
+  describe('createConnectionExperiment', () => {
+    const store = createDocumentStore('document')()
+    const sourceId = 'source-id'
+
+    beforeEach(() => {
+      store.$reset()
+      store.$patch({
+        ports: {
+          [sourceId]: createPort(sourceId, 'item-id', PortType.Output)
+        }
+      })
+
+      stubAll(store, ['setConnectionExperimentSnapBoundaries'])
+
+      store.createConnectionExperiment(sourceId)
+    })
+
+    it('should not create a new connection experiment if the source port does not exist', () => {
+      store.$reset()
+      store.createConnectionExperiment('invalid-id')
+
+      expect(store.connectionExperiment).toBeNull()
+    })
+
+    it('should apply the new connection experiment', () => {
+      expect(store.connectionExperiment).toEqual({
+        sourceId,
+        targetPosition: store.ports[sourceId].position
+      })
+    })
+
+    it('should set the snap boundaries', () => {
+      expect(store.setConnectionExperimentSnapBoundaries).toHaveBeenCalledTimes(1)
+      expect(store.setConnectionExperimentSnapBoundaries).toHaveBeenCalledWith(sourceId)
+    })
+  })
+
+  describe('updateConnectionExperiment', () => {
+    const store = createDocumentStore('document')()
+
+    beforeEach(() => store.$reset())
+
+    it('should not do anything if there is no connection experiment', () => {
+      stubAll(boundaries, [
+        'getPointBoundary',
+        'getRadialSnapOffset'
+      ])
+
+      store.updateConnectionExperiment({ x: 0, y: 0 }, { x: 0, y: 0 })
+
+      expect(boundaries.getPointBoundary).not.toHaveBeenCalled()
+      expect(boundaries.getRadialSnapOffset).not.toHaveBeenCalled()
+    })
+
+    it('should move the experimental connection to the given target position', () => {
+      const sourceId = 'source-id'
+      const position = { x: 20, y: 30 }
+      const offset = { x: 5, y: 5 }
+
+      store.$patch({
+        connectionExperiment: {
+          sourceId,
+          targetPosition: { x: 10, y: 20 }
+        }
+      })
+      store.updateConnectionExperiment(position, offset)
+
+      expect(store.connectionExperiment!.targetPosition).toEqual({
+        x: position.x - offset.x,
+        y: position.y - offset.y
+      })
+    })
+
+    it('should snap to the nearest available port', () => {
+      const sourceId = 'source-id'
+      const position = { x: 30, y: 40 }
+      const offset = { x: 0, y: 0 }
+      const snapPoisition = { x: 33, y: 44 }
+
+      store.$patch({
+        connectionExperiment: {
+          sourceId,
+          targetPosition: {
+            x: 10,
+            y: 20
+          }
+        },
+        snapBoundaries: [
+          boundaries.getPointBoundary({ x: 0, y: 0 }),
+          boundaries.getPointBoundary({ x: 10, y: 10 }),
+          boundaries.getPointBoundary(snapPoisition)
+        ]
+      })
+      store.updateConnectionExperiment(position, offset)
+
+      expect(store.connectionExperiment!.targetPosition).toEqual(snapPoisition)
+    })
+  })
+
+  describe('terminateConnectionExperiment', () => {
+    const store = createDocumentStore('document')()
+    const sourceId = 'source-id'
+    const targetId = 'target-id'
+    const source = createPort(sourceId, 'item-id', PortType.Output)
+    const target = createPort(targetId, 'item-id', PortType.Input, {
+      position: {
+        x: 11,
+        y: 21
+      }
+    })
+
+    it('should not do anything if there is no connection experiment', () => {
+      store.$reset()
+
+      stubAll(store, [
+        'cacheState',
+        'commitCachedState',
+        'connect',
+        'clearStatelessInfo'
+      ])
+
+      store.terminateConnectionExperiment()
+
+      expect(store.connect).not.toHaveBeenCalled()
+      expect(store.cacheState).not.toHaveBeenCalled()
+      expect(store.commitCachedState).not.toHaveBeenCalled()
+      expect(store.clearStatelessInfo).not.toHaveBeenCalled()
+    })
+
+    describe('when the connection experiment is in the neighborhood of a connectable port', () => {
+      beforeEach(() => {
+        store.$reset()
+        store.$patch({
+          connectionExperiment: {
+            sourceId,
+            targetPosition: { x: 10, y: 20 }
+          },
+          ports: {
+            [sourceId]: source,
+            [targetId]: target
+          },
+          connectablePortIds: new Set([targetId])
+        })
+
+        stubAll(store, [
+          'cacheState',
+          'commitCachedState',
+          'connect',
+          'clearStatelessInfo'
+        ])
+
+        store.terminateConnectionExperiment()
+      })
+
+      it('should connect the source and target ports', () => {
+        expect(store.connect).toHaveBeenCalledTimes(1)
+        expect(store.connect).toHaveBeenCalledWith({ source: sourceId, target: targetId })
+      })
+
+      it('should clear the connection experiment', () => {
+        expect(store.connectionExperiment).toBeNull()
+      })
+
+      it('should commit the state', () => {
+        expect(store.cacheState).toHaveBeenCalledTimes(1)
+        expect(store.commitCachedState).toHaveBeenCalledTimes(1)
+      })
+
+      it('should clear the stateless info', () => {
+        expect(store.clearStatelessInfo).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    describe('when the connection experiment is not near a connectable port', () => {
+      beforeEach(() => {
+        store.$reset()
+        store.$patch({
+          connectionExperiment: {
+            sourceId,
+            targetPosition: { x: 100, y: 200 }
+          },
+          ports: {
+            [targetId]: target
+          }
+        })
+
+        stubAll(store, [
+          'cacheState',
+          'commitCachedState',
+          'connect',
+          'clearStatelessInfo'
+        ])
+
+        store.terminateConnectionExperiment()
+      })
+
+      it('should not connect anything', () => {
+        expect(store.connect).not.toHaveBeenCalled()
+      })
+
+      it('should not commit the state', () => {
+        expect(store.cacheState).not.toHaveBeenCalled()
+        expect(store.commitCachedState).not.toHaveBeenCalled()
       })
     })
   })

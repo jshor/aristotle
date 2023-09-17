@@ -2,6 +2,8 @@ import { setActivePinia, createPinia } from 'pinia'
 import boundaries from '../../geometry/boundaries'
 import ItemType from '@/types/enums/ItemType'
 import {
+  createConnection,
+  createControlPoint,
   createGroup,
   createItem,
   stubAll
@@ -289,6 +291,45 @@ describe('sizing actions', () => {
       store.setGroupBoundingBox(group1.id)
 
       expect(store.groups[group1.id].boundingBox).toEqual(boundingBox)
+    })
+
+    it('should include control points in the bounding box', () => {
+      const connection1 = createConnection('connection1', 'a', 'b', {
+        controlPoints: [
+          createControlPoint({
+            position: {
+              x: 30,
+              y: 20
+            }
+          }),
+          createControlPoint({
+            position: {
+              x: 80,
+              y: 70
+            }
+          })
+        ]
+      })
+      const group = createGroup('group', [], {
+        connectionIds: ['connection1']
+      })
+
+      store.$patch({
+        connections: { connection1 },
+        groups: { group },
+        selectedControlPoints: {
+          connection1: new Set([0, 1])
+        }
+      })
+
+      store.setGroupBoundingBox(group.id)
+
+      expect(store.groups[group.id].boundingBox).toEqual({
+        left: 30,
+        top: 20,
+        right: 80,
+        bottom: 70
+      })
     })
   })
 })

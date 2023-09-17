@@ -1,21 +1,7 @@
 import BoundingBox from '@/types/types/BoundingBox'
 import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
-import getConnectionChain from '@/utils/getConnectionChain'
-
-export function deselectBaseItem (this: DocumentStoreInstance, id: string) {
-  this.setSelectionState({ id, value: false })
-}
-
-export function selectBaseItem (this: DocumentStoreInstance, id: string, keepSelection: boolean = false) {
-  if (this.items[id]?.isSelected || this.connections[id]?.isSelected || this.groups[id]?.isSelected) return
-
-  if (!keepSelection) {
-    this.deselectAll()
-  }
-
-  this.setSelectionState({ id, value: true })
-}
+import BaseItem from '@/types/interfaces/BaseItem'
 
 /**
  * Selects all items and connections.
@@ -24,13 +10,11 @@ export function selectAll (this: DocumentStoreInstance) {
   this.clearStatelessInfo()
 
   for (let id in this.connections) {
-    this.connections[id].isSelected = true
-    this.selectedConnectionIds.push(id)
+    this.setConnectionSelectionState(id, true)
   }
 
   for (let id in this.items) {
-    this.items[id].isSelected = true
-    this.selectedItemIds.push(id)
+    this.setItemSelectionState(id, true)
   }
 }
 
@@ -40,16 +24,34 @@ export function selectAll (this: DocumentStoreInstance) {
 export function deselectAll (this: DocumentStoreInstance) {
   this.clearStatelessInfo()
 
-  for (let id in this.connections) {
-    this.connections[id].isSelected = false
-    this.selectedConnectionIds = []
+  this.selectedConnectionIds.forEach(id => {
+    if (this.connections[id]) {
+      this.connections[id].isSelected = false
+    }
+  })
+
+  for (const id in this.selectedControlPoints) {
+    this.selectedControlPoints[id]?.forEach(index => {
+      if (this.connections[id]?.controlPoints?.[index]) {
+        this.connections[id].controlPoints[index].isSelected = false
+      }
+    })
   }
 
-  for (let id in this.items) {
-    this.items[id].isSelected = false
-    this.selectedItemIds.push(id)
-    this.selectedItemIds = []
+  this.selectedItemIds.forEach(id => {
+    if (this.items[id]) {
+      this.items[id].isSelected = false
+    }
+  })
+
+  for (const id in this.groups) {
+    this.groups[id].isSelected = false
   }
+
+  this.selectedControlPoints = {}
+  this.selectedGroupIds.clear()
+  this.selectedConnectionIds.clear()
+  this.selectedItemIds.clear()
 }
 
 /**
@@ -60,45 +62,124 @@ export function deselectAll (this: DocumentStoreInstance) {
 export function createSelection (this: DocumentStoreInstance, selection: BoundingBox) {
   if (!boundaries.isOneOrTwoDimensional(selection)) return // omit selection lines or points
 
-  const itemIds = Object
+  const portIds = new Set<string>()
+
+  // add all items and their ports that overlap within the selection rectange
+  Object
     .keys(this.items)
-    .filter(id => boundaries.hasIntersection(selection, this.items[id].boundingBox))
-  const connectionIds = Object
-    .keys(this.connections)
-    .filter(id => {
-      const connection = this.connections[id]
-      const source = this.ports[connection.source]
-      const target = this.ports[connection.target]
-
-      return boundaries.isLineIntersectingRectangle(source.position, target.position, selection)
-    })
-
-  itemIds
-    .concat(connectionIds)
     .forEach(id => {
-      this.updateSelectionList({ id, isSelected: true })
+      if (boundaries.hasIntersection(selection, this.items[id].boundingBox)) {
+        this.setItemSelectionState(id, true)
+        this
+          .items[id]
+          .portIds
+          .forEach(portId => portIds.add(portId))
+      }
     })
 
-  this.selectBaseItemConnections(itemIds)
+  Object
+    .keys(this.connections)
+    .forEach(id => {
+      const c = this.connections[id]
+      const source = this.ports[c.source]
+      const target = this.ports[c.target]
+      const points = [source, ...c.controlPoints, target]
+
+      // connection has at least one segment that overlaps the selection rectangle
+      const hasIntersection = boundaries.areLinesIntersectingRectangle(points.map(p => p.position), selection)
+
+      // connection is connected to selected items at both its source and target
+      const isConnectedToSelectedItems = portIds.has(c.source) && portIds.has(c.target)
+
+      // add the connection ID if the connection overlaps any segment within the selection rectange
+      if (hasIntersection || isConnectedToSelectedItems) {
+        this.setConnectionSelectionState(id, true)
+      }
+    })
 }
 
 /**
- * Selects all connections that are connected to any of the items in the given list.
- *
- * @param itemIds - list of items to select their connections for
+ * Sets the selection state of a control point.
  */
-export function selectBaseItemConnections (this: DocumentStoreInstance, itemIds: string[]) {
-  const portIds = itemIds.reduce((portIds: string[], itemId: string) => {
-    return portIds.concat(this.items[itemId].portIds)
-  }, [])
+export function setControlPointSelectionState (this: DocumentStoreInstance, id: string, index: number, isSelected: boolean) {
+  if (!this.connections[id]?.controlPoints) return
 
-  for (let id in this.connections) {
-    const c = this.connections[id]
+  const controlPoint = this.connections[id]?.controlPoints[index]
+  const hasSelectionChanged = controlPoint?.isSelected !== isSelected
 
-    if (portIds.includes(c.source) && portIds.includes(c.target)) {
-      this.updateSelectionList({ id, isSelected: true })
-    }
+  controlPoint.isSelected = isSelected
+
+  if (this.selectedControlPoints[id]) {
+    isSelected
+      ? this.selectedControlPoints[id].add(index)
+      : this.selectedControlPoints[id].delete(index)
+  } else if (isSelected) {
+    this.selectedControlPoints[id] = new Set([index])
   }
+
+  if (this.selectedControlPoints[id]?.size === 0) {
+    delete this.selectedControlPoints[id]
+  }
+
+  if (hasSelectionChanged) {
+    this.setGroupSelectionState(this.connections[id].groupId, isSelected)
+  }
+}
+
+/**
+ * Sets the selection state of a connection.
+ */
+export function setConnectionSelectionState (this: DocumentStoreInstance, id: string, isSelected: boolean) {
+  if (!this.connections[id]) return
+
+  this.connections[id].isSelected = isSelected
+  this.connections[id].controlPoints.forEach((_, index) => this.setControlPointSelectionState(id, index, isSelected))
+
+  isSelected
+    ? this.selectedConnectionIds.add(id)
+    : this.selectedConnectionIds.delete(id)
+
+  this.setGroupSelectionState(this.connections[id].groupId, isSelected)
+}
+
+/**
+ * Sets the selection state of an item.
+ */
+export function setItemSelectionState (this: DocumentStoreInstance, id: string, isSelected: boolean) {
+  if (!this.items[id]) return
+
+  this.items[id].isSelected = isSelected
+
+  isSelected
+    ? this.selectedItemIds.add(id)
+    : this.selectedItemIds.delete(id)
+
+  this.setGroupSelectionState(this.items[id].groupId, isSelected)
+}
+
+/**
+ * Sets the selection state of a group.
+ */
+export function setGroupSelectionState (this: DocumentStoreInstance, id: string | null, isSelected: boolean) {
+  if (id === null) return
+
+  const group = this.groups[id]
+
+  if (!this.groups[id] || this.groups[id].isSelected === isSelected) return
+
+  this.groups[id].isSelected = isSelected
+
+  group
+    .connectionIds
+    .forEach(id => this.setConnectionSelectionState(id, isSelected))
+
+  group
+    .itemIds
+    .forEach(id => this.setItemSelectionState(id, isSelected))
+
+  isSelected
+    ? this.selectedGroupIds.add(id)
+    : this.selectedGroupIds.delete(id)
 }
 
 /**
@@ -109,88 +190,13 @@ export function selectBaseItemConnections (this: DocumentStoreInstance, itemIds:
  * @param payload.id - ID of the item, group, or connection to select
  * @param payload.isSelected - selection this to change to
  */
-export function updateSelectionList (this: DocumentStoreInstance, { id, isSelected }: { id: string, isSelected: boolean }) {
-  const updateSelectionList = (id: string, key: 'selectedConnectionIds' | 'selectedItemIds') => {
-    const index = this[key].findIndex((i: string) => i === id)
-
-    if (isSelected && index === -1) {
-      this[key].push(id)
-    }
-
-    if (!isSelected && index !== -1) {
-      this[key].splice(index, 1)
-    }
-  }
-
+export function setSelectionState (this: DocumentStoreInstance, id: string, isSelected: boolean) {
   if (this.items[id]) {
-    // select an individual item
-    this.items[id].isSelected = isSelected
-    updateSelectionList(id, 'selectedItemIds')
+    this.setItemSelectionState(id, isSelected)
   } else if (this.connections[id]) {
-    // select a connection (chain)
-    const { connectionChainId } = this.connections[id]
-    const {
-      connectionIds,
-      freeportIds
-    } = getConnectionChain(this.connections, this.ports, connectionChainId)
-
-    // select all connection segments that are part of this connection chain
-    connectionIds.forEach(id => {
-      this.connections[id].isSelected = isSelected
-      updateSelectionList(id, 'selectedConnectionIds')
-    })
-
-    // select all freeports that are part of this connection chain
-    freeportIds.forEach(id => {
-      this.items[id].isSelected = isSelected
-      updateSelectionList(id, 'selectedItemIds')
-    })
-  }
-}
-
-/**
- * Inverts the selection value of the element having the given ID, or forces it to the value provided.
- * If the element is a member of a group, every item in that group will be selected.
- *
- * @param payload.id - the ID of the element to toggle its selection
- * @param payload.value - new selection this value to set to
- */
-export function setSelectionState (this: DocumentStoreInstance, { id, value }: { id: string, value: boolean }) {
-  const element = this.items[id] || this.connections[id]
-  const isSelected = value
-
-  if (!element || element.isSelected === isSelected) return
-
-  if (element.groupId) {
-    // if item is part of a group, select all items in that group
-    const { itemIds, connectionIds } = this.groups[element.groupId]
-
-    itemIds
-      .concat(connectionIds)
-      .forEach(id => {
-        this.updateSelectionList({ id, isSelected })
-      })
-
-    this.updateSelectionList({ id: element.groupId, isSelected })
-  } else {
-    // otherwise, just select this one item
-    this.updateSelectionList({ id, isSelected })
-  }
-}
-
-/**
- * Places focus back to the last base item or forward to the first base item (according to z-index).
- *
- * @param {boolean} backToFirstItem - true if the next item to focus is the first item, or to the first item otherwise
- */
-export function recycleSelection (this: DocumentStoreInstance, backToFirstItem: boolean) {
-  const id = backToFirstItem
-    ? this.baseItems[0]
-    : this.baseItems.slice(-1)[0]
-
-  if (id) {
-    this.deselectAll()
-    this.setSelectionState({ id: id.id, value: true })
+    this.setConnectionSelectionState(id, isSelected)
+  } else if (this.groups[id]) {
+    this.setGroupSelectionState(id, isSelected)
   }
 }
 
@@ -198,74 +204,67 @@ export function recycleSelection (this: DocumentStoreInstance, backToFirstItem: 
  * Deletes all selected items and connections.
  */
 export function deleteSelection (this: DocumentStoreInstance) {
-  if (!this.hasSelection) return
+  if (!this.canDelete) return
 
   this.commitState()
 
-  // get a list of all ports associated to all selected items
-  const portIds = this
-    .selectedItemIds
-    .reduce((portIds, itemId) => {
-      this
-        .items[itemId]
-        .portIds
-        .forEach(portId => portIds.add(portId))
-
-      return portIds
-    }, new Set<string>())
-
-  // get all connection chain IDs that are associated to all selected items
-  const connectionChainIds = Object
+  // any connection that is connected to any selected item will become disconnected once the item is removed
+  // select all connections belonging to removed items so that they can be removed as well
+  Object
     .values(this.connections)
-    .reduce((ids, { source, target, connectionChainId }) => {
-      if (portIds.has(source) || portIds.has(target)) {
-        ids.add(connectionChainId)
-      }
-      return ids
-    }, new Set<string>())
+    .forEach(({ source, target, id }) => {
+      // returns true if the given port ID is connected to any selected item
+      const isConnected = (i: string) => this.items[this.ports[i].elementId].isSelected
 
-  // get a list of all freeports and connections associated with all applicable connection chains
-  const { freeportIds, connectionIds } = Array
-    .from(connectionChainIds)
-    .reduce((chains, chainId) => {
-      const { freeportIds, connectionIds } = getConnectionChain(this.connections, this.ports, chainId)
-
-      return {
-        freeportIds: chains.freeportIds.concat(freeportIds),
-        connectionIds: chains.connectionIds.concat(connectionIds)
+      if (isConnected(source) || isConnected(target)) {
+        this.selectedConnectionIds.add(id)
       }
-    }, {
-      freeportIds: [] as string[],
-      connectionIds: [] as string[]
     })
+
+  // remove all selected connection control points
+  // there is the possibility that the user has selected a control point without selecting the connection
+  // or any item associated to the connection
+  for (const id in this.selectedControlPoints) {
+    this.connections[id].controlPoints = Array
+      .from(this.connections[id].controlPoints)
+      .map((point, index) => {
+        // set each selected control point to null to be removed
+        return this.selectedControlPoints[id].has(index)
+          ? null!
+          : point
+      })
+      .filter(p => p !== null)
+  }
 
   // first, remove all connections that should be removed
   this
-    .selectedConnectionIds // the user-selected connections
-    .concat(connectionIds) // the connections in related connection chains
+    .selectedConnectionIds
     .forEach(id => this.disconnectById(id))
 
   // then remove the items
   this
-    .selectedItemIds // the user-selected items
-    .concat(freeportIds) // the freeports in related connection chains
+    .selectedItemIds
     .forEach(id => this.removeElement(id))
 
   // then remove the selected groups
   this
     .selectedGroupIds
-    .forEach(id => id !== null && delete this.groups[id])
+    .forEach(id => {
+      delete this.groups[id]
+      this.selectedGroupIds.delete(id)
+    })
 
   this.deselectAll()
 }
 
+/**
+ * Clears all temporary information (i.e., momentary UI interactions) from the state.
+ */
 export function clearStatelessInfo (this: DocumentStoreInstance) {
   this.unsetConnectionPreview()
-  this.connectablePortIds = []
-  this.selectedConnectionIds = []
-  this.selectedItemIds = []
+  this.connectablePortIds.clear()
   this.selectedPortIndex = -1
-  this.cachedState = null
   this.activePortId = null
   this.connectionPreviewId = null
+  this.connectionExperiment = null
 }

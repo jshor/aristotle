@@ -57,7 +57,7 @@ export function incrementZIndex (this: DocumentStoreInstance, direction: number)
     selectedItemIds.reverse()
   }
 
-  const frozenIds: string[] = []
+  const frozenIds = new Set<string>()
 
   selectedItemIds.forEach(id => {
     const currentIndex = baseItems.findIndex(i => i.id === id)
@@ -65,11 +65,11 @@ export function incrementZIndex (this: DocumentStoreInstance, direction: number)
 
     if (nextIndex < 0 || nextIndex >= baseItems.length) {
       // if the next zIndex pushes it out of bounds, freeze it
-      frozenIds.push(baseItems[currentIndex].id)
+      frozenIds.add(baseItems[currentIndex].id)
       return
     }
 
-    if (!frozenIds.includes(baseItems[nextIndex]?.id)) {
+    if (!frozenIds.has(baseItems[nextIndex]?.id)) {
       const item = baseItems[currentIndex]
       // if the item to swap with is not frozen, then swap places with it
       baseItems.splice(currentIndex, 1)

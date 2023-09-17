@@ -1,6 +1,7 @@
 import { MIN_ZOOM } from '@/constants'
 import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
+import BoundingBox from '@/types/types/BoundingBox'
 
 /**
  * Updates the canvas size such that all items:
@@ -99,8 +100,6 @@ export function setItemSize (this: DocumentStoreInstance, { rect, id }: { rect: 
 
 /**
  * Sets the bounding box of an item.
- *
- * @param {string} payload.id - ID of the item
  */
 export function setItemBoundingBox (this: DocumentStoreInstance, id: string) {
   if (!this.items[id]) return
@@ -117,16 +116,23 @@ export function setItemBoundingBox (this: DocumentStoreInstance, id: string) {
 
 /**
  * Sets the bounding box of a group.
- *
- * @param {string} payload.id - ID of the group
  */
 export function setGroupBoundingBox (this: DocumentStoreInstance, id: string) {
   if (!this.groups[id]) return
 
-  const boundingBoxes = this
+  const itemBoundingBoxes = this
     .groups[id]
     .itemIds
     .map(id => this.items[id].boundingBox)
 
-  this.groups[id].boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
+  const pointBoundingBoxes = this
+    .groups[id]
+    .connectionIds
+    .reduce((boundingBoxes, id) => {
+      return boundingBoxes.concat(
+        this.connections[id].controlPoints.map(p => boundaries.getPointBoundary(p.position))
+      )
+    }, [] as BoundingBox[])
+
+  this.groups[id].boundingBox = boundaries.getGroupBoundingBox(itemBoundingBoxes.concat(pointBoundingBoxes))
 }

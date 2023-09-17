@@ -1,17 +1,37 @@
-interface Property {
+type PropertyBase<T> = {
   label: string
-  type: 'number' | 'text' | 'boolean' | 'color'
-  value: number | string | boolean
-  min?: number
-  max?: number
   description?: string
   options?: {
-    [text: string]: number | string | boolean
+    [text: string]: T
   }
   mobileOnly?: boolean
   desktopOnly?: boolean
   disabled?: boolean
   excludes?: string[]
 }
+
+/** A numeric property. */
+type NumericProperty = {
+  /** A nnnnn or a color. */
+  type: 'number'
+  value: number
+  min?: number
+  max?: number
+} & PropertyBase<number>
+
+/** A string property. */
+type StringProperty = {
+  /** A text or a color. */
+  type: 'text' | 'color'
+  value: string
+} & PropertyBase<string>
+
+/** A boolean property. */
+type BooleanProperty = {
+  type: 'boolean'
+  value: boolean
+} & PropertyBase<boolean>
+
+type Property = NumericProperty | StringProperty | BooleanProperty
 
 export default Property

@@ -3,6 +3,7 @@ import boundaries from '../geometry/boundaries'
 import { DocumentStoreInstance } from '..'
 import BoundingBox from '@/types/types/BoundingBox'
 import Connection from '@/types/interfaces/Connection'
+import Point from '@/types/interfaces/Point'
 
 /**
  * Sets the computed boundaries that an actively-dragged item to snap to.
@@ -11,44 +12,46 @@ import Connection from '@/types/interfaces/Connection'
  */
 export function setSnapBoundaries (this: DocumentStoreInstance, id: string) {
   this.snapBoundaries = ((): BoundingBox[] => {
-    if (this.connectablePortIds.length) {
-      // if there are connectable port ids, then use those for boundaries
-      return this
-        .connectablePortIds
-        .filter(portId => portId !== id)
-        .map(portId => boundaries.getPointBoundary(this.ports[portId].position))
-    }
-
     const item = this.items[id]
 
     if (item && !item.groupId) {
       // the item with the given id is an item that does not belong to a group
-      if (item.type === ItemType.Freeport) {
-        if (item.portIds.length > 1) {
-          // if only one port exists on the freeport, then it is a port being dragged by the user and does not apply
-          // freeports should snap to "straighten out" wires
-          return Object
-            .values(this.connections)
-            .reduce((boundingBoxes: BoundingBox[], connection: Connection) => {
-              if (item.portIds.includes(connection.source)) {
-                return boundingBoxes.concat(boundaries.getLinearBoundaries(this.ports[connection.target].position))
-              }
-
-              if (item.portIds.includes(connection.target)) {
-                return boundingBoxes.concat(boundaries.getLinearBoundaries(this.ports[connection.source].position))
-              }
-
-              return boundingBoxes
-            }, [])
-        }
-      } else {
-        // this an item that can snap to align with the outer edge of any non-freeport item
-        return Object
-          .values(this.items)
-          .filter(e => e.id !== id && e.type !== ItemType.Freeport && !e.isSelected)
-          .map(e => e.boundingBox)
-      }
+      // this an item that can snap to align with the outer edge of any other item
+      return Object
+        .values(this.items)
+        .filter(e => e.id !== id && !e.isSelected)
+        .map(e => e.boundingBox)
     }
     return []
   })()
+}
+
+export function setControlPointSnapBoundaries (
+  this: DocumentStoreInstance,
+  id: string,
+  entries: { portPosition: Point }[],
+  excludeIndex: number
+) {
+  const { source, target } = this.connections[id]
+
+  this.snapBoundaries = entries
+    .reduce((b, { portPosition }, index) => {
+      return excludeIndex !== index
+        ? b.concat(boundaries.getLinearBoundaries(portPosition))
+        : b
+    }, [] as BoundingBox[])
+    .concat(boundaries.getLinearBoundaries(this.ports[source].position))
+    .concat(boundaries.getLinearBoundaries(this.ports[target].position))
+}
+
+export function setConnectionExperimentSnapBoundaries (this: DocumentStoreInstance, sourceId: string) {
+  this.setConnectablePortIds({ portId: sourceId, isDragging: true })
+  this.snapBoundaries = []
+  this
+    .connectablePortIds
+    .forEach(portId => {
+      this
+        .snapBoundaries
+        .push(boundaries.getPointBoundary(this.ports[portId].position))
+    })
 }

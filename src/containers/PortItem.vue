@@ -1,104 +1,58 @@
 <template>
-  <port-pivot
-    :rotation="rotation"
-    @blur="onBlur"
-    @keydown.esc="onEscapeKey"
-    @keydown.space="store.cycleConnectionPreviews(id)"
-    @keydown.enter="store.commitPreviewedConnection"
-    @contextmenu="store.setActivePortId(id)"
-    allow-touch-drag
-    ref="pivotRef"
+  <wire-draggable
+    v-if="wire"
+    :geometry="wire.geometry"
+    :style="{
+      left: wire.position?.x + 'px',
+      top: wire.position?.y + 'px'
+    }"
+    :source-value="port.value"
+  />
+  <port-handle
+    v-if="wire"
+    :style="{
+      left: wire.targetPosition?.x + 'px',
+      top: wire.targetPosition?.y + 'px'
+    }"
+  />
+  <draggable
+    :position="port.position"
+    :style="{ zIndex }"
+    @drag-start="createConnectionExperiment(port.id)"
+    @drag="updateConnectionExperiment"
+    @drag-end="terminateConnectionExperiment"
+    @touchhold="onTouchHold"
+    @dblclick="onDoubleClick"
   >
-    <draggable
-      v-if="!isFreeport"
-      @drag-start="onDragStart"
-      @drag="onDrag"
-      @drag-end="onDragEnd"
-      @touchhold="onTouchHold"
-      @dblclick="onDoubleClick"
-      :tabindex="-1"
-    >
-      <port-handle
-        :type="type"
-        :hue="hue"
-        :active="isActive"
-        touch-friendly
-      />
-    </draggable>
-    <port-handle
-      v-else
-      :type="type"
-      :hue="hue"
-      :active="isActive"
-    />
-  </port-pivot>
+    <port-pivot>
+      <port-handle :active="isActive" />
+    </port-pivot>
+  </draggable>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref } from 'vue'
-import { v4 as uuid } from 'uuid'
+import { computed, defineComponent, PropType } from 'vue'
 import PortHandle from '@/components/port/PortHandle.vue'
 import PortPivot from '@/components/port/PortPivot.vue'
 import { DocumentStore } from '@/store/document'
-import PortType from '@/types/enums/PortType'
-import SnapMode from '@/types/enums/SnapMode'
 import Draggable from '@/components/interactive/Draggable.vue'
-import Resizable from '@/components/interactive/Resizable.vue'
-import Freeport from '@/types/types/Freeport'
-import Point from '@/types/interfaces/Point'
+import renderLayout from '@/store/document/geometry/wire'
+import Port from '@/types/interfaces/Port'
+import WireDraggable from './WireDraggable.vue'
+import { ITEM_BASE_Z_INDEX } from '@/constants'
 
 export default defineComponent({
   name: 'PortItem',
   components: {
+    WireDraggable,
     PortHandle,
     PortPivot,
-    Draggable,
-    Resizable
-},
+    Draggable
+  },
   props: {
-    /** Port ID. */
-    id: {
-      type: String,
-      default: ''
-    },
-
-    /** Unit circle rotation value (0, 1, 2, 3). */
-    rotation: {
-      type: Number,
-      default: 0
-    },
-
-    /** Position of the port on the canvas. */
-    position: {
-      type: Object as PropType<Point>,
-      default: () => ({
-        x: 0,
-        y: 0
-      })
-    },
-
-    /** Whether or not the port is draggable. */
-    isFreeport: {
-      type: Boolean,
-      default: false
-    },
-
-    /** The port type (input or output). */
-    type: {
-      type: Number,
-      default: 0
-    },
-
-    /** Port directional orientation. */
-    orientation: {
-      type: Number,
-      default: 0
-    },
-
-    /** Color hue of the port. */
-    hue: {
-      type: Number,
-      default: 0
+    port: {
+      type: Object as PropType<Port>,
+      required: true
     },
 
     /** Document store instance. */
@@ -109,23 +63,32 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const store = props.store()
-    const snapMode = SnapMode.Radial
-    const pivotRef = ref<typeof PortPivot>()
-    const isActive = computed(() => store.activePortId === props.id || store.connectablePortIds.includes(props.id))
+    const {
+      createConnectionExperiment,
+      updateConnectionExperiment,
+      terminateConnectionExperiment
+    } = store
+    const isActive = computed(() => store.activePortId === props.port.id || store.connectablePortIds.has(props.port.id))
+    const wire = computed(() => {
+      if (store.connectionExperiment?.sourceId !== props.port.id) return null
 
-    let newFreeport: Freeport | null = null
-    let draggedPortId = ''
-    let isAdded = false
-
-    onMounted(() => {
-      setTimeout(() => {
-        // compute the relative (w.r.t. the parent item) position of the port on the canvas
-        // this is wrapped in a setTimeout() to wait for its parent component (Item) to be mounted first
-        if (pivotRef.value) {
-          store.setPortRelativePosition(pivotRef.value.$el.getBoundingClientRect(), props.id)
-        }
+      const { targetPosition } = store.connectionExperiment
+      const geometry = renderLayout(props.port, {
+        position: targetPosition,
+        orientation: props.port.orientation,
+        rotation: props.port.rotation,
+        canInflect: true
       })
+      const position = {
+        x: Math.min(props.port.position.x, targetPosition.x) + geometry.minX,
+        y: Math.min(props.port.position.y, targetPosition.y) + geometry.minY
+      }
+
+      return { geometry, position, targetPosition }
     })
+
+    // use the same CSS z-index value for the port as its parent item
+    const zIndex = computed(() => store.items[props.port.elementId].zIndex + ITEM_BASE_Z_INDEX)
 
     function onEscapeKey ($event: KeyboardEvent) {
       $event.preventDefault()
@@ -139,84 +102,33 @@ export default defineComponent({
       store.cachedState = null
     }
 
-    /**
-     * Creates a new freeport that can be moved around using the mouse.
-     */
-    function onDragStart () {
-      newFreeport = {
-        itemId: uuid()
-      }
-      draggedPortId = uuid()
-      isAdded = false
-
-      if (props.type === PortType.Input) {
-        newFreeport.outputPortId = draggedPortId
-        newFreeport.targetId = props.id
-      } else {
-        newFreeport.inputPortId = draggedPortId
-        newFreeport.sourceId = props.id
-      }
-    }
-
-    function onDrag ({ x, y }: Point) {
-      if (newFreeport === null) return
-
-      if (!isAdded) {
-        store.createFreeport(newFreeport, false)
-        store.setConnectablePortIds({ portId: props.id, isDragging: true })
-        store.setSnapBoundaries(draggedPortId)
-      }
-
-      store.dragItem(newFreeport.itemId, { x, y }, SnapMode.Radial)
-    }
-
-    /**
-     * Handles terminating the temporary active port, and connects the port to the one at its dragged location.
-     * This method handles all results of a user-driven port-dragging interaction.
-     */
-    function onDragEnd () {
-      if (newFreeport === null) return
-      if (newFreeport.inputPortId) {
-        store.connectFreeport({
-          portId: newFreeport.inputPortId,
-          sourceId: props.id
-        })
-      } else if (newFreeport.outputPortId) {
-        store.connectFreeport({
-          portId: newFreeport.outputPortId,
-          targetId: props.id
-        })
-      }
-    }
-
     function onTouchHold ($event: TouchEvent) {
       $event.stopPropagation()
       $event.preventDefault()
       navigator.vibrate(100)
 
-      store.togglePortMonitoring(props.id)
+      store.togglePortMonitoring(props.port.id)
     }
 
     function onDoubleClick ($event: MouseEvent) {
       $event.stopPropagation()
       $event.preventDefault()
 
-      store.togglePortMonitoring(props.id)
+      store.togglePortMonitoring(props.port.id)
     }
 
     return {
-      store,
-      snapMode,
-      pivotRef,
+      wire,
       isActive,
-      onDragStart,
-      onDrag,
-      onDragEnd,
+      store,
+      zIndex,
       onEscapeKey,
       onBlur,
       onTouchHold,
       onDoubleClick,
-      PortType
+      createConnectionExperiment,
+      updateConnectionExperiment,
+      terminateConnectionExperiment
     }
   }
 })
