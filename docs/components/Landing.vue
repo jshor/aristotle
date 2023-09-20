@@ -1,23 +1,19 @@
 <template>
   <div>
     <div class="landing" :class="{ 'landing--loaded': loaded }">
-      <section class="landing__hero">
-        <div class="landing__main">
-          <div class="landing__logo">
-            <img :src="$withBase('/assets/logo.svg')" />
-          </div>
-          <div class="landing__title">
-            <h1>Build, simulate, and debug digital logic circuits.</h1>
+      <div class="landing__main">
 
-            <h3>Aristotle is an open source digital logic simulator for Windows, Linux, and macOS.</h3>
+        <downloads />
 
-            <downloads />
-          </div>
+        <div class="landing__image-wrapper">
+          <img class="landing__image" aria-hidden="true" src="/assets/screenshot.png" />
         </div>
 
-        <hook type="dark" />
-        <hook type="light" />
-      </section>
+        <section class="landing__section">
+          <!-- <h3>Aristotle allows you to graphically arrange components together to build digital logic circuits.</h3> -->
+          <!-- <h3>Its powerful built-in debugger and oscilloscope enable you to visualize and understand your circuits.</h3> -->
+        </section>
+      </div>
     </div>
   </div>
 </template>
@@ -53,72 +49,77 @@ $borderColor: #eaecef;
 $codeBgColor: #1B1B23;
 $shadowColor: #000000;
 
+html, body {
+  font-family: Inter,sans-serif!important;
+  background-color: $codeBgColor;
+  --c-bg: $codeBgColor;
+}
+
+.homepage {
+
+  // position: absolute;
+  display: block;
+  // top: 0;
+  // left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: $codeBgColor;
+  box-shadow: 0 0 100px 100px $codeBgColor inset;
+  background-image: url('/assets/download.svg');
+  z-index: 0;
+}
+
 .landing {
   opacity: 0;
   transition: opacity 0.5s;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
   display: flex;
   box-sizing: border-box;
+  text-align: center;
 
   &--loaded {
     opacity: 1;
   }
 
-  &__hero {
-    display: flex;
-    align-items: center;
+
+  &__main {
     justify-content: center;
     flex: 1;
     position: relative;
-    background-color: $codeBgColor;
-    box-shadow: 0 0 50px 50px $codeBgColor inset;
-    background-size: 40px 40px;
-    background-image:
-      linear-gradient(to right, #33363F 1px, transparent 1px),
-      linear-gradient(to bottom, #33363F 1px, transparent 1px);
   }
 
-  &__main {
-    max-width: 100vw;
-    display: flex;
-    flex-direction: row;
-    max-width: 860px;
+  &__section {
+    max-width: 955px;
+    margin: auto;
+
+    h3 {
+      margin-bottom: 3rem;
+      letter-spacing: -.06em;
+      line-height: 1.2;
+      font-size: 3rem;
+      background: -webkit-linear-gradient(#f2f4f8,#4bc567);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: left;
+      font-weight: bold;
+    }
   }
 
-  &__logo {
-    filter: drop-shadow(2px 1px 2px $shadowColor)
+  &__image {
+    object-fit: cover;
+    object-position: center;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 2px solid #333;
+    box-sizing: border-box;
+    filter: drop-shadow(0 0 4rem rgba(255, 255, 255, 0.1));
   }
 
-  &__title {
-    color: #fff;
+  &__image-wrapper {
+    margin: auto;
+    max-width: 1400px;
     padding: 2rem;
-    text-shadow: 2px 1px 3px $shadowColor;
-  }
-
-  &__title {
-    h1, h3 {
-      font-weight: normal;
-    }
-  }
-
-  @media (max-width: 720px) {
-    &__main {
-      flex-direction: column;
-    }
-
-    &__logo {
-      margin: auto;
-      width: 100%;
-      max-width: 250px;
-    }
-
-    &__title {
-      text-align: center;
-    }
+    box-sizing: border-box;
   }
 }
 </style>

@@ -4,10 +4,11 @@
   }
 }
 
-/* homepage overrides */
-.homepage {
-  padding-top: 100vh;
+:root {
+  --homepage-width: 1400px;
 }
+
+/* homepage overrides */
 
 @media (min-width: 719px) {
   .homepage {
