@@ -1,8 +1,11 @@
-import { defineUserConfig } from 'vuepress'
+import { defaultTheme, defineUserConfig } from 'vuepress'
 import registerComponentsPlugin from '@vuepress/plugin-register-components'
 import path from 'path'
 
 export default defineUserConfig({
+  theme: defaultTheme({
+    logo: '/assets/logo.svg',
+  }),
   base: '/',
   dest: 'build',
   head: [
@@ -22,5 +25,5 @@ export default defineUserConfig({
   ],
   lang: 'en-US',
   title: 'Aristotle',
-  description: 'The digital logic simulator.'
+  description: 'The open-source digital logic simulator for Windows, Linux, and Mac.'
 })

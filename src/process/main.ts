@@ -55,8 +55,8 @@ function createWindow (opts: BrowserWindowConstructorOptions, fileName: string, 
 function createMainWindow () {
   return createWindow({
     title: 'Main window',
-    width: 2000,
-    height: 1200,
+    width: 1336,
+    height: 734,
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       backgroundThrottling: false,
