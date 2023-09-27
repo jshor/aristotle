@@ -16,7 +16,7 @@ export function undo (this: DocumentStoreInstance) {
       ports: this.ports,
       groups: this.groups
     }))
-    this.applySerializedState(undoState)
+    this.applySerializedState(undoState, true)
     this.undoStack.pop()
     this.isDirty = true
   }
@@ -83,7 +83,7 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
   connections,
   ports,
   groups
-}: SerializableState) {
+}: SerializableState, debug = false) {
   this.deselectAll()
 
   /**
@@ -110,26 +110,12 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
   removedGroups.forEach(id => delete this.groups[id])
 
   Object
-    .keys(ports)
-    .forEach(id => {
-      if (this.ports[id]) {
-        delete ports[id].wave
-
-        this.ports[id] = {
-          ...this.ports[id],
-          ...ports[id],
-          value: this.ports[id].value
-        }
-      }
-    })
-
-  Object
     .keys(items)
     .forEach(id => {
       if (this.items[id]) {
         this.items[id] = {
           ...items[id],
-          clock: this.items[id].clock
+          // clock: this.items[id].clock
         }
         this.setItemBoundingBox(id)
         this.setItemSelectionState(id, items[id].isSelected)
@@ -175,6 +161,6 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
  *  - `ports`
  *  - `groups`
  */
-export function applySerializedState (this: DocumentStoreInstance, savedState: string) {
-  this.applyDeserializedState(JSON.parse(savedState) as SerializableState)
+export function applySerializedState (this: DocumentStoreInstance, savedState: string, debug = false) {
+  this.applyDeserializedState(JSON.parse(savedState) as SerializableState, debug)
 }
