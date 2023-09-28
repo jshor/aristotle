@@ -179,31 +179,14 @@ export function addVirtualNode (this: DocumentStoreInstance, item: Item, ports: 
 
     node.on('change', this.onVirtualNodeChange.bind(this, node, outputIds))
 
-    item.portIds.forEach(portId => {
-      this.nodes[portId] = node
-    })
-
-    if (item.type === ItemType.InputNode && item.subtype === ItemSubtype.Clock) {
-      const interval = item.properties.interval?.value as number
-
-
-      item.clock = new ClockPulse(outputIds[0], interval, 1) // TODO: should clock start at 1? should be configurable in properties?
-      item.clock.on('change', (value: number) => this.setPortValue({ id: outputIds[0], value }))
-
-      this.oscillator.add(item.clock)
-    }
-
-    this.circuit.addNode(node)
-
     item
       .portIds
       .forEach(portId => {
-        const port = ports[portId]
-
-        if (port.isMonitored) {
-          this.monitorPort(portId)
-        }
+        // assign a pointer from the port ID to the virtual node
+        this.nodes[portId] = node
       })
+
+    this.circuit.addNode(node)
 }
 
 /**
@@ -242,6 +225,18 @@ export function removeVirtualNode (this: DocumentStoreInstance, itemId: string) 
         this.removePort(portId)
       }
     })
+}
+
+export function addClock (this: DocumentStoreInstance, item: Item) {
+  const interval = item.properties.interval?.value as number
+  const startValue = item.properties.startValue?.value as LogicValue || LogicValue.FALSE
+
+  if (!interval) return
+
+  item.clock = new ClockPulse(item.portIds[0], interval, startValue)
+  item.clock.on('change', (value: number) => this.setPortValue({ id: item.portIds[0], value }))
+
+  this.oscillator.add(item.clock)
 }
 
 /**

@@ -8,18 +8,27 @@ import Connection from '@/types/interfaces/Connection'
  * Attaches the given port to an item.
  */
 export function addPort (this: DocumentStoreInstance, itemId: string, port: Port) {
+  const { portIds } = this.items[itemId]
+
   const node = Object
     .values(this.nodes)
-    .find(({ name }) => this.items[itemId].portIds.includes(name))
+    .find(({ name }) => portIds.includes(name))
 
   this.ports[port.id] = port
-  this.items[itemId].portIds.push(port.id)
+
+  if (!portIds.includes(port.id)) {
+    portIds.push(port.id)
+  }
 
   if (node) {
     this.nodes[port.id] = node
-  } else {
-    this.addVirtualNode(this.items[itemId])
   }
+
+  if (port.isMonitored) {
+    this.monitorPort(port.id)
+  }
+
+  this.setPortValue({ id: port.id, value: port.value })
 }
 
 /**
@@ -100,7 +109,7 @@ export function setConnectablePortIds (this: DocumentStoreInstance, { portId, is
  * @param payload.value - new port value
  */
 export function setPortValue (this: DocumentStoreInstance, { id, value }: { id: string, value: number }) {
-  if (this.nodes[id] && this.nodes[id].value !== value) {
+  if (this.ports[id] && this.nodes[id] && this.nodes[id].value !== value) {
     this.nodes[id].setValue(value)
     this.ports[id].wave?.drawPulseChange(value)
     this.circuit.enqueue(this.nodes[id])

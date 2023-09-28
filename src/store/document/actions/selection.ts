@@ -130,7 +130,7 @@ export function setControlPointSelectionState (this: DocumentStoreInstance, id: 
  * Sets the selection state of a connection.
  */
 export function setConnectionSelectionState (this: DocumentStoreInstance, id: string, isSelected: boolean) {
-  if (!this.connections[id]) return
+  if (!this.connections[id]?.controlPoints) return
 
   this.connections[id].isSelected = isSelected
   this.connections[id].controlPoints.forEach((_, index) => this.setControlPointSelectionState(id, index, isSelected))

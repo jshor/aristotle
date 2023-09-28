@@ -1,4 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia'
+import { merge } from 'lodash'
 import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
 import ItemType from '@/types/enums/ItemType'
@@ -513,13 +514,11 @@ describe('item actions', () => {
         store.$patch({
           items: { item }
         })
-        store.setProperties('item', {
-          ...properties,
+        store.setProperties('item', merge(properties, {
           interval: {
-            ...properties.interval,
             value
           }
-        })
+        }))
 
         expect(store.items.item.clock!.interval).toEqual(value)
       })
@@ -533,13 +532,11 @@ describe('item actions', () => {
         store.$patch({
           items: { item }
         })
-        store.setProperties('item', {
-          ...properties,
+        store.setProperties('item', merge(properties, {
           interval: {
-            ...properties.interval,
             value
           }
-        })
+        }))
 
         expect(store.items.item.clock).toBeNull()
       })

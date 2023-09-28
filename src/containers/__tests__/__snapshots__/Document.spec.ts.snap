@@ -11,7 +11,32 @@ exports[`Document container should match the snapshot 1`] = `
     <div class="draggable" style="left: 0px; top: 0px; pointer-events: none; z-index: 1000;" tabindex="0" data-test="item">
       <!--v-if-->
       <div class="circuit-component" style="transform: rotate(0deg);">
-        <div class="input-node" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]"><button type="button" class="input-node__flipper input-node__flipper--high-z" tabindex="0"><span>?</span></button></div>
+        <!-- <div class="input-node">
+    <button
+      type="button"
+      class="input-node__flipper"
+      :tabindex="0"
+      :class="{
+        'input-node__flipper--on': model === 1,
+        'input-node__flipper--off': model === -1,
+        'input-node__flipper--high-z': model === 0
+      }"
+      @mousedown.stop="onInput"
+      @touchstart.stop="onInput"
+    >
+      <span v-if="model === 1">ON</span>
+      <span v-else-if="model === -1">OFF</span>
+      <span v-else>?</span>
+    </button>
+  </div> -->
+        <div class="switch switch--hi-z" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]">
+          <div class="switch__inner" tabindex="0" aria-role="switch">
+            <div class="switch__trigger">
+              <div class="switch__light"></div>
+              <div class="switch__characters"></div>
+            </div>
+          </div>
+        </div>
         <div class="circuit-component__ports--left circuit-component__ports">
           <div class="port-pivot" style="transform: rotate(-0deg);" data-port-id="port1">
             <div class="port-handle" id="port1" tabindex="0">
@@ -29,7 +54,32 @@ exports[`Document container should match the snapshot 1`] = `
     <div class="draggable" style="left: 0px; top: 0px; pointer-events: none; z-index: 1000;" tabindex="0" data-test="item">
       <!--v-if-->
       <div class="circuit-component" style="transform: rotate(0deg);">
-        <div class="input-node" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]"><button type="button" class="input-node__flipper input-node__flipper--high-z" tabindex="0"><span>?</span></button></div>
+        <!-- <div class="input-node">
+    <button
+      type="button"
+      class="input-node__flipper"
+      :tabindex="0"
+      :class="{
+        'input-node__flipper--on': model === 1,
+        'input-node__flipper--off': model === -1,
+        'input-node__flipper--high-z': model === 0
+      }"
+      @mousedown.stop="onInput"
+      @touchstart.stop="onInput"
+    >
+      <span v-if="model === 1">ON</span>
+      <span v-else-if="model === -1">OFF</span>
+      <span v-else>?</span>
+    </button>
+  </div> -->
+        <div class="switch switch--hi-z" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]">
+          <div class="switch__inner" tabindex="0" aria-role="switch">
+            <div class="switch__trigger">
+              <div class="switch__light"></div>
+              <div class="switch__characters"></div>
+            </div>
+          </div>
+        </div>
         <div class="circuit-component__ports--left circuit-component__ports">
           <div class="port-pivot" style="transform: rotate(-0deg);" data-port-id="port1">
             <div class="port-handle" id="port1" tabindex="0">
