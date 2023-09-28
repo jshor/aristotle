@@ -57,44 +57,21 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
       }
     })
 
-  item
-    .portIds
-    .forEach(portId => {
-      const port = portList[portId]
-
-      if (port) {
-        this.ports[port.id] = port
-
-        if (port.isMonitored) {
-          // any existing wave is now be disconnected from signal changes since this is a new instance of Item
-          delete port.wave
-
-          // unmonitor the existing wave, if applicable
-          this.unmonitorPort(port.id)
-
-          // wait for next JS frame so that the oscillogram broadcast (with the port wave removed) completes first
-          // then the port can be re-monitored with the new wave
-          setTimeout(() => this.monitorPort(port.id))
-        }
-      }
-    })
-
   item.isSelected = false
 
-  if (item.clock) {
-    console.log('ADDING CLOCK BACK')
-    item.clock = ClockPulse.deserialize(item.clock)
-    this.oscillator.add(item.clock!)
-  }
-
-  // add the item to the document and create its corresponding circuit node
   this.items[item.id] = item
   this.items[item.id].zIndex = ++this.zIndex
 
-  this.addVirtualNode(item)
+  this.addVirtualNode(item, portList)
+
+  item
+    .portIds
+    .forEach(id => this.addPort(item.id, portList[id]))
+
   this.resetItemValue(item)
   this.setProperties(item.id, item.properties)
   this.setItemBoundingBox(item.id)
+  this.addClock(item)
 }
 
 /**
