@@ -33,6 +33,7 @@ export const createControlPoint = (data: Partial<ControlPoint> = {}): ControlPoi
 export const createPort = (id: string, elementId: string, type: PortType, payload: Partial<Port> = {}): Port => ({
   id,
   elementId,
+  defaultName: '',
   name: '',
   connectedPortIds: [],
   position: {
@@ -52,7 +53,7 @@ export const createItem = (id: string, type: ItemType, payload: Partial<Item> = 
   id,
   type,
   subtype: ItemSubtype.None,
-  name: '',
+  defaultName: '',
   portIds: [],
   groupId: null,
   rotation: 0,

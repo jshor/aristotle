@@ -29,7 +29,7 @@
       </resizable>
     </div>
     <div class="toolbox-item__label">
-      {{ item.name || item.subtype }}
+      {{ item.defaultName || item.subtype }}
     </div>
   </draggable>
 </template>
@@ -84,6 +84,8 @@ export default defineComponent({
      * @param {string<selectable | preview>} type - the element that resized
      */
     function onSizeChanged (rect: DOMRect, type: 'selectable' | 'preview') {
+      if (zoom.value !== 1) return
+
       rects[type] = rect
 
       const inner = rects.selectable

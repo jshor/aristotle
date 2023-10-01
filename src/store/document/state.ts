@@ -13,6 +13,8 @@ export interface DocumentState extends SerializableState {
   canvas: BoundingBox
   /** The height, in pixels, of the oscilloscope panel. */
   oscilloscopeHeight: number
+  /** The width, in pixels, of the oscilloscope timeline labels column. */
+  oscilloscopeWidth: number
   /** Whether or not the document has finished loading its contents. */
   hasLoaded: boolean
   /** The current serialized state. */
@@ -29,8 +31,6 @@ export interface DocumentState extends SerializableState {
   zoomLevel: number
   /** Whether or not the oscilloscope viewer panel is open. */
   isOscilloscopeOpen: boolean
-  /** Whether or not the oscilloscope is recording waves. */
-  isOscilloscopeRecording: boolean
   /**
    * Whether or not the circuit has finished computing its state.
    * If the debugger is on, this will be false until the user has finished stepping through the circuit.
@@ -42,6 +42,8 @@ export interface DocumentState extends SerializableState {
   isDirty: boolean
   /** Whether or not the document is busy processing something. Useful to debounce CPU-intensive actions. */
   isBusy: boolean
+  /** List of port IDs that are requested by the user to be monitored. */
+  monitoredPortIds: Set<string>
   /** List of IDs of selected items. */
   selectedItemIds: Set<string>
   /** List of IDs of selected wires. */
@@ -91,8 +93,8 @@ export const state = (): DocumentState => ({
   zoomLevel: 1,
   zIndex: 1,
   oscilloscopeHeight: 200,
+  oscilloscopeWidth: 100,
   isOscilloscopeOpen: false,
-  isOscilloscopeRecording: true,
   isCircuitEvaluated: false,
   isDebugging: false,
   isDirty: false,
@@ -117,6 +119,7 @@ export const state = (): DocumentState => ({
 
   /* the following variables are 'temporary' information */
   snapBoundaries: [],
+  monitoredPortIds: new Set<string>(),
   connectablePortIds: new Set<string>(),
   selectedConnectionIds: new Set<string>(),
   selectedItemIds: new Set<string>(),

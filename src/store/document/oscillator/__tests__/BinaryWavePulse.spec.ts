@@ -36,7 +36,7 @@ describe('Binary Wave Service', () => {
     })
   })
 
-  describe('reset()', () => {
+  describe('clear()', () => {
     beforeEach(() => {
       jest.spyOn(service, 'initialize')
     })
@@ -46,7 +46,7 @@ describe('Binary Wave Service', () => {
         .spyOn(service, 'initialize')
         .mockImplementation(jest.fn())
 
-      service.reset()
+      service.clear()
 
       expect(service.segments).toHaveLength(0)
       expect(service.width).toEqual(0)
@@ -54,14 +54,14 @@ describe('Binary Wave Service', () => {
 
     it('should initialize the segment with a low signal if the last signal was high', () => {
       service.initialize(1)
-      service.reset()
+      service.clear()
 
       expect(service.initialize).toHaveBeenCalledWith(0)
     })
 
     it('should initialize the segment with a high signal if the last signal was low', () => {
       service.initialize(0)
-      service.reset()
+      service.clear()
 
       expect(service.initialize).toHaveBeenCalledWith(1)
     })

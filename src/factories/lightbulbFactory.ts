@@ -11,7 +11,7 @@ export default function lightbulbFactory () {
   const elementId = uuid()
   const ports: Record<Direction, Port[]> = {
     [Direction.Left]: [
-      portFactory(elementId, uuid(), Direction.Left, PortType.Input, 'Input Port')
+      portFactory(elementId, uuid(), Direction.Left, PortType.Input)
     ],
     [Direction.Top]: [],
     [Direction.Bottom]: [],

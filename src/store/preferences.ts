@@ -1,4 +1,3 @@
-import PropertySet from '@/types/interfaces/PropertySet'
 import { defineStore } from 'pinia'
 
 export const usePreferencesStore = defineStore({
@@ -104,7 +103,7 @@ export const usePreferencesStore = defineStore({
       } catch (_) {}
     },
 
-    async updateSettings (preferences: PropertySet) {
+    async updateSettings (preferences: any) {
       await this.writeSettings()
     }
   }

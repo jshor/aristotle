@@ -49,7 +49,7 @@ import Nand from './gates/Nand.vue'
 import Xnor from './gates/Xnor.vue'
 import Xor from './gates/Xor.vue'
 import ItemSubtype from '@/types/enums/ItemSubtype'
-import PropertySet from '@/types/interfaces/PropertySet'
+import ItemProperties from '@/types/interfaces/ItemProperties'
 
 export default defineComponent({
   name: 'LogicGate',
@@ -64,7 +64,7 @@ export default defineComponent({
   },
   props: {
     properties: {
-      type: Object as PropType<PropertySet>,
+      type: Object as PropType<ItemProperties>,
       default: () => ({})
     },
     subtype: {
@@ -73,7 +73,7 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const inputCount = computed(() => (props.properties.inputCount?.value || 2) as number)
+    const inputCount = computed(() => props.properties.inputCount?.value || 2)
 
     return {
       inputCount

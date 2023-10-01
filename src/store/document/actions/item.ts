@@ -3,14 +3,13 @@ import { DocumentStoreInstance } from '..'
 import boundaries from '../geometry/boundaries'
 import PortType from '@/types/enums/PortType'
 import Direction from '@/types/enums/Direction'
-import ItemSubtype from '@/types/enums/ItemSubtype'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
-import ItemType from '@/types/enums/ItemType'
-import ClockPulse from '../oscillator/ClockPulse'
 import Port from '@/types/interfaces/Port'
-import PropertySet from '@/types/interfaces/PropertySet'
+import ItemProperties from '@/types/interfaces/ItemProperties'
 import Item from '@/types/interfaces/Item'
 import Point from '@/types/interfaces/Point'
+import { getSequencedName } from '@/utils/getSequencedName'
+import portFactory from '@/factories/portFactory'
 
 /**
  * Adds any non-IC component to the state.
@@ -23,55 +22,42 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
   // add all ports associated to this item
   // if the item is an integrated circuit, only add the ports that it defines (ones visible to the user)
   const portList = item.integratedCircuit?.ports || ports
-  const portNames = new Set<string>()
-  const itemNames = new Set(
-    Object
-      .values(this.items)
-      .map(({ name }) => name)
-  )
-  const getNumericName = (originalName: string, existingNames: Set<string>) => {
-    let name = originalName
-    let c = 1
-
-    while (existingNames.has(name)) {
-      name = `${originalName} ${++c}`
-    }
-
-    return name
-  }
-
-  item.name = getNumericName(item.properties?.name?.value as string || item.name, itemNames)
-  item
-    .portIds
-    .forEach(portId => {
-      const port = portList[portId]
-
-      if (port) {
-        const type = port.type === PortType.Input ? 'I' : 'O'
-
-        port.name = port.name
-          ? `${item.name} ${port.name}`
-          : getNumericName(`${item.name} ${type}`, portNames).replace(/(I|O)$/, '$11')
-
-        portNames.add(port.name)
-      }
-    })
 
   item.isSelected = false
 
   this.items[item.id] = item
   this.items[item.id].zIndex = ++this.zIndex
 
+  this.setProperties(item.id, item.properties)
   this.addVirtualNode(item, portList)
+  this.setItemBoundingBox(item.id)
 
   item
     .portIds
     .forEach(id => this.addPort(item.id, portList[id]))
 
   this.resetItemValue(item)
-  this.setProperties(item.id, item.properties)
-  this.setItemBoundingBox(item.id)
   this.addClock(item)
+  this.setItemName(item)
+}
+
+/**
+ * Sets the item's name.
+ * If the name already exists in the document, a sequenced name will be generated.
+ * Example: 'MyNode', 'MyNode 2', etc.
+ */
+export function setItemName (this: DocumentStoreInstance, item: Item) {
+  if (!item.properties.name) return // do nothing if the item cannot have its name defined
+
+  const itemNames = new Set(
+    Object
+      .values(this.items)
+      .map(({ properties }) => properties.name?.value || '')
+      .filter(name => name)
+  )
+
+  item.properties.name.value = getSequencedName(item.properties.name.value || item.defaultName, itemNames)
+  item.portIds.forEach(id => this.setPortName(id))
 }
 
 /**
@@ -157,7 +143,7 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
  */
  export function setInputCount (this: DocumentStoreInstance, id: string, count: number) {
   const item = this.items[id]
-  const oldCount = item.properties.inputCount.value as number
+  const oldCount = item.properties.inputCount!.value
 
   if (oldCount > count) {
     // if the count has decreased, find the last remaining port IDs which will be removed
@@ -170,22 +156,8 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
       const portId = uuid()
 
       // add the difference of ports one by one
-      this.addPort(id, {
-        id: portId,
-        name: '', // TODO
-        connectedPortIds: [],
-        type: PortType.Input,
-        elementId: id,
-        orientation: Direction.Left,
-        isMonitored: false,
-        hue: 0,
-        position: {
-          x: 0,
-          y: 0
-        },
-        rotation: 0,
-        value: 0
-      })
+      this.addPort(id, portFactory(id, portId, Direction.Left, PortType.Input))
+      this.setPortName(portId)
     }
   }
 }
@@ -198,29 +170,30 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
  * @param payload.id - item ID
  * @param payload.properties - new version of the properties
  */
-export function setProperties (this: DocumentStoreInstance, id: string, properties: PropertySet) {
+export function setProperties (this: DocumentStoreInstance, id: string, properties: ItemProperties) {
   const item = this.items[id]
 
   for (const propertyName in properties) {
-    const property = properties[propertyName]
+    const key = propertyName as keyof Item['properties']
+    const property = properties[key]
 
-    if (item.properties[propertyName].value === property.value) {
+    if (!property || item.properties[key]?.value === property.value) {
       continue // do nothing if the property value has not changed
     }
 
     this.commitState()
 
-    switch (propertyName) {
+    switch (key) {
       case 'inputCount':
-        this.setInputCount(id, property.value as number)
+        this.setInputCount(id, properties.inputCount!.value)
         break
       case 'interval':
         if (item.clock) {
-          item.clock.interval = property.value as number
+          item.clock.interval = properties.interval!.value
         }
         break
     }
 
-    this.items[id].properties[propertyName].value = property.value
+    this.items[id].properties[key]!.value = property!.value
   }
 }

@@ -33,7 +33,7 @@
     <circuit-component
       :type="item.type"
       :subtype="item.subtype"
-      :name="item.name"
+      :name="item.defaultName"
       :ports="ports"
       :properties="item.properties"
       :is-selected="isSelected"
@@ -55,6 +55,7 @@
           <port-handle
             :id="port.id"
             :hue="port.isMonitored ? port.hue : 0"
+            :is-monitored="port.isMonitored"
             :tabindex="0"
             @keydown.esc="onEscapeKey"
             @keydown.space="store.cycleConnectionPreviews(port.id)"

@@ -2,21 +2,28 @@ import Pulse from '@/types/interfaces/Pulse'
 import BinaryWavePulse from './BinaryWavePulse'
 import Oscillogram from '@/types/types/Oscillogram'
 import Point from '@/types/interfaces/Point'
+import ClockPulse from './ClockPulse'
 
 /**
  * @class Oscillator
- * @description Manages all oscillating services, including binary waves and clock pulses.
+ * @description Manages all oscillating services, including binary pulses and clock pulses.
  * This service uses system time to determine proper sequencing and updating.
  */
 export default class Oscillator {
   /** Whether or not the oscillator is paused. */
   public isPaused: boolean = true
 
-  /** Key-value pair of all waves. */
-  public waves: Record<string, Pulse> = {}
+  /** Key-value pair of all pulses. */
+  public pulses: Record<string, Pulse> = {}
+
+  /** Key-value pair of binary wave pulses. */
+  public binaryWaves: Record<string, BinaryWavePulse> = {}
+
+  /** Key-value pair of clock pulses. */
+  public clocks: Record<string, ClockPulse> = {}
 
   /** The refresh rate for the oscilloscope. */
-  public refreshRate: number = 20 // TODO: this can be configured to make the waves wider/oscilloscope run faster
+  public refreshRate: number = 20 // TODO: this can be configured to make the pulses wider/oscilloscope run faster
 
   /** The last time the oscillator was updated, in milliseconds. */
   public lastUpdateTime: number = Date.now()
@@ -53,38 +60,45 @@ export default class Oscillator {
   }
 
   /**
+   * Resets the oscillator state. This will reset the clocks.
+   */
+  reset = () => {
+    this.timeMsOffset = 0
+    this.timeMsElapsed = 0
+    this.lastUpdateTime = Date.now()
+
+    Object
+      .values(this.clocks)
+      .forEach(clock => clock.reset())
+  }
+
+  /**
    * Clears all current binary wave geometries.
    */
   clear = () => {
     Object
-      .values(this.waves)
-      .forEach(wave => {
-        if (wave instanceof BinaryWavePulse) {
-          (wave as BinaryWavePulse).reset()
-        }
-      })
+      .values(this.binaryWaves)
+      .forEach(wave => wave.clear())
   }
 
   /**
    * Computes the SVG points for each given binary wave.
    *
-   * @param waves
+   * @param pulses
    * @returns oscillogram result
    */
-  computeWaveGeometry = (waves: Record<string, Pulse>) => {
+  computeWaveGeometry = (pulses: Record<string, BinaryWavePulse>) => {
     const displays: Oscillogram = {}
     const getPoints = (segments: Point[]) => segments.map(({ x, y }) => `${x},${y}`)
 
-    for (const id in waves) {
-      if (waves[id] instanceof BinaryWavePulse) {
-        const wave = waves[id] as BinaryWavePulse
-        const points = getPoints(wave.segments)
+    for (const id in pulses) {
+      const wave = pulses[id]
+      const points = getPoints(wave.segments)
 
-        displays[id] = {
-          points: points.join(' '),
-          width: wave.width,
-          hue: wave.hue
-        }
+      displays[id] = {
+        points: points.join(' '),
+        width: wave.width,
+        hue: wave.hue
       }
     }
 
@@ -106,15 +120,11 @@ export default class Oscillator {
       this.timeMsOffset = this.timeMsElapsed
 
       Object
-        .values(this.waves)
-        .forEach((wave: Pulse) => {
-          if (wave instanceof BinaryWavePulse) {
-            wave.truncateSegments(screenWidth)
-          }
-        })
+        .values(this.binaryWaves)
+        .forEach(wave => wave.truncateSegments(screenWidth))
     }
 
-    this.onTick?.(this.computeWaveGeometry(this.waves))
+    this.onTick?.(this.computeWaveGeometry(this.binaryWaves))
   }
 
   /**
@@ -152,11 +162,11 @@ export default class Oscillator {
   }
 
   /**
-   * Updates all waves with the given tick count.
+   * Updates all pulses with the given tick count.
    */
   update = (): void => {
     Object
-      .values(this.waves)
+      .values(this.pulses)
       .forEach((wave) => wave.update(this.timeMsElapsed))
   }
 
@@ -166,9 +176,15 @@ export default class Oscillator {
    * @param {Pulse} wave
    */
   add = (wave: Pulse): void => {
-    if (!this.waves.hasOwnProperty(wave.id)) {
-      this.waves[wave.id] = wave
+    if (!this.pulses.hasOwnProperty(wave.id)) {
+      this.pulses[wave.id] = wave
       this.start()
+
+      if (wave instanceof BinaryWavePulse) {
+        this.binaryWaves[wave.id] = wave
+      } else if (wave instanceof ClockPulse) {
+        this.clocks[wave.id] = wave
+      }
 
       if (this.timeMsElapsed === 0) {
         this.broadcast()
@@ -184,9 +200,11 @@ export default class Oscillator {
   remove = (wave?: Pulse): void => {
     if (!wave) return
 
-    delete this.waves[wave.id]
+    delete this.pulses[wave.id]
+    delete this.binaryWaves[wave.id]
+    delete this.clocks[wave.id]
 
-    if (Object.keys(this.waves).length === 0) {
+    if (Object.keys(this.pulses).length === 0) {
       this.stop()
       this.clear()
     }

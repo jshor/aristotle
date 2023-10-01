@@ -28,7 +28,7 @@
       </div>
 
       <div class="toolbar__right">
-        <toolbar-button :icon="faBug" :active="documentStore.isDebugging" @click="documentStore.toggleDebugger" text="Debug" />
+        <toolbar-button :icon="faBug" :active="documentStore.isDebugging" @click="documentStore.toggleDebugger()" text="Debug" />
         <toolbar-separator />
         <toolbar-button :icon="faArrowsRotate" @click="documentStore.resetCircuit" text="Reset" />
         <toolbar-button :icon="faForwardStep" :disabled="!documentStore.isDebugging || documentStore.isCircuitEvaluated" @click="documentStore.advanceSimulation" text="Next" />

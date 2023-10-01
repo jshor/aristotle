@@ -1,10 +1,11 @@
+import LogicValue from '@/types/enums/LogicValue'
 import Pulse from '@/types/interfaces/Pulse'
 import { TinyEmitter } from 'tiny-emitter'
 import { v4 as uuid } from 'uuid'
 
 /**
- * @class ClockPulse
- * @description This provides an oscillating clock wave. It oscillates between TRUE and FALSE.
+ * This provides an oscillating clock wave.
+ * It oscillates between {@link LogicValue.TRUE} and {@link LogicValue.FALSE}.
  */
 export default class ClockPulse implements Pulse {
   /** Wave ID. */
@@ -14,7 +15,10 @@ export default class ClockPulse implements Pulse {
   public name: string
 
   /** Current signal value. */
-  public signal: number = 0
+  public currentValue: LogicValue = LogicValue.UNKNOWN
+
+  /** The default signal value. */
+  public defaultValue: LogicValue = LogicValue.UNKNOWN
 
   /** Interval, in milliseconds, to oscillate at. */
   public interval: number = 0
@@ -25,6 +29,7 @@ export default class ClockPulse implements Pulse {
   /** Event emitter. */
   private emitter: TinyEmitter = new TinyEmitter()
 
+  /** Whether or not the pulse is stopped. */
   private isStopped = false
 
   /**
@@ -34,26 +39,47 @@ export default class ClockPulse implements Pulse {
    * @param interval - time, in milliseconds, to oscillate at
    * @param signal - current signal value to initialize at
    */
-  constructor (name: string, interval: number, signal: number) {
+  constructor (name: string, interval: number, currentValue: LogicValue, defaultValue: LogicValue) {
     this.name = name
-    this.signal = signal
+    this.currentValue = currentValue
+    this.defaultValue = defaultValue
     this.interval = interval
     this.lastUpdate = -interval
   }
 
-  static deserialize (data?: { name: string, interval: number, signal: number } | null) {
+  /**
+   * Deserializes the given data into a ClockPulse instance.
+   */
+  static deserialize (data?: {
+    name: string
+    interval: number
+    currentValue: LogicValue
+    defaultValue: LogicValue
+  } | null) {
     if (data instanceof ClockPulse) return data
     if (!data) return
 
-    return new ClockPulse(data.name, data.interval, data.signal)
+    return new ClockPulse(data.name, data.interval, data.currentValue, data.defaultValue)
   }
 
+  /**
+   * Returns an object representation of the ClockPulse instance.
+   */
   toString = () => {
     return {
       name: this.name,
       interval: this.interval,
-      signal: this.signal
+      currentValue: this.currentValue,
+      defaultValue: this.defaultValue
     }
+  }
+
+  /**
+   * Resets the current value to the default value.
+   */
+  reset = () => {
+    this.lastUpdate = -this.interval
+    this.currentValue = this.defaultValue
   }
 
   /**
@@ -66,10 +92,16 @@ export default class ClockPulse implements Pulse {
     this.emitter.on(event, fn)
   }
 
+  /**
+   * Stops the clock pulse.
+   */
   stop = () => {
     this.isStopped = true
   }
 
+  /**
+   * Starts the clock pulse.
+   */
   start = () => {
     this.isStopped = false
   }
@@ -81,9 +113,11 @@ export default class ClockPulse implements Pulse {
    */
   public update = (elapsed: number): void => {
     if (!this.isStopped && elapsed >= this.lastUpdate + this.interval) {
-      this.signal = this.signal === -1 ? 1 : -1
+      this.currentValue = this.currentValue === LogicValue.FALSE
+        ? LogicValue.TRUE
+        : LogicValue.FALSE
       this.lastUpdate = elapsed
-      this.emitter.emit('change', this.signal)
+      this.emitter.emit('change', this.currentValue)
     }
   }
 }

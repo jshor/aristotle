@@ -12,7 +12,8 @@
     v-if="wire"
     :style="{
       left: wire.targetPosition?.x + 'px',
-      top: wire.targetPosition?.y + 'px'
+      top: wire.targetPosition?.y + 'px',
+      transform: `translate(-50%, -50%)`
     }"
   />
   <draggable
@@ -25,7 +26,10 @@
     @dblclick="onDoubleClick"
   >
     <port-pivot>
-      <port-handle :active="isActive" />
+      <port-handle
+        :active="isActive"
+        :hue="port.isMonitored ? port.hue : 0"
+      />
     </port-pivot>
   </draggable>
 </template>
@@ -40,6 +44,7 @@ import renderLayout from '@/store/document/geometry/wire'
 import Port from '@/types/interfaces/Port'
 import WireDraggable from './WireDraggable.vue'
 import { ITEM_BASE_Z_INDEX } from '@/constants'
+import Direction from '@/types/enums/Direction'
 
 export default defineComponent({
   name: 'PortItem',
@@ -70,12 +75,15 @@ export default defineComponent({
     } = store
     const isActive = computed(() => store.activePortId === props.port.id || store.connectablePortIds.has(props.port.id))
     const wire = computed(() => {
-      if (store.connectionExperiment?.sourceId !== props.port.id) return null
+      if (store.connectionExperiment?.sourceId !== props.port.id) {
+        // if this port is not part of the active connection experiment then there is no wire to render
+        return null
+      }
 
       const { targetPosition } = store.connectionExperiment
       const geometry = renderLayout(props.port, {
         position: targetPosition,
-        orientation: props.port.orientation,
+        orientation: Direction.Right,
         rotation: props.port.rotation,
         canInflect: true
       })

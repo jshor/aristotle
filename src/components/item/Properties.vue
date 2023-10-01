@@ -87,7 +87,7 @@ import { defineComponent, nextTick, PropType, ref, watch } from 'vue'
 import { faClose, faWrench } from '@fortawesome/free-solid-svg-icons'
 import cloneDeep from 'lodash.clonedeep'
 import Icon from '@/components/Icon.vue'
-import PropertySet from '@/types/interfaces/PropertySet'
+import ItemProperties from '@/types/interfaces/ItemProperties'
 import Point from '@/types/interfaces/Point'
 
 export default defineComponent({
@@ -97,7 +97,7 @@ export default defineComponent({
   },
   props: {
     properties: {
-      type: Object as PropType<PropertySet>,
+      type: Object as PropType<ItemProperties>,
       default: () => ({})
     },
     id: {
@@ -110,13 +110,13 @@ export default defineComponent({
     }
   },
   emits: {
-    update: (id: string, properties: PropertySet) => true,
+    update: (id: string, properties: ItemProperties) => true,
     pan: (point: Point, animate: boolean) => true
   },
   setup (props, { emit }) {
     const propertiesRef = ref<HTMLElement>()
     const isOpen = ref(false)
-    const model = ref<PropertySet>(cloneDeep(props.properties))
+    const model = ref<ItemProperties>(cloneDeep(props.properties))
 
     watch(props.properties, value => {
       model.value = cloneDeep(value)
