@@ -54,10 +54,10 @@ export function toggleDebugger (this: DocumentStoreInstance, force = false) {
   this.isDebugging = !this.isDebugging
 
   if (this.isDebugging || force) {
-    this.stopSimulation()
+    this.toggleClocks('stop')
     this.isDebugging = true
   } else {
-    this.startSimulation()
+    this.toggleClocks('start')
     this.advanceSimulation()
   }
 }
@@ -101,7 +101,6 @@ export function evaluateCircuitStep (this: DocumentStoreInstance, iteration: num
  * Resets the virtual circuit back to its original state.
  */
 export function resetCircuit (this: DocumentStoreInstance) {
-  this.oscillator.clear()
   this.circuit.reset()
 
   // apply the initial port values
@@ -135,7 +134,10 @@ export function resetCircuit (this: DocumentStoreInstance) {
       }
     })
 
+    // this.oscillator.timeMsElapsed = 0
+
   this.flushCircuit()
+  this.oscillator.reset()
 }
 
 /**
@@ -227,13 +229,16 @@ export function removeVirtualNode (this: DocumentStoreInstance, itemId: string) 
     })
 }
 
+/**
+ * Adds a clock pulse to the simulation.
+ */
 export function addClock (this: DocumentStoreInstance, item: Item) {
-  const interval = item.properties.interval?.value as number
-  const startValue = item.properties.startValue?.value as LogicValue || LogicValue.FALSE
+  const interval = item.properties.interval?.value
+  const startValue = item.properties.startValue?.value || LogicValue.FALSE
 
   if (!interval) return
 
-  item.clock = new ClockPulse(item.portIds[0], interval, startValue)
+  item.clock = new ClockPulse(item.portIds[0], interval, startValue, startValue)
   item.clock.on('change', (value: number) => this.setPortValue({ id: item.portIds[0], value }))
 
   this.oscillator.add(item.clock)
@@ -257,10 +262,10 @@ export function onVirtualNodeChange (this: DocumentStoreInstance, node: CircuitN
             // if the value of a material port that's visible on the canvas has changed, then the circuit has not been fully evaluated
             this.isCircuitEvaluated = false
           }
-        }
 
-        port.value = value
-        port.wave?.drawPulseChange(value)
+          port.value = value
+          port.wave?.drawPulseChange(value)
+        }
       }
     })
 }

@@ -24,7 +24,7 @@ describe('simulation actions', () => {
   describe('toggleClocks()', () => {
     const store = createDocumentStore('document')()
     const item = createItem('item', ItemType.InputNode, {
-      clock: new ClockPulse('clock', 1000, LogicValue.TRUE)
+      clock: new ClockPulse('clock', 1000, LogicValue.TRUE, LogicValue.TRUE)
     })
 
     beforeEach(() => {
@@ -139,8 +139,7 @@ describe('simulation actions', () => {
     beforeEach(() => {
       store.$reset()
       stubAll(store, [
-        'stopSimulation',
-        'startSimulation',
+        'toggleClocks',
         'advanceSimulation'
       ])
     })
@@ -149,7 +148,8 @@ describe('simulation actions', () => {
       store.isDebugging = true
       store.toggleDebugger(true)
 
-      expect(store.stopSimulation).toHaveBeenCalledTimes(1)
+      expect(store.toggleClocks).toHaveBeenCalledTimes(1)
+      expect(store.toggleClocks).toHaveBeenCalledWith('stop')
       expect(store.isDebugging).toBe(true)
     })
 
@@ -159,8 +159,9 @@ describe('simulation actions', () => {
         store.toggleDebugger()
       })
 
-      it('should restart the simulation', () => {
-        expect(store.startSimulation).toHaveBeenCalledTimes(1)
+      it('should restart the clocks', () => {
+        expect(store.toggleClocks).toHaveBeenCalledTimes(1)
+        expect(store.toggleClocks).toHaveBeenCalledWith('start')
       })
 
       it('should advance the simulation by one step', () => {
@@ -179,7 +180,8 @@ describe('simulation actions', () => {
       })
 
       it('should stop the simulation', () => {
-        expect(store.stopSimulation).toHaveBeenCalledTimes(1)
+        expect(store.toggleClocks).toHaveBeenCalledTimes(1)
+        expect(store.toggleClocks).toHaveBeenCalledWith('stop')
       })
 
       it('should flip isDebugging to true', () => {
@@ -428,61 +430,6 @@ describe('simulation actions', () => {
       expect(store.circuit.addNode).toHaveBeenCalledTimes(1)
       expect(store.circuit.addNode).toHaveBeenCalledWith(circuitNode)
     })
-
-    describe('when the item is a clock', () => {
-      const item = createItem('item-id', ItemType.InputNode, {
-        subtype: ItemSubtype.Clock,
-        portIds: [inputPort.id, outputPort.id],
-        properties: {
-          interval: {
-            type: 'number',
-            value: 1500,
-            label: 'Interval'
-          }
-        }
-      })
-
-      beforeEach(() => {
-        store.addVirtualNode(item, ports)
-      })
-
-      it('should add a clock element using the first output port', () => {
-        expect(item.clock!).toBeInstanceOf(ClockPulse)
-        expect(item.clock!.interval).toEqual(item.properties.interval.value)
-        // expect(item.clock.value).toEqual(LogicValue.TRUE) // TODO
-        expect(store.oscillator.add).toHaveBeenCalledTimes(1)
-        expect(store.oscillator.add).toHaveBeenCalledWith(item.clock)
-      })
-
-      it('should invoke setPortValue() when the clock value changes', () => {
-        item.clock!.update(1500)
-
-        expect(store.setPortValue).toHaveBeenCalledTimes(1)
-        expect(store.setPortValue).toHaveBeenCalledWith({
-          id: outputPort.id,
-          value: LogicValue.FALSE // opposite of the start value (TRUE)
-        })
-      })
-    })
-
-    describe('port monitoring', () => {
-      const inputPort = createPort('inputPort', 'item-id', PortType.Input, { isMonitored: true })
-      const outputPort = createPort('outputPort', 'item-id', PortType.Output)
-      const item = createItem('item-id', ItemType.InputNode, {
-        portIds: [inputPort.id, outputPort.id]
-      })
-
-      beforeEach(() => store.addVirtualNode(item, { inputPort, outputPort }))
-
-      it('should monitor ports that are marked to be monitored', () => {
-        expect(store.monitorPort).toHaveBeenCalledTimes(1)
-        expect(store.monitorPort).toHaveBeenCalledWith(inputPort.id)
-      })
-
-      it('should not monitor ports that are not marked to be monitored', () => {
-        expect(store.monitorPort).not.toHaveBeenCalledWith(outputPort.id)
-      })
-    })
   })
 
   describe('removeVirtualNode()', () => {
@@ -568,6 +515,68 @@ describe('simulation actions', () => {
     })
   })
 
+  describe('addClock()', () => {
+    const store = createDocumentStore('document')()
+    const outputPort = createPort('outputPort', 'item-id', PortType.Output)
+    const item = createItem('item-id', ItemType.InputNode, {
+      subtype: ItemSubtype.Clock,
+      portIds: [outputPort.id],
+      properties: {
+        interval: {
+          type: 'number',
+          value: 1500,
+          label: 'Interval'
+        }
+      }
+    })
+
+    beforeEach(() => {
+      store.$reset()
+
+      stubAll(store, ['setPortValue'])
+
+      jest
+        .spyOn(store.oscillator, 'add')
+        .mockImplementation(jest.fn())
+    })
+
+    it('should not add a clock element when no interval is defined on the element', () => {
+      store.addClock({
+        ...item,
+        properties: {}
+      })
+
+      expect(item.clock).toBeUndefined()
+      expect(store.oscillator.add).not.toHaveBeenCalled()
+    })
+
+    describe('when an interval is defined on the element', () => {
+      beforeEach(() => {
+        store.$patch({
+          ports: { outputPort }
+        })
+        store.addClock(item)
+      })
+
+      it('should add a clock element using the first output port', () => {
+        expect(item.clock!).toBeInstanceOf(ClockPulse)
+        expect(item.clock!.interval).toEqual(item.properties.interval!.value)
+        expect(store.oscillator.add).toHaveBeenCalledTimes(1)
+        expect(store.oscillator.add).toHaveBeenCalledWith(item.clock)
+      })
+
+      it('should invoke setPortValue() when the clock value changes', () => {
+        item.clock!.update(1500)
+
+        expect(store.setPortValue).toHaveBeenCalledTimes(1)
+        expect(store.setPortValue).toHaveBeenCalledWith({
+          id: outputPort.id,
+          value: LogicValue.TRUE
+        })
+      })
+    })
+  })
+
   describe('onVirtualNodeChange()', () => {
     const store = createDocumentStore('document')()
     const wave = new BinaryWavePulse('wave', 'wave', 1000, 1)
@@ -606,17 +615,6 @@ describe('simulation actions', () => {
       store.onVirtualNodeChange(node1, ['port1'], LogicValue.TRUE, ['port1'])
 
       expect(store.ports[port1.id].value).toEqual(LogicValue.TRUE)
-    })
-
-    it('should invoke drawPulseChange() on a port that contains a wave', () => {
-      jest
-        .spyOn(wave, 'drawPulseChange')
-        .mockImplementation(jest.fn())
-
-      store.onVirtualNodeChange(node2, ['port2'], LogicValue.TRUE, ['port2'])
-
-      // expect(wave.drawPulseChange).toHaveBeenCalledTimes(1)
-      expect(wave.drawPulseChange).toHaveBeenCalledWith(LogicValue.TRUE)
     })
   })
 

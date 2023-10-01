@@ -1,4 +1,3 @@
-import ClockPulse from '../oscillator/ClockPulse'
 import { DocumentStoreInstance } from '..'
 import BaseItem from '@/types/interfaces/BaseItem'
 import SerializableState from '@/types/interfaces/SerializableState'
@@ -83,7 +82,7 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
   connections,
   ports,
   groups
-}: SerializableState, debug = false) {
+}: SerializableState) {
   this.deselectAll()
 
   /**
@@ -113,9 +112,13 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
     .keys(items)
     .forEach(id => {
       if (this.items[id]) {
+        this.setItemPosition({
+          id,
+          position: items[id].position
+        })
         this.items[id] = {
           ...items[id],
-          // clock: this.items[id].clock
+          clock: this.items[id].clock
         }
         this.setItemBoundingBox(id)
         this.setItemSelectionState(id, items[id].isSelected)

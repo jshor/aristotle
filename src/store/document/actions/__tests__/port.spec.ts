@@ -29,7 +29,10 @@ describe('port actions', () => {
         items: { item }
       })
 
-      stubAll(store, ['addVirtualNode'])
+      stubAll(store, [
+        'setPortValue',
+        'monitorPort'
+      ])
     })
 
     it('should add the port to the state', () => {
@@ -40,22 +43,29 @@ describe('port actions', () => {
       expect(store.items[item.id].portIds).toContain(port.id)
     })
 
-    it('should add the virtual node if the node is not present on the circuit', () => {
-      store.nodes = {}
-      store.addPort(item.id, port)
-
-      expect(store.addVirtualNode).toHaveBeenCalledTimes(1)
-      expect(store.addVirtualNode).toHaveBeenCalledWith(item)
-    })
-
     it('should bind the reference of the port to the existing circuit node, if present', () => {
       const node = new CircuitNode(port.id)
 
       store.nodes = { [port.id]: node }
       store.addPort(item.id, port)
 
-      expect(store.addVirtualNode).not.toHaveBeenCalled()
       expect(store.nodes[port.id]).toEqual(node)
+    })
+
+    it('should monitor the port when `isMonitored` is true', () => {
+      store.nodes = {}
+      store.addPort(item.id, { ...port, isMonitored: true })
+
+      expect(store.monitorPort).toHaveBeenCalledTimes(1)
+      expect(store.monitorPort).toHaveBeenCalledWith(port.id)
+    })
+
+    it('should apply the port circuit value', () => {
+      store.nodes = {}
+      store.addPort(item.id, port)
+
+      expect(store.setPortValue).toHaveBeenCalledTimes(1)
+      expect(store.setPortValue).toHaveBeenCalledWith({ id: port.id, value: port.value })
     })
   })
 
@@ -93,6 +103,33 @@ describe('port actions', () => {
 
       expect(store.disconnectById).toHaveBeenCalledTimes(1)
       expect(store.disconnectById).toHaveBeenCalledWith(connection1.id)
+    })
+  })
+
+  describe('setPortName', () => {
+    const store = createDocumentStore('document')()
+    const item = createItem('item', ItemType.InputNode, { portIds: ['port1'], defaultName: 'MyItem' })
+    const port1 = createPort('port1', 'item', PortType.Input, { defaultName: 'Input Port' })
+    const port2 = createPort('port2', 'item', PortType.Input, { defaultName: 'Input Port' })
+
+    beforeEach(() => {
+      store.$reset()
+      store.$patch({
+        items: { item },
+        ports: { port1, port2 }
+      })
+    })
+
+    it('should set the port name to the sequenced name', () => {
+      store.setPortName(port1.id)
+
+      expect(port1.name).toEqual('MyItem Input Port')
+    })
+
+    it('should increment the sequenced name if the port is already named', () => {
+      store.setPortName(port2.id)
+
+      expect(port2.name).toEqual('MyItem Input Port 2')
     })
   })
 
@@ -370,7 +407,7 @@ describe('port actions', () => {
       const port = store.ports[portId]
 
       expect(port.wave).toBeInstanceOf(BinaryWavePulse)
-      expect(port.wave!.name).toEqual(`${store.items[itemId].name} ${port.name}`)
+      expect(port.wave!.name).toEqual(port.name)
       expect(port.wave!.hue).toEqual(port.hue)
     })
 

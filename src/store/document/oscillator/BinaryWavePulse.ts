@@ -3,8 +3,7 @@ import Point from '@/types/interfaces/Point'
 import Pulse from '@/types/interfaces/Pulse'
 
 /**
- * @class BinaryWavePulse
- * @description this service provides functionality for a graphical illustration of a wave in the oscilloscope.
+ * Provides functionality for a graphical illustration of a wave in the oscilloscope.
  * Instances of these waves are the values of the active oscillogram.
  */
 export default class BinaryWavePulse implements Pulse {
@@ -65,11 +64,13 @@ export default class BinaryWavePulse implements Pulse {
   /**
    * Clears out the existing wave data.
    */
-  public reset = () => {
+  public clear = () => {
     this.segments = []
     this.width = 0
     this.initialize(this.lastY === 1 ? 0 : 1)
   }
+
+  public reset = (elapsed: number) => {}
 
   /**
    * Periodic update function.

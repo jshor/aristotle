@@ -32,7 +32,7 @@ import OutputNode from '@/components/item/elements/OutputNode.vue'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
 import Direction from '@/types/enums/Direction'
-import PropertySet from '@/types/interfaces/PropertySet'
+import ItemProperties from '@/types/interfaces/ItemProperties'
 import Port from '@/types/interfaces/Port'
 
 const components = {
@@ -74,7 +74,7 @@ export default defineComponent({
       default: () => {}
     },
     properties: {
-      type: Object as PropType<PropertySet>,
+      type: Object as PropType<ItemProperties>,
       default: () => ({})
     }
   },

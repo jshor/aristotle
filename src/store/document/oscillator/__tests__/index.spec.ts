@@ -1,12 +1,13 @@
 import BinaryWavePulse from '../BinaryWavePulse'
 import ClockPulse from '../ClockPulse'
 import Oscillator from '../'
+import LogicValue from '@/types/enums/LogicValue'
 
 describe('Oscillation Service', () => {
-  let service: Oscillator
+  let oscillator: Oscillator
 
   beforeEach(() => {
-    service = new Oscillator()
+    oscillator = new Oscillator()
   })
 
   afterEach(() => jest.resetAllMocks())
@@ -19,81 +20,119 @@ describe('Oscillation Service', () => {
         .spyOn(Date, 'now')
         .mockReturnValue(now)
       jest
-        .spyOn(service, 'tick')
+        .spyOn(oscillator, 'tick')
         .mockImplementation(jest.fn())
     })
 
     it('should not re-start when the oscillator is not currently paused', () => {
-      service.isPaused = false
-      service.start()
+      oscillator.isPaused = false
+      oscillator.start()
 
-      expect(service.tick).not.toHaveBeenCalled()
+      expect(oscillator.tick).not.toHaveBeenCalled()
     })
 
     describe('when the oscillator is not paused', () => {
       const lastUpdateTime = now + 3456
 
       beforeEach(() => {
-        service.lastUpdateTime = lastUpdateTime
-        service.isPaused = true
-        service.start()
+        oscillator.lastUpdateTime = lastUpdateTime
+        oscillator.isPaused = true
+        oscillator.start()
       })
 
       it('should set the last update time to be now plus whatever time remained from the last period', () => {
-        expect(service.lastUpdateTime).toEqual(now + (lastUpdateTime % service.refreshRate))
+        expect(oscillator.lastUpdateTime).toEqual(now + (lastUpdateTime % oscillator.refreshRate))
       })
 
       it('should set the isPaused flag to false', () => {
-        expect(service.isPaused).toBe(false)
+        expect(oscillator.isPaused).toBe(false)
       })
 
       it('should invoke tick()', () => {
-        expect(service.tick).toHaveBeenCalledTimes(1)
+        expect(oscillator.tick).toHaveBeenCalledTimes(1)
       })
     })
   })
 
   describe('stop()', () => {
     it('should set isPaused to true', () => {
-      service.stop()
+      oscillator.stop()
 
-      expect(service.isPaused).toEqual(true)
+      expect(oscillator.isPaused).toEqual(true)
+    })
+  })
+
+  describe('reset()', () => {
+    it('should set the time elapsed to zero', () => {
+      oscillator.timeMsElapsed = 1000
+      oscillator.reset()
+
+      expect(oscillator.timeMsElapsed).toEqual(0)
+    })
+
+    it('should call reset on all clocks', () => {
+      const clock1 = new ClockPulse('clock1', 100, LogicValue.TRUE, LogicValue.TRUE)
+      const clock2 = new ClockPulse('clock2', 200, LogicValue.TRUE, LogicValue.TRUE)
+
+      jest
+        .spyOn(clock1, 'reset')
+        .mockImplementation(jest.fn())
+      jest
+        .spyOn(clock2, 'reset')
+        .mockImplementation(jest.fn())
+
+      oscillator.clocks = { clock1, clock2 }
+      oscillator.reset()
+
+      expect(clock1.reset).toHaveBeenCalledTimes(1)
+      expect(clock2.reset).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('clear()', () => {
-    it('should clear all binary service waves', () => {
-      const clock = new ClockPulse('clock', 1000, 1)
-      const wave = new BinaryWavePulse('wave', 'wave', 1, 0)
+    it('should clear all binary oscillator waves', () => {
+      const wave1 = new BinaryWavePulse('wave1', 'wave1', LogicValue.TRUE, 0)
+      const wave2 = new BinaryWavePulse('wave2', 'wave2', LogicValue.TRUE, 0)
 
       jest
-        .spyOn(wave, 'reset')
+        .spyOn(wave1, 'clear')
+        .mockImplementation(jest.fn())
+      jest
+        .spyOn(wave2, 'clear')
         .mockImplementation(jest.fn())
 
-      service.waves = { clock, wave }
-      service.clear()
+      oscillator.binaryWaves = { wave1, wave2 }
+      oscillator.clear()
 
-      expect(wave.reset).toHaveBeenCalledTimes(1)
+      expect(wave1.clear).toHaveBeenCalledTimes(1)
+      expect(wave2.clear).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('computeWaveGeometry()', () => {
     it('should return the oscillogram containing each binary wave having segments', () => {
-      const wave = new BinaryWavePulse('wave', 'wave', 1, 0)
-      const clock = new ClockPulse('clock', 1000, 1)
+      const wave1 = new BinaryWavePulse('wave1', 'wave1', LogicValue.TRUE, 123)
+      const wave2 = new BinaryWavePulse('wave2', 'wave2', LogicValue.TRUE, 456)
 
-      wave.segments = [{ x: 0, y: 0 }, { x: 10, y: 20 }]
-      wave.width = 0
+      wave1.segments = [{ x: 0, y: 0 }, { x: 10, y: 20 }]
+      wave1.width = 0
+      wave2.segments = [{ x: 10, y: 20 }, { x: 30, y: 40 }]
+      wave2.width = 20
 
-      const oscillogram = service.computeWaveGeometry({ wave, clock })
+      const oscillogram = oscillator.computeWaveGeometry({ wave1, wave2 })
 
-      expect(oscillogram).toHaveProperty('wave')
-      expect(oscillogram.wave).toEqual(expect.objectContaining({
+      expect(oscillogram).toHaveProperty('wave1')
+      expect(oscillogram.wave1).toEqual(expect.objectContaining({
         points: '0,0 10,20',
         width: 0,
-        hue: expect.any(Number)
+        hue: wave1.hue
       }))
-      expect(oscillogram).not.toHaveProperty('clock')
+      expect(oscillogram).toHaveProperty('wave2')
+      expect(oscillogram.wave2).toEqual(expect.objectContaining({
+        points: '10,20 30,40',
+        width: 20,
+        hue: wave2.hue
+      }))
     })
   })
 
@@ -102,16 +141,16 @@ describe('Oscillation Service', () => {
 
     beforeEach(() => {
       jest
-        .spyOn(service, 'update')
+        .spyOn(oscillator, 'update')
         .mockImplementation(jest.fn())
       jest
-        .spyOn(service, 'start')
+        .spyOn(oscillator, 'start')
         .mockImplementation(jest.fn())
       jest
-        .spyOn(service, 'stop')
+        .spyOn(oscillator, 'stop')
         .mockImplementation(jest.fn())
       jest
-        .spyOn(service, 'broadcast')
+        .spyOn(oscillator, 'broadcast')
         .mockImplementation(jest.fn())
       jest
         .spyOn(Date, 'now')
@@ -119,117 +158,122 @@ describe('Oscillation Service', () => {
     })
 
     it('should not do anything when the oscillator is paused', () => {
-      service.isPaused = true
-      service.tick()
+      oscillator.isPaused = true
+      oscillator.tick()
 
-      expect(service.start).not.toHaveBeenCalled()
-      expect(service.stop).not.toHaveBeenCalled()
-      expect(service.update).not.toHaveBeenCalled()
-      expect(service.broadcast).not.toHaveBeenCalled()
+      expect(oscillator.start).not.toHaveBeenCalled()
+      expect(oscillator.stop).not.toHaveBeenCalled()
+      expect(oscillator.update).not.toHaveBeenCalled()
+      expect(oscillator.broadcast).not.toHaveBeenCalled()
     })
 
     describe('when the oscillator is not paused', () => {
       beforeEach(() => {
-        service.isPaused = false
+        oscillator.isPaused = false
       })
 
       it('should restart the timer instead of invoking update() when the oscillator has been idle for 10 seconds', () => {
-        service.lastUpdateTime = now - 10000
-        service.tick()
+        oscillator.lastUpdateTime = now - 10000
+        oscillator.tick()
 
-        expect(service.start).toHaveBeenCalledTimes(1)
-        expect(service.stop).toHaveBeenCalledTimes(1)
-        expect(service.update).not.toHaveBeenCalled()
+        expect(oscillator.start).toHaveBeenCalledTimes(1)
+        expect(oscillator.stop).toHaveBeenCalledTimes(1)
+        expect(oscillator.update).not.toHaveBeenCalled()
       })
 
       it('should invoke update() five times when five refresh periods have passed since last update', () => {
-        service.lastUpdateTime = now - (service.refreshRate * 5)
-        service.tick()
+        oscillator.lastUpdateTime = now - (oscillator.refreshRate * 5)
+        oscillator.tick()
 
-        expect(service.update).toHaveBeenCalledTimes(5)
+        expect(oscillator.update).toHaveBeenCalledTimes(5)
       })
 
       it('should broadcast when the oscillator updates', () => {
-        service.lastUpdateTime = now - service.refreshRate
-        service.tick()
+        oscillator.lastUpdateTime = now - oscillator.refreshRate
+        oscillator.tick()
 
-        expect(service.broadcast).toHaveBeenCalledTimes(1)
+        expect(oscillator.broadcast).toHaveBeenCalledTimes(1)
       })
 
       it('should not broadcast when the oscillator has not updated', () => {
-        service.lastUpdateTime = now
-        service.tick()
+        oscillator.lastUpdateTime = now
+        oscillator.tick()
 
-        expect(service.broadcast).not.toHaveBeenCalled()
+        expect(oscillator.broadcast).not.toHaveBeenCalled()
       })
     })
   })
 
   describe('broadcast()', () => {
-    const wave = new BinaryWavePulse('wave', 'wave', 1, 0)
-    const clock = new ClockPulse('clock', 1000, 1)
+    const wave1 = new BinaryWavePulse('wave1', 'wave1', LogicValue.TRUE, 0)
+    const wave2 = new BinaryWavePulse('wave2', 'wave2', LogicValue.TRUE, 0)
 
     it('should truncate segments for each binary wave when the max width has exceeded', () => {
       jest
-        .spyOn(wave, 'truncateSegments')
+        .spyOn(wave1, 'truncateSegments')
+        .mockImplementation(jest.fn())
+      jest
+        .spyOn(wave2, 'truncateSegments')
         .mockImplementation(jest.fn())
 
-      service.refreshRate = 1000
-      service.waves = { wave, clock }
-      service.broadcast()
+      oscillator.refreshRate = 1000
+      oscillator.binaryWaves = { wave1, wave2 }
+      oscillator.broadcast()
 
-      expect(wave.truncateSegments).toHaveBeenCalledTimes(1)
-      expect(wave.truncateSegments).toHaveBeenCalledWith(0)
+      expect(wave1.truncateSegments).toHaveBeenCalledTimes(1)
+      expect(wave1.truncateSegments).toHaveBeenCalledWith(0)
+      expect(wave2.truncateSegments).toHaveBeenCalledTimes(1)
+      expect(wave2.truncateSegments).toHaveBeenCalledWith(0)
     })
   })
 
   describe('update()', () => {
     it('should call `update()` on each wave', () => {
-      const wave1 = new BinaryWavePulse('wave1', 'wave1', 1, 0)
-      const wave2 = new BinaryWavePulse('wave2', 'wave2', 1, 0)
+      const wave1 = new BinaryWavePulse('wave1', 'wave1', LogicValue.TRUE, 0)
+      const wave2 = new BinaryWavePulse('wave2', 'wave2', LogicValue.TRUE, 0)
 
       jest.spyOn(wave1, 'update')
       jest.spyOn(wave2, 'update')
 
-      service.waves = { wave1, wave2 }
-      service.update()
+      oscillator.pulses = { wave1, wave2 }
+      oscillator.update()
 
       expect(wave1.update).toHaveBeenCalledTimes(1)
-      expect(wave1.update).toHaveBeenCalledWith(service.timeMsElapsed)
+      expect(wave1.update).toHaveBeenCalledWith(oscillator.timeMsElapsed)
       expect(wave2.update).toHaveBeenCalledTimes(1)
-      expect(wave2.update).toHaveBeenCalledWith(service.timeMsElapsed)
+      expect(wave2.update).toHaveBeenCalledWith(oscillator.timeMsElapsed)
     })
   })
 
   describe('add()', () => {
     it('should add the wave to the list, with its id being the key', () => {
       const interval = 400
-      const wave = new ClockPulse('wave', interval, 1)
+      const wave = new ClockPulse('wave', interval, LogicValue.TRUE, LogicValue.TRUE)
 
-      service.add(wave)
+      oscillator.add(wave)
 
-      expect(service.waves).toHaveProperty(wave.id)
-      expect(service.waves[wave.id]).toEqual(wave)
+      expect(oscillator.clocks).toHaveProperty(wave.id)
+      expect(oscillator.clocks[wave.id]).toEqual(wave)
     })
 
     it('should not add the given wave if one with its id is already registered', () => {
-      const wave = new BinaryWavePulse('wave', 'wave', 1, 0)
+      const wave = new BinaryWavePulse('wave', 'wave', LogicValue.TRUE, 0)
 
-      service.waves = { wave }
-      service.add(wave)
+      oscillator.binaryWaves = { wave }
+      oscillator.add(wave)
 
-      expect(Object.keys(service.waves)).toEqual(['wave'])
+      expect(Object.keys(oscillator.binaryWaves)).toEqual(['wave'])
     })
   })
 
   describe('remove()', () => {
     it('should remove the wave having the given id', () => {
-      const wave = new BinaryWavePulse('test', 'test', 1, 0)
+      const wave = new BinaryWavePulse('test', 'test', LogicValue.TRUE, 0)
 
-      service.waves = { wave }
-      service.remove(wave)
+      oscillator.binaryWaves = { wave }
+      oscillator.remove(wave)
 
-      expect(service.waves).not.toHaveProperty(wave.id)
+      expect(oscillator.binaryWaves).not.toHaveProperty(wave.id)
     })
   })
 })

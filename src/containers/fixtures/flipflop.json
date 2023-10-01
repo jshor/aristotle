@@ -60,7 +60,8 @@
     "nor1InputPort1": {
       "id": "nor1InputPort1",
       "elementId": "nor1",
-      "name": "Input Port 1",
+      "defaultName": "Input Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -75,7 +76,8 @@
     "nor1InputPort2": {
       "id": "nor1InputPort2",
       "elementId": "nor1",
-      "name": "Input Port 2",
+      "defaultName": "Input Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -90,7 +92,8 @@
     "nor1OutputPort1": {
       "id": "nor1OutputPort1",
       "elementId": "nor1",
-      "name": "Output Port",
+      "defaultName": "Input Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -105,7 +108,8 @@
     "nor2InputPort1": {
       "id": "nor2InputPort1",
       "elementId": "nor2",
-      "name": "Input Port 1",
+      "defaultName": "Input Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -120,7 +124,8 @@
     "nor2InputPort2": {
       "id": "nor2InputPort2",
       "elementId": "nor2",
-      "name": "Input Port 2",
+      "defaultName": "Input Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -135,7 +140,8 @@
     "nor2OutputPort1": {
       "id": "nor2OutputPort1",
       "elementId": "nor2",
-      "name": "Output Port",
+      "defaultName": "Output Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -150,7 +156,8 @@
     "switchOutputPort1": {
       "id": "switchOutputPort1",
       "elementId": "switch1",
-      "name": "Output Port",
+      "defaultName": "Output Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -165,7 +172,8 @@
     "switchOutputPort2": {
       "id": "switchOutputPort2",
       "elementId": "switch2",
-      "name": "Output Port",
+      "defaultName": "Output Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -180,7 +188,8 @@
     "lightbulbInputPort1": {
       "id": "lightbulbInputPort1",
       "elementId": "lightbulb1",
-      "name": "Input Port",
+      "defaultName": "Input Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -195,7 +204,8 @@
     "lightbulbInputPort2": {
       "id": "lightbulbInputPort2",
       "elementId": "lightbulb2",
-      "name": "Input Port",
+      "defaultName": "Input Port",
+      "name": "",
       "connectedPortIds": [],
       "position": {
         "x": 0,
@@ -212,6 +222,7 @@
     "nor1": {
       "id": "nor1",
       "type": "LogicGate",
+      "defaultName": "NOR Gate",
       "subtype": "Nor",
       "portIds": [
         "nor1InputPort1",
@@ -236,6 +247,11 @@
           "value": 2,
           "type": "number",
           "min": 2
+        },
+        "name": {
+          "label": "Name",
+          "value": "",
+          "type": "text"
         }
       },
       "groupId": null,
@@ -247,6 +263,7 @@
       "id": "nor2",
       "type": "LogicGate",
       "subtype": "Nor",
+      "defaultName": "NOR Gate",
       "portIds": [
         "nor2InputPort2",
         "nor2InputPort1",
@@ -270,6 +287,11 @@
           "value": 2,
           "type": "number",
           "min": 2
+        },
+        "name": {
+          "label": "Name",
+          "value": "",
+          "type": "text"
         }
       },
       "groupId": null,
@@ -281,6 +303,7 @@
       "id": "switch1",
       "type": "InputNode",
       "subtype": "Clock",
+      "defaultName": "Clock",
       "portIds": [
         "switchOutputPort1"
       ],
@@ -329,6 +352,7 @@
       "id": "switch2",
       "type": "InputNode",
       "subtype": "Switch",
+      "defaultName": "Switch",
       "portIds": [
         "switchOutputPort2"
       ],
@@ -370,6 +394,7 @@
       "id": "lightbulb1",
       "type": "OutputNode",
       "subtype": "Lightbulb",
+      "defaultName": "Lightbulb",
       "portIds": [
         "lightbulbInputPort1"
       ],
@@ -401,6 +426,7 @@
       "id": "lightbulb2",
       "type": "OutputNode",
       "subtype": "Lightbulb",
+      "defaultName": "Lightbulb",
       "portIds": [
         "lightbulbInputPort2"
       ],

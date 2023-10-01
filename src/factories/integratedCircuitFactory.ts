@@ -49,7 +49,14 @@ export default function integratedCircuitFactory (state: SerializableState, name
         .filter(port => port.type === homogenousPortType)
         .forEach(port => {
           const newId = uuid()
-          const name = item.properties.name?.value as string || item.name
+          const type = homogenousPortType === PortType.Input
+            ? PortType.Output
+            : PortType.Input
+          const defaultName = type === PortType.Input
+            ? `Input Port ${portSequenceNumber}`
+            : `Output Port ${portSequenceNumber}`
+
+          item.properties.name?.value || item.defaultName
 
           // each input node (switch, button, etc.) will become a buffer node when simulated
           // therefore each input node (now buffer) will receive an additional input port to receive signals from the outside world
@@ -57,12 +64,9 @@ export default function integratedCircuitFactory (state: SerializableState, name
           // these new input and output ports will be used by both the embedded nodes and the integrated circuit element itself
           ports[newId] = {
             ...cloneDeep<Port>(port),
-            type: homogenousPortType === PortType.Input
-              ? PortType.Output
-              : PortType.Input,
-            name: itemPorts.length > 1
-              ? `${name} ${portSequenceNumber++}`
-              : name,
+            type,
+            defaultName,
+            name: '',
             id: newId,
             elementId: item.id,
             orientation,
@@ -76,7 +80,7 @@ export default function integratedCircuitFactory (state: SerializableState, name
       item.type = ItemType.Buffer
     })
 
-  integratedCircuitItem.name = name
+  integratedCircuitItem.defaultName = name
   integratedCircuitItem.integratedCircuit = {
     items,
     connections,

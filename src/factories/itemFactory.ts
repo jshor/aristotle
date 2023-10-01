@@ -7,7 +7,7 @@ import Direction from '@/types/enums/Direction'
 export default function itemFactory (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports?: Record<Direction, Port[]>): Item {
   return {
     id,
-    name: '',
+    defaultName: '',
     type,
     subtype,
     portIds: Object

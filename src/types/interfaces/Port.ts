@@ -4,6 +4,7 @@ import ControlPoint from './ControlPoint'
 
 interface Port extends ControlPoint {
   id: string
+  defaultName: string
   name: string
   elementId: string
   integratedCircuitItemId?: string

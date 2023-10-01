@@ -16,7 +16,7 @@ export default function digitFactory () {
     .reduce((map, _, i) => {
       const portId = uuid()
       const itemId = uuid()
-      const port = portFactory(itemId, portId, Direction.Left, PortType.Output, `Input Port ${i + 1}`)
+      const port = portFactory(itemId, portId, Direction.Left, PortType.Output)
       const item = itemFactory(itemId, ItemType.InputNode, ItemSubtype.Switch, 0, 0, {
         [Direction.Left]: [port],
         [Direction.Right]: [],

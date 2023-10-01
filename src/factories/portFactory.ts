@@ -2,11 +2,14 @@ import Direction from '@/types/enums/Direction'
 import PortType from '@/types/enums/PortType'
 import Port from '@/types/interfaces/Port'
 
-export default function portFactory (elementId: string, id: string, orientation: Direction, type: PortType, name: string): Port {
+export default function portFactory (elementId: string, id: string, orientation: Direction, type: PortType): Port {
   return {
     id,
     orientation,
-    name,
+    defaultName: type === PortType.Input
+      ? 'Input Port' // TODO: this should be translated
+      : 'Output Port',
+    name: '',
     position: {
       x: 0,
       y: 0

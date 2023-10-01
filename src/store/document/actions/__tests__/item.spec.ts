@@ -12,11 +12,12 @@ import {
 import { createDocumentStore } from '../..'
 import BinaryWavePulse from '../../oscillator/BinaryWavePulse'
 import LogicValue from '@/types/enums/LogicValue'
-import { setItemBoundingBox } from '../sizing'
 import ClockPulse from '../../oscillator/ClockPulse'
 import Point from '@/types/interfaces/Point'
-import PropertySet from '@/types/interfaces/PropertySet'
+import ItemProperties from '@/types/interfaces/ItemProperties'
 import Port from '@/types/interfaces/Port'
+import cloneDeep from 'lodash.clonedeep'
+import portFactory from '@/factories/portFactory'
 
 setActivePinia(createPinia())
 
@@ -51,42 +52,7 @@ describe('item actions', () => {
 
       it('should add the item as a node to the circuit', () => {
         expect(store.addVirtualNode).toHaveBeenCalledTimes(1)
-        expect(store.addVirtualNode).toHaveBeenCalledWith(item)
-      })
-    })
-
-    describe('when the item has at least one monitored port', () => {
-      const item = createItem('item1', ItemType.InputNode, { portIds: ['port'] })
-      const port = createPort('port', 'item', PortType.Output, {
-        isMonitored: true,
-        wave: new BinaryWavePulse('port', 'port', LogicValue.TRUE, 0)
-      })
-
-      beforeEach(() => {
-        stubAll(store, [
-          'monitorPort',
-          'unmonitorPort'
-        ])
-
-        jest.useFakeTimers()
-        store.addItem({ item, ports: { port } })
-      })
-
-      afterEach(() => jest.useRealTimers())
-
-      it('should delete the wave associated with the port', () => {
-        expect(store.ports.port).not.toHaveProperty('wave')
-      })
-
-      it('should re-monitor the port', () => {
-        expect(store.unmonitorPort).toHaveBeenCalledTimes(1)
-        expect(store.unmonitorPort).toHaveBeenCalledWith('port')
-
-        jest.runAllTimers()
-
-        expect(store.monitorPort).toHaveBeenCalledTimes(1)
-        expect(store.monitorPort).toHaveBeenCalledWith('port')
-
+        expect(store.addVirtualNode).toHaveBeenCalledWith(item, store.ports)
       })
     })
 
@@ -119,8 +85,84 @@ describe('item actions', () => {
 
       it('should install the integrated circuit onto the active circuit', () => {
         expect(store.addVirtualNode).toHaveBeenCalledTimes(1)
-        expect(store.addVirtualNode).toHaveBeenCalledWith(icItem)
+        expect(store.addVirtualNode).toHaveBeenCalledWith(icItem, icItem.integratedCircuit!.ports)
       })
+    })
+  })
+
+  describe('setItemName()', () => {
+    const store = createDocumentStore('document')()
+    const createProperties = (name: string): ItemProperties => ({
+      name: {
+        value: name,
+        label: 'Name',
+        type: 'text'
+      }
+    })
+
+    beforeEach(() => {
+      store.$reset()
+
+      stubAll(store, ['setPortName'])
+    })
+
+    it('should increment the item name if it already exists', () => {
+      const item1 = createItem('item1', ItemType.InputNode, {
+        properties: createProperties('MyNode')
+      })
+      const item2 = createItem('item2', ItemType.InputNode, {
+        properties: createProperties('MyNode')
+      })
+
+      store.$patch({
+        items: { item1, item2 }
+      })
+
+      store.setItemName(item1)
+      expect(item1.properties.name!.value).toEqual('MyNode 2')
+
+      store.setItemName(item2)
+      expect(item2.properties.name!.value).toEqual('MyNode 3')
+    })
+
+    it('should increment the default node name when one is not defined in its properties', () => {
+      const item1 = createItem('item1', ItemType.InputNode, {
+        defaultName: 'CustomNode',
+        properties: createProperties('')
+      })
+      const item2 = createItem('item2', ItemType.InputNode, {
+        defaultName: 'CustomNode',
+        properties: createProperties('')
+      })
+
+      store.$patch({
+        items: { item1, item2 }
+      })
+
+      store.setItemName(item1)
+      expect(item1.properties.name!.value).toEqual('CustomNode')
+
+      store.setItemName(item2)
+      expect(item2.properties.name!.value).toEqual('CustomNode 2')
+    })
+
+    it('should set the port names for each of the item\'s ports', () => {
+      const item1 = createItem('item1', ItemType.InputNode, {
+        properties: createProperties('MyNode'),
+        portIds: ['port1', 'port2', 'port3', 'port4']
+      })
+
+      store.$patch({
+        items: { item1 }
+      })
+
+      store.setItemName(item1)
+
+      expect(store.setPortName).toHaveBeenCalledTimes(4)
+      expect(store.setPortName).toHaveBeenCalledWith('port1')
+      expect(store.setPortName).toHaveBeenCalledWith('port2')
+      expect(store.setPortName).toHaveBeenCalledWith('port3')
+      expect(store.setPortName).toHaveBeenCalledWith('port4')
     })
   })
 
@@ -389,7 +431,8 @@ describe('item actions', () => {
     beforeEach(() => {
       stubAll(store, [
         'addPort',
-        'removePort'
+        'removePort',
+        'setPortName'
       ])
 
       store.$reset()
@@ -405,25 +448,10 @@ describe('item actions', () => {
       })
 
       it('should add the difference number of input ports', () => {
-        const portId = Object.keys(store.ports).slice(-1)[0]
+        const port = Object.values(store.ports).slice(-1)[0]
 
-        expect(store.addPort).toHaveBeenCalledWith(id, {
-          id: expect.any(String),
-          name: expect.any(String),
-          connectedPortIds: [],
-          type: PortType.Input,
-          elementId: id,
-          orientation: Direction.Left,
-          isMonitored: false,
-          hue: 0,
-          position: {
-            x: 0,
-            y: 0
-          },
-          rotation: 0,
-          value: 0
-        })
-        expect(store.items.item1.portIds).toContain(portId)
+        expect(store.addPort).toHaveBeenCalledWith(id, portFactory(id, expect.any(String), Direction.Left, PortType.Input))
+        expect(store.items.item1.portIds).toContain(port.id)
       })
     })
 
@@ -442,16 +470,11 @@ describe('item actions', () => {
     const store = createDocumentStore('document')()
 
     const id = 'item1'
-    const createProperties = (): PropertySet => ({
+    const createProperties = (): ItemProperties => ({
       inputCount: {
         value: 2,
         label: 'Input Count',
         type: 'number'
-      },
-      showInOscilloscope: {
-        value: true,
-        label: 'Show in oscilloscope',
-        type: 'boolean'
       },
       name: {
         value: 'Some name',
@@ -484,7 +507,7 @@ describe('item actions', () => {
       const item1 = createItem(id, ItemType.LogicGate, { properties: createProperties() })
       const properties = createProperties()
 
-      properties.inputCount.value = 3
+      properties.inputCount!.value = 3
 
       store.$patch({
         items: { item1 }
@@ -495,7 +518,7 @@ describe('item actions', () => {
     })
 
     describe('when the `interval` property has changed', () => {
-      const properties: PropertySet = {
+      const properties: ItemProperties = {
         ...createProperties(),
         interval: {
           value: 1000,
@@ -508,13 +531,13 @@ describe('item actions', () => {
       it('should set the clock interval', () => {
         const item = createItem('item', ItemType.InputNode, {
           properties,
-          clock: new ClockPulse('item', 1000, LogicValue.TRUE)
+          clock: new ClockPulse('item', 1000, LogicValue.TRUE, LogicValue.TRUE)
         })
 
         store.$patch({
           items: { item }
         })
-        store.setProperties('item', merge(properties, {
+        store.setProperties('item', merge(cloneDeep(properties), {
           interval: {
             value
           }
@@ -532,7 +555,7 @@ describe('item actions', () => {
         store.$patch({
           items: { item }
         })
-        store.setProperties('item', merge(properties, {
+        store.setProperties('item', merge(cloneDeep(properties), {
           interval: {
             value
           }
@@ -547,14 +570,14 @@ describe('item actions', () => {
       const value = 'New value'
       const item1 = createItem(id, ItemType.LogicGate, { properties: createProperties() })
       const properties = createProperties()
-      properties[propertyName].value = value
+      properties[propertyName]!.value = value
 
       store.$patch({
         items: { item1 }
       })
       store.setProperties(id, properties)
 
-      expect(store.items[id].properties[propertyName].value).toEqual(value)
+      expect(store.items[id].properties[propertyName]!.value).toEqual(value)
     })
   })
 })

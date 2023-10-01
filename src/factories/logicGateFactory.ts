@@ -5,6 +5,7 @@ import itemFactory from './itemFactory'
 import portFactory from './portFactory'
 import Direction from '@/types/enums/Direction'
 import Port from '@/types/interfaces/Port'
+import PortType from '@/types/enums/PortType'
 
 export default function logicGateFactory (type: ItemSubtype, width: number, height: number, inputCount: number = 2) {
   const elementId = uuid()
@@ -12,10 +13,10 @@ export default function logicGateFactory (type: ItemSubtype, width: number, heig
     [Direction.Top]: [],
     [Direction.Left]: Array(inputCount)
       .fill('')
-      .map((a, i) => portFactory(elementId, uuid(), 0, 1, `Input Port ${i}`)),
+      .map(() => portFactory(elementId, uuid(), Direction.Left, PortType.Input)),
     [Direction.Bottom]: [],
     [Direction.Right]: [
-      portFactory(elementId, uuid(), 2, 0, 'Output Port')
+      portFactory(elementId, uuid(), Direction.Right, PortType.Output)
     ]
   }
   const item = itemFactory(elementId, ItemType.LogicGate, type, width, height, ports)
@@ -27,11 +28,6 @@ export default function logicGateFactory (type: ItemSubtype, width: number, heig
       value: inputCount,
       type: 'number',
       min: inputCount
-    },
-    showInOscilloscope: {
-      label: 'Show in oscilloscope',
-      value: false,
-      type: 'boolean'
     }
   }
 

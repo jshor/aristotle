@@ -51,7 +51,7 @@ export const useIntegratedCircuitStore = defineStore('integratedCircuit', {
         const content = await FileService.open(filePath)
         const parsed = JSON.parse(content) as Item
 
-        this.factories[parsed.name] = () => {
+        this.factories[parsed.defaultName] = () => {
           const item = idMapper.mapIntegratedCircuitIds(parsed)
           const ports = item
             .portIds
@@ -86,7 +86,7 @@ export const useIntegratedCircuitStore = defineStore('integratedCircuit', {
       if (!this.model) return
 
       try {
-        const fileName = `${this.model.name}.aicx`
+        const fileName = `${this.model.defaultName}.aicx`
         const filePath = window.api.showSaveFileDialog([
           {
             name: 'Aristotle Integrated Circuit (*.aicx)',

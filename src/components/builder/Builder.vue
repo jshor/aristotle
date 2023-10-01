@@ -15,7 +15,7 @@
         @drop="onWireDrop"
       />
 
-      <builder-editable-label v-model="item.name" />
+      <builder-editable-label v-model="item.defaultName" />
 
       <builder-drop-zone
         type="right"

@@ -4,10 +4,10 @@
     <div class="oscilloscope-title-bar__actions">
       <button
         class="oscilloscope-title-bar__button"
-        title="Close"
-        @click="$emit('close')"
+        title="Remove all observations"
+        @click="$emit('removeAll')"
       >
-        <icon :icon="faClose" />
+        <icon :icon="faBan" />
       </button>
       <button
         class="oscilloscope-title-bar__button"
@@ -15,21 +15,21 @@
         :disabled="!clearable"
         @click="$emit('clear')"
       >
-        <icon :icon="faBan" />
+        <icon :icon="faEraser" />
       </button>
       <button
         class="oscilloscope-title-bar__button"
         title="Close"
-        @click="$emit('toggle')"
+        @click="$emit('close')"
       >
-        <icon :icon="isRecording ? faPause : faPlay" />
+        <icon :icon="faClose" />
       </button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { faBan, faClose, faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
+import { faBan, faClose, faEraser, faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import { defineComponent } from 'vue'
 import Icon from '@/components/Icon.vue'
 
@@ -37,6 +37,11 @@ export default defineComponent({
   name: 'OscilloscopeTitleBar',
   components: {
     Icon
+  },
+  emits: {
+    clear: () => true,
+    close: () => true,
+    removeAll: () => true
   },
   props: {
     /** Whether or not the timeline is clearable. */
@@ -53,8 +58,8 @@ export default defineComponent({
     return {
       faBan,
       faClose,
-      faPause,
-      faPlay
+      faEraser,
+      faTrashCan
     }
   }
 })

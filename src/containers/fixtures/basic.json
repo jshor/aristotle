@@ -44,6 +44,7 @@
       "id": "switch1",
       "type": "InputNode",
       "subtype": "Clock",
+      "name": "Clock",
       "portIds": [
         "switchOutputPort1"
       ],
@@ -90,6 +91,7 @@
       "id": "lightbulb1",
       "type": "OutputNode",
       "subtype": "Lightbulb",
+      "name": "Lightbulb",
       "portIds": [
         "lightbulbInputPort1"
       ],

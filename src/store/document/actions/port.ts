@@ -2,7 +2,7 @@ import { DocumentStoreInstance } from '..'
 import PortType from '@/types/enums/PortType'
 import BinaryWavePulse from '../oscillator/BinaryWavePulse'
 import Port from '@/types/interfaces/Port'
-import Connection from '@/types/interfaces/Connection'
+import { getSequencedName } from '@/utils/getSequencedName'
 
 /**
  * Attaches the given port to an item.
@@ -60,6 +60,19 @@ export function removePort (this: DocumentStoreInstance, portId: string) {
 }
 
 /**
+ * Sets the sequenced name of the given port.
+ * Example: 'MyNode Input Port', 'MyNode Input Port 2', etc.
+ */
+export function setPortName (this: DocumentStoreInstance, portId: string) {
+  const port = this.ports[portId]
+  const item = this.items[port.elementId]
+  const portNames = new Set(item.portIds.map(id => this.ports[id].name))
+  const itemName = item.properties.name?.value || item.defaultName
+
+  port.name = getSequencedName(`${itemName} ${port.defaultName}`, portNames)
+}
+
+/**
  * Sets the ID of the active (i.e., 'previewed'/'enlarged') port.
  */
 export function setActivePortId (this: DocumentStoreInstance, portId: string) {
@@ -111,9 +124,9 @@ export function setConnectablePortIds (this: DocumentStoreInstance, { portId, is
 export function setPortValue (this: DocumentStoreInstance, { id, value }: { id: string, value: number }) {
   if (this.ports[id] && this.nodes[id] && this.nodes[id].value !== value) {
     this.nodes[id].setValue(value)
-    this.ports[id].wave?.drawPulseChange(value)
     this.circuit.enqueue(this.nodes[id])
     this.isCircuitEvaluated = false
+    this.ports[id].wave?.drawPulseChange(value)
 
     if (!this.isDebugging) {
       this.advanceSimulation()
@@ -137,12 +150,12 @@ export function togglePortMonitoring (this: DocumentStoreInstance, portId: strin
  */
 export function monitorPort (this: DocumentStoreInstance, portId: string) {
   const port = this.ports[portId]
-  const name = this.items[port.elementId]?.name
 
   port.hue = port.hue ||  ~~(360 * Math.random())
   port.isMonitored = true
-  port.wave = new BinaryWavePulse(portId, `${name} ${port.name}`, port.value, port.hue)
+  port.wave = new BinaryWavePulse(portId, port.name, port.value, port.hue)
 
+  this.monitoredPortIds.add(portId)
   this.oscillator.add(port.wave)
   this.isOscilloscopeOpen = true
 }
@@ -150,7 +163,7 @@ export function monitorPort (this: DocumentStoreInstance, portId: string) {
 /**
  * Removes a port from being monitored from the oscolloscope.
  */
-export function unmonitorPort (this: DocumentStoreInstance, portId: string) {
+export function unmonitorPort (this: DocumentStoreInstance, portId: string, removeWave = true) {
   const port = this.ports[portId]
 
   port.isMonitored = false
@@ -159,6 +172,10 @@ export function unmonitorPort (this: DocumentStoreInstance, portId: string) {
 
   delete this.oscillogram[portId]
   delete port.wave
+
+  if (removeWave) {
+    this.monitoredPortIds.delete(portId)
+  }
 
   this.isOscilloscopeOpen = Object.keys(this.oscillogram).length > 0
 }

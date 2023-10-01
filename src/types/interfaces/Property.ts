@@ -11,27 +11,27 @@ type PropertyBase<T> = {
 }
 
 /** A numeric property. */
-type NumericProperty = {
+type NumericProperty<T> = {
   /** A nnnnn or a color. */
   type: 'number'
-  value: number
+  value: T
   min?: number
   max?: number
-} & PropertyBase<number>
+} & PropertyBase<T>
 
 /** A string property. */
-type StringProperty = {
+type StringProperty<T> = {
   /** A text or a color. */
   type: 'text' | 'color'
-  value: string
-} & PropertyBase<string>
+  value: T
+} & PropertyBase<T>
 
 /** A boolean property. */
-type BooleanProperty = {
+type BooleanProperty<T> = {
   type: 'boolean'
-  value: boolean
-} & PropertyBase<boolean>
+  value: T
+} & PropertyBase<T>
 
-type Property = NumericProperty | StringProperty | BooleanProperty
+type Property<T> = NumericProperty<T> | StringProperty<T> | BooleanProperty<T>
 
 export default Property
