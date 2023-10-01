@@ -49,7 +49,7 @@ export default function integratedCircuitFactory (state: SerializableState, name
         .filter(port => port.type === homogenousPortType)
         .forEach(port => {
           const newId = uuid()
-          const name = item.properties.name?.value as string || item.name
+          const name = item.properties.name?.value || item.name
 
           // each input node (switch, button, etc.) will become a buffer node when simulated
           // therefore each input node (now buffer) will receive an additional input port to receive signals from the outside world

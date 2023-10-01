@@ -11,36 +11,6 @@ setActivePinia(createPinia())
 describe('simulation actions', () => {
   beforeEach(() => jest.restoreAllMocks())
 
-  describe('toggleOscillatorRecording()', () => {
-    const store = createDocumentStore('document')()
-
-    it('should start the oscillator if it is paused', () => {
-      jest
-        .spyOn(store.oscillator, 'start')
-        .mockImplementation(jest.fn())
-
-      store.oscillator.isPaused = true
-      store.toggleOscillatorRecording()
-
-      expect(store.oscillator.start).toHaveBeenCalledTimes(1)
-      expect(store.isOscilloscopeRecording).toBe(true)
-      expect(store.oscillator.isPaused).toBe(false)
-    })
-
-    it('should stop the oscillator if running', () => {
-      jest
-        .spyOn(store.oscillator, 'stop')
-        .mockImplementation(jest.fn())
-
-      store.oscillator.isPaused = false
-      store.toggleOscillatorRecording()
-
-      expect(store.oscillator.stop).toHaveBeenCalledTimes(1)
-      expect(store.isOscilloscopeRecording).toBe(false)
-      expect(store.oscillator.isPaused).toBe(true)
-    })
-  })
-
   describe('toggleOscilloscope()', () => {
     const store = createDocumentStore('document')()
 

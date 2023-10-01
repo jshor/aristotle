@@ -56,6 +56,11 @@ export default class ClockPulse implements Pulse {
     }
   }
 
+  reset = (elapsed: number) => {
+    console.log('elapsed: ', this.lastUpdate % this.interval)
+    this.lastUpdate = elapsed + (this.lastUpdate % this.interval)
+  }
+
   /**
    * Event listener.
    *

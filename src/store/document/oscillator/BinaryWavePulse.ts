@@ -65,11 +65,13 @@ export default class BinaryWavePulse implements Pulse {
   /**
    * Clears out the existing wave data.
    */
-  public reset = () => {
+  public clear = () => {
     this.segments = []
     this.width = 0
     this.initialize(this.lastY === 1 ? 0 : 1)
   }
+
+  public reset = (elapsed: number) => {}
 
   /**
    * Periodic update function.

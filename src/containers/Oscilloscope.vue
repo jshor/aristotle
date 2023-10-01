@@ -2,20 +2,19 @@
   <oscilloscope-viewer
     v-if="isOscilloscopeOpen"
     v-model="oscilloscopeHeight"
-    :collapse-height="40"
-    @collapse="closeOscilloscope"
   >
     <oscilloscope-title-bar
       :clearable="hasWaves"
-      :is-recording="isOscilloscopeRecording"
       @clear="clearOscilloscope"
-      @toggle="toggleOscillatorRecording"
+      @close="closeOscilloscope"
+      @remove-all="destroyOscilloscope"
     />
     <div v-if="!hasWaves">
       no waves to observe
     </div>
     <oscilloscope-timeline
       v-else
+      v-model="oscilloscopeWidth"
       :oscillogram="oscillogram"
       :items="items"
       :ports="ports"
@@ -48,16 +47,13 @@ export default defineComponent({
     const store = props.store()
     const {
       oscilloscopeHeight,
+      oscilloscopeWidth,
       isOscilloscopeOpen,
-      isOscilloscopeRecording,
       oscillogram,
       items,
       ports
     } = storeToRefs(store)
-    const {
-      closeOscilloscope,
-      toggleOscillatorRecording
-    } = store
+    const { closeOscilloscope, destroyOscilloscope } = store
     const hasWaves = computed(() => Object.keys(store.oscillogram).length > 0)
 
     function clearOscilloscope () {
@@ -70,11 +66,11 @@ export default defineComponent({
       items,
       ports,
       oscilloscopeHeight,
+      oscilloscopeWidth,
       isOscilloscopeOpen,
-      isOscilloscopeRecording,
       clearOscilloscope,
       closeOscilloscope,
-      toggleOscillatorRecording
+      destroyOscilloscope
     }
   }
 })

@@ -1,20 +1,6 @@
 import { DocumentStoreInstance } from '..'
 
 /**
- * Toggles the oscillator's wave recording.
- */
-export function toggleOscillatorRecording (this: DocumentStoreInstance) {
-  if (this.oscillator.isPaused) {
-    this.oscillator.start()
-  } else {
-    this.oscillator.stop()
-  }
-
-  this.oscillator.isPaused = !this.oscillator.isPaused
-  this.isOscilloscopeRecording = !this.oscillator.isPaused
-}
-
-/**
  * Toggles the oscilloscope panel.
  */
 export function toggleOscilloscope (this: DocumentStoreInstance) {
@@ -30,13 +16,9 @@ export function toggleOscilloscope (this: DocumentStoreInstance) {
  * This will resume monitoring any previously-monitored ports.
  */
 export function openOscilloscope (this: DocumentStoreInstance) {
-  Object
-    .values(this.ports)
-    .forEach(port => {
-      if (port.isMonitored) {
-        this.monitorPort(port.id)
-      }
-    })
+  this
+    .monitoredPortIds
+    .forEach(portId => this.monitorPort(portId))
 
   this.isOscilloscopeOpen = true
 }
@@ -45,17 +27,32 @@ export function openOscilloscope (this: DocumentStoreInstance) {
  * Closes the oscilloscope panel.
  * This will pause monitoring all ports while closed to save computation.
  */
-export function closeOscilloscope (this: DocumentStoreInstance, lastHeight?: number) {
+export function closeOscilloscope (this: DocumentStoreInstance) {
   if (!this.isOscilloscopeOpen) return
 
-  Object
-    .keys(this.ports)
-    .forEach(id => this.unmonitorPort(id))
+  this
+    .monitoredPortIds
+    .forEach(portId => this.unmonitorPort(portId, false))
 
   this.oscillator.clear()
   this.isOscilloscopeOpen = false
+}
 
-  if (lastHeight) {
-    this.oscilloscopeHeight = lastHeight
+export function destroyOscilloscope (this: DocumentStoreInstance) {
+  const dialogResult = window
+    .api
+    .showMessageBox({
+      message: 'Are you sure you want to remove all waves from the oscilloscope?',
+      title: 'Confirm',
+      buttons: ['Yes', 'No']
+    })
+
+  if (dialogResult === 0) {
+    this
+      .monitoredPortIds
+      .forEach(portId => this.unmonitorPort(portId))
+
+    this.oscillator.clear()
+    this.isOscilloscopeOpen = false
   }
 }

@@ -6,6 +6,8 @@ import BoundingBox from '../types/BoundingBox'
 import BaseItem from './BaseItem'
 import IntegratedCircuit from './IntegratedCircuit'
 import Property from './Property'
+import LogicValue from '../enums/LogicValue'
+import ItemProperties from './ItemProperties'
 
 interface Item extends BaseItem {
   type: ItemType
@@ -19,9 +21,7 @@ interface Item extends BaseItem {
   zIndex: number
   width: number
   height: number
-  properties: {
-    [propertyName: string]: Property
-  }
+  properties: ItemProperties
   clock?: ClockPulse | null
   integratedCircuit?: IntegratedCircuit
 }

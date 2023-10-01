@@ -111,9 +111,9 @@ export function setConnectablePortIds (this: DocumentStoreInstance, { portId, is
 export function setPortValue (this: DocumentStoreInstance, { id, value }: { id: string, value: number }) {
   if (this.ports[id] && this.nodes[id] && this.nodes[id].value !== value) {
     this.nodes[id].setValue(value)
-    this.ports[id].wave?.drawPulseChange(value)
     this.circuit.enqueue(this.nodes[id])
     this.isCircuitEvaluated = false
+    this.ports[id].wave?.drawPulseChange(value)
 
     if (!this.isDebugging) {
       this.advanceSimulation()
@@ -143,6 +143,7 @@ export function monitorPort (this: DocumentStoreInstance, portId: string) {
   port.isMonitored = true
   port.wave = new BinaryWavePulse(portId, `${name} ${port.name}`, port.value, port.hue)
 
+  this.monitoredPortIds.add(portId)
   this.oscillator.add(port.wave)
   this.isOscilloscopeOpen = true
 }
@@ -150,7 +151,7 @@ export function monitorPort (this: DocumentStoreInstance, portId: string) {
 /**
  * Removes a port from being monitored from the oscolloscope.
  */
-export function unmonitorPort (this: DocumentStoreInstance, portId: string) {
+export function unmonitorPort (this: DocumentStoreInstance, portId: string, removeWave = true) {
   const port = this.ports[portId]
 
   port.isMonitored = false
@@ -159,6 +160,10 @@ export function unmonitorPort (this: DocumentStoreInstance, portId: string) {
 
   delete this.oscillogram[portId]
   delete port.wave
+
+  if (removeWave) {
+    this.monitoredPortIds.delete(portId)
+  }
 
   this.isOscilloscopeOpen = Object.keys(this.oscillogram).length > 0
 }

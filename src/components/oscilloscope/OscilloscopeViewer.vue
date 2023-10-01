@@ -1,23 +1,28 @@
 <template>
   <div
-    ref="viewer"
     class="oscilloscope-viewer"
-    :style="{ height: `${height}px` }"
   >
     <div
       class="oscilloscope-viewer__touch-resizer"
-      @touchstart="onTouchStart"
+      ref="resizer"
+      @touchstart="onDragStart"
       @touchmove="onTouchMove"
-      @touchcancel="onMouseUp"
-      @touchend="onMouseUp"
+      @touchcancel="onDragEnd"
+      @touchend="onDragEnd"
     >
       <div
         class="oscilloscope-viewer__mouse-resizer"
-        @mousedown="onMouseDown"
+        @mousedown="onDragStart"
       />
     </div>
 
-    <slot />
+    <div
+      class="oscilloscope-viewer__inner"
+    ref="viewer"
+    :style="{ height: `${height}px` }"
+    >
+      <slot />
+    </div>
   </div>
 </template>
 
@@ -27,73 +32,64 @@ import { defineComponent, onMounted, onUnmounted, ref } from 'vue'
 export default defineComponent({
   name: 'OscilloscopeViewer',
   props: {
-    collapseHeight: {
-      type: Number,
-      default: 20
-    },
+    /** The height, in pixels, of the oscilloscope viewer. */
     modelValue: {
       type: Number,
       required: true
     }
   },
+  emits: {
+    'update:modelValue': (height: number) => true
+  },
   setup (props, { emit }) {
     const height = ref(props.modelValue)
     const viewer = ref<HTMLElement>()
+    const resizer = ref<HTMLElement>()
 
-    let originalY = 0
-    let currentY = 0
     let isDragging = false
 
-    function onMouseDown ($event: MouseEvent | Touch) {
-      originalY = height.value
-      currentY = $event.clientY
+    onMounted(() => {
+      window.addEventListener('mousemove', onMouseMove)
+      window.addEventListener('mouseup', onDragEnd)
+    })
+
+    onUnmounted(() => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onDragEnd)
+    })
+
+    function onDragStart () {
       isDragging = true
     }
 
-    function onTouchStart ($event: TouchEvent) {
-      onMouseDown($event.touches[0])
+    function onDragEnd () {
+      isDragging = false
     }
 
     function onMouseMove ($event: MouseEvent | Touch) {
       if (!isDragging || !viewer.value) return
 
-      const rect = viewer.value.parentElement?.getBoundingClientRect()
+      const rect = viewer.value
+        .parentElement!
+        .parentElement!
+        .getBoundingClientRect()
 
-      height.value += Math.min(currentY - $event.clientY, rect?.height || Infinity)
-      currentY = $event.clientY
+      height.value = Math.max(50, Math.min(rect.height, rect.bottom - $event.clientY))
 
-      if (height.value <= props.collapseHeight) {
-        emit('collapse', originalY)
-      } else {
-        emit('update:modelValue', height.value)
-      }
+      emit('update:modelValue', height.value)
     }
 
     function onTouchMove ($event: TouchEvent) {
       onMouseMove($event.touches[0])
     }
 
-    function onMouseUp () {
-      isDragging = false
-    }
-
-    onMounted(() => {
-      window.addEventListener('mousemove', onMouseMove)
-      window.addEventListener('mouseup', onMouseUp)
-    })
-
-    onUnmounted(() => {
-      window.removeEventListener('mousemove', onMouseMove)
-      window.removeEventListener('mouseup', onMouseUp)
-    })
-
     return {
-      onMouseDown,
-      onMouseUp,
-      onTouchStart,
       onTouchMove,
+      onDragStart,
+      onDragEnd,
       height,
-      viewer
+      viewer,
+      resizer
     }
   }
 })
@@ -101,13 +97,16 @@ export default defineComponent({
 
 <style lang="scss">
 .oscilloscope-viewer {
-  display: flex;
-  flex-direction: column;
   position: relative;
   border-top: 1px solid var(--color-bg-secondary);
   background-color: var(--color-bg-primary);
   color: var(--color-primary);
-  --resizer-height: 1em;
+  --resizer-height: #{$resizer-size};
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+  }
 
   &__touch-resizer {
     position: absolute;

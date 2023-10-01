@@ -39,10 +39,10 @@
         class="property-form__switch"
       >
         <property-switch
-          v-model.boolean="(data.value as boolean)"
+          v-model.boolean="data.value"
           :id="`${id}_${propertyName}`"
           :disabled="data.disabled"
-          @update:modelValue="onSwitch(propertyName as string)"
+          @update:modelValue="onSwitch(propertyName)"
         />
       </div>
 
@@ -75,7 +75,7 @@ import cloneDeep from 'lodash.clonedeep'
 import PropertySwitch from '@/components/properties/PropertySwitch.vue'
 import Icon from '@/components/Icon.vue'
 import isMobile from '@/utils/isMobile'
-import PropertySet from '@/types/interfaces/PropertySet'
+import ItemProperties from '@/types/interfaces/ItemProperties'
 
 export default defineComponent({
   name: 'PropertyForm',
@@ -85,7 +85,7 @@ export default defineComponent({
   },
   props: {
     modelValue: {
-      type: Object as PropType<PropertySet>,
+      type: Object as PropType<ItemProperties>,
       default: () => ({})
     },
     id: {
@@ -94,27 +94,32 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const getModel = (model: PropertySet): PropertySet => Object
-      .keys(model)
-      // filter to ensure mobile-only or desktop-only settings are visible appropriately
-      .filter(key => isMobile
-        ? !model[key].desktopOnly
-        : !model[key].mobileOnly)
-      .reduce((m, k) => ({
-        ...m,
-        [k]: cloneDeep(model[k])
-      }), {})
+    const getModel = (model: ItemProperties) => {
+      const properties: ItemProperties = {}
 
-    const model = ref<PropertySet>(getModel(props.modelValue))
+      for (const key in model) {
+        const k = key as keyof ItemProperties
+        const isVisible = isMobile
+          ? !model[k].desktopOnly
+          : !model[k].mobileOnly
+
+        if (isVisible) {
+          properties[k] = cloneDeep(model[k])
+        }
+      }
+
+      return properties
+    }
+    const model = ref<ItemProperties>(getModel(props.modelValue))
 
     watch(() => props.modelValue, value => {
       model.value = getModel(value)
     }, { deep: true })
 
-    function onSwitch (propertyName: string) {
+    function onSwitch (propertyName: keyof ItemProperties) {
       const property = model.value[propertyName]
 
-      property.excludes?.forEach(p => {
+      property.excludes?.forEach((p: keyof ItemProperties) => {
         if (property.value && model.value[p].type === 'boolean') {
           model.value[p].value = false
         }

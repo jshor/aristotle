@@ -70,15 +70,15 @@
               @switch="switchDocument"
               @open-integrated-circuit="openIntegratedCircuit"
             />
+            <oscilloscope
+              :key="activeDocumentId"
+              :store="activeDocument.store"
+            />
           </template>
         </tab-host>
       </template>
 
       <template #bottom>
-        <oscilloscope
-          :key="activeDocumentId"
-          :store="activeDocument.store"
-        />
 
         <!-- desktop-only bottom status bar -->
         <status-bar

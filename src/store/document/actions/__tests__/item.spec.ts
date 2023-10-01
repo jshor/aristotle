@@ -15,7 +15,7 @@ import LogicValue from '@/types/enums/LogicValue'
 import { setItemBoundingBox } from '../sizing'
 import ClockPulse from '../../oscillator/ClockPulse'
 import Point from '@/types/interfaces/Point'
-import PropertySet from '@/types/interfaces/PropertySet'
+import ItemProperties from '@/types/interfaces/ItemProperties'
 import Port from '@/types/interfaces/Port'
 
 setActivePinia(createPinia())
@@ -442,7 +442,7 @@ describe('item actions', () => {
     const store = createDocumentStore('document')()
 
     const id = 'item1'
-    const createProperties = (): PropertySet => ({
+    const createProperties = (): ItemProperties => ({
       inputCount: {
         value: 2,
         label: 'Input Count',
@@ -495,7 +495,7 @@ describe('item actions', () => {
     })
 
     describe('when the `interval` property has changed', () => {
-      const properties: PropertySet = {
+      const properties: ItemProperties = {
         ...createProperties(),
         interval: {
           value: 1000,

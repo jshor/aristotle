@@ -2,6 +2,7 @@ import Pulse from '@/types/interfaces/Pulse'
 import BinaryWavePulse from './BinaryWavePulse'
 import Oscillogram from '@/types/types/Oscillogram'
 import Point from '@/types/interfaces/Point'
+import ClockPulse from './ClockPulse'
 
 /**
  * @class Oscillator
@@ -52,6 +53,17 @@ export default class Oscillator {
     this.isPaused = true
   }
 
+  reset = () => {
+
+    Object
+      .values(this.waves)
+      .forEach(wave => {
+        if (wave instanceof ClockPulse) {
+          (wave as ClockPulse).reset(this.timeMsElapsed)
+        }
+      })
+  }
+
   /**
    * Clears all current binary wave geometries.
    */
@@ -60,7 +72,7 @@ export default class Oscillator {
       .values(this.waves)
       .forEach(wave => {
         if (wave instanceof BinaryWavePulse) {
-          (wave as BinaryWavePulse).reset()
+          (wave as BinaryWavePulse).clear()
         }
       })
   }

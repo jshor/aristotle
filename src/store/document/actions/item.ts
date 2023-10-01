@@ -8,7 +8,7 @@ import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordin
 import ItemType from '@/types/enums/ItemType'
 import ClockPulse from '../oscillator/ClockPulse'
 import Port from '@/types/interfaces/Port'
-import PropertySet from '@/types/interfaces/PropertySet'
+import ItemProperties from '@/types/interfaces/ItemProperties'
 import Item from '@/types/interfaces/Item'
 import Point from '@/types/interfaces/Point'
 
@@ -62,15 +62,15 @@ export function addItem (this: DocumentStoreInstance, { item, ports }: { item: I
   this.items[item.id] = item
   this.items[item.id].zIndex = ++this.zIndex
 
+  this.setProperties(item.id, item.properties)
   this.addVirtualNode(item, portList)
+  this.setItemBoundingBox(item.id)
 
   item
     .portIds
     .forEach(id => this.addPort(item.id, portList[id]))
 
   this.resetItemValue(item)
-  this.setProperties(item.id, item.properties)
-  this.setItemBoundingBox(item.id)
   this.addClock(item)
 }
 
@@ -157,7 +157,7 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
  */
  export function setInputCount (this: DocumentStoreInstance, id: string, count: number) {
   const item = this.items[id]
-  const oldCount = item.properties.inputCount.value as number
+  const oldCount = item.properties.inputCount!.value
 
   if (oldCount > count) {
     // if the count has decreased, find the last remaining port IDs which will be removed
@@ -198,19 +198,20 @@ export function removeElement (this: DocumentStoreInstance, id: string) {
  * @param payload.id - item ID
  * @param payload.properties - new version of the properties
  */
-export function setProperties (this: DocumentStoreInstance, id: string, properties: PropertySet) {
+export function setProperties (this: DocumentStoreInstance, id: string, properties: ItemProperties) {
   const item = this.items[id]
 
   for (const propertyName in properties) {
-    const property = properties[propertyName]
+    const key = propertyName as keyof Item['properties']
+    const property = properties[key] as Item['properties'][typeof key]
 
-    if (item.properties[propertyName].value === property.value) {
+    if (!property || item.properties[key]?.value === property.value) {
       continue // do nothing if the property value has not changed
     }
 
     this.commitState()
 
-    switch (propertyName) {
+    switch (key) {
       case 'inputCount':
         this.setInputCount(id, property.value as number)
         break
@@ -221,6 +222,6 @@ export function setProperties (this: DocumentStoreInstance, id: string, properti
         break
     }
 
-    this.items[id].properties[propertyName].value = property.value
+    this.items[id].properties[key]!.value = property.value
   }
 }
