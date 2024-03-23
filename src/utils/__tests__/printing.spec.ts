@@ -1,7 +1,7 @@
-import domToImage from 'dom-to-image'
+import domToImage from 'dom-to-image-more'
 import printing from '../printing'
 
-jest.mock('dom-to-image')
+jest.mock('dom-to-image-more')
 
 const sampleImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg=='
 

@@ -1,28 +1,10 @@
 <template>
-  <!-- <div class="input-node">
-    <button
-      type="button"
-      class="input-node__flipper"
-      :tabindex="0"
-      :class="{
-        'input-node__flipper--on': model === 1,
-        'input-node__flipper--off': model === -1,
-        'input-node__flipper--high-z': model === 0
-      }"
-      @mousedown.stop="onInput"
-      @touchstart.stop="onInput"
-    >
-      <span v-if="model === 1">ON</span>
-      <span v-else-if="model === -1">OFF</span>
-      <span v-else>?</span>
-    </button>
-  </div> -->
   <div class="switch"
-      :class="{
-        'switch--on': model === 1,
-        'switch--off': model === -1,
-        'switch--hi-z': model === 0
-      }">
+    :class="{
+      'switch--on': model === 1,
+      'switch--off': model === -1,
+      'switch--hi-z': model === 0
+    }">
     <div
       class="switch__inner"
       :tabindex="0"
@@ -36,7 +18,6 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script lang="ts">

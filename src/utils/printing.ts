@@ -1,5 +1,5 @@
 import BoundingBox from '@/types/types/BoundingBox'
-import domToImage from 'dom-to-image'
+import domToImage from 'dom-to-image-more'
 
 /**
  * Renders a printer-friendly HTML DOM clone of the given editor element.

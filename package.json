@@ -8,7 +8,7 @@
   "main": "dist-electron/main/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build && electron-builder",
+    "build": "vite build && electron-builder",
     "lint": "eslint src",
     "test": "jest --runInBand",
     "docs:build": "vuepress build docs",
@@ -20,7 +20,7 @@
   "dependencies": {
     "@fortawesome/free-regular-svg-icons": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
-    "dom-to-image": "^2.6.0",
+    "dom-to-image-more": "^3.3.0",
     "jszip": "^3.10.1",
     "lodash.clonedeep": "^4.5.0",
     "ngrok": "^5.0.0-beta.2",

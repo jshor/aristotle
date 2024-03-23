@@ -9,3 +9,8 @@ declare module 'vue3-smooth-dnd' {
   export { Draggable } from 'vue3-smooth-dnd'
 }
 
+declare module 'dom-to-image-more' {
+  import types from '@types/dom-to-image'
+  export default types
+}
+
