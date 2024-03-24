@@ -139,9 +139,6 @@ export const useDraggable = (options: {
    * @param {TouchEvent} $event
    */
   function onTouchStart ($event: TouchEvent) {
-    $event.stopPropagation()
-    $event.preventDefault()
-
     dragStart($event.touches[0], $event.target as HTMLElement)
 
     hasMovedSubstantially = false
@@ -162,8 +159,10 @@ export const useDraggable = (options: {
    * @param {TouchEvent} $event
    */
   function onTouchMove ($event: TouchEvent) {
-    $event.stopPropagation()
-    $event.preventDefault()
+    if (isDragging && hasMovedSubstantially) {
+      $event.stopPropagation()
+      $event.preventDefault()
+    }
 
     if (requestAnimationFrameId) return
     if ($event.touches.length > 1) {

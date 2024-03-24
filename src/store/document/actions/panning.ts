@@ -24,8 +24,6 @@ export function panTo (this: DocumentStoreInstance, pan: Point, animate = false)
  * Provide positive values to navigate up or to the left.
  */
 export function panDelta (this: DocumentStoreInstance, delta: Point, animate = false) {
-  let requestAnimationFrameId = 0
-
   const from: BoundingBox = { ...this.canvas }
   const momentum = Math.max(Math.abs(delta.x), Math.abs(delta.y), 1) * PANNING_FRICTION
   const speed = PANNING_SPEED

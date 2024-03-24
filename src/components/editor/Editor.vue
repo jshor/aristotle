@@ -206,6 +206,10 @@ export default defineComponent({
       distanceTravelled = Math.hypot(deltaX, deltaY)
       angle = Math.atan2(deltaY, deltaX)
       previousPosition = { x, y }
+
+      setTimeout(() => {
+        distanceTravelled = 0
+      }, 250) // TODO: make this number a constant - this is the snapshot time to compute velocity
     }
 
     /**

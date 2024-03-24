@@ -6,11 +6,11 @@ import BoundingBox from '@/types/types/BoundingBox'
 /**
  * Updates the canvas size such that all items:
  *
- *  (1) fit within the canvas (which is expanded to twice the size of the bounding box of all items if not),
- *  (2) are centered, and
- *  (3) are zoomed to visually fit within the viewport
+ *  1. fit within the canvas (which is expanded to twice the size of the bounding box of all items if not),
+ *  2. are centered, and
+ *  3. are zoomed to visually fit within the viewport
  */
-export function updateCanvasSize (this: DocumentStoreInstance) {
+export function updateCanvasSize (this: DocumentStoreInstance, zoom = 1) {
   const boundingBoxes = Object
     .values(this.items)
     .map(item => item.boundingBox)
@@ -20,6 +20,7 @@ export function updateCanvasSize (this: DocumentStoreInstance) {
   const height = boundingBox.bottom - boundingBox.top
   const canvasWidth = this.canvas.right - this.canvas.left
   const canvasHeight = this.canvas.bottom - this.canvas.top
+  const defaultZoom = 0 // 1.4 // TODO: set the user-defined default zoom like this (0 = 'zoom to fit')
 
   if (width > canvasWidth || height > canvasHeight) {
     // if the boundaries of item(s) exceeds the canvas dimensions, then resize the canvas
@@ -38,7 +39,7 @@ export function updateCanvasSize (this: DocumentStoreInstance) {
   // if everything fits, then zoom is defaulted to 100%
   setTimeout(() => {
     this.setZoom({
-      zoom: Math.min(this.viewport.width / width, this.viewport.height / height, 1)
+      zoom: defaultZoom || Math.min(this.viewport.width / width, this.viewport.height / height, 1)
     })
   })
 }
@@ -50,15 +51,17 @@ export function updateCanvasSize (this: DocumentStoreInstance) {
  */
 export function setViewerSize (this: DocumentStoreInstance, rect: DOMRect) {
   this.viewport = rect
-  this.canvas.right = screen.width / MIN_ZOOM
-  this.canvas.bottom =  screen.height / MIN_ZOOM
 
-  if (!this.hasLoaded && rect.width > 0 && rect.height > 0) {
-    this.hasLoaded = true
-    this.updateCanvasSize()
-    this.centerAll()
-    this.panToCenter()
-    // this.setZoom({ zoom: 1.4 }) // TODO: set the user-defined default zoom like this (may need setTimeout)
+  if (!this.hasLoaded) {
+    this.canvas.right = screen.width / MIN_ZOOM
+    this.canvas.bottom =  screen.height / MIN_ZOOM
+
+    if (rect.width > 0 && rect.height > 0) {
+      this.hasLoaded = true
+      this.updateCanvasSize()
+      this.centerAll()
+      this.panToCenter()
+    }
   }
 }
 
