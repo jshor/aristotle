@@ -63,6 +63,8 @@ export interface DocumentState extends SerializableState {
   /**
    * Information about the connection "experiment" (i.e., when a user drags a port to try to establish a new connection).
    * `null` when no experiment is being performed.
+   *
+   * The connection experiment is rendered by [PortItem.vue](../../containers/PortItem.vue).
    */
   connectionExperiment: {
     /** The ID of the port originating the experiment. */

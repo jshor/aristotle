@@ -19,10 +19,6 @@ export function cut (this: DocumentStoreInstance) {
  * Copies selected editor elements to the clipboard.
  */
 export function copy (this: DocumentStoreInstance) {
-  if (!this.hasSelectedItems) {
-    return window.api.beep()
-  }
-
   const items: Record<string, Item> = {}
   const ports: Record<string, Port> = {}
   const connections: Record<string, Connection> = {}
@@ -31,13 +27,22 @@ export function copy (this: DocumentStoreInstance) {
   this.selectedItemIds.forEach(id => {
     items[id] = this.items[id]
     items[id].portIds.forEach(portId => {
-      ports[portId] = this.ports[portId]
+      ports[portId] = {
+        ...this.ports[portId],
+        connectedPortIds: []
+      }
     })
   })
 
   this
     .selectedConnectionIds
-    .forEach(id => connections[id] = this.connections[id])
+    .forEach(id => {
+      const connection = this.connections[id]
+
+      if (ports[connection.source] && ports[connection.target]) {
+        connections[id] = connection
+      }
+    })
 
   this
     .selectedGroupIds

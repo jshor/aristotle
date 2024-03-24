@@ -146,6 +146,7 @@ export function destroyConnectionById (this: DocumentStoreInstance, id: string) 
   this.ports[source].connectedPortIds.splice(sourceIndex, 1)
   this.ports[target].connectedPortIds.splice(targetIndex, 1)
 
+  // the input signal to the target port is now cut; set the port's value to 'unknown'
   this.ports[target].value = LogicValue.UNKNOWN
   this.ports[target].wave?.drawPulseChange(LogicValue.UNKNOWN)
 
@@ -217,15 +218,11 @@ export function createConnectionExperiment (this: DocumentStoreInstance, sourceI
  * Moves the target of the active connection experiment.
  *
  * @param position - the new position of the target, in editor coordinates
- * @param offset - the offset of the target, in editor coordinates
  */
-export function updateConnectionExperiment (this: DocumentStoreInstance, position: Point, offset: Point) {
+export function updateConnectionExperiment (this: DocumentStoreInstance, position: Point) {
   if (!this.connectionExperiment) return
 
-  const { x, y } = fromDocumentToEditorCoordinates(this.canvas, this.viewport, {
-    x: position.x - offset.x,
-    y: position.y - offset.y
-  }, this.zoom)
+  const { x, y } = fromDocumentToEditorCoordinates(this.canvas, this.viewport, position, this.zoom)
   const boundingBox = boundaries.getPointBoundary({ x, y })
   const { snapping } = usePreferencesStore()
   const tolerance = snapping.snapTolerance.value
@@ -255,7 +252,13 @@ export function terminateConnectionExperiment (this: DocumentStoreInstance) {
 
   if (target) {
     this.cacheState()
-    this.connect({ source: sourceId, target: target.id })
+
+    if (this.ports[sourceId].type === PortType.Input) {
+      this.connect({ source: target.id, target: sourceId })
+    } else {
+      this.connect({ source: sourceId, target: target.id })
+    }
+
     this.commitCachedState()
   }
 

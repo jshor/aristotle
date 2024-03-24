@@ -524,7 +524,7 @@ describe('connection actions', () => {
         'getRadialSnapOffset'
       ])
 
-      store.updateConnectionExperiment({ x: 0, y: 0 }, { x: 0, y: 0 })
+      store.updateConnectionExperiment({ x: 0, y: 0 })
 
       expect(boundaries.getPointBoundary).not.toHaveBeenCalled()
       expect(boundaries.getRadialSnapOffset).not.toHaveBeenCalled()
@@ -533,7 +533,6 @@ describe('connection actions', () => {
     it('should move the experimental connection to the given target position', () => {
       const sourceId = 'source-id'
       const position = { x: 20, y: 30 }
-      const offset = { x: 5, y: 5 }
 
       store.$patch({
         connectionExperiment: {
@@ -541,18 +540,14 @@ describe('connection actions', () => {
           targetPosition: { x: 10, y: 20 }
         }
       })
-      store.updateConnectionExperiment(position, offset)
+      store.updateConnectionExperiment(position)
 
-      expect(store.connectionExperiment!.targetPosition).toEqual({
-        x: position.x - offset.x,
-        y: position.y - offset.y
-      })
+      expect(store.connectionExperiment!.targetPosition).toEqual(position)
     })
 
     it('should snap to the nearest available port', () => {
       const sourceId = 'source-id'
       const position = { x: 30, y: 40 }
-      const offset = { x: 0, y: 0 }
       const snapPoisition = { x: 33, y: 44 }
 
       store.$patch({
@@ -569,7 +564,7 @@ describe('connection actions', () => {
           boundaries.getPointBoundary(snapPoisition)
         ]
       })
-      store.updateConnectionExperiment(position, offset)
+      store.updateConnectionExperiment(position)
 
       expect(store.connectionExperiment!.targetPosition).toEqual(snapPoisition)
     })
@@ -587,7 +582,7 @@ describe('connection actions', () => {
       }
     })
 
-    it('should not do anything if there is no connection experiment', () => {
+    beforeEach(() => {
       store.$reset()
 
       stubAll(store, [
@@ -596,6 +591,9 @@ describe('connection actions', () => {
         'connect',
         'clearStatelessInfo'
       ])
+    })
+
+    it('should not do anything if there is no connection experiment', () => {
 
       store.terminateConnectionExperiment()
 
@@ -607,7 +605,6 @@ describe('connection actions', () => {
 
     describe('when the connection experiment is in the neighborhood of a connectable port', () => {
       beforeEach(() => {
-        store.$reset()
         store.$patch({
           connectionExperiment: {
             sourceId,
@@ -619,13 +616,6 @@ describe('connection actions', () => {
           },
           connectablePortIds: new Set([targetId])
         })
-
-        stubAll(store, [
-          'cacheState',
-          'commitCachedState',
-          'connect',
-          'clearStatelessInfo'
-        ])
 
         store.terminateConnectionExperiment()
       })
@@ -647,6 +637,25 @@ describe('connection actions', () => {
       it('should clear the stateless info', () => {
         expect(store.clearStatelessInfo).toHaveBeenCalledTimes(1)
       })
+    })
+
+    it('should reverse the source and the target when the source is an input port', () => {
+      store.$patch({
+        connectionExperiment: {
+          sourceId,
+          targetPosition: { x: 10, y: 20 }
+        },
+        ports: {
+          [sourceId]: target,
+          [targetId]: source
+        },
+        connectablePortIds: new Set([targetId])
+      })
+
+      store.terminateConnectionExperiment()
+
+      expect(store.connect).toHaveBeenCalledTimes(1)
+      expect(store.connect).toHaveBeenCalledWith({ source: targetId, target: sourceId })
     })
 
     describe('when the connection experiment is not near a connectable port', () => {

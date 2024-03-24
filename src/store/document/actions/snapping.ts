@@ -26,13 +26,18 @@ export function setSnapBoundaries (this: DocumentStoreInstance, id: string) {
   })()
 }
 
+/**
+ * Sets the vertical and horizontal snap boundaries for a connection's control points.
+ *
+ * @param excludeIndex - the index of the control point to exclude (e.g., the one actively being dragged)
+ */
 export function setControlPointSnapBoundaries (
   this: DocumentStoreInstance,
-  id: string,
+  connectionId: string,
   entries: { portPosition: Point }[],
   excludeIndex: number
 ) {
-  const { source, target } = this.connections[id]
+  const { source, target } = this.connections[connectionId]
 
   this.snapBoundaries = entries
     .reduce((b, { portPosition }, index) => {
@@ -44,6 +49,9 @@ export function setControlPointSnapBoundaries (
     .concat(boundaries.getLinearBoundaries(this.ports[target].position))
 }
 
+/**
+ * Sets the point snap boundaries for all connectable ports.
+ */
 export function setConnectionExperimentSnapBoundaries (this: DocumentStoreInstance, sourceId: string) {
   this.setConnectablePortIds({ portId: sourceId, isDragging: true })
   this.snapBoundaries = []

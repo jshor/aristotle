@@ -168,7 +168,7 @@ describe('undo/redo actions', () => {
 
     const item1 = createItem('item1', ItemType.InputNode, {
       portIds: ['port1'],
-      clock: new ClockPulse('item1', 1000, LogicValue.TRUE)
+      clock: new ClockPulse('item1', 1000, LogicValue.TRUE, LogicValue.TRUE)
     })
     const addedItem1 = createItem('addedItem1', ItemType.InputNode)
     const addedItem2 = createItem('addedItem2', ItemType.InputNode)
