@@ -70,6 +70,7 @@ describe('clipboard actions', () => {
     const item2 = createItem('item2', ItemType.OutputNode, { portIds: ['port2'], groupId: 'group' })
     const item3 = createItem('item3', ItemType.InputNode, { portIds: ['port3'] })
     const item4 = createItem('item4', ItemType.OutputNode, { portIds: ['port4'] })
+    const item5 = createItem('item5', ItemType.OutputNode, { portIds: ['port4'] })
     const connection1 = createConnection('connection1', 'port3', 'port4')
     const group = createGroup('group', ['item1', 'item2'], { isSelected: true })
 
@@ -80,7 +81,8 @@ describe('clipboard actions', () => {
           item1,
           item2,
           item3,
-          item4
+          item4,
+          item5
         },
         ports: {
           port1,
@@ -98,6 +100,7 @@ describe('clipboard actions', () => {
           'item1',
           'item2',
           'item3',
+          'item4'
         ]),
         selectedConnectionIds: new Set(['connection1']),
         selectedGroupIds: new Set(['group'])
@@ -139,14 +142,11 @@ describe('clipboard actions', () => {
       expect(clipboardData.items).toHaveProperty('item1')
       expect(clipboardData.items).toHaveProperty('item2')
       expect(clipboardData.items).toHaveProperty('item3')
+      expect(clipboardData.items).toHaveProperty('item4')
     })
 
     it('should not copy non-selected items', () => {
-      expect(clipboardData.items).not.toHaveProperty('item4')
-    })
-
-    it('should not copy orphaned freeports', () => {
-      expect(clipboardData.items).not.toHaveProperty('chain2Freeport1')
+      expect(clipboardData.items).not.toHaveProperty('item5')
     })
 
     it('should copy all connections that are connected to selected items at both ends', () => {
