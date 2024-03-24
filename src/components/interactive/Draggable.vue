@@ -78,7 +78,7 @@ export default defineComponent({
 
       props.isSelected
         ? emit('deselect')
-        : emit('select', true)
+        : emit('select')
     }
 
     /**

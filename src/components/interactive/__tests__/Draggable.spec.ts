@@ -305,7 +305,6 @@ describe('Draggable component', () => {
 
       it('should emit `select`', async () => {
         expect(wrapper.emitted()).toHaveProperty('select')
-        expect(wrapper.emitted().select[0]).toEqual([true])
       })
 
       it('should emit `deselect` when the item is selected', async () => {

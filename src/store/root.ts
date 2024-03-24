@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid'
 import basic from '../containers/fixtures/basic.json'
 import flipFlop from '../containers/fixtures/flipflop.json'
 // import flipFlop from '../containers/fixtures/counter.json'
-import integratedCircuit from '../containers/fixtures/ic.json'
+// import integratedCircuit from '../containers/fixtures/ic.json'
 import testIc from '../containers/fixtures/test.json'
 
 import { createDocumentStore, DocumentStore } from './document'
@@ -105,7 +105,7 @@ export const useRootStore = defineStore({
     },
     openIntegratedCircuit (item: Item) {
       if (item.integratedCircuit) {
-        this.openDocument('', item.integratedCircuit.serializedState, item.id, item.name)
+        this.openDocument('', item.integratedCircuit.serializedState, item.id, item.defaultName)
       }
     },
     async saveImage (data: Blob) {
