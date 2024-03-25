@@ -65,14 +65,12 @@ export default defineComponent({
   pointer-events: all;
   z-index: 1001;
 
+  @include circuit-element;
+
   &, &__display {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-
-  &--selected {
-    filter: drop-shadow(0 0 6px var(--color-secondary));
   }
 
   &__display {

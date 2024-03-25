@@ -1,5 +1,8 @@
 <template>
-  <theme :dark="(experience.darkMode.value as boolean)">
+  <theme
+    :dark="(experience.darkMode.value as boolean)"
+    :style="colorStyles"
+  >
     <div
       class="app__dropzone"
       :class="{
@@ -9,8 +12,7 @@
 
     <main-view
       v-if="activeDocumentId && activeDocument"
-      :is-blurred="isDialogOpen"
-      @contextmenu="onContextMenu">
+      :is-blurred="isDialogOpen">
       <template #top>
         <!-- mobile-only header -->
         <template v-if="isMobile">
@@ -42,10 +44,12 @@
         <toolbar
           :key="activeDocumentId"
           :store="activeDocument.store"
+          @contextmenu="onContextMenu"
         />
         <toolbox
           :is-open="isToolboxOpen"
           :store="activeDocument.store"
+          @contextmenu="onContextMenu"
         />
       </template>
 
@@ -61,6 +65,7 @@
               :dirty="document.store().isDirty"
               @activate="activateDocument(id as string)"
               @close="closeDocument(id as string)"
+              @contextmenu="onContextMenu"
             />
           </template>
           <template #default>
@@ -73,6 +78,7 @@
             <oscilloscope
               :key="activeDocumentId"
               :store="activeDocument.store"
+              @contextmenu="onContextMenu"
             />
           </template>
         </tab-host>
@@ -87,6 +93,7 @@
           :store="activeDocument.store"
           :is-fullscreen="isFullscreen"
           @fullscreen="toggleFullscreen"
+          @contextmenu="onContextMenu"
         />
       </template>
     </main-view>
@@ -152,7 +159,7 @@ export default defineComponent({
 },
   setup () {
     const store = useRootStore()
-    const { experience } = storeToRefs(usePreferencesStore())
+    const { colorStyles, experience } = storeToRefs(usePreferencesStore())
     const {
       activeDocument,
       activeDocumentId,
@@ -263,7 +270,7 @@ export default defineComponent({
     }
 
     function onContextMenu () {
-      // window.api.showContextMenu([])
+      window.api.showContextMenu([])
     }
 
     return {
@@ -271,6 +278,7 @@ export default defineComponent({
       activeDocument,
       activeDocumentId,
       documents,
+      colorStyles,
       experience,
       hasOpenDocuments,
       isDropping,

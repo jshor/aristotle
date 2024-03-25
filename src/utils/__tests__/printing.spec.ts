@@ -69,12 +69,12 @@ describe('Printing utility', () => {
     })
 
     it('should attach the rendered image to the printable iframe', async () => {
-      await printing.printImage(zoom, editor, {
+      await printing.printImage(editor, {
         left: 100,
         right: 200,
         top: 100,
         bottom: 150
-      })
+      }, {})
 
       const [ image, pageSize ] = printFrameSpy.mock.calls[0]
 
@@ -86,12 +86,12 @@ describe('Printing utility', () => {
     })
 
     it('should resize the image in ratio to fit the window size', async () => {
-      await printing.printImage(zoom, editor, {
+      await printing.printImage(editor, {
         left: 4000,
         right: 5000,
         top: 4000,
         bottom: 5500
-      })
+      }, {})
 
       const [ image, pageSize ] = printFrameSpy.mock.calls[0]
 
@@ -103,12 +103,12 @@ describe('Printing utility', () => {
     })
 
     it('should attach a portrait image to the printable iframe when the height exceeds the width', async () => {
-      await printing.printImage(zoom, editor, {
+      await printing.printImage(editor, {
         left: 4000,
         right: 5500,
         top: 4000,
         bottom: 5000
-      })
+      }, {})
 
       const [ image, pageSize ] = printFrameSpy.mock.calls[0]
 

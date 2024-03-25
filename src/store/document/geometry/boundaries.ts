@@ -241,6 +241,23 @@ function getPointBoundary (point: Point): BoundingBox {
 }
 
 /**
+ * Returns a bounding box for a set of points.
+ */
+function getConstellationBoundingBox (points: Point[]): BoundingBox {
+  return points.reduce((rect, point) => ({
+    left: Math.min(rect.left, point.x),
+    top: Math.min(rect.top, point.y),
+    right: Math.max(rect.right, point.x),
+    bottom: Math.max(rect.bottom, point.y)
+  }), {
+    left: Infinity,
+    top: Infinity,
+    right: 0,
+    bottom: 0
+  })
+}
+
+/**
  * Computes the bounding box of the given item.
  *
  * @param item
@@ -332,6 +349,7 @@ export default {
   getLinearBoundaries,
   getPointBoundary,
   hasIntersection,
+  getConstellationBoundingBox,
   getBoundingBox,
   getGroupBoundingBox,
   getBoundingBoxMidpoint,

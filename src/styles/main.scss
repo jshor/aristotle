@@ -6,7 +6,6 @@ body {
   min-height: 100vh;
   max-height: 100vh;
   overscroll-behavior: contain;
-  // overflow: hidden;
 
   --font-family: system-ui;
 
@@ -26,6 +25,7 @@ body {
   --color-hi-z: darkred;
   --color-off: gray;
   --color-on: green;
+  --color-selection: var(--color-secondary);
 
   background-color: var(--color-bg-primary);
 }
@@ -65,6 +65,9 @@ body {
   --color-off: #fff;
 }
 
+.printer-friendly, .image-friendly {
+  --color-selection: transparent !important;
+}
 
 @media (prefers-color-scheme: dark) {
   :root {

@@ -1,0 +1,9 @@
+@mixin circuit-element {
+  &--selected {
+    filter: drop-shadow(0 0 6px var(--color-selection));
+  }
+
+  &--flash {
+    animation: flash 1s normal ease-out; 
+  }
+}

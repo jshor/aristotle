@@ -169,9 +169,15 @@ export default defineComponent({
 
 <style lang="scss">
 .wire {
+  @include circuit-element;
+
   pointer-events: none;
   touch-action: none;
   position: absolute;
+
+  &--preview {
+    opacity: 0.5;
+  }
 
   &__clickable {
     animation: none;
@@ -207,18 +213,6 @@ export default defineComponent({
       stroke: var(--color-off);
       stroke: -webkit-focus-ring-color !important;
     }
-  }
-
-  &--selected {
-    filter: drop-shadow(0 0 6px var(--color-secondary)); // TODO: make this a mixin
-  }
-
-  &--preview {
-    opacity: 0.5;
-  }
-
-  &--flash {
-    animation: flash 1s normal ease-out; // TODO: make this a mixin
   }
 }
 

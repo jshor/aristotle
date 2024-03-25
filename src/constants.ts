@@ -30,3 +30,15 @@ export const ITEM_BASE_Z_INDEX = 1000
 
 /** The easing function for each animation frame to ease out after panning. */
 export const PANNING_EASING_FUNCTION = (x: number) => 1 - Math.pow(1 - x, 3)
+
+/** Printer-friendly color CSS variables. */
+export const PRINTER_FRIENDLY_COLORS = {
+  '--color-bg-primary': '#fff',
+  '--color-bg-secondary': '#fff',
+  '--color-bg-tertiary': '#fff',
+  '--color-bg-quaternary': '#fff',
+  '--color-primary': '#000',
+  '--color-secondary': '#000',
+  '--color-shadow': '#000',
+  '--color-off': '#fff'
+}

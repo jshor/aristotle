@@ -19,7 +19,7 @@ export const usePreferencesStore = defineStore({
       unknownColor: {
         type: 'color',
         label: 'Unknown state',
-        value: '#ff0000',
+        value: 'darkred',
         description: 'High impedance (Hi-Z).'
       }
     },
@@ -94,6 +94,19 @@ export const usePreferencesStore = defineStore({
       }
     }
   }),
+
+  getters: {
+    /**
+     * The CSS color variables.
+     */
+    colorStyles (state) {
+      return {
+        '--color-on': state.colors.onColor.value,
+        '--color-off': state.colors.offColor.value,
+        '--color-hi-z': state.colors.unknownColor.value
+      }
+    }
+  },
 
   actions: {
     async writeSettings () {

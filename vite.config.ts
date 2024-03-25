@@ -53,6 +53,8 @@ export default defineConfig(({ command }) => {
           additionalData: `
             @import '@/styles/_globals.scss';
             @import '@/styles/_variables.scss';
+            @import '@/styles/_mixins.scss';
+            @import '@/styles/_keyframes.scss';
           `
         }
       }
