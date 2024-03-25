@@ -5,11 +5,6 @@
     :grid-size="gridSize"
     :tabindex="0"
     :canvas="store.canvas"
-    :style="{
-      '--color-on': colors.onColor.value,
-      '--color-off': colors.offColor.value,
-      '--color-hi-z': colors.unknownColor.value
-    }"
     @pan="store.panDelta"
     @zoom="store.setZoom"
     @contextmenu="onContextMenu"
@@ -84,6 +79,8 @@ import { storeToRefs } from 'pinia'
 import { usePreferencesStore } from '@/store/preferences'
 import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING, ITEM_BASE_Z_INDEX } from '@/constants'
 import BoundingBox from '@/types/types/BoundingBox'
+import ControlPoint from '@/types/interfaces/ControlPoint'
+import Point from '@/types/interfaces/Point'
 
 export default defineComponent({
   name: 'Document',
@@ -107,7 +104,6 @@ export default defineComponent({
     const preferencesStore = usePreferencesStore()
     const editorRef = ref<typeof Editor>()
     const updates = ref(0)
-    const { colors } = storeToRefs(preferencesStore)
     const flash = computed(() => store.isDebugging && store.isCircuitEvaluated)
     const gridSize = computed(() => preferencesStore.grid.showGrid.value ? preferencesStore.grid.gridSize.value : 0)
 
@@ -136,9 +132,15 @@ export default defineComponent({
      * This is used for rendering the document as an image that can be printed or exported to a file.
      */
     function initiatePrint (callback: (editorElement: HTMLElement, boundingBox: BoundingBox) => Promise<void>) {
+      const points = Object
+        .values(store.connections)
+        .reduce((points, { controlPoints }) => points.concat(
+          controlPoints.map(({ position }) => position)
+        ), [] as Point[])
       const boundingBoxes = Object
         .values(store.items)
         .map(({ boundingBox }) => boundingBox)
+        .concat(boundaries.getConstellationBoundingBox(points))
       const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
 
       callback(editorRef.value!.grid, boundingBox)
@@ -149,7 +151,7 @@ export default defineComponent({
      */
     async function printImage () {
       initiatePrint(async (editorElement, boundingBox) => {
-        await printing.printImage(store.zoom, editorElement, boundingBox)
+        await printing.printImage(store.zoom, editorElement, boundingBox, preferencesStore.colorStyles)
 
         store.isPrinting = false
       })
@@ -160,7 +162,10 @@ export default defineComponent({
      */
     async function exportImage () {
       initiatePrint(async (editorElement, boundingBox) => {
-        const { printArea } = printing.createPrintArea(1 / store.zoom, editorElement, boundingBox, IMAGE_PADDING, '')
+        const { printArea } = printing.createPrintArea(editorElement, boundingBox, IMAGE_PADDING, 'image-friendly', {
+          zoom: (1 / store.zoom).toString(),
+          ...preferencesStore.colorStyles
+        })
         const image = await printing.createImage<Blob>(printArea, 'toBlob')
 
         await rootStore.saveImage(image)
@@ -238,7 +243,9 @@ export default defineComponent({
      * Shows the editor context menu.
      */
     function onContextMenu ($event: Event) {
-      window.api.showContextMenu(editorContextMenu(props.store))
+      setTimeout(() => {
+        window.api.showContextMenu(editorContextMenu(props.store))
+      })
 
       $event.preventDefault()
       $event.stopPropagation()
@@ -258,7 +265,6 @@ export default defineComponent({
       store,
       editorRef,
       updates,
-      colors,
       gridSize,
       flash,
       storeDefinition: props.store,

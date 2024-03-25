@@ -95,6 +95,25 @@ export default defineComponent({
   outline: none;
   filter: drop-shadow(0 0 6px transparent);
 
+  @include circuit-element;
+
+  &--custom {
+    .circuit-component__ports {
+      &--left, &--right {
+        padding: var(--integrated-circuit-wire-height) 0;
+      }
+
+      &--top {
+        margin-top: calc(var(--integrated-circuit-wire-height) * -1);
+      }
+
+      &--top, &--bottom {
+        margin-left: calc(var(--integrated-circuit-wire-height) + 6px);
+        margin-right: calc(var(--integrated-circuit-wire-height) + 6px);
+      }
+    }
+  }
+
   &__ports {
     position: relative;
     display: flex;
@@ -141,31 +160,6 @@ export default defineComponent({
       bottom: 50%;
       align-items: flex-start;
       padding-bottom: var(--integrated-circuit-wire-height);
-    }
-  }
-
-  &--selected {
-    filter: drop-shadow(0 0 6px var(--color-secondary));
-  }
-
-  &--flash {
-    animation: flash 1s normal ease-out;
-  }
-
-  &--custom {
-    .circuit-component__ports {
-      &--left, &--right {
-        padding: var(--integrated-circuit-wire-height) 0;
-      }
-
-      &--top {
-        margin-top: calc(var(--integrated-circuit-wire-height) * -1);
-      }
-
-      &--top, &--bottom {
-        margin-left: calc(var(--integrated-circuit-wire-height) + 6px);
-        margin-right: calc(var(--integrated-circuit-wire-height) + 6px);
-      }
     }
   }
 }

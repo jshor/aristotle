@@ -9,7 +9,7 @@ import domToImage from 'dom-to-image-more'
  * @param boundingBox - the bounding box of all items in the editor
  * @param padding - number of pixels to use as surrounding padding
  */
-function createPrintArea (zoom: number, editor: HTMLElement, boundingBox: BoundingBox, padding: number, className: string = 'printer-friendly') {
+function createPrintArea (editor: HTMLElement, boundingBox: BoundingBox, padding: number, className: string, style: Record<string, string>) {
   const printArea = editor.cloneNode(true) as HTMLElement
   const width = boundingBox.right - boundingBox.left + (padding * 2)
   const height = boundingBox.bottom - boundingBox.top + (padding * 2)
@@ -23,7 +23,10 @@ function createPrintArea (zoom: number, editor: HTMLElement, boundingBox: Boundi
     child.style.top = `${(top - boundingBox.top)}px`
   }
 
-  printArea.style['zoom' as any] = zoom.toString()
+  for (const key in style) {
+    printArea.style.setProperty(key, style[key])
+  }
+
   printArea.style.width = `${width}px`
   printArea.style.height = `${height}px`
   printArea.style.position = 'relative'
@@ -55,6 +58,7 @@ function createPrintFrame (image: HTMLImageElement, pageSize: number[]) {
   iframe.style.top = '0px'
   iframe.style.left = '0px'
 
+  document.body.style.overflow = 'hidden'
   document.body.appendChild(iframe)
 
   const printFrame = iframe.contentWindow
@@ -82,11 +86,13 @@ function createPrintFrame (image: HTMLImageElement, pageSize: number[]) {
  * @param printArea
  */
 async function createImage<T extends string | Blob> (printArea: HTMLElement, fn: 'toBlob' | 'toPng') {
+  document.body.style.overflow = 'hidden'
   document.body.appendChild(printArea)
 
   const dataUrl = await domToImage[fn](printArea) as T
 
   printArea.remove()
+  document.body.style.overflow = 'initial'
 
   return dataUrl
 }
@@ -113,8 +119,12 @@ async function printWindow (win: Window | null) {
  * @param editor - the editor DOM element to clone
  * @param boundingBox - the bounding box of all items in the editor
  */
-async function printImage (zoom: number, editor: HTMLElement, boundingBox: BoundingBox) {
-  const { printArea, width, height } = createPrintArea(1 / zoom, editor, boundingBox, 20)
+async function printImage (zoom: number, editor: HTMLElement, boundingBox: BoundingBox, colors: Record<string, string>) {
+  // TODO: should the margin and page size be configurable by the user?
+  const { printArea, width, height } = createPrintArea(editor, boundingBox, 20, 'printer-friendly', {
+    zoom: (1 / zoom).toString(),
+    ...colors
+  })
   const dataUrl = await printing.createImage<string>(printArea, 'toPng')
   const pageSize = [8.5, 11] // inches
   const minSize = Math.min(...pageSize) * 96 // pixels
@@ -147,6 +157,7 @@ async function printImage (zoom: number, editor: HTMLElement, boundingBox: Bound
   await printing.printWindow(iframe?.contentWindow)
 
   iframe?.remove()
+  document.body.style.overflow = 'initial'
 }
 
 const printing = {

@@ -24,6 +24,7 @@
       left: wire.wirePosition.x + 'px',
       top: wire.wirePosition.y + 'px'
     }"
+    :flash="flash"
     @add="p => onPortAdd(p, index)"
     @move="p => onNewPortMove(p, index)"
     @added="dragEnd"
