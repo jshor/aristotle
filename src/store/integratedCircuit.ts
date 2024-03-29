@@ -8,7 +8,9 @@ import SerializableState from '@/types/interfaces/SerializableState'
 import ItemFactory from '@/types/types/ItemFactory'
 import Item from '@/types/interfaces/Item'
 import Direction from '@/types/enums/Direction'
-import PortType from '@/types/enums/PortType'
+import dFlipFlop from '@/containers/fixtures/d-flipflop.json'
+import tFlipFlop from '@/containers/fixtures/t-flipflop.json'
+import customCircuitFactory from '@/factories/customCircuitFactory'
 
 type IntegratedCircuitState = {
   isBuilderOpen: boolean
@@ -28,14 +30,19 @@ export const useIntegratedCircuitStore = defineStore('integratedCircuit', {
   }),
 
   actions: {
+    loadAllToolbox () {
+      this.factories[dFlipFlop.defaultName] = customCircuitFactory.bind(null, dFlipFlop as any)
+      this.factories[tFlipFlop.defaultName] = customCircuitFactory.bind(null, tFlipFlop as any)
+    },
 
-    launchBuilder (circuit: SerializableState) {
+    async launchBuilder (circuit: SerializableState) {
       this.isBuilderOpen = true
-      this.model = integratedCircuitFactory(circuit, 'My integrated circuit', 400, 400)
 
-      return new Promise(resolve => {
-        this.resolve = resolve as () => void
-      })
+      const { item } = integratedCircuitFactory(circuit, 'My integrated circuit')
+
+      this.model = item
+
+      console.log('RESUL:', JSON.stringify(this.model))
     },
 
     async loadLibrary () {

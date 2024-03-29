@@ -51,7 +51,12 @@ export default defineComponent({
     const zoom = computed(() => store.zoom)
     const circuits = computed(() => integratedCircuitStore.factories)
 
+    integratedCircuitStore.loadAllToolbox()
+
     function onDrop (factory: ItemFactory, position?: Point) {
+
+      console.log('IC ITEM: ', factory())
+      store.deselectAll()
       store.insertItemAtPosition(factory(), position)
     }
 

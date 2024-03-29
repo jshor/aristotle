@@ -9,7 +9,7 @@ import ItemProperties from '@/types/interfaces/ItemProperties'
 import ItemFactory from '@/types/types/ItemFactory'
 import Port from '@/types/interfaces/Port'
 
-const inputFactory: ItemFactory = (type: ItemSubtype, width: number, height: number, properties: ItemProperties = {}) => {
+const inputFactory: ItemFactory = (type: ItemSubtype, properties: ItemProperties = {}) => {
   const elementId = uuid()
   const ports: Record<Direction, Port[]> = {
     [Direction.Left]: [],
@@ -19,7 +19,7 @@ const inputFactory: ItemFactory = (type: ItemSubtype, width: number, height: num
       portFactory(elementId, uuid(), Direction.Right, PortType.Output)
     ]
   }
-  const item = itemFactory(elementId, ItemType.InputNode, type, width, height, ports)
+  const item = itemFactory(elementId, ItemType.InputNode, type, ports)
 
   item.properties = {
     ...item.properties,

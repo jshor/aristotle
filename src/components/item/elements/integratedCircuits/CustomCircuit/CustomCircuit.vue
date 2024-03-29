@@ -10,7 +10,6 @@
   >
     <custom-circuit-port-zone
       :ports="ports[Direction.Top]"
-      :circuit-name="name"
       orientation="horizontal"
       type="top"
     />
@@ -18,7 +17,6 @@
     <div class="custom-circuit__center">
       <custom-circuit-port-zone
         :ports="ports[Direction.Left]"
-        :circuit-name="name"
         orientation="vertical"
         type="left"
       />
@@ -27,7 +25,6 @@
       </div>
       <custom-circuit-port-zone
         :ports="ports[Direction.Right]"
-        :circuit-name="name"
         orientation="vertical"
         type="right"
       />
@@ -35,7 +32,6 @@
 
     <custom-circuit-port-zone
       :ports="ports[Direction.Bottom]"
-      :circuit-name="name"
       orientation="horizontal"
       type="bottom"
     />
@@ -58,7 +54,7 @@ export default defineComponent({
     },
     name: {
       type: String,
-      default: 'circuit'
+      default: ''
     }
   },
   setup () {
@@ -70,9 +66,10 @@ export default defineComponent({
 <style lang="scss">
 .custom-circuit {
   border: 1px solid var(--color-secondary);
-  // background-color: var(--color-bg-primary);
-  background-color: #1D1E25CC;
+  background-color: var(--color-bg-primary);
+  // background-color: #1D1E25CC;
   pointer-events: all;
+  touch-action: auto;
   margin: 40px;
 
   &--no-left {

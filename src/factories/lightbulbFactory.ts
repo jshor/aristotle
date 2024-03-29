@@ -17,7 +17,7 @@ export default function lightbulbFactory () {
     [Direction.Bottom]: [],
     [Direction.Right]: []
   }
-  const item = itemFactory(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, 40, 40, ports)
+  const item = itemFactory(elementId, ItemType.OutputNode, ItemSubtype.Lightbulb, ports)
 
   return { item, ports }
 }

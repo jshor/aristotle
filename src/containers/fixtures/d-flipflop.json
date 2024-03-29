@@ -1,0 +1,1366 @@
+{
+  "id": "14138911-e1fc-4eef-b76a-fa17e27cb14c",
+  "defaultName": "D Flip-Flop",
+  "name": "",
+  "type": "IntegratedCircuit",
+  "subtype": "CustomCircuit",
+  "portIds": [
+      "54f69909-9c26-404a-b4f2-acae4de497b1",
+      "ce1b5696-04f0-44f9-8784-b6aeba8be907",
+      "2168a5a9-d1cb-4d15-8a07-87aa4ae85145",
+      "ffc65252-3790-4a7e-b95d-2f194af8b5e0",
+      "eb1f8c26-aee2-4b6d-976e-43b11469b4cd",
+      "a7263665-1088-4454-9de1-d8f945288941"
+  ],
+  "groupId": null,
+  "rotation": 0,
+  "boundingBox": {
+      "top": 0,
+      "left": 0,
+      "right": 0,
+      "bottom": 0
+  },
+  "position": {
+      "x": 0,
+      "y": 0
+  },
+  "zIndex": 0,
+  "width": 0,
+  "height": 0,
+  "isSelected": false,
+  "properties": {
+      "name": {
+          "type": "text",
+          "label": "Name",
+          "value": ""
+      }
+  },
+  "integratedCircuit": {
+      "items": {
+          "c093997c-3f96-4125-b59b-ba4ee0cc3cf1": {
+              "id": "c093997c-3f96-4125-b59b-ba4ee0cc3cf1",
+              "defaultName": "Buffer",
+              "name": "",
+              "type": "Buffer",
+              "subtype": "Buffer",
+              "portIds": [
+                  "a9c578a5-550e-4658-b715-d510453269bc",
+                  "54f69909-9c26-404a-b4f2-acae4de497b1"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "top": 0,
+                  "left": 0,
+                  "right": 0,
+                  "bottom": 0
+              },
+              "position": {
+                  "x": 0,
+                  "y": 0
+              },
+              "zIndex": 0,
+              "width": 0,
+              "height": 0,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": ""
+                  }
+              }
+          },
+          "550c309b-921d-4042-a5d5-80b2a62969bb": {
+              "id": "550c309b-921d-4042-a5d5-80b2a62969bb",
+              "defaultName": "Buffer",
+              "name": "",
+              "type": "Buffer",
+              "subtype": "Buffer",
+              "portIds": [
+                  "fe72d883-c28c-4fcf-a602-a1159c2ce946",
+                  "ce1b5696-04f0-44f9-8784-b6aeba8be907"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "top": 0,
+                  "left": 0,
+                  "right": 0,
+                  "bottom": 0
+              },
+              "position": {
+                  "x": 0,
+                  "y": 0
+              },
+              "zIndex": 0,
+              "width": 0,
+              "height": 0,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": ""
+                  }
+              }
+          },
+          "93fce8b5-10aa-4726-9b70-cc40fbe045f1": {
+              "id": "93fce8b5-10aa-4726-9b70-cc40fbe045f1",
+              "defaultName": "Buffer",
+              "name": "",
+              "type": "Buffer",
+              "subtype": "Buffer",
+              "portIds": [
+                  "9134fd30-0104-487c-bbe2-78272e965094",
+                  "2168a5a9-d1cb-4d15-8a07-87aa4ae85145"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "top": 0,
+                  "left": 0,
+                  "right": 0,
+                  "bottom": 0
+              },
+              "position": {
+                  "x": 0,
+                  "y": 0
+              },
+              "zIndex": 0,
+              "width": 0,
+              "height": 0,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": ""
+                  }
+              }
+          },
+          "81d5776c-927d-4b7a-8bc6-854e2b4565b4": {
+              "id": "81d5776c-927d-4b7a-8bc6-854e2b4565b4",
+              "defaultName": "Buffer",
+              "name": "",
+              "type": "Buffer",
+              "subtype": "Buffer",
+              "portIds": [
+                  "543eabc3-0bd8-4569-8fdf-34fe15e46742",
+                  "ffc65252-3790-4a7e-b95d-2f194af8b5e0"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "top": 0,
+                  "left": 0,
+                  "right": 0,
+                  "bottom": 0
+              },
+              "position": {
+                  "x": 0,
+                  "y": 0
+              },
+              "zIndex": 0,
+              "width": 0,
+              "height": 0,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": ""
+                  }
+              }
+          },
+          "0c0fbd68-ffde-4d46-bbb5-c66b3a32d3f0": {
+              "id": "0c0fbd68-ffde-4d46-bbb5-c66b3a32d3f0",
+              "defaultName": "Buffer",
+              "name": "",
+              "type": "Buffer",
+              "subtype": "Buffer",
+              "portIds": [
+                  "5c9d4581-b995-4d44-a2c9-c704060643a4",
+                  "eb1f8c26-aee2-4b6d-976e-43b11469b4cd"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "top": 0,
+                  "left": 0,
+                  "right": 0,
+                  "bottom": 0
+              },
+              "position": {
+                  "x": 0,
+                  "y": 0
+              },
+              "zIndex": 0,
+              "width": 0,
+              "height": 0,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": ""
+                  }
+              }
+          },
+          "10487fd6-b498-41a7-8a99-61d00afabca8": {
+              "id": "10487fd6-b498-41a7-8a99-61d00afabca8",
+              "defaultName": "Nand",
+              "name": "Nand",
+              "type": "LogicGate",
+              "subtype": "Nand",
+              "portIds": [
+                  "8508f715-f148-40e1-aef4-77e5f50a1321",
+                  "e1561f07-1173-4f0d-981a-7ecbbc7476f3",
+                  "90efcf8e-53b4-46f7-82dc-e95abbf5ef71",
+                  "e2b65826-3932-4416-9897-32d47d833e32"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "left": 17021,
+                  "top": 6880,
+                  "bottom": 6955,
+                  "right": 17161
+              },
+              "position": {
+                  "x": 17021,
+                  "y": 6880
+              },
+              "zIndex": 19,
+              "width": 140,
+              "height": 75,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": "Nand"
+                  },
+                  "inputCount": {
+                      "label": "Input count",
+                      "value": 3,
+                      "type": "number",
+                      "min": 2
+                  }
+              }
+          },
+          "d2c6d85e-c51d-49bb-b4a1-f52f73a73a31": {
+              "id": "d2c6d85e-c51d-49bb-b4a1-f52f73a73a31",
+              "defaultName": "Nand",
+              "name": "Nand 2",
+              "type": "LogicGate",
+              "subtype": "Nand",
+              "portIds": [
+                  "5da32c94-53e9-4771-b9c4-a6c39fde8396",
+                  "3ae4ac70-7360-4412-a644-ddbc5299b883",
+                  "31425454-a9d9-4687-a9e2-dd67f8b31326",
+                  "1910737b-35e3-40be-8b6e-3e3a4111f013"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "left": 17383,
+                  "top": 6899,
+                  "bottom": 6974,
+                  "right": 17523
+              },
+              "position": {
+                  "x": 17383,
+                  "y": 6899
+              },
+              "zIndex": 20,
+              "width": 140,
+              "height": 75,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": "Nand 2"
+                  },
+                  "inputCount": {
+                      "label": "Input count",
+                      "value": 3,
+                      "type": "number",
+                      "min": 2
+                  }
+              }
+          },
+          "a77b9d66-ca34-4a37-9eb8-56e1d15aeeed": {
+              "id": "a77b9d66-ca34-4a37-9eb8-56e1d15aeeed",
+              "defaultName": "Nand",
+              "name": "Nand 3",
+              "type": "LogicGate",
+              "subtype": "Nand",
+              "portIds": [
+                  "6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2",
+                  "5c99d7c9-f8cb-4035-bf67-703c2f966c4d",
+                  "cdfc2496-b587-412e-b304-090f019fc9bd",
+                  "a2998bc4-d5b8-4d43-8d30-8b507bebed45"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "left": 17363,
+                  "top": 7143,
+                  "bottom": 7218,
+                  "right": 17503
+              },
+              "position": {
+                  "x": 17363,
+                  "y": 7143
+              },
+              "zIndex": 21,
+              "width": 140,
+              "height": 75,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": "Nand 3"
+                  },
+                  "inputCount": {
+                      "label": "Input count",
+                      "value": 3,
+                      "type": "number",
+                      "min": 2
+                  }
+              }
+          },
+          "90312df3-0e3d-4271-b51d-1d2472ad30b2": {
+              "id": "90312df3-0e3d-4271-b51d-1d2472ad30b2",
+              "defaultName": "Nand",
+              "name": "Nand 4",
+              "type": "LogicGate",
+              "subtype": "Nand",
+              "portIds": [
+                  "08e24d85-d109-46e7-9f2a-c836602992f7",
+                  "744eea6f-7242-4cb6-bb20-32431ed86f0d",
+                  "72242e61-9317-4745-aa9d-89b4a607cab1",
+                  "42bafc22-6df8-47d5-8234-48ed639603d8"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "left": 17121,
+                  "top": 7014,
+                  "bottom": 7089,
+                  "right": 17261
+              },
+              "position": {
+                  "x": 17121,
+                  "y": 7014
+              },
+              "zIndex": 22,
+              "width": 140,
+              "height": 75,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": "Nand 4"
+                  },
+                  "inputCount": {
+                      "label": "Input count",
+                      "value": 3,
+                      "type": "number",
+                      "min": 2
+                  }
+              }
+          },
+          "16dcc0ab-fb69-4275-8efa-726d566e37bc": {
+              "id": "16dcc0ab-fb69-4275-8efa-726d566e37bc",
+              "defaultName": "Nand",
+              "name": "Nand 5",
+              "type": "LogicGate",
+              "subtype": "Nand",
+              "portIds": [
+                  "31126629-d86f-4c9e-9948-576948fff94c",
+                  "ada1136f-0353-4703-8a88-72010b262040",
+                  "71b35b18-dcb9-4ce3-a2ff-2ced294a0f33",
+                  "0f2c76f2-2743-492a-ac88-e0543b929cf5"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "left": 17022,
+                  "top": 7165,
+                  "bottom": 7240,
+                  "right": 17162
+              },
+              "position": {
+                  "x": 17022,
+                  "y": 7165
+              },
+              "zIndex": 23,
+              "width": 140,
+              "height": 75,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": "Nand 5"
+                  },
+                  "inputCount": {
+                      "label": "Input count",
+                      "value": 3,
+                      "type": "number",
+                      "min": 2
+                  }
+              }
+          },
+          "666c13c8-e27b-4216-820b-55abfa24fb41": {
+              "id": "666c13c8-e27b-4216-820b-55abfa24fb41",
+              "defaultName": "Nand",
+              "name": "Nand 6",
+              "type": "LogicGate",
+              "subtype": "Nand",
+              "portIds": [
+                  "9e254145-eb94-46d1-a803-90b18c98ed33",
+                  "7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee",
+                  "2152c2c3-0419-4d78-9e46-10c5871733a5",
+                  "2bbacf28-6e34-4aa8-ac0c-39b44a9da81d"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "left": 17013,
+                  "top": 7377,
+                  "bottom": 7452,
+                  "right": 17153
+              },
+              "position": {
+                  "x": 17013,
+                  "y": 7377
+              },
+              "zIndex": 24,
+              "width": 140,
+              "height": 75,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": "Nand 6"
+                  },
+                  "inputCount": {
+                      "label": "Input count",
+                      "value": 3,
+                      "type": "number",
+                      "min": 2
+                  }
+              }
+          },
+          "adc28a80-1c4b-4ecd-9fa9-c437ec661a05": {
+              "id": "adc28a80-1c4b-4ecd-9fa9-c437ec661a05",
+              "defaultName": "Buffer",
+              "name": "",
+              "type": "Buffer",
+              "subtype": "Buffer",
+              "portIds": [
+                  "b6ae9270-c60d-447a-b2d4-8120847ece52",
+                  "a7263665-1088-4454-9de1-d8f945288941"
+              ],
+              "groupId": null,
+              "rotation": 0,
+              "boundingBox": {
+                  "top": 0,
+                  "left": 0,
+                  "right": 0,
+                  "bottom": 0
+              },
+              "position": {
+                  "x": 0,
+                  "y": 0
+              },
+              "zIndex": 0,
+              "width": 0,
+              "height": 0,
+              "isSelected": false,
+              "properties": {
+                  "name": {
+                      "type": "text",
+                      "label": "Name",
+                      "value": ""
+                  }
+              }
+          }
+      },
+      "connections": {
+          "4a2a3c55-cd5a-47ea-947a-2ee05dc14fd5": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "4a2a3c55-cd5a-47ea-947a-2ee05dc14fd5",
+              "source": "5c9d4581-b995-4d44-a2c9-c704060643a4",
+              "target": "2bbacf28-6e34-4aa8-ac0c-39b44a9da81d",
+              "zIndex": 27,
+              "isSelected": false
+          },
+          "1950cec6-f8ac-48ad-904d-e0023fc1beb8": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "1950cec6-f8ac-48ad-904d-e0023fc1beb8",
+              "source": "9134fd30-0104-487c-bbe2-78272e965094",
+              "target": "7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee",
+              "zIndex": 28,
+              "isSelected": false
+          },
+          "d1f2dc54-c492-4721-8ad4-a5142771c374": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "d1f2dc54-c492-4721-8ad4-a5142771c374",
+              "source": "71b35b18-dcb9-4ce3-a2ff-2ced294a0f33",
+              "target": "9e254145-eb94-46d1-a803-90b18c98ed33",
+              "zIndex": 29,
+              "isSelected": false
+          },
+          "c7e87c69-e87f-46b3-b1ab-e2b642cc9cf5": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "c7e87c69-e87f-46b3-b1ab-e2b642cc9cf5",
+              "source": "2152c2c3-0419-4d78-9e46-10c5871733a5",
+              "target": "0f2c76f2-2743-492a-ac88-e0543b929cf5",
+              "zIndex": 30,
+              "isSelected": false
+          },
+          "dcfd8f03-ef76-427a-98bc-3ea9d7faaffa": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "dcfd8f03-ef76-427a-98bc-3ea9d7faaffa",
+              "source": "543eabc3-0bd8-4569-8fdf-34fe15e46742",
+              "target": "ada1136f-0353-4703-8a88-72010b262040",
+              "zIndex": 31,
+              "isSelected": false
+          },
+          "839357e5-1c2d-46e5-ae9c-7c57657e2210": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "839357e5-1c2d-46e5-ae9c-7c57657e2210",
+              "source": "72242e61-9317-4745-aa9d-89b4a607cab1",
+              "target": "31126629-d86f-4c9e-9948-576948fff94c",
+              "zIndex": 32,
+              "isSelected": false
+          },
+          "05efa578-82ce-4f4f-bd4c-c84b001af9d2": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "05efa578-82ce-4f4f-bd4c-c84b001af9d2",
+              "source": "543eabc3-0bd8-4569-8fdf-34fe15e46742",
+              "target": "42bafc22-6df8-47d5-8234-48ed639603d8",
+              "zIndex": 33,
+              "isSelected": false
+          },
+          "6704bc72-ab1d-4d0c-acf7-d1ce1ddb3141": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "6704bc72-ab1d-4d0c-acf7-d1ce1ddb3141",
+              "source": "9134fd30-0104-487c-bbe2-78272e965094",
+              "target": "744eea6f-7242-4cb6-bb20-32431ed86f0d",
+              "zIndex": 34,
+              "isSelected": false
+          },
+          "857e15b4-5659-488f-8560-e02d0e54b13b": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "857e15b4-5659-488f-8560-e02d0e54b13b",
+              "source": "90efcf8e-53b4-46f7-82dc-e95abbf5ef71",
+              "target": "08e24d85-d109-46e7-9f2a-c836602992f7",
+              "zIndex": 35,
+              "isSelected": false
+          },
+          "3fd9958d-0772-428e-bb49-333ebf25710c": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "3fd9958d-0772-428e-bb49-333ebf25710c",
+              "source": "2152c2c3-0419-4d78-9e46-10c5871733a5",
+              "target": "e1561f07-1173-4f0d-981a-7ecbbc7476f3",
+              "zIndex": 36,
+              "isSelected": false
+          },
+          "c799c926-8e61-46c7-a376-f32afaf7839f": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "c799c926-8e61-46c7-a376-f32afaf7839f",
+              "source": "72242e61-9317-4745-aa9d-89b4a607cab1",
+              "target": "e2b65826-3932-4416-9897-32d47d833e32",
+              "zIndex": 37,
+              "isSelected": false
+          },
+          "1f1d2730-8972-499d-a4c5-2075a467b113": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "1f1d2730-8972-499d-a4c5-2075a467b113",
+              "source": "72242e61-9317-4745-aa9d-89b4a607cab1",
+              "target": "3ae4ac70-7360-4412-a644-ddbc5299b883",
+              "zIndex": 40,
+              "isSelected": false
+          },
+          "ef3ee4f7-77fb-4860-ad05-77fd0d1a22cb": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "ef3ee4f7-77fb-4860-ad05-77fd0d1a22cb",
+              "source": "cdfc2496-b587-412e-b304-090f019fc9bd",
+              "target": "1910737b-35e3-40be-8b6e-3e3a4111f013",
+              "zIndex": 41,
+              "isSelected": false
+          },
+          "cbf9f7a1-adb4-453e-90a9-78a8275eafa7": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "cbf9f7a1-adb4-453e-90a9-78a8275eafa7",
+              "source": "31425454-a9d9-4687-a9e2-dd67f8b31326",
+              "target": "6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2",
+              "zIndex": 42,
+              "isSelected": false
+          },
+          "f3d4103f-6c06-4f27-88ac-8cd357515dcf": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "f3d4103f-6c06-4f27-88ac-8cd357515dcf",
+              "source": "9134fd30-0104-487c-bbe2-78272e965094",
+              "target": "5c99d7c9-f8cb-4035-bf67-703c2f966c4d",
+              "zIndex": 43,
+              "isSelected": false
+          },
+          "56d5f08d-c38c-4ce9-bf39-e355e353ff30": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "56d5f08d-c38c-4ce9-bf39-e355e353ff30",
+              "source": "71b35b18-dcb9-4ce3-a2ff-2ced294a0f33",
+              "target": "a2998bc4-d5b8-4d43-8d30-8b507bebed45",
+              "zIndex": 44,
+              "isSelected": false
+          },
+          "f0f63b91-071b-49e2-9729-4b9f59df4cea": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "f0f63b91-071b-49e2-9729-4b9f59df4cea",
+              "source": "cdfc2496-b587-412e-b304-090f019fc9bd",
+              "target": "fe72d883-c28c-4fcf-a602-a1159c2ce946",
+              "zIndex": 45,
+              "isSelected": false
+          },
+          "ca85acea-5a67-4c0a-9d10-b760d942e581": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "ca85acea-5a67-4c0a-9d10-b760d942e581",
+              "source": "31425454-a9d9-4687-a9e2-dd67f8b31326",
+              "target": "a9c578a5-550e-4658-b715-d510453269bc",
+              "zIndex": 46,
+              "isSelected": false
+          },
+          "53debf57-eca9-4d60-88ef-348cef04fbd2": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "53debf57-eca9-4d60-88ef-348cef04fbd2",
+              "source": "b6ae9270-c60d-447a-b2d4-8120847ece52",
+              "target": "8508f715-f148-40e1-aef4-77e5f50a1321",
+              "zIndex": 38,
+              "isSelected": false
+          },
+          "e9d7cee5-3816-4264-b777-4b13426a8d92": {
+              "controlPoints": [],
+              "groupId": null,
+              "id": "e9d7cee5-3816-4264-b777-4b13426a8d92",
+              "source": "b6ae9270-c60d-447a-b2d4-8120847ece52",
+              "target": "5da32c94-53e9-4771-b9c4-a6c39fde8396",
+              "zIndex": 39,
+              "isSelected": false
+          }
+      },
+      "ports": {
+          "a9c578a5-550e-4658-b715-d510453269bc": {
+              "id": "a9c578a5-550e-4658-b715-d510453269bc",
+              "elementId": "c093997c-3f96-4125-b59b-ba4ee0cc3cf1",
+              "defaultName": "Input Port",
+              "name": "Q Input Port 2",
+              "connectedPortIds": [
+                  "31425454-a9d9-4687-a9e2-dd67f8b31326"
+              ],
+              "position": {
+                  "x": 17662.5,
+                  "y": 6938.046875
+              },
+              "type": 1,
+              "rotation": 0,
+              "orientation": 0,
+              "value": 1,
+              "isFreeport": false,
+              "isMonitored": false
+          },
+          "fe72d883-c28c-4fcf-a602-a1159c2ce946": {
+              "id": "fe72d883-c28c-4fcf-a602-a1159c2ce946",
+              "elementId": "550c309b-921d-4042-a5d5-80b2a62969bb",
+              "defaultName": "Input Port",
+              "name": "Q' Input Port 2",
+              "connectedPortIds": [
+                  "cdfc2496-b587-412e-b304-090f019fc9bd"
+              ],
+              "position": {
+                  "x": 17648,
+                  "y": 7179.046875
+              },
+              "type": 1,
+              "rotation": 0,
+              "orientation": 0,
+              "value": 1,
+              "isFreeport": false,
+              "isMonitored": false
+          },
+          "9134fd30-0104-487c-bbe2-78272e965094": {
+              "id": "9134fd30-0104-487c-bbe2-78272e965094",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "CLR' Output Port 2",
+              "position": {
+                  "x": 16805,
+                  "y": 7040
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "93fce8b5-10aa-4726-9b70-cc40fbe045f1",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee",
+                  "744eea6f-7242-4cb6-bb20-32431ed86f0d",
+                  "5c99d7c9-f8cb-4035-bf67-703c2f966c4d"
+              ]
+          },
+          "543eabc3-0bd8-4569-8fdf-34fe15e46742": {
+              "id": "543eabc3-0bd8-4569-8fdf-34fe15e46742",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "> Output Port 2",
+              "position": {
+                  "x": 16807,
+                  "y": 7231
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "81d5776c-927d-4b7a-8bc6-854e2b4565b4",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "ada1136f-0353-4703-8a88-72010b262040",
+                  "42bafc22-6df8-47d5-8234-48ed639603d8"
+              ]
+          },
+          "5c9d4581-b995-4d44-a2c9-c704060643a4": {
+              "id": "5c9d4581-b995-4d44-a2c9-c704060643a4",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "D Output Port 2",
+              "position": {
+                  "x": 16807,
+                  "y": 7429
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "0c0fbd68-ffde-4d46-bbb5-c66b3a32d3f0",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "2bbacf28-6e34-4aa8-ac0c-39b44a9da81d"
+              ]
+          },
+          "8508f715-f148-40e1-aef4-77e5f50a1321": {
+              "id": "8508f715-f148-40e1-aef4-77e5f50a1321",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand Input Port 2",
+              "position": {
+                  "x": 17021,
+                  "y": 6892
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "10487fd6-b498-41a7-8a99-61d00afabca8",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "b6ae9270-c60d-447a-b2d4-8120847ece52"
+              ]
+          },
+          "e1561f07-1173-4f0d-981a-7ecbbc7476f3": {
+              "id": "e1561f07-1173-4f0d-981a-7ecbbc7476f3",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand Input Port 3",
+              "position": {
+                  "x": 17021,
+                  "y": 6917
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "10487fd6-b498-41a7-8a99-61d00afabca8",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "2152c2c3-0419-4d78-9e46-10c5871733a5"
+              ]
+          },
+          "90efcf8e-53b4-46f7-82dc-e95abbf5ef71": {
+              "id": "90efcf8e-53b4-46f7-82dc-e95abbf5ef71",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "Nand Output Port 2",
+              "position": {
+                  "x": 17160,
+                  "y": 6917
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "10487fd6-b498-41a7-8a99-61d00afabca8",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "08e24d85-d109-46e7-9f2a-c836602992f7"
+              ]
+          },
+          "e2b65826-3932-4416-9897-32d47d833e32": {
+              "id": "e2b65826-3932-4416-9897-32d47d833e32",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand Input Port 4",
+              "position": {
+                  "x": 17021,
+                  "y": 6942
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "10487fd6-b498-41a7-8a99-61d00afabca8",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "72242e61-9317-4745-aa9d-89b4a607cab1"
+              ]
+          },
+          "5da32c94-53e9-4771-b9c4-a6c39fde8396": {
+              "id": "5da32c94-53e9-4771-b9c4-a6c39fde8396",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 2 Input Port 2",
+              "position": {
+                  "x": 17383,
+                  "y": 6911
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "d2c6d85e-c51d-49bb-b4a1-f52f73a73a31",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "b6ae9270-c60d-447a-b2d4-8120847ece52"
+              ]
+          },
+          "3ae4ac70-7360-4412-a644-ddbc5299b883": {
+              "id": "3ae4ac70-7360-4412-a644-ddbc5299b883",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 2 Input Port 3",
+              "position": {
+                  "x": 17383,
+                  "y": 6936
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "d2c6d85e-c51d-49bb-b4a1-f52f73a73a31",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "72242e61-9317-4745-aa9d-89b4a607cab1"
+              ]
+          },
+          "31425454-a9d9-4687-a9e2-dd67f8b31326": {
+              "id": "31425454-a9d9-4687-a9e2-dd67f8b31326",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "Nand 2 Output Port 2",
+              "position": {
+                  "x": 17522,
+                  "y": 6936
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "d2c6d85e-c51d-49bb-b4a1-f52f73a73a31",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2",
+                  "a9c578a5-550e-4658-b715-d510453269bc"
+              ]
+          },
+          "1910737b-35e3-40be-8b6e-3e3a4111f013": {
+              "id": "1910737b-35e3-40be-8b6e-3e3a4111f013",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 2 Input Port 4",
+              "position": {
+                  "x": 17383,
+                  "y": 6961
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "d2c6d85e-c51d-49bb-b4a1-f52f73a73a31",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "cdfc2496-b587-412e-b304-090f019fc9bd"
+              ]
+          },
+          "6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2": {
+              "id": "6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 3 Input Port 2",
+              "position": {
+                  "x": 17363,
+                  "y": 7155
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "a77b9d66-ca34-4a37-9eb8-56e1d15aeeed",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "31425454-a9d9-4687-a9e2-dd67f8b31326"
+              ]
+          },
+          "5c99d7c9-f8cb-4035-bf67-703c2f966c4d": {
+              "id": "5c99d7c9-f8cb-4035-bf67-703c2f966c4d",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 3 Input Port 3",
+              "position": {
+                  "x": 17363,
+                  "y": 7180
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "a77b9d66-ca34-4a37-9eb8-56e1d15aeeed",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "9134fd30-0104-487c-bbe2-78272e965094"
+              ]
+          },
+          "cdfc2496-b587-412e-b304-090f019fc9bd": {
+              "id": "cdfc2496-b587-412e-b304-090f019fc9bd",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "Nand 3 Output Port 2",
+              "position": {
+                  "x": 17502,
+                  "y": 7180
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "a77b9d66-ca34-4a37-9eb8-56e1d15aeeed",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "1910737b-35e3-40be-8b6e-3e3a4111f013",
+                  "fe72d883-c28c-4fcf-a602-a1159c2ce946"
+              ]
+          },
+          "a2998bc4-d5b8-4d43-8d30-8b507bebed45": {
+              "id": "a2998bc4-d5b8-4d43-8d30-8b507bebed45",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 3 Input Port 4",
+              "position": {
+                  "x": 17363,
+                  "y": 7205
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "a77b9d66-ca34-4a37-9eb8-56e1d15aeeed",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "71b35b18-dcb9-4ce3-a2ff-2ced294a0f33"
+              ]
+          },
+          "08e24d85-d109-46e7-9f2a-c836602992f7": {
+              "id": "08e24d85-d109-46e7-9f2a-c836602992f7",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 4 Input Port 2",
+              "position": {
+                  "x": 17121,
+                  "y": 7026
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "90312df3-0e3d-4271-b51d-1d2472ad30b2",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "90efcf8e-53b4-46f7-82dc-e95abbf5ef71"
+              ]
+          },
+          "744eea6f-7242-4cb6-bb20-32431ed86f0d": {
+              "id": "744eea6f-7242-4cb6-bb20-32431ed86f0d",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 4 Input Port 3",
+              "position": {
+                  "x": 17121,
+                  "y": 7051
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "90312df3-0e3d-4271-b51d-1d2472ad30b2",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "9134fd30-0104-487c-bbe2-78272e965094"
+              ]
+          },
+          "72242e61-9317-4745-aa9d-89b4a607cab1": {
+              "id": "72242e61-9317-4745-aa9d-89b4a607cab1",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "Nand 4 Output Port 2",
+              "position": {
+                  "x": 17260,
+                  "y": 7051
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "90312df3-0e3d-4271-b51d-1d2472ad30b2",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "31126629-d86f-4c9e-9948-576948fff94c",
+                  "e2b65826-3932-4416-9897-32d47d833e32",
+                  "3ae4ac70-7360-4412-a644-ddbc5299b883"
+              ]
+          },
+          "42bafc22-6df8-47d5-8234-48ed639603d8": {
+              "id": "42bafc22-6df8-47d5-8234-48ed639603d8",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 4 Input Port 4",
+              "position": {
+                  "x": 17121,
+                  "y": 7076
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "90312df3-0e3d-4271-b51d-1d2472ad30b2",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "543eabc3-0bd8-4569-8fdf-34fe15e46742"
+              ]
+          },
+          "31126629-d86f-4c9e-9948-576948fff94c": {
+              "id": "31126629-d86f-4c9e-9948-576948fff94c",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 5 Input Port 2",
+              "position": {
+                  "x": 17022,
+                  "y": 7177
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "16dcc0ab-fb69-4275-8efa-726d566e37bc",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "72242e61-9317-4745-aa9d-89b4a607cab1"
+              ]
+          },
+          "ada1136f-0353-4703-8a88-72010b262040": {
+              "id": "ada1136f-0353-4703-8a88-72010b262040",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 5 Input Port 3",
+              "position": {
+                  "x": 17022,
+                  "y": 7202
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "16dcc0ab-fb69-4275-8efa-726d566e37bc",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "543eabc3-0bd8-4569-8fdf-34fe15e46742"
+              ]
+          },
+          "71b35b18-dcb9-4ce3-a2ff-2ced294a0f33": {
+              "id": "71b35b18-dcb9-4ce3-a2ff-2ced294a0f33",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "Nand 5 Output Port 2",
+              "position": {
+                  "x": 17161,
+                  "y": 7202
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "16dcc0ab-fb69-4275-8efa-726d566e37bc",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "9e254145-eb94-46d1-a803-90b18c98ed33",
+                  "a2998bc4-d5b8-4d43-8d30-8b507bebed45"
+              ]
+          },
+          "0f2c76f2-2743-492a-ac88-e0543b929cf5": {
+              "id": "0f2c76f2-2743-492a-ac88-e0543b929cf5",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 5 Input Port 4",
+              "position": {
+                  "x": 17022,
+                  "y": 7227
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "16dcc0ab-fb69-4275-8efa-726d566e37bc",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "2152c2c3-0419-4d78-9e46-10c5871733a5"
+              ]
+          },
+          "9e254145-eb94-46d1-a803-90b18c98ed33": {
+              "id": "9e254145-eb94-46d1-a803-90b18c98ed33",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 6 Input Port 2",
+              "position": {
+                  "x": 17013,
+                  "y": 7389
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "666c13c8-e27b-4216-820b-55abfa24fb41",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "71b35b18-dcb9-4ce3-a2ff-2ced294a0f33"
+              ]
+          },
+          "7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee": {
+              "id": "7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 6 Input Port 3",
+              "position": {
+                  "x": 17013,
+                  "y": 7414
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "666c13c8-e27b-4216-820b-55abfa24fb41",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "9134fd30-0104-487c-bbe2-78272e965094"
+              ]
+          },
+          "2152c2c3-0419-4d78-9e46-10c5871733a5": {
+              "id": "2152c2c3-0419-4d78-9e46-10c5871733a5",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "Nand 6 Output Port 2",
+              "position": {
+                  "x": 17152,
+                  "y": 7414
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "666c13c8-e27b-4216-820b-55abfa24fb41",
+              "value": 1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "0f2c76f2-2743-492a-ac88-e0543b929cf5",
+                  "e1561f07-1173-4f0d-981a-7ecbbc7476f3"
+              ]
+          },
+          "2bbacf28-6e34-4aa8-ac0c-39b44a9da81d": {
+              "id": "2bbacf28-6e34-4aa8-ac0c-39b44a9da81d",
+              "orientation": 0,
+              "defaultName": "Input Port",
+              "name": "Nand 6 Input Port 4",
+              "position": {
+                  "x": 17013,
+                  "y": 7439
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "666c13c8-e27b-4216-820b-55abfa24fb41",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "5c9d4581-b995-4d44-a2c9-c704060643a4"
+              ]
+          },
+          "b6ae9270-c60d-447a-b2d4-8120847ece52": {
+              "id": "b6ae9270-c60d-447a-b2d4-8120847ece52",
+              "orientation": 2,
+              "defaultName": "Output Port",
+              "name": "PRE' Output Port 2",
+              "position": {
+                  "x": 16812,
+                  "y": 6814
+              },
+              "type": 0,
+              "rotation": 0,
+              "elementId": "adc28a80-1c4b-4ecd-9fa9-c437ec661a05",
+              "value": -1,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": [
+                  "8508f715-f148-40e1-aef4-77e5f50a1321",
+                  "5da32c94-53e9-4771-b9c4-a6c39fde8396"
+              ]
+          },
+          "54f69909-9c26-404a-b4f2-acae4de497b1": {
+              "id": "54f69909-9c26-404a-b4f2-acae4de497b1",
+              "elementId": "14138911-e1fc-4eef-b76a-fa17e27cb14c",
+              "defaultName": "Q",
+              "name": "Q",
+              "connectedPortIds": [],
+              "position": {
+                  "x": 17662.5,
+                  "y": 6938.046875
+              },
+              "type": 0,
+              "rotation": 0,
+              "orientation": 2,
+              "value": 0,
+              "isFreeport": false,
+              "isMonitored": false
+          },
+          "ce1b5696-04f0-44f9-8784-b6aeba8be907": {
+              "id": "ce1b5696-04f0-44f9-8784-b6aeba8be907",
+              "elementId": "14138911-e1fc-4eef-b76a-fa17e27cb14c",
+              "defaultName": "Q'",
+              "name": "Q'",
+              "connectedPortIds": [],
+              "position": {
+                  "x": 17648,
+                  "y": 7179.046875
+              },
+              "type": 0,
+              "rotation": 0,
+              "orientation": 2,
+              "value": 0,
+              "isFreeport": false,
+              "isMonitored": false
+          },
+          "2168a5a9-d1cb-4d15-8a07-87aa4ae85145": {
+              "id": "2168a5a9-d1cb-4d15-8a07-87aa4ae85145",
+              "orientation": 3,
+              "defaultName": "CLR'",
+              "name": "CLR'",
+              "position": {
+                  "x": 16805,
+                  "y": 7040
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "14138911-e1fc-4eef-b76a-fa17e27cb14c",
+              "value": 0,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": []
+          },
+          "ffc65252-3790-4a7e-b95d-2f194af8b5e0": {
+              "id": "ffc65252-3790-4a7e-b95d-2f194af8b5e0",
+              "orientation": 0,
+              "defaultName": ">",
+              "name": ">",
+              "position": {
+                  "x": 16807,
+                  "y": 7231
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "14138911-e1fc-4eef-b76a-fa17e27cb14c",
+              "value": 0,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": []
+          },
+          "eb1f8c26-aee2-4b6d-976e-43b11469b4cd": {
+              "id": "eb1f8c26-aee2-4b6d-976e-43b11469b4cd",
+              "orientation": 0,
+              "defaultName": "D",
+              "name": "D",
+              "position": {
+                  "x": 16807,
+                  "y": 7429
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "14138911-e1fc-4eef-b76a-fa17e27cb14c",
+              "value": 0,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": []
+          },
+          "a7263665-1088-4454-9de1-d8f945288941": {
+              "id": "a7263665-1088-4454-9de1-d8f945288941",
+              "orientation": 1,
+              "defaultName": "PRE'",
+              "name": "PRE'",
+              "position": {
+                  "x": 16812,
+                  "y": 6814
+              },
+              "type": 1,
+              "rotation": 0,
+              "elementId": "14138911-e1fc-4eef-b76a-fa17e27cb14c",
+              "value": 0,
+              "hue": 0,
+              "isMonitored": false,
+              "connectedPortIds": []
+          }
+      },
+      "groups": {},
+      "serializedState": "{\"items\":{\"c50611be-c3bd-4db5-8782-8c0f6f1ce7e8\":{\"id\":\"c50611be-c3bd-4db5-8782-8c0f6f1ce7e8\",\"type\":\"OutputNode\",\"subtype\":\"Lightbulb\",\"defaultName\":\"Lightbulb\",\"portIds\":[\"a9c578a5-550e-4658-b715-d510453269bc\"],\"position\":{\"x\":17662.5,\"y\":6918.546875},\"boundingBox\":{\"left\":17662.5,\"top\":6918.546875,\"bottom\":6958.546875,\"right\":17737.5},\"rotation\":0,\"isSelected\":false,\"properties\":{\"name\":{\"label\":\"Name\",\"value\":\"Q\",\"type\":\"text\"}},\"groupId\":null,\"zIndex\":14,\"width\":75,\"height\":40,\"name\":\"Q\"},\"75aa8491-acaf-4f7b-84dd-41cd8e515c0f\":{\"id\":\"75aa8491-acaf-4f7b-84dd-41cd8e515c0f\",\"type\":\"OutputNode\",\"subtype\":\"Lightbulb\",\"defaultName\":\"Lightbulb\",\"portIds\":[\"fe72d883-c28c-4fcf-a602-a1159c2ce946\"],\"position\":{\"x\":17648,\"y\":7159.546875},\"boundingBox\":{\"left\":17648,\"top\":7159.546875,\"bottom\":7199.546875,\"right\":17723},\"rotation\":0,\"isSelected\":false,\"properties\":{\"name\":{\"label\":\"Name\",\"value\":\"Q'\",\"type\":\"text\"}},\"groupId\":null,\"zIndex\":15,\"width\":75,\"height\":40,\"name\":\"Q'\"},\"e50abf21-a779-4ca3-ae85-456b230e50cd\":{\"id\":\"e50abf21-a779-4ca3-ae85-456b230e50cd\",\"defaultName\":\"Switch\",\"name\":\"CLR'\",\"type\":\"InputNode\",\"subtype\":\"Switch\",\"portIds\":[\"9134fd30-0104-487c-bbe2-78272e965094\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":16742,\"top\":7001,\"bottom\":7080,\"right\":16806},\"position\":{\"x\":16742,\"y\":7001},\"zIndex\":16,\"width\":64,\"height\":79,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\"CLR'\"},\"startValue\":{\"label\":\"Start value\",\"value\":-1,\"type\":\"number\",\"options\":{\"True\":1,\"Hi-Z\":0,\"False\":-1}}}},\"d76416f9-4ef2-4f7e-b75a-4d97aa348e90\":{\"id\":\"d76416f9-4ef2-4f7e-b75a-4d97aa348e90\",\"defaultName\":\"Switch\",\"name\":\">\",\"type\":\"InputNode\",\"subtype\":\"Switch\",\"portIds\":[\"543eabc3-0bd8-4569-8fdf-34fe15e46742\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":16744,\"top\":7192,\"bottom\":7271,\"right\":16808},\"position\":{\"x\":16744,\"y\":7192},\"zIndex\":17,\"width\":64,\"height\":79,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\">\"},\"startValue\":{\"label\":\"Start value\",\"value\":-1,\"type\":\"number\",\"options\":{\"True\":1,\"Hi-Z\":0,\"False\":-1}}}},\"4ae9bf92-c5e6-4163-aeaa-aab6c78329ba\":{\"id\":\"4ae9bf92-c5e6-4163-aeaa-aab6c78329ba\",\"defaultName\":\"Switch\",\"name\":\"D\",\"type\":\"InputNode\",\"subtype\":\"Switch\",\"portIds\":[\"5c9d4581-b995-4d44-a2c9-c704060643a4\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":16744,\"top\":7390,\"bottom\":7469,\"right\":16808},\"position\":{\"x\":16744,\"y\":7390},\"zIndex\":18,\"width\":64,\"height\":79,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\"D\"},\"startValue\":{\"label\":\"Start value\",\"value\":-1,\"type\":\"number\",\"options\":{\"True\":1,\"Hi-Z\":0,\"False\":-1}}}},\"10487fd6-b498-41a7-8a99-61d00afabca8\":{\"id\":\"10487fd6-b498-41a7-8a99-61d00afabca8\",\"defaultName\":\"Nand\",\"name\":\"Nand\",\"type\":\"LogicGate\",\"subtype\":\"Nand\",\"portIds\":[\"8508f715-f148-40e1-aef4-77e5f50a1321\",\"e1561f07-1173-4f0d-981a-7ecbbc7476f3\",\"90efcf8e-53b4-46f7-82dc-e95abbf5ef71\",\"e2b65826-3932-4416-9897-32d47d833e32\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":17021,\"top\":6880,\"bottom\":6955,\"right\":17161},\"position\":{\"x\":17021,\"y\":6880},\"zIndex\":19,\"width\":140,\"height\":75,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\"Nand\"},\"inputCount\":{\"label\":\"Input count\",\"value\":3,\"type\":\"number\",\"min\":2}}},\"d2c6d85e-c51d-49bb-b4a1-f52f73a73a31\":{\"id\":\"d2c6d85e-c51d-49bb-b4a1-f52f73a73a31\",\"defaultName\":\"Nand\",\"name\":\"Nand 2\",\"type\":\"LogicGate\",\"subtype\":\"Nand\",\"portIds\":[\"5da32c94-53e9-4771-b9c4-a6c39fde8396\",\"3ae4ac70-7360-4412-a644-ddbc5299b883\",\"31425454-a9d9-4687-a9e2-dd67f8b31326\",\"1910737b-35e3-40be-8b6e-3e3a4111f013\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":17383,\"top\":6899,\"bottom\":6974,\"right\":17523},\"position\":{\"x\":17383,\"y\":6899},\"zIndex\":20,\"width\":140,\"height\":75,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\"Nand 2\"},\"inputCount\":{\"label\":\"Input count\",\"value\":3,\"type\":\"number\",\"min\":2}}},\"a77b9d66-ca34-4a37-9eb8-56e1d15aeeed\":{\"id\":\"a77b9d66-ca34-4a37-9eb8-56e1d15aeeed\",\"defaultName\":\"Nand\",\"name\":\"Nand 3\",\"type\":\"LogicGate\",\"subtype\":\"Nand\",\"portIds\":[\"6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2\",\"5c99d7c9-f8cb-4035-bf67-703c2f966c4d\",\"cdfc2496-b587-412e-b304-090f019fc9bd\",\"a2998bc4-d5b8-4d43-8d30-8b507bebed45\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":17363,\"top\":7143,\"bottom\":7218,\"right\":17503},\"position\":{\"x\":17363,\"y\":7143},\"zIndex\":21,\"width\":140,\"height\":75,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\"Nand 3\"},\"inputCount\":{\"label\":\"Input count\",\"value\":3,\"type\":\"number\",\"min\":2}}},\"90312df3-0e3d-4271-b51d-1d2472ad30b2\":{\"id\":\"90312df3-0e3d-4271-b51d-1d2472ad30b2\",\"defaultName\":\"Nand\",\"name\":\"Nand 4\",\"type\":\"LogicGate\",\"subtype\":\"Nand\",\"portIds\":[\"08e24d85-d109-46e7-9f2a-c836602992f7\",\"744eea6f-7242-4cb6-bb20-32431ed86f0d\",\"72242e61-9317-4745-aa9d-89b4a607cab1\",\"42bafc22-6df8-47d5-8234-48ed639603d8\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":17121,\"top\":7014,\"bottom\":7089,\"right\":17261},\"position\":{\"x\":17121,\"y\":7014},\"zIndex\":22,\"width\":140,\"height\":75,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\"Nand 4\"},\"inputCount\":{\"label\":\"Input count\",\"value\":3,\"type\":\"number\",\"min\":2}}},\"16dcc0ab-fb69-4275-8efa-726d566e37bc\":{\"id\":\"16dcc0ab-fb69-4275-8efa-726d566e37bc\",\"defaultName\":\"Nand\",\"name\":\"Nand 5\",\"type\":\"LogicGate\",\"subtype\":\"Nand\",\"portIds\":[\"31126629-d86f-4c9e-9948-576948fff94c\",\"ada1136f-0353-4703-8a88-72010b262040\",\"71b35b18-dcb9-4ce3-a2ff-2ced294a0f33\",\"0f2c76f2-2743-492a-ac88-e0543b929cf5\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":17022,\"top\":7165,\"bottom\":7240,\"right\":17162},\"position\":{\"x\":17022,\"y\":7165},\"zIndex\":23,\"width\":140,\"height\":75,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\"Nand 5\"},\"inputCount\":{\"label\":\"Input count\",\"value\":3,\"type\":\"number\",\"min\":2}}},\"666c13c8-e27b-4216-820b-55abfa24fb41\":{\"id\":\"666c13c8-e27b-4216-820b-55abfa24fb41\",\"defaultName\":\"Nand\",\"name\":\"Nand 6\",\"type\":\"LogicGate\",\"subtype\":\"Nand\",\"portIds\":[\"9e254145-eb94-46d1-a803-90b18c98ed33\",\"7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee\",\"2152c2c3-0419-4d78-9e46-10c5871733a5\",\"2bbacf28-6e34-4aa8-ac0c-39b44a9da81d\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":17013,\"top\":7377,\"bottom\":7452,\"right\":17153},\"position\":{\"x\":17013,\"y\":7377},\"zIndex\":24,\"width\":140,\"height\":75,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\"Nand 6\"},\"inputCount\":{\"label\":\"Input count\",\"value\":3,\"type\":\"number\",\"min\":2}}},\"7d3a4677-18a4-4091-8160-b48ff1d50ae3\":{\"id\":\"7d3a4677-18a4-4091-8160-b48ff1d50ae3\",\"defaultName\":\"Switch\",\"name\":\"PRE'\",\"type\":\"InputNode\",\"subtype\":\"Switch\",\"portIds\":[\"b6ae9270-c60d-447a-b2d4-8120847ece52\"],\"groupId\":null,\"rotation\":0,\"boundingBox\":{\"left\":16749,\"top\":6775,\"bottom\":6854,\"right\":16813},\"position\":{\"x\":16749,\"y\":6775},\"zIndex\":25,\"width\":64,\"height\":79,\"isSelected\":false,\"properties\":{\"name\":{\"type\":\"text\",\"label\":\"Name\",\"value\":\"PRE'\"},\"startValue\":{\"label\":\"Start value\",\"value\":-1,\"type\":\"number\",\"options\":{\"True\":1,\"Hi-Z\":0,\"False\":-1}}}}},\"connections\":{\"4a2a3c55-cd5a-47ea-947a-2ee05dc14fd5\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"4a2a3c55-cd5a-47ea-947a-2ee05dc14fd5\",\"source\":\"5c9d4581-b995-4d44-a2c9-c704060643a4\",\"target\":\"2bbacf28-6e34-4aa8-ac0c-39b44a9da81d\",\"zIndex\":27,\"isSelected\":false},\"1950cec6-f8ac-48ad-904d-e0023fc1beb8\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"1950cec6-f8ac-48ad-904d-e0023fc1beb8\",\"source\":\"9134fd30-0104-487c-bbe2-78272e965094\",\"target\":\"7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee\",\"zIndex\":28,\"isSelected\":false},\"d1f2dc54-c492-4721-8ad4-a5142771c374\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"d1f2dc54-c492-4721-8ad4-a5142771c374\",\"source\":\"71b35b18-dcb9-4ce3-a2ff-2ced294a0f33\",\"target\":\"9e254145-eb94-46d1-a803-90b18c98ed33\",\"zIndex\":29,\"isSelected\":false},\"c7e87c69-e87f-46b3-b1ab-e2b642cc9cf5\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"c7e87c69-e87f-46b3-b1ab-e2b642cc9cf5\",\"source\":\"2152c2c3-0419-4d78-9e46-10c5871733a5\",\"target\":\"0f2c76f2-2743-492a-ac88-e0543b929cf5\",\"zIndex\":30,\"isSelected\":false},\"dcfd8f03-ef76-427a-98bc-3ea9d7faaffa\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"dcfd8f03-ef76-427a-98bc-3ea9d7faaffa\",\"source\":\"543eabc3-0bd8-4569-8fdf-34fe15e46742\",\"target\":\"ada1136f-0353-4703-8a88-72010b262040\",\"zIndex\":31,\"isSelected\":false},\"839357e5-1c2d-46e5-ae9c-7c57657e2210\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"839357e5-1c2d-46e5-ae9c-7c57657e2210\",\"source\":\"72242e61-9317-4745-aa9d-89b4a607cab1\",\"target\":\"31126629-d86f-4c9e-9948-576948fff94c\",\"zIndex\":32,\"isSelected\":false},\"05efa578-82ce-4f4f-bd4c-c84b001af9d2\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"05efa578-82ce-4f4f-bd4c-c84b001af9d2\",\"source\":\"543eabc3-0bd8-4569-8fdf-34fe15e46742\",\"target\":\"42bafc22-6df8-47d5-8234-48ed639603d8\",\"zIndex\":33,\"isSelected\":false},\"6704bc72-ab1d-4d0c-acf7-d1ce1ddb3141\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"6704bc72-ab1d-4d0c-acf7-d1ce1ddb3141\",\"source\":\"9134fd30-0104-487c-bbe2-78272e965094\",\"target\":\"744eea6f-7242-4cb6-bb20-32431ed86f0d\",\"zIndex\":34,\"isSelected\":false},\"857e15b4-5659-488f-8560-e02d0e54b13b\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"857e15b4-5659-488f-8560-e02d0e54b13b\",\"source\":\"90efcf8e-53b4-46f7-82dc-e95abbf5ef71\",\"target\":\"08e24d85-d109-46e7-9f2a-c836602992f7\",\"zIndex\":35,\"isSelected\":false},\"3fd9958d-0772-428e-bb49-333ebf25710c\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"3fd9958d-0772-428e-bb49-333ebf25710c\",\"source\":\"2152c2c3-0419-4d78-9e46-10c5871733a5\",\"target\":\"e1561f07-1173-4f0d-981a-7ecbbc7476f3\",\"zIndex\":36,\"isSelected\":false},\"c799c926-8e61-46c7-a376-f32afaf7839f\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"c799c926-8e61-46c7-a376-f32afaf7839f\",\"source\":\"72242e61-9317-4745-aa9d-89b4a607cab1\",\"target\":\"e2b65826-3932-4416-9897-32d47d833e32\",\"zIndex\":37,\"isSelected\":false},\"1f1d2730-8972-499d-a4c5-2075a467b113\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"1f1d2730-8972-499d-a4c5-2075a467b113\",\"source\":\"72242e61-9317-4745-aa9d-89b4a607cab1\",\"target\":\"3ae4ac70-7360-4412-a644-ddbc5299b883\",\"zIndex\":40,\"isSelected\":false},\"ef3ee4f7-77fb-4860-ad05-77fd0d1a22cb\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"ef3ee4f7-77fb-4860-ad05-77fd0d1a22cb\",\"source\":\"cdfc2496-b587-412e-b304-090f019fc9bd\",\"target\":\"1910737b-35e3-40be-8b6e-3e3a4111f013\",\"zIndex\":41,\"isSelected\":false},\"cbf9f7a1-adb4-453e-90a9-78a8275eafa7\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"cbf9f7a1-adb4-453e-90a9-78a8275eafa7\",\"source\":\"31425454-a9d9-4687-a9e2-dd67f8b31326\",\"target\":\"6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2\",\"zIndex\":42,\"isSelected\":false},\"f3d4103f-6c06-4f27-88ac-8cd357515dcf\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"f3d4103f-6c06-4f27-88ac-8cd357515dcf\",\"source\":\"9134fd30-0104-487c-bbe2-78272e965094\",\"target\":\"5c99d7c9-f8cb-4035-bf67-703c2f966c4d\",\"zIndex\":43,\"isSelected\":false},\"56d5f08d-c38c-4ce9-bf39-e355e353ff30\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"56d5f08d-c38c-4ce9-bf39-e355e353ff30\",\"source\":\"71b35b18-dcb9-4ce3-a2ff-2ced294a0f33\",\"target\":\"a2998bc4-d5b8-4d43-8d30-8b507bebed45\",\"zIndex\":44,\"isSelected\":false},\"f0f63b91-071b-49e2-9729-4b9f59df4cea\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"f0f63b91-071b-49e2-9729-4b9f59df4cea\",\"source\":\"cdfc2496-b587-412e-b304-090f019fc9bd\",\"target\":\"fe72d883-c28c-4fcf-a602-a1159c2ce946\",\"zIndex\":45,\"isSelected\":false},\"ca85acea-5a67-4c0a-9d10-b760d942e581\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"ca85acea-5a67-4c0a-9d10-b760d942e581\",\"source\":\"31425454-a9d9-4687-a9e2-dd67f8b31326\",\"target\":\"a9c578a5-550e-4658-b715-d510453269bc\",\"zIndex\":46,\"isSelected\":false},\"53debf57-eca9-4d60-88ef-348cef04fbd2\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"53debf57-eca9-4d60-88ef-348cef04fbd2\",\"source\":\"b6ae9270-c60d-447a-b2d4-8120847ece52\",\"target\":\"8508f715-f148-40e1-aef4-77e5f50a1321\",\"zIndex\":38,\"isSelected\":false},\"e9d7cee5-3816-4264-b777-4b13426a8d92\":{\"controlPoints\":[],\"groupId\":null,\"id\":\"e9d7cee5-3816-4264-b777-4b13426a8d92\",\"source\":\"b6ae9270-c60d-447a-b2d4-8120847ece52\",\"target\":\"5da32c94-53e9-4771-b9c4-a6c39fde8396\",\"zIndex\":39,\"isSelected\":false}},\"ports\":{\"a9c578a5-550e-4658-b715-d510453269bc\":{\"id\":\"a9c578a5-550e-4658-b715-d510453269bc\",\"elementId\":\"c50611be-c3bd-4db5-8782-8c0f6f1ce7e8\",\"defaultName\":\"Input Port\",\"name\":\"Q Input Port 2\",\"connectedPortIds\":[\"31425454-a9d9-4687-a9e2-dd67f8b31326\"],\"position\":{\"x\":17662.5,\"y\":6938.046875},\"type\":1,\"rotation\":0,\"orientation\":0,\"value\":1,\"isFreeport\":false,\"isMonitored\":false},\"fe72d883-c28c-4fcf-a602-a1159c2ce946\":{\"id\":\"fe72d883-c28c-4fcf-a602-a1159c2ce946\",\"elementId\":\"75aa8491-acaf-4f7b-84dd-41cd8e515c0f\",\"defaultName\":\"Input Port\",\"name\":\"Q' Input Port 2\",\"connectedPortIds\":[\"cdfc2496-b587-412e-b304-090f019fc9bd\"],\"position\":{\"x\":17648,\"y\":7179.046875},\"type\":1,\"rotation\":0,\"orientation\":0,\"value\":1,\"isFreeport\":false,\"isMonitored\":false},\"9134fd30-0104-487c-bbe2-78272e965094\":{\"id\":\"9134fd30-0104-487c-bbe2-78272e965094\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"CLR' Output Port 2\",\"position\":{\"x\":16805,\"y\":7040},\"type\":0,\"rotation\":0,\"elementId\":\"e50abf21-a779-4ca3-ae85-456b230e50cd\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee\",\"744eea6f-7242-4cb6-bb20-32431ed86f0d\",\"5c99d7c9-f8cb-4035-bf67-703c2f966c4d\"]},\"543eabc3-0bd8-4569-8fdf-34fe15e46742\":{\"id\":\"543eabc3-0bd8-4569-8fdf-34fe15e46742\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"> Output Port 2\",\"position\":{\"x\":16807,\"y\":7231},\"type\":0,\"rotation\":0,\"elementId\":\"d76416f9-4ef2-4f7e-b75a-4d97aa348e90\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"ada1136f-0353-4703-8a88-72010b262040\",\"42bafc22-6df8-47d5-8234-48ed639603d8\"]},\"5c9d4581-b995-4d44-a2c9-c704060643a4\":{\"id\":\"5c9d4581-b995-4d44-a2c9-c704060643a4\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"D Output Port 2\",\"position\":{\"x\":16807,\"y\":7429},\"type\":0,\"rotation\":0,\"elementId\":\"4ae9bf92-c5e6-4163-aeaa-aab6c78329ba\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"2bbacf28-6e34-4aa8-ac0c-39b44a9da81d\"]},\"8508f715-f148-40e1-aef4-77e5f50a1321\":{\"id\":\"8508f715-f148-40e1-aef4-77e5f50a1321\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand Input Port 2\",\"position\":{\"x\":17021,\"y\":6892},\"type\":1,\"rotation\":0,\"elementId\":\"10487fd6-b498-41a7-8a99-61d00afabca8\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"b6ae9270-c60d-447a-b2d4-8120847ece52\"]},\"e1561f07-1173-4f0d-981a-7ecbbc7476f3\":{\"id\":\"e1561f07-1173-4f0d-981a-7ecbbc7476f3\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand Input Port 3\",\"position\":{\"x\":17021,\"y\":6917},\"type\":1,\"rotation\":0,\"elementId\":\"10487fd6-b498-41a7-8a99-61d00afabca8\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"2152c2c3-0419-4d78-9e46-10c5871733a5\"]},\"90efcf8e-53b4-46f7-82dc-e95abbf5ef71\":{\"id\":\"90efcf8e-53b4-46f7-82dc-e95abbf5ef71\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"Nand Output Port 2\",\"position\":{\"x\":17160,\"y\":6917},\"type\":0,\"rotation\":0,\"elementId\":\"10487fd6-b498-41a7-8a99-61d00afabca8\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"08e24d85-d109-46e7-9f2a-c836602992f7\"]},\"e2b65826-3932-4416-9897-32d47d833e32\":{\"id\":\"e2b65826-3932-4416-9897-32d47d833e32\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand Input Port 4\",\"position\":{\"x\":17021,\"y\":6942},\"type\":1,\"rotation\":0,\"elementId\":\"10487fd6-b498-41a7-8a99-61d00afabca8\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"72242e61-9317-4745-aa9d-89b4a607cab1\"]},\"5da32c94-53e9-4771-b9c4-a6c39fde8396\":{\"id\":\"5da32c94-53e9-4771-b9c4-a6c39fde8396\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 2 Input Port 2\",\"position\":{\"x\":17383,\"y\":6911},\"type\":1,\"rotation\":0,\"elementId\":\"d2c6d85e-c51d-49bb-b4a1-f52f73a73a31\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"b6ae9270-c60d-447a-b2d4-8120847ece52\"]},\"3ae4ac70-7360-4412-a644-ddbc5299b883\":{\"id\":\"3ae4ac70-7360-4412-a644-ddbc5299b883\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 2 Input Port 3\",\"position\":{\"x\":17383,\"y\":6936},\"type\":1,\"rotation\":0,\"elementId\":\"d2c6d85e-c51d-49bb-b4a1-f52f73a73a31\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"72242e61-9317-4745-aa9d-89b4a607cab1\"]},\"31425454-a9d9-4687-a9e2-dd67f8b31326\":{\"id\":\"31425454-a9d9-4687-a9e2-dd67f8b31326\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"Nand 2 Output Port 2\",\"position\":{\"x\":17522,\"y\":6936},\"type\":0,\"rotation\":0,\"elementId\":\"d2c6d85e-c51d-49bb-b4a1-f52f73a73a31\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2\",\"a9c578a5-550e-4658-b715-d510453269bc\"]},\"1910737b-35e3-40be-8b6e-3e3a4111f013\":{\"id\":\"1910737b-35e3-40be-8b6e-3e3a4111f013\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 2 Input Port 4\",\"position\":{\"x\":17383,\"y\":6961},\"type\":1,\"rotation\":0,\"elementId\":\"d2c6d85e-c51d-49bb-b4a1-f52f73a73a31\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"cdfc2496-b587-412e-b304-090f019fc9bd\"]},\"6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2\":{\"id\":\"6e3e8e23-2ffb-4a6c-b46a-3ae4328d87d2\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 3 Input Port 2\",\"position\":{\"x\":17363,\"y\":7155},\"type\":1,\"rotation\":0,\"elementId\":\"a77b9d66-ca34-4a37-9eb8-56e1d15aeeed\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"31425454-a9d9-4687-a9e2-dd67f8b31326\"]},\"5c99d7c9-f8cb-4035-bf67-703c2f966c4d\":{\"id\":\"5c99d7c9-f8cb-4035-bf67-703c2f966c4d\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 3 Input Port 3\",\"position\":{\"x\":17363,\"y\":7180},\"type\":1,\"rotation\":0,\"elementId\":\"a77b9d66-ca34-4a37-9eb8-56e1d15aeeed\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"9134fd30-0104-487c-bbe2-78272e965094\"]},\"cdfc2496-b587-412e-b304-090f019fc9bd\":{\"id\":\"cdfc2496-b587-412e-b304-090f019fc9bd\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"Nand 3 Output Port 2\",\"position\":{\"x\":17502,\"y\":7180},\"type\":0,\"rotation\":0,\"elementId\":\"a77b9d66-ca34-4a37-9eb8-56e1d15aeeed\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"1910737b-35e3-40be-8b6e-3e3a4111f013\",\"fe72d883-c28c-4fcf-a602-a1159c2ce946\"]},\"a2998bc4-d5b8-4d43-8d30-8b507bebed45\":{\"id\":\"a2998bc4-d5b8-4d43-8d30-8b507bebed45\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 3 Input Port 4\",\"position\":{\"x\":17363,\"y\":7205},\"type\":1,\"rotation\":0,\"elementId\":\"a77b9d66-ca34-4a37-9eb8-56e1d15aeeed\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"71b35b18-dcb9-4ce3-a2ff-2ced294a0f33\"]},\"08e24d85-d109-46e7-9f2a-c836602992f7\":{\"id\":\"08e24d85-d109-46e7-9f2a-c836602992f7\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 4 Input Port 2\",\"position\":{\"x\":17121,\"y\":7026},\"type\":1,\"rotation\":0,\"elementId\":\"90312df3-0e3d-4271-b51d-1d2472ad30b2\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"90efcf8e-53b4-46f7-82dc-e95abbf5ef71\"]},\"744eea6f-7242-4cb6-bb20-32431ed86f0d\":{\"id\":\"744eea6f-7242-4cb6-bb20-32431ed86f0d\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 4 Input Port 3\",\"position\":{\"x\":17121,\"y\":7051},\"type\":1,\"rotation\":0,\"elementId\":\"90312df3-0e3d-4271-b51d-1d2472ad30b2\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"9134fd30-0104-487c-bbe2-78272e965094\"]},\"72242e61-9317-4745-aa9d-89b4a607cab1\":{\"id\":\"72242e61-9317-4745-aa9d-89b4a607cab1\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"Nand 4 Output Port 2\",\"position\":{\"x\":17260,\"y\":7051},\"type\":0,\"rotation\":0,\"elementId\":\"90312df3-0e3d-4271-b51d-1d2472ad30b2\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"31126629-d86f-4c9e-9948-576948fff94c\",\"e2b65826-3932-4416-9897-32d47d833e32\",\"3ae4ac70-7360-4412-a644-ddbc5299b883\"]},\"42bafc22-6df8-47d5-8234-48ed639603d8\":{\"id\":\"42bafc22-6df8-47d5-8234-48ed639603d8\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 4 Input Port 4\",\"position\":{\"x\":17121,\"y\":7076},\"type\":1,\"rotation\":0,\"elementId\":\"90312df3-0e3d-4271-b51d-1d2472ad30b2\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"543eabc3-0bd8-4569-8fdf-34fe15e46742\"]},\"31126629-d86f-4c9e-9948-576948fff94c\":{\"id\":\"31126629-d86f-4c9e-9948-576948fff94c\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 5 Input Port 2\",\"position\":{\"x\":17022,\"y\":7177},\"type\":1,\"rotation\":0,\"elementId\":\"16dcc0ab-fb69-4275-8efa-726d566e37bc\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"72242e61-9317-4745-aa9d-89b4a607cab1\"]},\"ada1136f-0353-4703-8a88-72010b262040\":{\"id\":\"ada1136f-0353-4703-8a88-72010b262040\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 5 Input Port 3\",\"position\":{\"x\":17022,\"y\":7202},\"type\":1,\"rotation\":0,\"elementId\":\"16dcc0ab-fb69-4275-8efa-726d566e37bc\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"543eabc3-0bd8-4569-8fdf-34fe15e46742\"]},\"71b35b18-dcb9-4ce3-a2ff-2ced294a0f33\":{\"id\":\"71b35b18-dcb9-4ce3-a2ff-2ced294a0f33\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"Nand 5 Output Port 2\",\"position\":{\"x\":17161,\"y\":7202},\"type\":0,\"rotation\":0,\"elementId\":\"16dcc0ab-fb69-4275-8efa-726d566e37bc\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"9e254145-eb94-46d1-a803-90b18c98ed33\",\"a2998bc4-d5b8-4d43-8d30-8b507bebed45\"]},\"0f2c76f2-2743-492a-ac88-e0543b929cf5\":{\"id\":\"0f2c76f2-2743-492a-ac88-e0543b929cf5\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 5 Input Port 4\",\"position\":{\"x\":17022,\"y\":7227},\"type\":1,\"rotation\":0,\"elementId\":\"16dcc0ab-fb69-4275-8efa-726d566e37bc\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"2152c2c3-0419-4d78-9e46-10c5871733a5\"]},\"9e254145-eb94-46d1-a803-90b18c98ed33\":{\"id\":\"9e254145-eb94-46d1-a803-90b18c98ed33\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 6 Input Port 2\",\"position\":{\"x\":17013,\"y\":7389},\"type\":1,\"rotation\":0,\"elementId\":\"666c13c8-e27b-4216-820b-55abfa24fb41\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"71b35b18-dcb9-4ce3-a2ff-2ced294a0f33\"]},\"7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee\":{\"id\":\"7f33e7f7-96ba-42d9-8b4c-f9d714a3ccee\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 6 Input Port 3\",\"position\":{\"x\":17013,\"y\":7414},\"type\":1,\"rotation\":0,\"elementId\":\"666c13c8-e27b-4216-820b-55abfa24fb41\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"9134fd30-0104-487c-bbe2-78272e965094\"]},\"2152c2c3-0419-4d78-9e46-10c5871733a5\":{\"id\":\"2152c2c3-0419-4d78-9e46-10c5871733a5\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"Nand 6 Output Port 2\",\"position\":{\"x\":17152,\"y\":7414},\"type\":0,\"rotation\":0,\"elementId\":\"666c13c8-e27b-4216-820b-55abfa24fb41\",\"value\":1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"0f2c76f2-2743-492a-ac88-e0543b929cf5\",\"e1561f07-1173-4f0d-981a-7ecbbc7476f3\"]},\"2bbacf28-6e34-4aa8-ac0c-39b44a9da81d\":{\"id\":\"2bbacf28-6e34-4aa8-ac0c-39b44a9da81d\",\"orientation\":0,\"defaultName\":\"Input Port\",\"name\":\"Nand 6 Input Port 4\",\"position\":{\"x\":17013,\"y\":7439},\"type\":1,\"rotation\":0,\"elementId\":\"666c13c8-e27b-4216-820b-55abfa24fb41\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"5c9d4581-b995-4d44-a2c9-c704060643a4\"]},\"b6ae9270-c60d-447a-b2d4-8120847ece52\":{\"id\":\"b6ae9270-c60d-447a-b2d4-8120847ece52\",\"orientation\":2,\"defaultName\":\"Output Port\",\"name\":\"PRE' Output Port 2\",\"position\":{\"x\":16812,\"y\":6814},\"type\":0,\"rotation\":0,\"elementId\":\"7d3a4677-18a4-4091-8160-b48ff1d50ae3\",\"value\":-1,\"hue\":0,\"isMonitored\":false,\"connectedPortIds\":[\"8508f715-f148-40e1-aef4-77e5f50a1321\",\"5da32c94-53e9-4771-b9c4-a6c39fde8396\"]}},\"groups\":{}}"
+  }
+}

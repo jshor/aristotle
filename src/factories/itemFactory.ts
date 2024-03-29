@@ -4,10 +4,13 @@ import Port from '@/types/interfaces/Port'
 import Item from '@/types/interfaces/Item'
 import Direction from '@/types/enums/Direction'
 
-export default function itemFactory (id: string, type: ItemType, subtype: ItemSubtype, width: number, height: number, ports?: Record<Direction, Port[]>): Item {
+export default function itemFactory (id: string, type: ItemType, subtype: ItemSubtype, ports?: Record<Direction, Port[]>): Item {
   return {
     id,
-    defaultName: '',
+    defaultName: subtype === ItemSubtype.None
+      ? type
+      : subtype,
+    name: '',
     type,
     subtype,
     portIds: Object
@@ -18,16 +21,16 @@ export default function itemFactory (id: string, type: ItemType, subtype: ItemSu
     boundingBox: {
       top: 0,
       left: 0,
-      right: width,
-      bottom: height
+      right: 0,
+      bottom: 0
     },
     position: {
       x: 0,
       y: 0
     },
     zIndex: 0,
-    width,
-    height,
+    width: 0,
+    height: 0,
     isSelected: false,
     properties: {
       name: {

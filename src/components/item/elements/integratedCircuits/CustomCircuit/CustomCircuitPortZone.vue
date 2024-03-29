@@ -9,7 +9,7 @@
       class="custom-circuit-port-zone__io"
     >
       <custom-circuit-port
-        :label="port.name.replace(circuitName, '')"
+        :label="port.defaultName"
         :type="type"
       />
     </div>
@@ -33,10 +33,6 @@ export default defineComponent({
       type: String as PropType<'horizontal' | 'vertical'>,
       required: true
     },
-    circuitName: {
-      type: String,
-      required: true
-    },
     type: {
       type: String,
       required: true
@@ -48,6 +44,8 @@ export default defineComponent({
 <style lang="scss">
 .custom-circuit-port-zone {
   width: 100%;
+  pointer-events: none;
+  touch-action: none;
 
   &__io {
     box-sizing: border-box;

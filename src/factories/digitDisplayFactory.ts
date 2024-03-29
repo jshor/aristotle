@@ -10,21 +10,27 @@ import Port from '@/types/interfaces/Port'
 import SerializableState from '@/types/interfaces/SerializableState'
 
 export default function digitFactory () {
-  const ports: Port[] = []
+  const ports: Record<Direction, Port[]> = {
+    [Direction.Left]: [],
+    [Direction.Right]: [],
+    [Direction.Top]: [],
+    [Direction.Bottom]: []
+  }
+
   const state: SerializableState = Array(4)
     .fill('')
     .reduce((map, _, i) => {
       const portId = uuid()
       const itemId = uuid()
       const port = portFactory(itemId, portId, Direction.Left, PortType.Output)
-      const item = itemFactory(itemId, ItemType.InputNode, ItemSubtype.Switch, 0, 0, {
+      const item = itemFactory(itemId, ItemType.InputNode, ItemSubtype.Switch, {
         [Direction.Left]: [port],
         [Direction.Right]: [],
         [Direction.Top]: [],
         [Direction.Bottom]: []
       })
 
-      ports.push(port)
+      ports[Direction.Left].push(port)
 
       return {
         connections: {},
@@ -45,7 +51,7 @@ export default function digitFactory () {
       groups: {}
     })
 
-  const item = integratedCircuitFactory(state, 'Digit Display', 40, 40, ItemSubtype.DigitDisplay)
+  const { item } = integratedCircuitFactory(state, 'Digit Display', ItemSubtype.DigitDisplay)
 
   return { item, ports }
 }

@@ -7,7 +7,7 @@ import Direction from '@/types/enums/Direction'
 import Port from '@/types/interfaces/Port'
 import PortType from '@/types/enums/PortType'
 
-export default function logicGateFactory (type: ItemSubtype, width: number, height: number, inputCount: number = 2) {
+export default function logicGateFactory (type: ItemSubtype, inputCount = 2) {
   const elementId = uuid()
   const ports: Record<Direction, Port[]> = {
     [Direction.Top]: [],
@@ -19,7 +19,7 @@ export default function logicGateFactory (type: ItemSubtype, width: number, heig
       portFactory(elementId, uuid(), Direction.Right, PortType.Output)
     ]
   }
-  const item = itemFactory(elementId, ItemType.LogicGate, type, width, height, ports)
+  const item = itemFactory(elementId, ItemType.LogicGate, type, ports)
 
   item.properties = {
     ...item.properties,

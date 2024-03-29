@@ -80,6 +80,7 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
 
         idMap[oldId] = newId
         items[newId] = cloneDeep<Item>(item)
+        items[newId].id = newId
 
         if (item.integratedCircuit) {
           items[newId].integratedCircuit = {
@@ -87,7 +88,6 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
             ...mapStandardCircuitIds(cloneDeep(item.integratedCircuit), idMap)
           }
         }
-          items[newId].id = newId
 
         items[newId].portIds = item.portIds.map(oldId => idMap[oldId])
 
@@ -102,6 +102,7 @@ function mapStandardCircuitIds (circuit: SerializableState, idMap: IdMap = {}) {
       .values(ports)
       .forEach(port => {
         ports[port.id].elementId = idMap[port.elementId]
+        ports[port.id].connectedPortIds = port.connectedPortIds.map(oldId => idMap[oldId])
       })
 
     return ports
@@ -149,19 +150,18 @@ function mapIntegratedCircuitIds (item: Item) {
   // TODO: this function can probably be removed
   if (!item.integratedCircuit) return item
 
-  const { items } = mapStandardCircuitIds({
-    items: {
-      [item.id]: item
-    },
-    connections: {},
-    ports: {},
-    groups: {}
-  })
-  const mappedItem = Object.values(items)[0]
+  const newItemId = uuid()
+  const newItem = cloneDeep(item)
+  const idMap = { [item.id]: newItemId }
 
-  mappedItem.id = uuid()
+  newItem.integratedCircuit = {
+    serializedState: item.integratedCircuit.serializedState,
+    ...mapStandardCircuitIds(cloneDeep(item.integratedCircuit), idMap)
+  }
+  newItem.portIds = item.portIds.map(oldId => idMap[oldId])
+  newItem.id = newItemId
 
-  return mappedItem // Object.values(items)[0]
+  return newItem
 }
 
 export default {

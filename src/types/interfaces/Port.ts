@@ -7,8 +7,6 @@ interface Port extends ControlPoint {
   defaultName: string
   name: string
   elementId: string
-  integratedCircuitItemId?: string
-  virtualElementId?: string
   type: PortType
   value: number
   hue: number

@@ -119,6 +119,11 @@ export default defineComponent({
     display: flex;
     position: absolute;
 
+    .port-handle {
+      pointer-events: none;
+      touch-action: none;
+    }
+
     &--left, &--right {
       left: 0;
       top: 0;

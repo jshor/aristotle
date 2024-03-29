@@ -22,6 +22,7 @@
           <circuit-component
             :type="item.type"
             :subtype="item.subtype"
+            :name="item.name"
             :ports="ports"
             :properties="item.properties"
           />

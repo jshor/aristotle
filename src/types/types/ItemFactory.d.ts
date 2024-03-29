@@ -1,4 +1,5 @@
-import Direction from "../enums/Direction"
+import Direction from '../enums/Direction'
+import Item from '../interfaces/Item'
 
 type ItemFactory = (...any) => { item: Item, ports: Record<Direction, Port[]> }
 
