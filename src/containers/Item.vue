@@ -7,7 +7,6 @@
     :position="item.position"
     :is-selected="isSelected"
     :allow-touch-drag="isSelected"
-    :tabindex="0"
     @keydown.esc="onEscapeKey"
     @drag="onDrag"
     @drag-start="onDragStart"
@@ -19,13 +18,15 @@
     @deselect="store.setItemSelectionState(id, false)"
     ref="itemRef"
     data-test="item"
+    is-focusable
   >
     <properties
       v-if="isPropertiesEnabled"
-      :properties="item.properties"
+      v-model="item.properties"
       :id="id"
       :viewport="viewport"
-      @update="store.setProperties"
+      :bounding-box="item.boundingBox"
+      :zoom="store.zoom"
       @pan="store.panDelta"
       aria-label="Properties dialog"
       data-test="properties"
@@ -33,7 +34,7 @@
     <circuit-component
       :type="item.type"
       :subtype="item.subtype"
-      :name="item.defaultName"
+      :name="item.name"
       :ports="ports"
       :properties="item.properties"
       :is-selected="isSelected"
@@ -82,10 +83,10 @@ import PortPivot from '@/components/port/PortPivot.vue'
 import { DocumentStore } from '@/store/document'
 import Draggable from '@/components/interactive/Draggable.vue'
 import { useRootStore } from '@/store/root'
-import editorContextMenu from '@/menus/context/editor'
 import Direction from '@/types/enums/Direction'
 import Point from '@/types/interfaces/Point'
 import Port from '@/types/interfaces/Port'
+import ItemProperties from '@/types/interfaces/ItemProperties'
 
 /**
  * This component represents a two-dimensional item in the editor.
@@ -141,7 +142,7 @@ export default defineComponent({
 
     onMounted(updateSize)
 
-    watch(() => store.items[props.id]?.properties.inputCount?.value, size => size ? updateSize() : null)
+    watch(() => store.items[props.id]?.properties, onUpdateProperties, { deep: true })
 
     /** A list of all ports that belong to this item. */
     const ports = computed(() => {
@@ -162,7 +163,7 @@ export default defineComponent({
       return ports
     })
 
-    /* whether or not the properties trigger button should be visible */
+    /** whether or not the properties trigger button should be visible */
     const isPropertiesEnabled = computed(() => props.isSelected && store.selectedItemIds.size === 1)
 
     /**
@@ -181,7 +182,6 @@ export default defineComponent({
 
     /**
      * Item drag event handler.
-     * This will cache the undo-able state if dragged for the first time.
      *
      * @param position - new position that item has moved to
      * @param offset - the drag point w.r.t. the center of the item
@@ -226,27 +226,53 @@ export default defineComponent({
     }
 
     /**
+     * Performs update operations on item property values.
+     */
+    async function onUpdateProperties (properties: ItemProperties) {
+      const _item = store.items[props.id]
+
+      await nextTick()
+
+      if (!store.items[props.id]) return
+
+      if (properties.name?.value !== _item.name) {
+        store.setItemName(_item, properties.name?.value)
+      }
+
+      if (properties.inputCount?.value) {
+        store.setInputCount(props.id, properties.inputCount.value)
+        await updateSize()
+      }
+
+      if (properties.interval && _item.clock) {
+        _item.clock.interval = properties.interval.value
+      }
+    }
+
+    /**
      * Updates the store with the item's DOM size.
      */
-    function updateSize () {
+    async function updateSize () {
       const element = itemRef.value?.$el
+
+      if (!element) return
 
       store.setItemSize({
         id: props.id,
-        rect: element.getBoundingClientRect()!
+        rect: element.getBoundingClientRect()
       })
 
-      nextTick(() => {
-        element
-          .querySelectorAll('[data-port-id]')
-          .forEach((portElement: HTMLElement) => {
-            // ports may have shifted their positions
-            const portId = portElement.dataset.portId!
-            const { x, y } = portElement.getBoundingClientRect()
+      await nextTick()
 
-            store.setPortRelativePosition({ x, y }, portId)
-          })
-      })
+      element
+        .querySelectorAll('[data-port-id]')
+        .forEach((portElement: HTMLElement) => {
+          // ports may have shifted their positions
+          const portId = portElement.dataset.portId!
+          const { x, y } = portElement.getBoundingClientRect()
+
+          store.setPortRelativePosition({ x, y }, portId)
+        })
     }
 
     return {

@@ -1,6 +1,5 @@
 import { mount, VueWrapper } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { ComponentPublicInstance } from 'vue'
 import Item from '../Item.vue'
 import { createDocumentStore, DocumentStore, DocumentStoreInstance } from '@/store/document'
 import { createItem, createPort, stubAll } from '@/store/document/actions/__tests__/__helpers__'
@@ -10,6 +9,8 @@ import ItemSubtype from '@/types/enums/ItemSubtype'
 import { useRootStore } from '@/store/root'
 import type ItemInterface from '@/types/interfaces/Item'
 import Port from '@/types/interfaces/Port'
+import LogicValue from '@/types/enums/LogicValue'
+import ClockPulse from '@/store/document/oscillator/ClockPulse'
 
 setActivePinia(createPinia())
 
@@ -43,6 +44,11 @@ describe('Item container', () => {
       props: {
         ...props,
         store: storeDefinition
+      },
+      global: {
+        stubs: {
+          Properties: true
+        }
       }
     })
   })
@@ -61,23 +67,111 @@ describe('Item container', () => {
     })
   })
 
-  describe('when the item has variable input ports that have changed', () => {
-    it('should match the new rotation', async () => {
-      stubAll(store, ['setItemSize'])
+  describe('when property values change', () => {
+    describe('when the item name has changed', () => {
+      beforeEach(async () => {
+        stubAll(store, [
+          'setItemName'
+        ])
 
-      store.items.item1.properties = {
-        inputCount: {
-          value: 2,
-          type: 'number',
-          label: 'Input Count'
+        await wrapper.vm.$nextTick()
+        jest.resetAllMocks()
+      })
+
+      it('should not change the state if the name is not configurable', async () => {
+        store.items.item1.properties.startValue = {
+          value: LogicValue.FALSE,
+          type: 'text',
+          label: 'Start value'
         }
-      }
 
-      await wrapper.vm.$nextTick()
+        await wrapper.vm.$nextTick()
 
-      expect(store.setItemSize).toHaveBeenCalledWith({
-        id: 'item1',
-        rect: expect.any(Object)
+        expect(store.setItemName).not.toHaveBeenCalled()
+      })
+
+      it('should not change the name if it is the same as the current item name', async () => {
+        store.items.item1.name = 'Old Name'
+        store.items.item1.properties.name = {
+          value: 'Old Name',
+          type: 'text',
+          label: 'Name'
+        }
+
+        await wrapper.vm.$nextTick()
+
+        expect(store.setItemName).not.toHaveBeenCalled()
+      })
+
+      it('should update the item name when it has changed', async () => {
+        store.items.item1.name = 'Old Name'
+        store.items.item1.properties.name = {
+          value: 'New Name',
+          type: 'text',
+          label: 'Name'
+        }
+
+        await wrapper.vm.$nextTick()
+        await wrapper.vm.$nextTick()
+
+        expect(store.setItemName).toHaveBeenCalledWith(item1, 'New Name')
+      })
+    })
+
+    describe('when the item has variable input ports that have changed', () => {
+      it('should update the size when the number of input ports changes', async () => {
+        stubAll(store, [
+          'setItemSize',
+          'setInputCount'
+        ])
+
+        const newValue = 3
+
+        store.items.item1.properties = {
+          inputCount: {
+            value: 2,
+            type: 'number',
+            label: 'Input Count'
+          }
+        }
+
+        await wrapper.vm.$nextTick()
+        jest.resetAllMocks()
+
+        store.items.item1.properties.inputCount!.value = newValue
+
+        await wrapper.vm.$nextTick()
+
+        expect(store.setInputCount).toHaveBeenCalledWith('item1', newValue)
+        expect(store.setItemSize).toHaveBeenCalledWith({
+          id: 'item1',
+          rect: expect.any(Object)
+        })
+      })
+    })
+
+    describe('when the item has a clock whose frequency has changed', () => {
+      it('should update the size when the frequency changes', async () => {
+        const newValue = 500
+        const oldValue = 1000
+
+        store.items.item1.clock = new ClockPulse('item1', oldValue, LogicValue.FALSE, LogicValue.FALSE)
+        store.items.item1.properties = {
+          interval: {
+            value: oldValue,
+            type: 'number',
+            label: 'Frequency'
+          }
+        }
+
+        await wrapper.vm.$nextTick()
+        jest.resetAllMocks()
+
+        store.items.item1.properties.interval!.value = newValue
+
+        await wrapper.vm.$nextTick()
+
+        expect(store.items.item1.clock.interval).toEqual(newValue)
       })
     })
   })
@@ -106,13 +200,13 @@ describe('Item container', () => {
   })
 
   describe('when the item is double-clicked', () => {
-    it('should reveal the custom circuit, if it exists', () => {
+    it('should reveal the custom circuit, if it exists', async () => {
       const rootStore = useRootStore()
 
       stubAll(rootStore, ['openIntegratedCircuit'])
 
       item1.subtype = ItemSubtype.CustomCircuit
-      wrapper.trigger('dblclick')
+      await wrapper.trigger('dblclick')
 
       expect(rootStore.openIntegratedCircuit).toHaveBeenCalled()
     })

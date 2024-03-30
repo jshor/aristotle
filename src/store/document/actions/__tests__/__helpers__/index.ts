@@ -54,6 +54,7 @@ export const createItem = (id: string, type: ItemType, payload: Partial<Item> = 
   type,
   subtype: ItemSubtype.None,
   defaultName: '',
+  name: '',
   portIds: [],
   groupId: null,
   rotation: 0,

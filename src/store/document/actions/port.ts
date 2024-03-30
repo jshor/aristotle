@@ -67,9 +67,8 @@ export function setPortName (this: DocumentStoreInstance, portId: string) {
   const port = this.ports[portId]
   const item = this.items[port.elementId]
   const portNames = new Set(item.portIds.map(id => this.ports[id].name))
-  const itemName = item.properties.name?.value || item.defaultName
 
-  port.name = getSequencedName(`${itemName} ${port.defaultName}`, portNames)
+  port.name = getSequencedName(`${item.name} ${port.defaultName}`, portNames)
 }
 
 /**
@@ -151,9 +150,12 @@ export function togglePortMonitoring (this: DocumentStoreInstance, portId: strin
 export function monitorPort (this: DocumentStoreInstance, portId: string) {
   const port = this.ports[portId]
 
-  port.hue = port.hue ||  ~~(360 * Math.random())
   port.isMonitored = true
   port.wave = new BinaryWavePulse(portId, port.name, port.value, port.hue)
+
+  if (!port.hue) {
+    this.setRandomPortColor(portId)
+  }
 
   this.monitoredPortIds.add(portId)
   this.oscillator.add(port.wave)
@@ -178,4 +180,17 @@ export function unmonitorPort (this: DocumentStoreInstance, portId: string, remo
   }
 
   this.isOscilloscopeOpen = Object.keys(this.oscillogram).length > 0
+}
+
+/**
+ * Assigns a random, "chalky" color for the port.
+ */
+export function setRandomPortColor (this: DocumentStoreInstance, portId: string) {
+  const port = this.ports[portId]
+
+  port.hue = ~~(360 * Math.random())
+
+  if (port.wave) {
+    port.wave.hue = port.hue
+  }
 }

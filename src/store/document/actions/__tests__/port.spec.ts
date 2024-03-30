@@ -108,7 +108,7 @@ describe('port actions', () => {
 
   describe('setPortName', () => {
     const store = createDocumentStore('document')()
-    const item = createItem('item', ItemType.InputNode, { portIds: ['port1'], defaultName: 'MyItem' })
+    const item = createItem('item', ItemType.InputNode, { portIds: ['port1'], name: 'MyItem' })
     const port1 = createPort('port1', 'item', PortType.Input, { defaultName: 'Input Port' })
     const port2 = createPort('port2', 'item', PortType.Input, { defaultName: 'Input Port' })
 

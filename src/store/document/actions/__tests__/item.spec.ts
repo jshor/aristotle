@@ -108,9 +108,11 @@ describe('item actions', () => {
 
     it('should increment the item name if it already exists', () => {
       const item1 = createItem('item1', ItemType.InputNode, {
+        defaultName: 'MyNode',
         properties: createProperties('MyNode')
       })
       const item2 = createItem('item2', ItemType.InputNode, {
+        defaultName: 'MyNode',
         properties: createProperties('MyNode')
       })
 
@@ -119,10 +121,10 @@ describe('item actions', () => {
       })
 
       store.setItemName(item1)
-      expect(item1.properties.name!.value).toEqual('MyNode 2')
+      expect(item1.properties.name!.value).toEqual('MyNode')
 
       store.setItemName(item2)
-      expect(item2.properties.name!.value).toEqual('MyNode 3')
+      expect(item2.properties.name!.value).toEqual('MyNode 2')
     })
 
     it('should increment the default node name when one is not defined in its properties', () => {
@@ -463,121 +465,6 @@ describe('item actions', () => {
       it('should remove the difference number of input ports at the end of the list', () => {
         expect(store.removePort).toHaveBeenCalledWith(port3.id)
       })
-    })
-  })
-
-  describe('setProperties', () => {
-    const store = createDocumentStore('document')()
-
-    const id = 'item1'
-    const createProperties = (): ItemProperties => ({
-      inputCount: {
-        value: 2,
-        label: 'Input Count',
-        type: 'number'
-      },
-      name: {
-        value: 'Some name',
-        label: 'Name',
-        type: 'text'
-      }
-    })
-
-    beforeEach(() => {
-      stubAll(store, [
-        'setInputCount'
-      ])
-
-      store.$reset()
-    })
-
-    it('should not change anything if no properties have changed', () => {
-      const properties = createProperties()
-      const item1 = createItem(id, ItemType.LogicGate, { properties })
-
-      store.$patch({
-        items: { item1 }
-      })
-      store.setProperties(id, properties)
-
-      expect(store.setInputCount).not.toHaveBeenCalled()
-    })
-
-    it('should invoke setInputCount() when the `inputCount` property has changed', () => {
-      const item1 = createItem(id, ItemType.LogicGate, { properties: createProperties() })
-      const properties = createProperties()
-
-      properties.inputCount!.value = 3
-
-      store.$patch({
-        items: { item1 }
-      })
-      store.setProperties(id, properties)
-
-      expect(store.setInputCount).toHaveBeenCalledWith(id, 3)
-    })
-
-    describe('when the `interval` property has changed', () => {
-      const properties: ItemProperties = {
-        ...createProperties(),
-        interval: {
-          value: 1000,
-          label: 'Interval',
-          type: 'number'
-        }
-      }
-      const value = 2000
-
-      it('should set the clock interval', () => {
-        const item = createItem('item', ItemType.InputNode, {
-          properties,
-          clock: new ClockPulse('item', 1000, LogicValue.TRUE, LogicValue.TRUE)
-        })
-
-        store.$patch({
-          items: { item }
-        })
-        store.setProperties('item', merge(cloneDeep(properties), {
-          interval: {
-            value
-          }
-        }))
-
-        expect(store.items.item.clock!.interval).toEqual(value)
-      })
-
-      it('should not do anything if the item has no clock', () => {
-        const item = createItem('item', ItemType.InputNode, {
-          properties,
-          clock: null
-        })
-
-        store.$patch({
-          items: { item }
-        })
-        store.setProperties('item', merge(cloneDeep(properties), {
-          interval: {
-            value
-          }
-        }))
-
-        expect(store.items.item.clock).toBeNull()
-      })
-    })
-
-    it('should set the new item property value', () => {
-      const propertyName = 'name'
-      const value = 'New value'
-      const item1 = createItem(id, ItemType.LogicGate, { properties: createProperties() })
-      const properties = createProperties()
-      properties[propertyName]!.value = value
-
-      store.$patch({
-        items: { item1 }
-      })
-      store.setProperties(id, properties)
-
-      expect(store.items[id].properties[propertyName]!.value).toEqual(value)
     })
   })
 })

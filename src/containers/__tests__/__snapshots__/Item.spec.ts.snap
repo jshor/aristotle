@@ -3,6 +3,7 @@
 exports[`Item container should match the snapshot 1`] = `
 "<div class="draggable" style="left: 0px; top: 0px; pointer-events: none; z-index: 1;" tabindex="0" data-test="item">
   <!--v-if-->
+  <!--v-if-->
   <div class="circuit-component" style="transform: rotate(0deg);">
     <div class="switch switch--hi-z" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]">
       <div class="switch__inner" tabindex="0" aria-role="switch">
@@ -37,6 +38,7 @@ exports[`Item container should match the snapshot 1`] = `
 
 exports[`Item container when the item rotates should match the new rotation 1`] = `
 "<div class="draggable" style="left: 0px; top: 0px; pointer-events: none; z-index: 1;" tabindex="0" data-test="item">
+  <!--v-if-->
   <!--v-if-->
   <div class="circuit-component" style="transform: rotate(0deg);">
     <div class="switch switch--hi-z" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]">
