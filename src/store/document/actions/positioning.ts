@@ -132,12 +132,9 @@ export function dragItem (this: DocumentStoreInstance, id: string, position: Poi
  *
  * @param position - the new position of the control point, in editor coordinates
  */
-export function dragControlPoint (this: DocumentStoreInstance, id: string, position: Point, offset: Point, index: number) {
+export function dragControlPoint (this: DocumentStoreInstance, id: string, position: Point, index: number) {
   const controlPoint = this.connections[id].controlPoints[index]
-  const newPosition = fromDocumentToEditorCoordinates(this.canvas, this.viewport, {
-    x: position.x - offset.x,
-    y: position.y - offset.y
-  }, this.zoom)
+  const newPosition = fromDocumentToEditorCoordinates(this.canvas, this.viewport, position, this.zoom)
   const boundingBox = boundaries.getPointBoundary(newPosition)
   const snapMode = this.totalSelectionCount > 1
     ? undefined // don't snap wires when multiple things are being dragged at the same time

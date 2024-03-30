@@ -1,21 +1,25 @@
 <template>
-  <wire-draggable
-    v-if="wire"
-    :geometry="wire.geometry"
-    :style="{
-      left: wire.position?.x + 'px',
-      top: wire.position?.y + 'px'
-    }"
-    :source-value="port.value"
-  />
-  <port-handle
-    v-if="wire"
-    :style="{
-      left: wire.targetPosition?.x + 'px',
-      top: wire.targetPosition?.y + 'px',
-      transform: `translate(-50%, -50%)`
-    }"
-  />
+  <template v-if="connectionExperiment">
+    <wire-draggable
+      data-test="experiment-wire"
+      :geometry="connectionExperiment.geometry"
+      :style="{
+        left: connectionExperiment.position.x + 'px',
+        top: connectionExperiment.position.y + 'px'
+      }"
+      :source-value="port.value"
+    />
+    <port-handle
+      v-if="connectionExperiment"
+      data-test="experiment-port"
+      :style="{
+        left: connectionExperiment.targetPosition.x + 'px',
+        top: connectionExperiment.targetPosition.y + 'px',
+        transform: `translate(-50%, -50%)`
+      }"
+    />
+  </template>
+
   <draggable
     :position="port.position"
     :style="{ zIndex }"
@@ -27,6 +31,7 @@
   >
     <port-pivot>
       <port-handle
+        data-test="port"
         :active="isActive"
         :hue="port.isMonitored ? port.hue : 0"
       />
@@ -38,11 +43,11 @@
 import { computed, defineComponent, PropType } from 'vue'
 import PortHandle from '@/components/port/PortHandle.vue'
 import PortPivot from '@/components/port/PortPivot.vue'
+import WireDraggable from '@/components/basic/WireDraggable.vue'
 import { DocumentStore } from '@/store/document'
 import Draggable from '@/components/interactive/Draggable.vue'
 import renderLayout from '@/store/document/geometry/wire'
 import Port from '@/types/interfaces/Port'
-import WireDraggable from './WireDraggable.vue'
 import { ITEM_BASE_Z_INDEX } from '@/constants'
 import Direction from '@/types/enums/Direction'
 
@@ -73,8 +78,12 @@ export default defineComponent({
       updateConnectionExperiment,
       terminateConnectionExperiment
     } = store
+
+    /** Whether or not the port is active (i.e., visually "large" to accept a new connection). */
     const isActive = computed(() => store.activePortId === props.port.id || store.connectablePortIds.has(props.port.id))
-    const wire = computed(() => {
+
+    /** The geometry for the connection experiment. */
+    const connectionExperiment = computed(() => {
       if (store.connectionExperiment?.sourceId !== props.port.id) {
         // if this port is not part of the active connection experiment then there is no wire to render
         return null
@@ -96,20 +105,11 @@ export default defineComponent({
     })
 
     // use the same CSS z-index value for the port as its parent item
-    const zIndex = computed(() => store.items[props.port.elementId].zIndex + ITEM_BASE_Z_INDEX)
+    const zIndex = computed(() => store.items[props.port.elementId]?.zIndex + ITEM_BASE_Z_INDEX)
 
-    function onEscapeKey ($event: KeyboardEvent) {
-      $event.preventDefault()
-      $event.stopPropagation()
-
-      emit('deselect', $event)
-    }
-
-    function onBlur () {
-      store.unsetConnectionPreview()
-      store.cachedState = null
-    }
-
+    /**
+     * Toggles oscilloscope monitoring on the port on touch-hold.
+     */
     function onTouchHold ($event: TouchEvent) {
       $event.stopPropagation()
       $event.preventDefault()
@@ -118,6 +118,9 @@ export default defineComponent({
       store.togglePortMonitoring(props.port.id)
     }
 
+    /**
+     * Toggles oscilloscope monitoring on the port on double-click.
+     */
     function onDoubleClick ($event: MouseEvent) {
       $event.stopPropagation()
       $event.preventDefault()
@@ -126,12 +129,10 @@ export default defineComponent({
     }
 
     return {
-      wire,
+      connectionExperiment,
       isActive,
       store,
       zIndex,
-      onEscapeKey,
-      onBlur,
       onTouchHold,
       onDoubleClick,
       createConnectionExperiment,

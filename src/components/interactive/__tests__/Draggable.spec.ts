@@ -28,7 +28,7 @@ describe('Draggable component', () => {
         })
     })
 
-    it('should emit `select` when the item is not already selected', async () => {
+    it('should emit `select`', async () => {
       await wrapper.setProps({ isSelected: false })
       await wrapper.trigger('focus')
 
@@ -36,15 +36,6 @@ describe('Draggable component', () => {
 
       expect(wrapper.emitted()).toHaveProperty('select')
       expect(wrapper.emitted().select[0]).toEqual([true])
-    })
-
-    it('should not emit `select` when the item is already selected', async () => {
-      await wrapper.setProps({ isSelected: true })
-      await wrapper.trigger('focus')
-
-      jest.advanceTimersByTime(10)
-
-      expect(wrapper.emitted()).not.toHaveProperty('select')
     })
   })
 
@@ -260,7 +251,7 @@ describe('Draggable component', () => {
         expect(wrapper.emitted()).toHaveProperty('drag')
       })
 
-      it('should emit `dragEnd` with the last position when the touch finger is released', async () => { // bad
+      it('should emit `dragEnd` with the last position when the touch finger is released', async () => {
         await wrapper.trigger('touchmove', {
           touches: [new TouchEvent('touchmove')]
         })

@@ -10,6 +10,7 @@ exports[`Document container should match the snapshot 1`] = `
     </div>
     <div class="draggable" style="left: 0px; top: 0px; pointer-events: none; z-index: 1000;" tabindex="0" data-test="item">
       <!--v-if-->
+      <!--v-if-->
       <div class="circuit-component" style="transform: rotate(0deg);">
         <div class="switch switch--hi-z" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]">
           <div class="switch__inner" tabindex="0" aria-role="switch">
@@ -35,6 +36,7 @@ exports[`Document container should match the snapshot 1`] = `
     </div>
     <div class="draggable" style="left: 0px; top: 0px; pointer-events: none; z-index: 1000;" tabindex="0" data-test="item">
       <!--v-if-->
+      <!--v-if-->
       <div class="circuit-component" style="transform: rotate(0deg);">
         <div class="switch switch--hi-z" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]">
           <div class="switch__inner" tabindex="0" aria-role="switch">
@@ -58,24 +60,22 @@ exports[`Document container should match the snapshot 1`] = `
         <div class="circuit-component__ports--bottom circuit-component__ports"></div>
       </div>
     </div><!-- Note: z-index of items will be offset by ITEM_BASE_Z_INDEX to ensure they overlap wires -->
-    <div class="draggable" style="left: 0px; top: 0px; z-index: 1;">
-      <div class="port-handle">
-        <div class="port-handle__display">
-          <div class="port-handle__hue"></div>
-        </div>
-      </div>
-    </div><svg class="wire" width="15" height="15" aria-roledescription="connection" style="left: -7.5px; top: -7.5px;">
+    <!-- the tab-accessible centroid element -->
+    <div style="position: absolute; left: 0px; top: 0px;" tabindex="0" aria-label="Connection from  to " title="Connection from  to " data-test="centroid"></div><!-- each segment of the visible wire -->
+    <!-- TODO: set is-animated according to preferences --><svg class="wire" width="15" height="15" aria-roledescription="connection" style="left: -7.5px; top: -7.5px;" title="Connection from  to ">
       <path class="wire__outline" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
       <path class="wire__display" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+      <!--v-if-->
       <path class="wire__clickable" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
-    </svg>
-    <div style="position: absolute; left: 0px; top: 0px;" tabindex="0"></div>
+    </svg><!-- the visual outline of the bounding box surrounding the connection -->
     <!--v-if-->
+    <!-- the control points -->
+    <!-- render only n-1 control points, since the last one is the target port -->
     <!--v-if-->
-    <!--v-if-->
-    <div class="draggable" style="left: 0px; top: 0px; z-index: 1000;">
+    <div class="draggable" style="left: 0px; top: 0px; z-index: 1000;" tabindex="-1">
+      <!--v-if-->
       <div class="port-pivot" style="transform: rotate(-0deg);">
-        <div class="port-handle">
+        <div class="port-handle" data-test="port">
           <div class="port-handle__display">
             <div class="port-handle__hue"></div>
           </div>
@@ -83,10 +83,10 @@ exports[`Document container should match the snapshot 1`] = `
       </div>
     </div>
     <!--v-if-->
-    <!--v-if-->
-    <div class="draggable" style="left: 0px; top: 0px; z-index: 1000;">
+    <div class="draggable" style="left: 0px; top: 0px; z-index: 1000;" tabindex="-1">
+      <!--v-if-->
       <div class="port-pivot" style="transform: rotate(-0deg);">
-        <div class="port-handle">
+        <div class="port-handle" data-test="port">
           <div class="port-handle__display">
             <div class="port-handle__hue"></div>
           </div>

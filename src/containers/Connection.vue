@@ -1,18 +1,17 @@
 <template>
-  <draggable
-    v-for="(port, index) in geometries"
-    :key="index"
-    :position="port.portPosition"
-    :style="{ zIndex }"
-    @drag-start="p => onDragStart(p, index)"
-    @drag="(p, o) => onPortDrag(p, o, index)"
-    @drag-end="dragEnd"
-    @select="k => selectControlPoint(index, k)"
-    @deselect="setControlPointSelectionState(id, index, false)"
-    @contextmenu="$e => onControlPointContextMenu($e, index)"
-  >
-    <port-handle :is-selected="port.isSelected" />
-  </draggable>
+  <!-- the tab-accessible centroid element -->
+  <div
+    :style="centroidStyle"
+    :tabindex="0"
+    :aria-label="title"
+    :title="title"
+    data-test="centroid"
+    @focus="onConnectionFocus"
+    @blur="hasFocus = false"
+  />
+
+  <!-- each segment of the visible wire -->
+  <!-- TODO: set is-animated according to preferences -->
   <wire-draggable
     v-for="(wire, index) in geometries"
     :key="index"
@@ -20,29 +19,48 @@
     :ref="wire.ref"
     :source-value="source.value"
     :is-selected="isSelected"
+    :is-animated="false"
     :style="{
       left: wire.wirePosition.x + 'px',
       top: wire.wirePosition.y + 'px'
     }"
+    :title="title"
     :flash="flash"
     @add="p => onPortAdd(p, index)"
-    @move="p => onNewPortMove(p, index)"
+    @move="p => onPortDrag(p, index)"
     @added="dragEnd"
     @select="selectConnection"
     @deselect="setConnectionSelectionState(id, false)"
     @contextmenu="onConnectionContextMenu"
   />
-  <div
-    :style="centroidStyle"
-    :tabindex="0"
-    @focus="hasFocus = true"
-    @blur="hasFocus = false"
-  />
+
+  <!-- the visual outline of the bounding box surrounding the connection -->
   <div
     v-if="hasFocus"
+    data-test="bounding-box"
     class="connection__bounding-box"
     :style="boundingBox"
   />
+
+  <!-- the control points -->
+  <!-- render only n-1 control points, since the last one is the target port -->
+  <draggable
+    v-for="(port, index) in geometries.slice(0, geometries.length - 1)"
+    :key="index"
+    :position="port.portPosition"
+    :style="{ zIndex }"
+    :is-selected="port.isSelected"
+    :allow-touch-drag="port.isSelected"
+    @drag-start="p => onDragStart(p, index)"
+    @drag="p => onPortDrag(p, index)"
+    @drag-end="dragEnd"
+    @select="k => selectControlPoint(index, k)"
+    @deselect="setControlPointSelectionState(id, index, false)"
+    @contextmenu="$e => onControlPointContextMenu($e, index)"
+  >
+    <div class="connection__port" />
+    <port-handle :is-selected="port.isSelected" />
+  </draggable>
 </template>
 
 <script lang="ts">
@@ -50,9 +68,9 @@ import { defineComponent, ref, computed, PropType, Ref, ComponentPublicInstance,
 import PortHandle from '@/components/port/PortHandle.vue'
 import Point from '@/types/interfaces/Point'
 import Draggable from '@/components/interactive/Draggable.vue'
+import WireDraggable from '@/components/basic/WireDraggable.vue'
 import WireGeometry from '@/types/types/WireGeometry'
 import renderLayout from '@/store/document/geometry/wire'
-import WireDraggable from './WireDraggable.vue'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
 import ControlPoint from '@/types/interfaces/ControlPoint'
 import { DocumentStore } from '@/store/document'
@@ -83,7 +101,7 @@ export default defineComponent({
       default: 0
     },
 
-    /** Whether or not the item should show a flash once to the user. */
+    /** Whether or not the connection should show a flash once to the user. */
     flash: {
       type: Boolean,
       default: false
@@ -101,8 +119,10 @@ export default defineComponent({
     const source = computed(() => store.ports[connection.source])
     const target = computed(() => store.ports[connection.target])
     const hasFocus = ref(false)
+
     let drag = { x: 0, y: 0 }
 
+    /** Returns a new control point. */
     const createControlPoint = (data: Partial<ControlPoint> = {}): ControlPoint => ({
       position: {
         x: 0,
@@ -114,15 +134,29 @@ export default defineComponent({
       ...data
     })
 
+    /** Whether or not this connection was established as a preview. */
     const isPreview = computed(() => store.connectionPreviewId === props.id)
 
+    /** The user-friendly title for the connection. */
+    const title = computed(() => {
+      const source = store.ports[connection.source]
+      const target = store.ports[connection.target]
+
+      return `Connection from ${source.name} to ${target.name}`
+    })
+
+    /**
+     * List of *n* wire geometries.
+     * Each wire geometry is a segment of the connection, including its target connection point.
+     * Only *n* - 1 control points should be rendered, since the last one is the target port.
+     */
     const geometries = computed(() => {
       const { controlPoints } = store.connections[props.id]
       const geometries: {
         geometry: WireGeometry
         wirePosition: Point
         portPosition: Point
-        isSelected?: boolean
+        isSelected: boolean
         ref: Ref<ComponentPublicInstance<typeof WireDraggable> | undefined>
       }[] = []
       let previousPort = createControlPoint({ ...source.value, canInflect: false })
@@ -135,7 +169,9 @@ export default defineComponent({
         const geometry = renderLayout(previousPort, {
           ...port,
           orientation: i === controlPoints.length
+            // the last wire segment should have the same orientation as the target port
             ? port.orientation
+            // all other wire segments should be rotated 180 degrees to accommodate their control points
             : (port.orientation + 2) % 4
         })
 
@@ -146,7 +182,7 @@ export default defineComponent({
             y: Math.min(previousPort.position.y, port.position.y) + geometry.minY
           },
           portPosition: port.position,
-          isSelected: port.isSelected,
+          isSelected: port.isSelected!,
           ref: ref<ComponentPublicInstance<typeof WireDraggable>>()
         })
 
@@ -156,6 +192,7 @@ export default defineComponent({
       return geometries
     })
 
+    /** The invisible centroid div style, used for maintaining `tabindex`. */
     const centroidStyle = computed<StyleValue>(() => {
       const a = source.value.position
       const b = target.value.position
@@ -167,14 +204,15 @@ export default defineComponent({
       }
     })
 
+    /** The bounding box outline of the entire connection, displayed for accessibility. */
     const boundingBox = computed(() => {
       const g = geometries
         .value
         .reduce((b, { ref }) => {
           const rect = ref.value?.[0]
-            ?.$el
-            ?.querySelector('path')
-            ?.getBoundingClientRect()
+            .$el
+            .querySelector('path')
+            .getBoundingClientRect()
 
           if (!rect) {
             return b
@@ -206,6 +244,9 @@ export default defineComponent({
       }
     })
 
+    /**
+     * Drag start handler for control points and wires.
+     */
     function onDragStart (position: Point, index: number) {
       store.cacheState()
 
@@ -218,25 +259,27 @@ export default defineComponent({
       }
     }
 
-    function onPortDrag (position: Point, offset: Point, index: number) {
+    /**
+     * Handles movement of the given control point.
+     */
+    function onPortDrag (position: Point, index: number) {
       if (store.connections[props.id].groupId) {
         // connection is in a group; move the group
         store.setSelectionPosition({
-          x: position.x - drag.x,
-          y: position.y - drag.y
+          x: (position.x - drag.x) / store.zoomLevel,
+          y: (position.y - drag.y) / store.zoomLevel
         })
 
         drag = position
       } else {
         // connection is not in a group; move the control point
-        store.dragControlPoint(props.id, position, offset, index)
+        store.dragControlPoint(props.id, position, index)
       }
     }
 
-    function onNewPortMove (position: Point, index: number) {
-      onPortDrag(position, { x: 0, y: 0 }, index)
-    }
-
+    /**
+     * Adds an *n*th control point to the connection at the specified position.
+     */
     function onPortAdd (position: Point, index: number) {
       store.cacheState()
 
@@ -250,9 +293,13 @@ export default defineComponent({
         store.addControlPoint(props.id, position, index)
       }
 
-      onNewPortMove(position, index)
+      onPortDrag(position, index)
     }
 
+    /**
+     * Draggable wire context menu handler.
+     * This will select the entire connection (including its control points) if not already selected.
+     */
     function onConnectionContextMenu ($event: MouseEvent) {
       if (!props.isSelected) {
         store.setConnectionSelectionState(props.id, true)
@@ -261,35 +308,57 @@ export default defineComponent({
       emit('contextmenu', $event)
     }
 
+    /**
+     * Control point context menu handler.
+     * This will select the control point if it is not already selected.
+     */
     function onControlPointContextMenu ($event: MouseEvent, index: number) {
       if (!store.connections[props.id].controlPoints[index].isSelected) {
-        store.setControlPointSelectionState(props.id, index, true)
+        selectControlPoint(index)
       }
 
       emit('contextmenu', $event)
     }
 
+    /**
+     * Selects the control point of the given index in the store.
+     */
     function selectControlPoint (index: number, deselectAll?: boolean) {
-      if (deselectAll && !store.connections[props.id].controlPoints[index].isSelected) {
+      if (deselectAll) {
         store.deselectAll()
       }
 
       store.setControlPointSelectionState(props.id, index, true)
     }
 
+    /**
+     * Selects the connection in the store.
+     */
     function selectConnection (deselectAll?: boolean) {
-      if (deselectAll && !props.isSelected) {
+      if (deselectAll) {
         store.deselectAll()
       }
 
       store.setConnectionSelectionState(props.id, true)
     }
 
+    /**
+     * Selects the connection visually (bounding box) and in the store.
+     */
+    function onConnectionFocus () {
+      hasFocus.value = true
+      selectConnection(true)
+    }
+
+    /**
+     * Commits the cached state.
+     */
     function dragEnd () {
       store.commitCachedState()
     }
 
     return {
+      title,
       isPreview,
       hasFocus,
       source,
@@ -299,7 +368,7 @@ export default defineComponent({
       onDragStart,
       onPortDrag,
       onPortAdd,
-      onNewPortMove,
+      onConnectionFocus,
       onConnectionContextMenu,
       onControlPointContextMenu,
       dragEnd,
@@ -320,12 +389,22 @@ export default defineComponent({
     border: 1px solid var(--color-primary);
     border-radius: 4px;
     pointer-events: none;
-    outline: auto 5px -webkit-focus-ring-color;
+    outline: auto $outline-border-width -webkit-focus-ring-color;
     touch-action: none;
     padding: 10px;
     margin-left: -10px;
     margin-top: -10px;
     z-index: 8000;
+  }
+
+  &__port {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: block;
+    margin-left: -16px;
+    margin-top: -16px;
   }
 }
 </style>

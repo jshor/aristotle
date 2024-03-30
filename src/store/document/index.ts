@@ -63,7 +63,7 @@ export const createDocumentStore = (documentId: string) => defineStore({
         return false
       }
 
-      return hasUngrouped(state.selectedItemIds, state.items) || hasUngrouped(state.selectedConnectionIds, state.connections)
+      return hasUngrouped(state.selectedItemIds, state.items)
     },
 
     canUngroup (state) {

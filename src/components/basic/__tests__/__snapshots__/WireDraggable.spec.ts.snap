@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Draggable wire component should match the snapshot 1`] = `
+"<svg class="wire" width="15" height="15" aria-roledescription="connection">
+  <path class="wire__outline" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+  <path class="wire__display" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+  <!--v-if-->
+  <path class="wire__clickable" data-test="wire-clickable" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+</svg>"
+`;

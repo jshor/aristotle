@@ -27,7 +27,19 @@
       :d="geometry.path"
     />
     <path
+      v-if="isAnimated"
+      class="wire__animation"
+      :class="{
+        'wire__animation--on': sourceValue === LogicValue.TRUE,
+        'wire__animation--off': sourceValue === LogicValue.FALSE
+      }"
+      fill="none"
+      :transform="`translate(${Math.abs(geometry.minX)}, ${Math.abs(geometry.minY)})`"
+      :d="geometry.path"
+    />
+    <path
       class="wire__clickable"
+      data-test="wire-clickable"
       fill="none"
       ref="wireRef"
       :transform="`translate(${Math.abs(geometry.minX)}, ${Math.abs(geometry.minY)})`"
@@ -43,40 +55,51 @@
 </template>
 
 <script lang="ts">
-import LogicValue from '@/types/enums/LogicValue'
-import WireGeometry from '@/types/types/WireGeometry'
 import { computed, defineComponent, PropType, ref } from 'vue'
-import { useDraggable } from '@/composables/useDraggable'
-import Point from '@/types/interfaces/Point'
+import LogicValue from '../../types/enums/LogicValue'
+import WireGeometry from '../../types/types/WireGeometry'
+import { useDraggable } from '../../composables/useDraggable'
+import Point from '../../types/interfaces/Point'
 
 export default defineComponent({
-  name: 'Wire',
+  name: 'WireDraggable',
   props: {
     /** The wire Bezier curve geometry. */
     geometry: {
       type: Object as PropType<WireGeometry>,
       required: true
     },
+
+    /** Whether or not to display marching ants to indicate electrical flow direction. */
     isAnimated: {
       type: Boolean,
       default: false
     },
+
+    /** The logical value of the source port. */
     sourceValue: {
       type: Number as PropType<LogicValue>,
       required: true
     },
+
+    /** The user-friendly label. */
     label: {
       type: String,
       default: ''
     },
+
+    /** Whether or not this connection is a preview (i.e., opaque in appearance). */
     isPreview: {
       type: Boolean,
       default: false
     },
+
+    /** Whether or not this wire should display as selected (i.e., with a select shadow). */
     isSelected: {
       type: Boolean,
       default: false
     },
+
     /** Whether or not the item should show a flash once to the user. */
     flash: {
       type: Boolean,
@@ -112,10 +135,13 @@ export default defineComponent({
         : emit('select', true)
     }
 
+    /**
+     * Drag start event handler.
+     */
     function onDragStart (position: Point, offset: Point) {
-      if (!isTouchDragging.value) {
-        emit('add', position, offset)
-      }
+      // if (!isTouchDragging.value) {
+      //   emit('add', position, offset)
+      // }
     }
 
     function onDragEnd () {
@@ -129,11 +155,11 @@ export default defineComponent({
      * The draggable `mousedown` event will continue to be propagated.
      */
     function onLeftMouseDown ($event: MouseEvent) {
-      onMouseDown($event)
+      // onMouseDown($event)
 
-      if (!props.isSelected) {
-        emit('select', !$event.ctrlKey)
-      }
+      // if (!props.isSelected) {
+      //   emit('select', !$event.ctrlKey)
+      // }
     }
 
     const allowTouchDrag = computed(() => isTouchDragging.value)
@@ -146,7 +172,7 @@ export default defineComponent({
       dragEnd,
     } = useDraggable({
       allowTouchDrag,
-      longTouchTimeout: 500,
+      longTouchTimeout: 500, // TODO: const
       onTouched,
       onDragStart,
       onDrag: (p: Point, o: Point) => emit('move', p, o),
@@ -196,7 +222,12 @@ export default defineComponent({
     stroke-width: 3;
     stroke-dasharray: 5;
     animation: animate1 500s infinite linear;
-    stroke: red;
+    stroke: var(--color-bg-primary);
+    opacity: 0;
+
+    &--on {
+      opacity: 1;
+    }
   }
 
   &__display {
@@ -216,6 +247,7 @@ export default defineComponent({
   }
 }
 
+// TODO: move to keyframes scss file?
 @keyframes animate1 {
   from {
     stroke-dashoffset: 0;

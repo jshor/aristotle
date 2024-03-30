@@ -248,13 +248,9 @@ describe('positioning actions', () => {
       x: 4,
       y: 7
     }
-    const offset = {
-      x: 1,
-      y: 2
-    }
     const newPosition = {
-      x: position.x - offset.x,
-      y: position.y - offset.y
+      x: position.x,
+      y: position.y
     }
     const oldPosition = {
       x: 11,
@@ -279,7 +275,7 @@ describe('positioning actions', () => {
     })
 
     it('should drag the control point to the given position', () => {
-      store.dragControlPoint('connection1', position, offset, 0)
+      store.dragControlPoint('connection1', position, 0)
 
       expect(store.dragTarget).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -297,7 +293,7 @@ describe('positioning actions', () => {
 
     it('should not snap the control point if multiple elements are being dragged', () => {
       store.selectedItemIds.add('item1')
-      store.dragControlPoint('connection1', position, offset, 0)
+      store.dragControlPoint('connection1', position, 0)
 
       expect(store.dragTarget).toHaveBeenCalledWith(
         expect.objectContaining({

@@ -2,6 +2,7 @@
   <div
     class="draggable"
     :style="style"
+    :tabindex="isFocusable ? 0 : -1"
     @mousedown.left="onLeftMouseDown"
     @mouseup="onMouseUp"
     @touchstart="onTouchStart"
@@ -11,13 +12,19 @@
     @focus="onFocus"
     @contextmenu="$emit('contextmenu', $event)"
   >
+    <div
+      v-if="hasHiddenFocus"
+      :tabindex="0"
+      @blur="hasHiddenFocus = false"
+      ref="focusRef"
+    />
     <slot />
   </div>
 </template>
 
 <script lang="ts">
 import Point from '@/types/interfaces/Point'
-import { defineComponent, PropType, computed } from 'vue'
+import { defineComponent, PropType, computed, ref, nextTick } from 'vue'
 import { TOUCH_HOLD_TIMEOUT } from '@/constants'
 import { useDraggable } from '@/composables/useDraggable'
 
@@ -32,6 +39,12 @@ export default defineComponent({
 
     /** Whether or not this connection is selected. */
     isSelected: {
+      type: Boolean,
+      default: false
+    },
+
+    /** Whether or not this element can have focus. */
+    isFocusable: {
       type: Boolean,
       default: false
     },
@@ -56,6 +69,8 @@ export default defineComponent({
       left: `${props.position.x}px`,
       top: `${props.position.y}px`
     }))
+    const focusRef = ref<HTMLElement>()
+    const hasHiddenFocus = ref(false)
 
     /**
      * Focus event handler.
@@ -63,9 +78,7 @@ export default defineComponent({
      * @emits `select` if not already selected
      */
     function onFocus () {
-      if (!props.isSelected) {
-        emit('select', true)
-      }
+      emit('select', true)
     }
 
     /**
@@ -79,6 +92,8 @@ export default defineComponent({
       props.isSelected
         ? emit('deselect')
         : emit('select')
+
+      applyHiddenFocus()
     }
 
     /**
@@ -91,6 +106,28 @@ export default defineComponent({
 
       if (!props.isSelected) {
         emit('select', !$event.ctrlKey)
+      }
+
+      applyHiddenFocus()
+    }
+
+    /**
+     * Places focus within this component (but hidden from the user).
+     *
+     * This is so that the draggable element can have focus and the tab index order
+     * be maintained, but not have the outline appear when this element is clicked on.
+     */
+    async function applyHiddenFocus () {
+      if (!props.isFocusable) return
+
+      hasHiddenFocus.value = true
+
+      await nextTick()
+
+      if (props.isSelected) {
+        focusRef.value?.focus()
+      } else {
+        hasHiddenFocus.value = false
       }
     }
 
@@ -113,6 +150,8 @@ export default defineComponent({
 
     return {
       style,
+      focusRef,
+      hasHiddenFocus,
       onLeftMouseDown,
       onMouseUp,
       onTouchStart,
@@ -132,7 +171,7 @@ export default defineComponent({
   touch-action: none;
 
   &:focus {
-    outline: auto 5px -webkit-focus-ring-color;
+    outline: auto $outline-border-width -webkit-focus-ring-color;
   }
 }
 </style>

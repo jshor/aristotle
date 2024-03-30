@@ -214,7 +214,7 @@ export function deleteSelection (this: DocumentStoreInstance) {
     .values(this.connections)
     .forEach(({ source, target, id }) => {
       // returns true if the given port ID is connected to any selected item
-      const isConnected = (i: string) => this.items[this.ports[i].elementId].isSelected
+      const isConnected = (i: string) => this.items[this.ports[i].elementId]?.isSelected
 
       if (isConnected(source) || isConnected(target)) {
         this.selectedConnectionIds.add(id)

@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Item container should match the snapshot 1`] = `
+"<!--v-if-->
+<div class="draggable" style="left: 0px; top: 0px; z-index: NaN;" tabindex="-1">
+  <!--v-if-->
+  <div class="port-pivot" style="transform: rotate(-0deg);">
+    <div class="port-handle" data-test="port">
+      <div class="port-handle__display">
+        <div class="port-handle__hue"></div>
+      </div>
+    </div>
+  </div>
+</div>"
+`;
+
+exports[`Item container when a connection experiment is initiated should draw the connection experiment wire and port handle 1`] = `
+"<svg class="wire" width="180" height="230" aria-roledescription="connection" data-test="experiment-wire" style="left: -57.5px; top: -7.5px;">
+  <path class="wire__outline" fill="none" transform="translate(57.5, 7.5)" d="M 0 0 C -50 0 50 200 100 200"></path>
+  <path class="wire__display" fill="none" transform="translate(57.5, 7.5)" d="M 0 0 C -50 0 50 200 100 200"></path>
+  <!--v-if-->
+  <path class="wire__clickable" fill="none" transform="translate(57.5, 7.5)" d="M 0 0 C -50 0 50 200 100 200"></path>
+</svg>
+<div class="port-handle" data-test="experiment-port" style="left: 100px; top: 200px; transform: translate(-50%, -50%);">
+  <div class="port-handle__display">
+    <div class="port-handle__hue"></div>
+  </div>
+</div>
+<div class="draggable" style="left: 0px; top: 0px; z-index: NaN; z-index: NaN;" tabindex="-1">
+  <!--v-if-->
+  <div class="port-pivot" style="transform: rotate(-0deg);">
+    <div class="port-handle" data-test="port">
+      <div class="port-handle__display">
+        <div class="port-handle__hue"></div>
+      </div>
+    </div>
+  </div>
+</div>"
+`;

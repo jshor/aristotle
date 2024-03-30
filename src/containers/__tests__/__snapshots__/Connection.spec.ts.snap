@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Item container should match the snapshot 1`] = `
+"<!-- the tab-accessible centroid element -->
+<div style="position: absolute; left: 0px; top: 0px;" tabindex="0" aria-label="Connection from Source Port to Target Port" title="Connection from Source Port to Target Port" data-test="centroid"></div>
+<!-- each segment of the visible wire -->
+<!-- TODO: set is-animated according to preferences -->
+<svg class="wire wire--selected" width="15" height="15" aria-roledescription="connection" style="left: -7.5px; top: -7.5px;" title="Connection from Source Port to Target Port">
+  <path class="wire__outline" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+  <path class="wire__display" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+  <!--v-if-->
+  <path class="wire__clickable" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+</svg>
+<!-- the visual outline of the bounding box surrounding the connection -->
+<!--v-if-->
+<!-- the control points -->
+<!-- render only n-1 control points, since the last one is the target port -->"
+`;
+
+exports[`Item container when dragging a wire snap 1`] = `
+"<!-- the tab-accessible centroid element -->
+<div style="position: absolute; left: 0px; top: 0px;" tabindex="0" aria-label="Connection from Source Port to Target Port" title="Connection from Source Port to Target Port" data-test="centroid"></div>
+<!-- each segment of the visible wire -->
+<!-- TODO: set is-animated according to preferences -->
+<svg class="wire wire--selected" width="15" height="15" aria-roledescription="connection" style="left: -7.5px; top: -7.5px;" title="Connection from Source Port to Target Port">
+  <path class="wire__outline" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+  <path class="wire__display" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+  <!--v-if-->
+  <path class="wire__clickable" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+</svg>
+<!-- the visual outline of the bounding box surrounding the connection -->
+<!--v-if-->
+<!-- the control points -->
+<!-- render only n-1 control points, since the last one is the target port -->"
+`;

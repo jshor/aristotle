@@ -9,7 +9,7 @@ import PortType from '@/types/enums/PortType'
 import printing from '@/utils/printing'
 import { useRootStore } from '@/store/root'
 import editorContextMenu from '@/menus/context/editor'
-import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING } from '@/constants'
+import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING, PRINTER_FRIENDLY_COLORS } from '@/constants'
 import Connection from '@/types/interfaces/Connection'
 import Port from '@/types/interfaces/Port'
 import Item from '@/types/interfaces/Item'
@@ -87,6 +87,9 @@ describe('Document container', () => {
     it('should invoke saveImage() on the root store', () => {
       expect(printing.printImage).toHaveBeenCalledWith(expect.any(HTMLElement), expect.anything(), {
         ...usePreferencesStore().colorStyles,
+        ...PRINTER_FRIENDLY_COLORS,
+        '--media-display': 'none',
+        '--color-selection': 'transparent !important',
         zoom: store.zoom.toString()
       })
     })
@@ -123,8 +126,9 @@ describe('Document container', () => {
         expect.any(HTMLElement),
         expect.anything(),
         IMAGE_PADDING,
-        'image-friendly',
         {
+          '--media-display': 'none',
+          '--color-selection': 'transparent !important',
           ...usePreferencesStore().colorStyles,
           zoom: `${1 / store.zoom}`
         }
