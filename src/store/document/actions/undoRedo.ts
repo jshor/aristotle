@@ -3,7 +3,7 @@ import BaseItem from '@/types/interfaces/BaseItem'
 import SerializableState from '@/types/interfaces/SerializableState'
 
 /**
- * Reverts to the most-recently committed document this.
+ * Reverts to the most-recently committed document state.
  */
 export function undo (this: DocumentStoreInstance) {
   const undoState = this.undoStack.slice(-1).pop()
@@ -22,7 +22,7 @@ export function undo (this: DocumentStoreInstance) {
 }
 
 /**
- * Reverts to the most-recently-reverted this.
+ * Reverts to the most-recently-reverted state.
  */
 export function redo (this: DocumentStoreInstance) {
   const redoState = this.redoStack.slice(-1).pop()
@@ -49,7 +49,7 @@ export function commitState (this: DocumentStoreInstance) {
 }
 
 /**
- * Stringifies and caches the current document this.
+ * Stringifies and caches the current document state.
  * This will save all connections, items, ports, and groups.
  */
 export function cacheState (this: DocumentStoreInstance) {
@@ -62,7 +62,7 @@ export function cacheState (this: DocumentStoreInstance) {
 }
 
 /**
- * Commits the actively-cached this to the undo stack.
+ * Commits the actively-cached state to the undo stack.
  * This will clear the redo stack.
  */
 export function commitCachedState (this: DocumentStoreInstance) {
@@ -108,6 +108,21 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
   removedItems.forEach(id => this.removeElement(id))
   removedGroups.forEach(id => delete this.groups[id])
 
+  /**
+   * Applies the state of `newObj` onto `oldObj`, omitting the keys in `omit`.
+   */
+  function applyObjectState<T extends {}> (oldObj: T, newObj: T, ...omit: (keyof T)[]) {
+    Object
+      .keys(newObj)
+      .forEach(key => {
+        const k = key as keyof T
+
+        if (oldObj?.[k] && !omit.includes(k)) {
+          oldObj[k] = newObj[k]
+        }
+      })
+  }
+
   Object
     .keys(items)
     .forEach(id => {
@@ -116,10 +131,7 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
           id,
           position: items[id].position
         })
-        this.items[id] = {
-          ...items[id],
-          clock: this.items[id].clock
-        }
+        applyObjectState(this.items[id], items[id], 'clock')
         this.setItemBoundingBox(id)
         this.setItemSelectionState(id, items[id].isSelected)
       }
@@ -138,10 +150,7 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
   Object
     .keys(connections)
     .forEach(id => {
-      this.connections[id] = {
-        ...this.connections[id],
-        ...connections[id]
-      }
+      applyObjectState(this.connections[id], connections[id])
       this.setConnectionSelectionState(id, connections[id].isSelected)
     })
 
@@ -154,11 +163,17 @@ export function applyDeserializedState (this: DocumentStoreInstance, {
       this.setGroupBoundingBox(id)
       this.setGroupSelectionState(id, true)
     })
+
+  Object
+    .keys(ports)
+    .forEach(id => {
+      applyObjectState(this.ports[id], ports[id], 'value', 'wave')
+    })
 }
 
 /**
  * Applies the given serialized state to the active document.
- * The serialized JSON this must contain exactly these maps:
+ * The serialized JSON state must contain exactly these maps:
  *  - `items`
  *  - `connections`
  *  - `ports`

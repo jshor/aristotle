@@ -66,6 +66,7 @@ export function group (this: DocumentStoreInstance) {
 
   this.setZIndex(zIndex)
   this.setGroupBoundingBox(id)
+  this.deselectAll()
   this.setGroupSelectionState(id, true)
 }
 
