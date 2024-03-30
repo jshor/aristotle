@@ -11,6 +11,7 @@
         :key="key"
         :style="{ color: `hsla(${v.hue}, var(--lightness), var(--saturation), 0.8)` }"
         class="oscilloscope-timeline__label"
+        @contextmenu="$event => $emit('contextmenu', $event, key as string)"
       >
         <label>{{ ports[key]?.name }}</label>
       </div>
@@ -39,6 +40,7 @@
         :style="{ width: `${totalWidth}px` }"
         :key="key"
         class="oscilloscope-timeline__item"
+        @contextmenu="$event => $emit('contextmenu', $event, key as string)"
       >
         <div
           :style="{ width: `${value.width}px` }"
@@ -66,15 +68,13 @@
 <script lang="ts">
 import Port from '@/types/interfaces/Port'
 import Oscillogram from '@/types/types/Oscillogram'
-import Item from '@/types/interfaces/Item'
 import { computed, defineComponent, onMounted, onUnmounted, PropType, ref, StyleValue, watch } from 'vue'
-import { useDraggable } from '@/composables/useDraggable'
-import Point from '@/types/interfaces/Point'
 
 export default defineComponent({
   name: 'OscilloscopeTimeline',
   emits: {
-    'update:modelValue': (height: number) => true
+    'update:modelValue': (height: number) => true,
+    'contextmenu': ($event: MouseEvent, portId: string) => true
   },
   props: {
     /** The width, in pixels, of the labels column. */
@@ -85,11 +85,6 @@ export default defineComponent({
     /** The oscillogram displayed in the timeline. */
     oscillogram: {
       type: Object as PropType<Oscillogram>,
-      required: true
-    },
-    /** The oscillogram displayed in the timeline. */
-    items: {
-      type: Object as PropType<Record<string, Item>>,
       required: true
     },
     /** The oscillogram displayed in the timeline. */

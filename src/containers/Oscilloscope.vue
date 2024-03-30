@@ -8,6 +8,7 @@
       @clear="clearOscilloscope"
       @close="closeOscilloscope"
       @remove-all="destroyOscilloscope"
+      @contextmenu="onContextMenu"
     />
     <div v-if="!hasWaves">
       no waves to observe
@@ -16,8 +17,8 @@
       v-else
       v-model="oscilloscopeWidth"
       :oscillogram="oscillogram"
-      :items="items"
       :ports="ports"
+      @contextmenu="onContextMenu"
     />
   </oscilloscope-viewer>
 </template>
@@ -29,6 +30,7 @@ import OscilloscopeTitleBar from '@/components/oscilloscope/OscilloscopeTitleBar
 import OscilloscopeViewer from '@/components/oscilloscope/OscilloscopeViewer.vue'
 import { DocumentStore } from '@/store/document'
 import { storeToRefs } from 'pinia'
+import oscilloscopeContextMenu from '@/menus/context/oscilloscope'
 
 export default defineComponent({
   name: 'Oscilloscope',
@@ -50,7 +52,6 @@ export default defineComponent({
       oscilloscopeWidth,
       isOscilloscopeOpen,
       oscillogram,
-      items,
       ports
     } = storeToRefs(store)
     const { closeOscilloscope, destroyOscilloscope } = store
@@ -60,17 +61,26 @@ export default defineComponent({
       store.oscillator.clear()
     }
 
+    function onContextMenu ($event: MouseEvent, portId?: string) {
+      window
+        .api
+        .showContextMenu(oscilloscopeContextMenu(props.store, portId))
+
+      $event.stopPropagation()
+      $event.preventDefault()
+    }
+
     return {
       hasWaves,
       oscillogram,
-      items,
       ports,
       oscilloscopeHeight,
       oscilloscopeWidth,
       isOscilloscopeOpen,
       clearOscilloscope,
       closeOscilloscope,
-      destroyOscilloscope
+      destroyOscilloscope,
+      onContextMenu
     }
   }
 })
