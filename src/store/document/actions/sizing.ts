@@ -57,7 +57,7 @@ export function setViewerSize (this: DocumentStoreInstance, rect: DOMRect) {
     this.canvas.bottom =  screen.height / MIN_ZOOM
 
     if (rect.width > 0 && rect.height > 0) {
-      this.hasLoaded = true
+      this.setHasLoaded()
       this.updateCanvasSize()
       this.centerAll()
       this.panToCenter()

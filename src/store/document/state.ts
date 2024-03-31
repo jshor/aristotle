@@ -86,6 +86,10 @@ export interface DocumentState extends SerializableState {
   oscillator: Oscillator
   /** Oscillogram data, containing each BinaryWave instance observed in the oscilloscope. */
   oscillogram: Oscillogram
+  /** A promise that resolves once the editor has successfully loaded. */
+  loadPromise?: Promise<void>
+  /** Resolution function for {@link loadPromise}. */
+  loadResolver?: () => void
 }
 
 export const state = (): DocumentState => ({

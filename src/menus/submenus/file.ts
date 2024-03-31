@@ -120,7 +120,7 @@ export default function file (): MenuItemConstructorOptions[] {
     label: 'Close Document',
     accelerator: 'CmdOrCtrl+W',
     enabled: hasDocument,
-    click: () => rootStore.closeDocument(rootStore.activeDocumentId as string)
+    click: () => rootStore.closeActiveDocument()
   })
 
   items.push({ type: 'separator' })

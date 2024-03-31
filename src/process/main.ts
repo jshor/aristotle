@@ -130,7 +130,7 @@ async function boot (app: App, mainWindow: BrowserWindow) {
   ipcMain.on('quit', () => {
     // the renderer has asked to exit
     canClose = true
-    mainWindow.close()
+    // mainWindow.close()
     app.quit()
   })
 }

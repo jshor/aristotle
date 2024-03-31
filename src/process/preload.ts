@@ -7,6 +7,8 @@ import os from 'os'
 const defaultPath = path.resolve(app.getPath('desktop'))
 const cursorPosition = { x: 0, y: 0 }
 
+let isClosing = false
+
 window.addEventListener('contextmenu', (e) => {
   cursorPosition.x = e.x
   cursorPosition.y = e.y
@@ -59,11 +61,16 @@ export const api: typeof window.api = {
   },
   onBeforeClose (fn: () => Promise<boolean>) {
     ipcRenderer.on('about-to-close', async () => {
+      if (isClosing) return
+
+      isClosing = true
       const canClose = await fn()
 
       if (canClose) {
         ipcRenderer.send('quit')
       }
+
+      isClosing = false
     })
   },
   onOpenFile (fn: (filePath: string) => void) {
@@ -72,6 +79,7 @@ export const api: typeof window.api = {
     })
   },
   quit () {
+    isClosing = true
     ipcRenderer.send('quit')
   },
   openFile (filePath: string) {

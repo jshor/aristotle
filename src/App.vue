@@ -1,6 +1,6 @@
 <template>
   <theme
-    :dark="(experience.darkMode.value as boolean)"
+    :dark="experience.darkMode.value"
     :style="colorStyles"
   >
     <div
@@ -70,13 +70,13 @@
           </template>
           <template #default>
             <document
-              :key="activeDocumentId"
+              :key="`document-${activeDocumentId}`"
               :store="activeDocument.store"
               @switch="switchDocument"
               @open-integrated-circuit="openIntegratedCircuit"
             />
             <oscilloscope
-              :key="activeDocumentId"
+              :key="`oscilloscope-${activeDocumentId}`"
               :store="activeDocument.store"
               @contextmenu="onContextMenu"
             />

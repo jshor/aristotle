@@ -27,6 +27,7 @@ export function panDelta (this: DocumentStoreInstance, delta: Point, animate = f
   const from: BoundingBox = { ...this.canvas }
   const momentum = Math.max(Math.abs(delta.x), Math.abs(delta.y), 1) * PANNING_FRICTION
   const speed = PANNING_SPEED
+  // TODO: need to add a maximum time for panning to occur - otherwise it takes too long
 
   cancelAnimationFrame(this.panningAnimationFrameId)
 
