@@ -19,8 +19,11 @@ export const IMAGE_PADDING = 20
 /** The amount of momentum to build with each key press while moving an object using arrow keys. */
 export const ARROW_KEY_MOMENTUM_MULTIPLIER = 1.05
 
-/** The amount of time, in milliseconds, that the user must be touching something before emitting a `touchhold` event. */
-export const TOUCH_HOLD_TIMEOUT = 100
+/** The amount of time, in milliseconds, that the user must be touching something before emitting a *long-lived* `touchhold` event. */
+export const TOUCH_LONG_HOLD_TIMEOUT = 1000
+
+/** The amount of time, in milliseconds, that the user must be touching something before emitting a *short-lived* `touchhold` event. */
+export const TOUCH_SHORT_HOLD_TIMEOUT = 500
 
 /**
  * The minimum CSS z-index value to apply to all items.

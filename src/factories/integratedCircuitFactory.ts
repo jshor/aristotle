@@ -96,6 +96,13 @@ export default function integratedCircuitFactory (state: SerializableState, name
         }, items)
     }, {})
 
+  Object
+    .values(ports)
+    .forEach(port => {
+      port.hue = 0
+      port.isMonitored = false
+    })
+
   integratedCircuitItem.defaultName = name
   integratedCircuitItem.integratedCircuit = {
     items,

@@ -1,102 +1,88 @@
 <template>
   <div
-    @contextmenu="stopPropagation"
-    @mousedown="stopPropagation"
-    @mouseup="stopPropagation"
-    @keydown.esc="onKeyDown"
+    @contextmenu.stop
+    @mousedown.stop
+    @mouseup.stop
+    @keydown.space="openProperties"
     class="properties"
+    ref="propertiesRef"
+    tabindex="0"
   >
-    <div
-      v-if="isOpen"
-      class="properties__dialog"
-      ref="propertiesRef"
-      :aria-hidden="!isOpen"
+    <teleport
+      v-if="isMounted"
+      to=".editor__grid"
     >
-      <div class="properties__heading" role="title">
-        Properties
-        <icon
-          :tabindex="0"
-          :icon="faClose"
-          @click="close"
-          role="button"
-          class="properties__close"
-        />
-      </div>
+      <div
+        v-if="isOpen"
+        class="properties__overlay"
+        @click="close"
+        @touchstart="close"
+      />
 
       <div
-        v-for="(data, propertyName) in model"
-        :key="propertyName"
-        class="properties__entry"
+        v-if="isOpen"
+        class="properties__dialog"
+        ref="dialogRef"
+        :aria-hidden="!isOpen"
+        :style="dialogStyle"
+        :tabindex="0"
+        @keydown.esc="close"
+        @keydown="onKeyDown"
+        @touchstart.stop
       >
-        <label
-          :for="`${id}_${propertyName}`"
-          class="properties__label"
-        >
-          {{ data.label }}
-        </label>
+        <div class="properties__heading" role="title">
+          Properties
+          <icon
+            :tabindex="0"
+            :icon="faClose"
+            @click="close"
+            @keydown.space="close"
+            role="button"
+            class="properties__close"
+          />
+        </div>
 
-        <select
-          v-if="data.options"
-          v-model="data.value"
-          :id="`${id}_${propertyName}`"
-          class="properties__input"
-          @change="onChange"
-        >
-          <option
-            v-for="(value, key) in data.options"
-            :key="key"
-            :value="value"
-          >
-            {{ key }}
-          </option>
-        </select>
-        <input
-          v-else-if="data.type === 'boolean'"
-          v-model="(data.value as boolean)"
-          :id="`${id}_${propertyName}`"
-          type="checkbox"
-          class="properties__input"
-          @change="onChange"
+        <property-form
+          v-model="model"
+          :id="id"
         />
-        <input
-          v-else
-          v-model="data.value"
-          :min="data.min"
-          :max="data.max"
-          :type="data.type"
-          :id="`${id}_${propertyName}`"
-          class="properties__input"
-          @change="onChange"
+
+        <div
+          tabindex="0"
+          @focus="dialogRef?.focus()"
         />
       </div>
-    </div>
 
-    <icon
-      v-else
-      @keydown.space="openProperties"
-      @click="openProperties"
-      :tabindex="0"
-      :icon="faWrench"
-      class="properties__icon"
-    />
+      <icon
+        v-else
+        @click="openProperties"
+        @touchend="openProperties"
+        :style="iconStyle"
+        :icon="faWrench"
+        class="properties__icon"
+      />
+    </teleport>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, PropType, ref, watch } from 'vue'
-import { faClose, faWrench } from '@fortawesome/free-solid-svg-icons'
+import { computed, defineComponent, nextTick, PropType, ref, watch, onMounted } from 'vue'
+import { faClose, faGear as faWrench } from '@fortawesome/free-solid-svg-icons'
 import cloneDeep from 'lodash.clonedeep'
 import Icon from '@/components/Icon.vue'
+import PropertyForm from '@/components/PropertyForm.vue'
 import ItemProperties from '@/types/interfaces/ItemProperties'
 import Point from '@/types/interfaces/Point'
+import BoundingBox from '@/types/types/BoundingBox'
 
 export default defineComponent({
   name: 'Properties',
   components: {
-    Icon
+    Icon,
+    PropertyForm
   },
   props: {
-    properties: {
+    modelValue: {
       type: Object as PropType<ItemProperties>,
       default: () => ({})
     },
@@ -107,56 +93,97 @@ export default defineComponent({
     viewport: {
       type: Object as PropType<DOMRect>,
       required: true
+    },
+    boundingBox: {
+      type: Object as PropType<BoundingBox>,
+      required: true
+    },
+    zoom: {
+      type: Number,
+      required: true
     }
   },
   emits: {
-    update: (id: string, properties: ItemProperties) => true,
-    pan: (point: Point, animate: boolean) => true
+    'update:modelValue': (properties: ItemProperties) => true,
+    'pan': (point: Point, animate: boolean) => true
   },
   setup (props, { emit }) {
+    const dialogRef = ref<HTMLElement>()
     const propertiesRef = ref<HTMLElement>()
     const isOpen = ref(false)
-    const model = ref<ItemProperties>(cloneDeep(props.properties))
+    const position = ref<Point>({ x: 0, y: 0 })
+    const iconStyle = computed(() => ({
+      left: `${props.boundingBox.right + 16}px`,
+      top: `${props.boundingBox.top}px`
+    }))
+    const dialogStyle = computed(() => ({
+      ...iconStyle.value,
+      transform: `scale(${1 / props.zoom})`
+    }))
+    const model = computed({
+      get: () => cloneDeep(props.modelValue),
+      set: value => emit('update:modelValue', value)
+    })
+    const isMounted = ref(false)
 
-    watch(props.properties, value => {
-      model.value = cloneDeep(value)
-    }, { deep: true })
+    onMounted(() => isMounted.value = true)
+
+    watch(() => props.boundingBox, updatePosition)
 
     function close ($event: Event) {
-      isOpen.value = false
-      $event.preventDefault()
-    }
-
-    function onKeyDown ($event: KeyboardEvent) {
-      close($event)
       propertiesRef.value?.focus()
+      $event.preventDefault()
+      $event.stopPropagation()
+      isOpen.value = false
     }
 
     function stopPropagation ($event: MouseEvent) {
       $event.stopPropagation()
     }
 
-    function onChange () {
-      emit('update', props.id, model.value)
-    }
-
-    function openProperties () {
+    async function openProperties () {
       isOpen.value = true
 
-      nextTick(() => {
-        if (!propertiesRef.value) return
+      await nextTick()
+      await updatePosition()
+    }
 
-        const { bottom, right } = propertiesRef.value.getBoundingClientRect()
-        const deltaX = Math.max(right - props.viewport.right, 0)
-        const deltaY = Math.max(bottom - props.viewport.bottom, 0)
+    async function updatePosition () {
+      position.value = {
+        x: props.boundingBox.right + 10,
+        y: props.boundingBox.top + 10
+      }
 
-        if (deltaX > 0 || deltaY > 0) {
-          emit('pan', {
-            x: -deltaX,
-            y: -deltaY
-          }, true)
-        }
-      })
+      await nextTick()
+
+      if (!dialogRef.value) return
+
+      const { left, top, bottom, right } = dialogRef.value.getBoundingClientRect()
+      const deltaMaxX = Math.max(right - props.viewport.right, 0)
+      const deltaMaxY = Math.max(bottom - props.viewport.bottom, 0)
+      const deltaMinX = Math.min(left - props.viewport.left, 0)
+      const deltaMinY = Math.min(top - props.viewport.top, 0)
+
+      if (deltaMaxX > 0 || deltaMaxY > 0) {
+        emit('pan', {
+          x: -deltaMaxX,
+          y: -deltaMaxY
+        }, true)
+      }
+
+      if (deltaMinX < 0 || deltaMinY < 0) {
+        emit('pan', {
+          x: -deltaMinX,
+          y: -deltaMinY
+        }, true)
+      }
+
+      dialogRef.value.focus()
+    }
+
+    function onKeyDown ($event: KeyboardEvent) {
+      // $event.preventDefault()
+      // $event.stopImmediatePropagation()
     }
 
     return {
@@ -165,48 +192,76 @@ export default defineComponent({
       model,
       isOpen,
       propertiesRef,
+      dialogRef,
+      iconStyle,
+      dialogStyle,
+      isMounted,
       close,
-      onKeyDown,
-      onChange,
       openProperties,
-      stopPropagation
+      stopPropagation,
+      onKeyDown,
+      touchedTest: ($event: TouchEvent) => {
+        $event.stopPropagation()
+
+        console.log('touched')
+      }
     }
   }
 })
 </script>
 
 <style lang="scss">
+$outline-padding: 4px;
+$icon-size: 20px;
+
 .properties {
   position: absolute;
+  right: -($icon-size + ($outline-padding * 2) + ($outline-border-width * 2) + 2);
+  display: block;
   top: 0;
-  right: -20px;
-  width: 16px;
-  height: 16px;
+  width: $icon-size + ($outline-padding * 2);
+  height: $icon-size + ($outline-padding * 2);
   pointer-events: all;
   touch-action: auto;
-  z-index: 9999;
   filter: drop-shadow(0px 0px 3px black);
 
   &__icon {
+    position: absolute;
+    margin-top: $outline-padding;
+    width: $icon-size;
+    height: $icon-size;
     cursor: pointer;
-    transition: all 0.25s;
+    transition: transform 0.25s;
+    color: var(--color-primary);
+    z-index: 99999;
 
     &:hover, &:focus {
-      transform: scale(2);
+      transform: scale(2) rotate(180deg);
     }
+  }
+
+  &__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9998;
   }
 
   &__dialog {
     pointer-events: all;
+    touch-action: auto;
     position: absolute;
-    top: 0;
-    left: 0;
     width: 200px;
+    display: var(--media-display);
     background-color: var(--color-bg-secondary);
     color: var(--color-primary);
     border: 1px solid var(--color-secondary);
     padding: 0.25em;
     box-sizing: border-box;
+    z-index: 9999;
+    transform-origin: 0 0;
   }
 
   &__heading {

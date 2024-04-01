@@ -25,7 +25,7 @@
 <script lang="ts">
 import Point from '@/types/interfaces/Point'
 import { defineComponent, PropType, computed, ref, nextTick } from 'vue'
-import { TOUCH_HOLD_TIMEOUT } from '@/constants'
+import { TOUCH_LONG_HOLD_TIMEOUT } from '@/constants'
 import { useDraggable } from '@/composables/useDraggable'
 
 export default defineComponent({
@@ -141,7 +141,7 @@ export default defineComponent({
       dragEnd,
     } = useDraggable({
       allowTouchDrag,
-      longTouchTimeout: TOUCH_HOLD_TIMEOUT,
+      longTouchTimeout: TOUCH_LONG_HOLD_TIMEOUT,
       onTouched,
       onDragStart: (p: Point, o: Point) => emit('dragStart', p, o),
       onDrag: (p: Point, o: Point) => emit('drag', p, o),

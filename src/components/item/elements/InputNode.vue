@@ -12,7 +12,7 @@
     >
       <div class="switch__trigger"
       @mousedown.stop="onInput"
-      @touchstart.stop="onInput">
+      @touchstart="onInput">
         <div class="switch__light"></div>
         <div class="switch__characters"></div>
       </div>

@@ -1,7 +1,7 @@
 <template>
   <div class="property-form">
     <div
-      v-for="(data, propertyName) in model"
+      v-for="(data, propertyName) in (model as Required<PropertyList>)"
       :key="propertyName"
       class="property-form__entry"
     >
@@ -39,19 +39,30 @@
         class="property-form__switch"
       >
         <property-switch
-          v-model.boolean="data.value"
+          v-model.boolean="(data.value as boolean)"
           :id="`${id}_${propertyName}`"
           :disabled="data.disabled"
           @update:modelValue="onSwitch(propertyName)"
         />
       </div>
 
+      <!-- numeric input -->
+      <input
+        v-else-if="data.type === 'number'"
+        v-model="data.value"
+        :min="data.min"
+        :max="data.max"
+        :type="data.type"
+        :id="`${id}_${propertyName}`"
+        :disabled="data.disabled"
+        class="property-form__input"
+        @change="onChange"
+      />
+
       <!-- text boxes -->
       <input
         v-else
         v-model="data.value"
-        :min="data.min"
-        :max="data.max"
         :type="data.type"
         :id="`${id}_${propertyName}`"
         :disabled="data.disabled"
@@ -75,7 +86,9 @@ import cloneDeep from 'lodash.clonedeep'
 import PropertySwitch from '@/components/properties/PropertySwitch.vue'
 import Icon from '@/components/Icon.vue'
 import isMobile from '@/utils/isMobile'
-import ItemProperties from '@/types/interfaces/ItemProperties'
+import Property from '@/types/interfaces/Property'
+
+type PropertyList = Record<string, Property<string | boolean | number>>
 
 export default defineComponent({
   name: 'PropertyForm',
@@ -85,7 +98,7 @@ export default defineComponent({
   },
   props: {
     modelValue: {
-      type: Object as PropType<ItemProperties>,
+      type: Object as PropType<PropertyList>,
       default: () => ({})
     },
     id: {
@@ -94,14 +107,14 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const getModel = (model: ItemProperties) => {
-      const properties: ItemProperties = {}
+    const getModel = (model: PropertyList) => {
+      const properties: PropertyList = {}
 
       for (const key in model) {
-        const k = key as keyof ItemProperties
+        const k = key as keyof PropertyList
         const isVisible = isMobile
-          ? !model[k].desktopOnly
-          : !model[k].mobileOnly
+          ? !model[k]?.desktopOnly
+          : !model[k]?.mobileOnly
 
         if (isVisible) {
           properties[k] = cloneDeep(model[k])
@@ -110,16 +123,17 @@ export default defineComponent({
 
       return properties
     }
-    const model = ref<ItemProperties>(getModel(props.modelValue))
+    const model = ref<PropertyList>(getModel(props.modelValue))
+    const errors = ref<string[]>([])
 
     watch(() => props.modelValue, value => {
       model.value = getModel(value)
     }, { deep: true })
 
-    function onSwitch (propertyName: keyof ItemProperties) {
+    function onSwitch (propertyName: keyof PropertyList) {
       const property = model.value[propertyName]
 
-      property.excludes?.forEach((p: keyof ItemProperties) => {
+      property?.excludes?.forEach((p: keyof PropertyList) => {
         if (property.value && model.value[p].type === 'boolean') {
           model.value[p].value = false
         }
@@ -129,11 +143,36 @@ export default defineComponent({
     }
 
     function onChange () {
+      validate()
       emit('update:modelValue', model.value)
+    }
+
+    function validate () {
+      for (const key in model.value) {
+        const k = key as keyof PropertyList
+
+        if (!isValidValue(model.value[k])) {
+          model.value[k].value = props.modelValue[k].value
+        }
+      }
+    }
+
+    function isValidValue (property: Property<string | boolean | number>) {
+      if (property.type === 'boolean') return true
+      if (property.type === 'number') {
+        if (typeof property.value !== 'number') return false
+        if (property.max !== undefined && property.max < property.value) return false
+        if (property.min !== undefined && property.min > property.value) return false
+
+        return true
+      }
+
+      return !!property.value
     }
 
     return {
       model,
+      errors,
       close,
       onSwitch,
       onChange
@@ -177,8 +216,8 @@ export default defineComponent({
     color: var(--color-primary);
     font-family: system-ui, sans-serif;
     padding: 0.25em;
-      width: auto;
-      height: auto;
+    width: auto;
+    height: auto;
 
     &[type="color"] {
       padding: 0;

@@ -135,7 +135,7 @@ export const useDraggable = (options: {
    * Touch event initialization handler.
    * Invoked when the element is first touched.
    *
-   * @emits `touchold` when held down for more than 500ms
+   * @emits `touchold` when held down for more than the touch timeout
    * @param {TouchEvent} $event
    */
   function onTouchStart ($event: TouchEvent) {

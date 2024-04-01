@@ -39,6 +39,9 @@
     />
     <path
       class="wire__clickable"
+      :class="{
+        'wire__clickable--mobile': isMobile
+      }"
       data-test="wire-clickable"
       fill="none"
       ref="wireRef"
@@ -47,7 +50,7 @@
       @mousedown.left="onLeftMouseDown"
       @mouseup="onMouseUp"
       @touchstart="onTouchStart"
-      @touchmove="onTouchMove"
+      @touchmove="onTouchDrag"
       @touchend="onTouchEnd"
       @touchcancel="dragEnd"
     />
@@ -60,6 +63,8 @@ import LogicValue from '../../types/enums/LogicValue'
 import WireGeometry from '../../types/types/WireGeometry'
 import { useDraggable } from '../../composables/useDraggable'
 import Point from '../../types/interfaces/Point'
+import isMobile from '../../utils/isMobile'
+import { TOUCH_SHORT_HOLD_TIMEOUT } from '@/constants'
 
 export default defineComponent({
   name: 'WireDraggable',
@@ -132,16 +137,16 @@ export default defineComponent({
 
       props.isSelected
         ? emit('deselect')
-        : emit('select', true)
+        : emit('select', false)
     }
 
     /**
      * Drag start event handler.
      */
     function onDragStart (position: Point, offset: Point) {
-      // if (!isTouchDragging.value) {
-      //   emit('add', position, offset)
-      // }
+      if (!isTouchDragging.value) {
+        emit('add', position, offset)
+      }
     }
 
     function onDragEnd () {
@@ -155,11 +160,11 @@ export default defineComponent({
      * The draggable `mousedown` event will continue to be propagated.
      */
     function onLeftMouseDown ($event: MouseEvent) {
-      // onMouseDown($event)
+      onMouseDown($event)
 
-      // if (!props.isSelected) {
-      //   emit('select', !$event.ctrlKey)
-      // }
+      if (!props.isSelected) {
+        emit('select', !$event.ctrlKey)
+      }
     }
 
     const allowTouchDrag = computed(() => isTouchDragging.value)
@@ -172,20 +177,29 @@ export default defineComponent({
       dragEnd,
     } = useDraggable({
       allowTouchDrag,
-      longTouchTimeout: 500, // TODO: const
+      longTouchTimeout: TOUCH_SHORT_HOLD_TIMEOUT,
       onTouched,
       onDragStart,
       onDrag: (p: Point, o: Point) => emit('move', p, o),
       onDragEnd: () => onDragEnd()
     })
 
+    function onTouchDrag ($event: TouchEvent) {
+      if (isTouchDragging.value) {
+        $event.stopPropagation()
+      }
+
+      onTouchMove($event)
+    }
+
     return {
+      isMobile,
       wireRef,
       LogicValue,
       onLeftMouseDown,
       onMouseUp,
       onTouchStart,
-      onTouchMove,
+      onTouchDrag,
       onTouchEnd,
       dragEnd
     }
@@ -207,9 +221,13 @@ export default defineComponent({
 
   &__clickable {
     animation: none;
-    stroke-width: 16;
     pointer-events: visibleStroke;
+    stroke-width: 16;
     cursor: pointer;
+
+    &--mobile {
+      stroke-width: 24;
+    }
   }
 
   &__outline {

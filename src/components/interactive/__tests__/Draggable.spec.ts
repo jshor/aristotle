@@ -2,6 +2,7 @@ import boundaries from '@/store/document/geometry/boundaries'
 import { mount, VueWrapper } from '@vue/test-utils'
 import { ComponentPublicInstance } from 'vue'
 import Draggable from '../Draggable.vue'
+import { TOUCH_LONG_HOLD_TIMEOUT } from '@/constants'
 
 describe('Draggable component', () => {
   let wrapper: VueWrapper
@@ -171,14 +172,14 @@ describe('Draggable component', () => {
   describe('when using touch gestures', () => {
     const getTouchEvent = (clientX: number, clientY: number): Touch => ({ clientX, clientY }) as Touch
 
-    it('should emit `touchhold` after being held down in the same place for more than 500ms', async () => {
+    it('should emit `touchhold` after being held down in the same place for more than the long touch-hold timeout', async () => {
       jest.useFakeTimers()
 
       await wrapper.trigger('touchstart', {
         touches: [new TouchEvent('touchstart')]
       })
 
-      jest.advanceTimersByTime(500)
+      jest.advanceTimersByTime(TOUCH_LONG_HOLD_TIMEOUT + 1)
 
       expect(wrapper.emitted()).toHaveProperty('touchhold')
     })
@@ -210,7 +211,7 @@ describe('Draggable component', () => {
           touches: [getTouchEvent(x, y)]
         })
 
-        jest.advanceTimersByTime(500)
+        jest.advanceTimersByTime(TOUCH_LONG_HOLD_TIMEOUT + 1)
 
         expect(wrapper.emitted()).not.toHaveProperty('touchhold')
       })
@@ -224,7 +225,7 @@ describe('Draggable component', () => {
           touches: [getTouchEvent(x, y)]
         })
 
-        jest.advanceTimersByTime(500)
+        jest.advanceTimersByTime(TOUCH_LONG_HOLD_TIMEOUT + 1)
 
         expect(wrapper.emitted()).toHaveProperty('touchhold')
       })

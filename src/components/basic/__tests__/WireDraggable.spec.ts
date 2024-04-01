@@ -3,6 +3,7 @@ import WireDraggable from '../WireDraggable.vue'
 import { createControlPoint } from '@/store/document/actions/__tests__/__helpers__'
 import boundaries from '@/store/document/geometry/boundaries'
 import renderLayout from '@/store/document/geometry/wire'
+import { TOUCH_SHORT_HOLD_TIMEOUT } from '@/constants'
 
 describe('Draggable wire component', () => {
   let wrapper: VueWrapper<typeof WireDraggable>
@@ -26,7 +27,7 @@ describe('Draggable wire component', () => {
   describe('when using touch gestures', () => {
     const getTouchEvent = (clientX: number, clientY: number): Touch => ({ clientX, clientY }) as Touch
 
-    it('should emit `add` to add a control point after being held down in the same place for more than 500ms', async () => {
+    it('should emit `add` to add a control point after being held down in the same place for more than the short touch-hold timeout', async () => {
       jest.useFakeTimers()
 
       await wrapper
@@ -35,7 +36,7 @@ describe('Draggable wire component', () => {
           touches: [new TouchEvent('touchstart')]
         })
 
-      jest.advanceTimersByTime(500)
+      jest.advanceTimersByTime(TOUCH_SHORT_HOLD_TIMEOUT + 1)
 
       expect(wrapper.emitted()).toHaveProperty('add')
     })
@@ -71,7 +72,7 @@ describe('Draggable wire component', () => {
             touches: [getTouchEvent(x, y)]
           })
 
-        jest.advanceTimersByTime(500)
+        jest.advanceTimersByTime(TOUCH_SHORT_HOLD_TIMEOUT + 1)
 
         expect(wrapper.emitted()).not.toHaveProperty('add')
       })
@@ -87,7 +88,7 @@ describe('Draggable wire component', () => {
             touches: [getTouchEvent(x, y)]
           })
 
-        jest.advanceTimersByTime(500)
+        jest.advanceTimersByTime(TOUCH_SHORT_HOLD_TIMEOUT + 1)
 
         expect(wrapper.emitted()).toHaveProperty('add')
       })
