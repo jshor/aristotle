@@ -14,7 +14,9 @@ import BoundingBox from '@/types/types/BoundingBox'
 setActivePinia(createPinia())
 
 describe('sizing actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
 
   describe('updateCanvasSize', () => {
     const store = createDocumentStore('document')()
@@ -37,7 +39,7 @@ describe('sizing actions', () => {
       }
 
       beforeEach(() => {
-        jest
+        vi
           .spyOn(boundaries, 'getGroupBoundingBox')
           .mockReturnValue(boundingBox)
 
@@ -74,10 +76,10 @@ describe('sizing actions', () => {
           bottom: 750
         }
 
-        jest
+        vi
           .spyOn(boundaries, 'getGroupBoundingBox')
           .mockReturnValue(boundingBox)
-        jest.useFakeTimers()
+        vi.useFakeTimers()
 
         store.$patch({
           items: {
@@ -95,11 +97,11 @@ describe('sizing actions', () => {
           }
         })
         store.updateCanvasSize()
-        jest.runAllTimers()
+        vi.runAllTimers()
 
         expect(store.zoomLevel).toEqual(0.67)
 
-        jest.useRealTimers()
+        vi.useRealTimers()
       })
     })
   })
@@ -184,7 +186,7 @@ describe('sizing actions', () => {
     })
 
     it('should not do anything if the item does not exist', () => {
-      jest.resetAllMocks()
+      vi.resetAllMocks()
       store.setItemSize({ id: 'item-does-not-exist', rect })
 
       expect(store.setItemBoundingBox).not.toHaveBeenCalled()
@@ -225,7 +227,7 @@ describe('sizing actions', () => {
     })
 
     it('should not compute a new bounding box if the item does not exist', () => {
-      jest.spyOn(boundaries, 'getBoundingBox')
+      vi.spyOn(boundaries, 'getBoundingBox')
 
       store.setItemBoundingBox('item1')
 
@@ -241,7 +243,7 @@ describe('sizing actions', () => {
       }
       const item1 = createItem('item1', ItemType.LogicGate)
 
-      jest
+      vi
         .spyOn(boundaries, 'getBoundingBox')
         .mockReturnValue(boundingBox)
 
@@ -262,7 +264,7 @@ describe('sizing actions', () => {
     })
 
     it('should not compute a new bounding box if the group does not exist', () => {
-      jest.spyOn(boundaries, 'getGroupBoundingBox')
+      vi.spyOn(boundaries, 'getGroupBoundingBox')
 
       store.setGroupBoundingBox('group1')
 
@@ -284,7 +286,7 @@ describe('sizing actions', () => {
         groups: { group1 }
       })
 
-      jest
+      vi
         .spyOn(boundaries, 'getGroupBoundingBox')
         .mockReturnValue(boundingBox)
 

@@ -32,7 +32,7 @@ describe('Item container', () => {
   })
 
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
     store.$reset()
   })
 

@@ -54,7 +54,7 @@ describe('Properties Form', () => {
   })
 
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
   })
 
   it('should match the snapshot', () => {

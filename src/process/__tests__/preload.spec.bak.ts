@@ -9,11 +9,11 @@ import { api } from '../preload'
  *
  * (it is not fixed in 2.0.8)
  */
-jest.mock('electron')
-jest.mock('@electron/remote')
+vi.mock('electron')
+vi.mock('@electron/remote')
 
 describe('Remote Service', () => {
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   it('should be true', () => {
     expect(true).toBe(true)
@@ -25,9 +25,9 @@ describe('Remote Service', () => {
     }]
 
     it('should set the application menu to the one created', () => {
-      const popup = jest.fn()
+      const popup = vi.fn()
 
-      jest
+      vi
         .spyOn(Menu, 'buildFromTemplate')
         .mockReturnValue({ popup } as any)
 
@@ -39,21 +39,21 @@ describe('Remote Service', () => {
   })
 
   describe('showContextMenu()', () => {
-    const popup = jest.fn()
+    const popup = vi.fn()
     const menuItems: MenuItemConstructorOptions[] = [{
       label: 'Test item'
     }]
 
     it('should set the application menu to the one created', () => {
-      jest
+      vi
         .spyOn(Menu, 'buildFromTemplate')
         .mockReturnValue({ popup } as any)
 
-      jest
+      vi
         .spyOn(window, 'require')
         .mockImplementation(() => ({ Menu }))
 
-      jest
+      vi
         .spyOn(Menu, 'buildFromTemplate')
         .mockReturnValue({ popup } as any)
 
@@ -67,9 +67,9 @@ describe('Remote Service', () => {
   describe('showMessageBox()', () => {
 
     beforeEach(() => {
-      jest
+      vi
         .spyOn(dialog, 'showMessageBoxSync')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     it('should show the message box with the given params', () => {
@@ -103,10 +103,10 @@ describe('Remote Service', () => {
 
   describe('onBeforeClose()', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(ipcRenderer, 'send')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(ipcRenderer, 'on')
         .mockImplementation((a, fn: any) => fn())
     })

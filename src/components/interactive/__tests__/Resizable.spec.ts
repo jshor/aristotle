@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import Resizable from '../Resizable.vue'
 
 describe('Resizable component', () => {
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   it('should emit `resize` with the element size', async () => {
     const target = document.createElement('div')

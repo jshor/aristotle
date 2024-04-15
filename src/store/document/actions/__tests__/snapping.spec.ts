@@ -9,7 +9,7 @@ import PortType from '@/types/enums/PortType'
 setActivePinia(createPinia())
 
 describe('snapping actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('setSnapBoundaries', () => {
     const store = createDocumentStore('document')()

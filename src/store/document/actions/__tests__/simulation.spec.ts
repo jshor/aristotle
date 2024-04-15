@@ -19,7 +19,7 @@ import BinaryWavePulse from '../../oscillator/BinaryWavePulse'
 setActivePinia(createPinia())
 
 describe('simulation actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('toggleClocks()', () => {
     const store = createDocumentStore('document')()
@@ -35,9 +35,9 @@ describe('simulation actions', () => {
     })
 
     it('should start all clocks when the action is "start"', () => {
-      jest
+      vi
         .spyOn(item.clock!, 'start')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       store.toggleClocks('start')
 
@@ -45,9 +45,9 @@ describe('simulation actions', () => {
     })
 
     it('should stop all clocks when the action is "stop"', () => {
-      jest
+      vi
         .spyOn(item.clock!, 'stop')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       store.toggleClocks('stop')
 
@@ -61,9 +61,9 @@ describe('simulation actions', () => {
     beforeEach(() => {
       store.$reset()
 
-      jest
+      vi
         .spyOn(store.oscillator, 'start')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       stubAll(store, ['toggleClocks'])
     })
@@ -96,9 +96,9 @@ describe('simulation actions', () => {
     beforeEach(() => {
       store.$reset()
 
-      jest
+      vi
         .spyOn(store.oscillator, 'stop')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       stubAll(store, ['toggleClocks'])
 
@@ -222,11 +222,11 @@ describe('simulation actions', () => {
     beforeEach(() => {
       store.$reset()
 
-      jest
+      vi
         .spyOn(store.circuit, 'advance')
         .mockImplementation(() => store.circuit.queue.pop())
 
-      jest.spyOn(store, 'evaluateCircuitStep')
+      vi.spyOn(store, 'evaluateCircuitStep')
     })
 
     it('should invoke advance() on the circuit', () => {
@@ -378,13 +378,13 @@ describe('simulation actions', () => {
         'monitorPort'
       ])
 
-      jest
+      vi
         .spyOn(store.circuit, 'addNode')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(store.oscillator, 'add')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(circuitNodeMapper, 'getCircuitNode')
         .mockReturnValue(circuitNode)
     })
@@ -475,9 +475,9 @@ describe('simulation actions', () => {
 
       stubAll(store, ['removePort'])
 
-      jest
+      vi
         .spyOn(store.circuit, 'removeNode')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     describe('when the item is an integrated circuit', () => {
@@ -535,9 +535,9 @@ describe('simulation actions', () => {
 
       stubAll(store, ['setPortValue'])
 
-      jest
+      vi
         .spyOn(store.oscillator, 'add')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     it('should not add a clock element when no interval is defined on the element', () => {
@@ -644,12 +644,12 @@ describe('simulation actions', () => {
           port2: node2
         }
       })
-      jest
+      vi
         .spyOn(store, 'addVirtualNode')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(store.circuit, 'addConnection')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     describe('when the item is a valid integrated circuit', () => {

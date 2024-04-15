@@ -7,7 +7,7 @@ describe('Toolbox Item', () => {
   const zoom = 1.2
 
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
     document.body.innerHTML = ''
   })
 
@@ -68,7 +68,7 @@ describe('Toolbox Item', () => {
       expect(wrapper.emitted()).not.toHaveProperty('drop')
     })
 
-    xit('should not emit a `drop` event when the cloned item was not yet attached to the DOM', async () => {
+    it.skip('should not emit a `drop` event when the cloned item was not yet attached to the DOM', async () => {
       const component = await wrapper.findComponent({ name: 'Draggable' })
 
       await component.vm.$emit('drag-start')

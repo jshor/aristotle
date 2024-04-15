@@ -14,7 +14,7 @@ import { createDocumentStore } from '../..'
 setActivePinia(createPinia())
 
 describe('rotation actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('rotate', () => {
     const store = createDocumentStore('document')()

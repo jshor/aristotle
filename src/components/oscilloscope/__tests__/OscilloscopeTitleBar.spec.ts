@@ -13,7 +13,7 @@ describe('Oscilloscope Title Bar', () => {
     expect(wrapper.html()).toMatchSnapshot()
   })
 
-  xit('should emit `close` when the close button is clicked', async () => {
+  it.skip('should emit `close` when the close button is clicked', async () => {
     await wrapper.setProps({ clearable: true })
     await wrapper
       .findAll('button[class="oscilloscope-title-bar__button"]')[2]

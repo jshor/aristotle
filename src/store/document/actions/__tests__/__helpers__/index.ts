@@ -112,9 +112,9 @@ export const createGroup = (id: string, itemIds: string[] = [], payload: Partial
 
 export const stubAll = <T extends {}>(store: T, methods: (keyof T & string)[]) => {
   methods.forEach(method => {
-    jest
+    vi
       .spyOn(store, method as any)
-      .mockImplementation(jest.fn())
+      .mockImplementation(vi.fn())
   })
 }
 

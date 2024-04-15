@@ -18,8 +18,8 @@ setActivePinia(createPinia())
 
 describe('clipboard actions', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.restoreAllMocks()
+    vi.clearAllMocks()
+    vi.restoreAllMocks()
   })
 
   describe('cut()', () => {
@@ -106,7 +106,7 @@ describe('clipboard actions', () => {
         selectedGroupIds: new Set(['group'])
       })
 
-      jest
+      vi
         .spyOn(window.api, 'setClipboardContents')
         .mockImplementation((data: string) => clipboardData = JSON.parse(data))
 
@@ -205,13 +205,13 @@ describe('clipboard actions', () => {
     }
 
     beforeEach(() => {
-      jest
+      vi
         .spyOn(window.api, 'getClipboardContents')
         .mockReturnValue(JSON.stringify(clipboardData))
-      jest
+      vi
         .spyOn(idMapper, 'mapStandardCircuitIds')
         .mockImplementation(d => d)
-      jest
+      vi
         .spyOn(window, 'requestAnimationFrame')
         .mockImplementation(cb => {
           cb(0)
@@ -234,8 +234,8 @@ describe('clipboard actions', () => {
     })
 
     it('should beep and clear the clipboard if the data is invalid', () => {
-      jest.clearAllMocks()
-      jest
+      vi.clearAllMocks()
+      vi
         .spyOn(window.api, 'getClipboardContents')
         .mockImplementation(() => {
           throw new Error('Invalid clipboard data')
@@ -349,8 +349,8 @@ describe('clipboard actions', () => {
     })
 
     it('should beep if data cannot be pasted', () => {
-      jest.resetAllMocks()
-      jest
+      vi.resetAllMocks()
+      vi
         .spyOn(window.api, 'canPaste')
         .mockReturnValue(false)
 

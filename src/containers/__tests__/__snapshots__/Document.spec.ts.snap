@@ -1,4 +1,103 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Document container > should match the snapshot 1`] = `
+"<div class="editor" tabindex="0">
+  <div style="background-size: 20px 20px; transform: scale(1); left: 0px; top: 0px; width: 0px; height: 0px;" class="editor__grid">
+    <!-- when tabbed into, this resets the selection back to the last focusable element in the editor -->
+    <div tabindex="0" data-test="first"></div><!-- editor content (items, connections, groups, ports, etc.) -->
+    <div class="selector">
+      <!--v-if-->
+    </div>
+    <div class="draggable" style="left: 0px; top: 0px; pointer-events: none; z-index: 1000;" tabindex="0" data-test="item">
+      <!--v-if-->
+      <!--v-if-->
+      <div class="circuit-component" style="transform: rotate(0deg);">
+        <div class="switch switch--hi-z" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]">
+          <div class="switch__inner" tabindex="0" aria-role="switch">
+            <div class="switch__trigger">
+              <div class="switch__light"></div>
+              <div class="switch__characters"></div>
+            </div>
+          </div>
+        </div>
+        <div class="circuit-component__ports--left circuit-component__ports">
+          <div class="port-pivot" style="transform: rotate(-0deg);" data-port-id="port1">
+            <div class="port-handle" id="port1" is-monitored="false" tabindex="0">
+              <div class="port-handle__display">
+                <div class="port-handle__hue"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="circuit-component__ports--top circuit-component__ports"></div>
+        <div class="circuit-component__ports--right circuit-component__ports"></div>
+        <div class="circuit-component__ports--bottom circuit-component__ports"></div>
+      </div>
+    </div>
+    <div class="draggable" style="left: 0px; top: 0px; pointer-events: none; z-index: 1000;" tabindex="0" data-test="item">
+      <!--v-if-->
+      <!--v-if-->
+      <div class="circuit-component" style="transform: rotate(0deg);">
+        <div class="switch switch--hi-z" type="InputNode" subtype="None" isselected="false" flash="false" name="" properties="[object Object]">
+          <div class="switch__inner" tabindex="0" aria-role="switch">
+            <div class="switch__trigger">
+              <div class="switch__light"></div>
+              <div class="switch__characters"></div>
+            </div>
+          </div>
+        </div>
+        <div class="circuit-component__ports--left circuit-component__ports">
+          <div class="port-pivot" style="transform: rotate(-0deg);" data-port-id="port1">
+            <div class="port-handle" id="port1" is-monitored="false" tabindex="0">
+              <div class="port-handle__display">
+                <div class="port-handle__hue"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="circuit-component__ports--top circuit-component__ports"></div>
+        <div class="circuit-component__ports--right circuit-component__ports"></div>
+        <div class="circuit-component__ports--bottom circuit-component__ports"></div>
+      </div>
+    </div><!-- Note: z-index of items will be offset by ITEM_BASE_Z_INDEX to ensure they overlap wires -->
+    <!-- the tab-accessible centroid element -->
+    <div style="position: absolute; left: 0px; top: 0px;" tabindex="0" aria-label="Connection from &quot;&quot; to &quot;&quot;" data-test="centroid"></div><!-- each segment of the visible wire -->
+    <!-- TODO: set is-animated according to preferences --><svg class="wire" width="15" height="15" aria-roledescription="connection" style="left: -7.5px; top: -7.5px;" title="Connection from &quot;&quot; to &quot;&quot;">
+      <title>Connection from "" to ""</title>
+      <path class="wire__outline" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+      <path class="wire__display" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+      <path class="wire__animation" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+      <path class="wire__clickable" data-test="wire-clickable" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+    </svg><!-- the visual outline of the bounding box surrounding the connection -->
+    <!--v-if-->
+    <!-- the control points -->
+    <!-- render only n-1 control points, since the last one is the target port -->
+    <!--v-if-->
+    <div class="draggable" style="left: 0px; top: 0px; z-index: 1000;" tabindex="-1">
+      <!--v-if-->
+      <div class="port-pivot" style="transform: rotate(-0deg);">
+        <div class="port-handle" data-test="port">
+          <div class="port-handle__display">
+            <div class="port-handle__hue"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--v-if-->
+    <div class="draggable" style="left: 0px; top: 0px; z-index: 1000;" tabindex="-1">
+      <!--v-if-->
+      <div class="port-pivot" style="transform: rotate(-0deg);">
+        <div class="port-handle" data-test="port">
+          <div class="port-handle__display">
+            <div class="port-handle__hue"></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- when tabbed into, this resets the selection back to the first focusable element in the editor -->
+    <div tabindex="0" data-test="last"></div>
+  </div>
+</div>"
+`;
 
 exports[`Document container should match the snapshot 1`] = `
 "<div class="editor" tabindex="0">

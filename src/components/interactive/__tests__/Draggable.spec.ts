@@ -12,16 +12,16 @@ describe('Draggable component', () => {
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
-    jest.resetAllMocks()
-    jest.clearAllMocks()
-    jest.useRealTimers()
+    vi.restoreAllMocks()
+    vi.resetAllMocks()
+    vi.clearAllMocks()
+    vi.useRealTimers()
   })
 
   describe('when the element is focused', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
-      jest
+      vi.useFakeTimers()
+      vi
         .spyOn(window, 'requestAnimationFrame')
         .mockImplementation(cb => {
           cb(1)
@@ -33,7 +33,7 @@ describe('Draggable component', () => {
       await wrapper.setProps({ isSelected: false })
       await wrapper.trigger('focus')
 
-      jest.advanceTimersByTime(10)
+      vi.advanceTimersByTime(10)
 
       expect(wrapper.emitted()).toHaveProperty('select')
       expect(wrapper.emitted().select[0]).toEqual([true])
@@ -42,7 +42,7 @@ describe('Draggable component', () => {
 
   describe('when applying mouse events', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(window, 'requestAnimationFrame')
         .mockImplementation(cb => {
           cb(1)
@@ -159,9 +159,9 @@ describe('Draggable component', () => {
       expect(wrapper.emitted()).not.toHaveProperty('dragEnd')
     })
 
-    xit('should focus the element when selected', async () => {
+    it.skip('should focus the element when selected', async () => {
       const { element } = wrapper.find('.draggable')
-      const spy = jest.spyOn(element as HTMLElement, 'focus')
+      const spy = vi.spyOn(element as HTMLElement, 'focus')
 
       await wrapper.setProps({ isSelected: true })
 
@@ -173,13 +173,13 @@ describe('Draggable component', () => {
     const getTouchEvent = (clientX: number, clientY: number): Touch => ({ clientX, clientY }) as Touch
 
     it('should emit `touchhold` after being held down in the same place for more than the long touch-hold timeout', async () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
 
       await wrapper.trigger('touchstart', {
         touches: [new TouchEvent('touchstart')]
       })
 
-      jest.advanceTimersByTime(TOUCH_LONG_HOLD_TIMEOUT + 1)
+      vi.advanceTimersByTime(TOUCH_LONG_HOLD_TIMEOUT + 1)
 
       expect(wrapper.emitted()).toHaveProperty('touchhold')
     })
@@ -189,8 +189,8 @@ describe('Draggable component', () => {
       const y = 20
 
       beforeEach(async () => {
-        jest.useFakeTimers()
-        jest
+        vi.useFakeTimers()
+        vi
           .spyOn(window, 'requestAnimationFrame')
           .mockImplementation(cb => {
             cb(1)
@@ -203,7 +203,7 @@ describe('Draggable component', () => {
       })
 
       it('should not allow `touchhold` to be emitted once the position has moved substantially', async () => {
-        jest
+        vi
           .spyOn(boundaries, 'isInNeighborhood')
           .mockReturnValue(false)
 
@@ -211,13 +211,13 @@ describe('Draggable component', () => {
           touches: [getTouchEvent(x, y)]
         })
 
-        jest.advanceTimersByTime(TOUCH_LONG_HOLD_TIMEOUT + 1)
+        vi.advanceTimersByTime(TOUCH_LONG_HOLD_TIMEOUT + 1)
 
         expect(wrapper.emitted()).not.toHaveProperty('touchhold')
       })
 
       it('should permit `touchhold` to be emitted when the item does not move substantially', async () => {
-        jest
+        vi
           .spyOn(boundaries, 'isInNeighborhood')
           .mockReturnValue(true)
 
@@ -225,7 +225,7 @@ describe('Draggable component', () => {
           touches: [getTouchEvent(x, y)]
         })
 
-        jest.advanceTimersByTime(TOUCH_LONG_HOLD_TIMEOUT + 1)
+        vi.advanceTimersByTime(TOUCH_LONG_HOLD_TIMEOUT + 1)
 
         expect(wrapper.emitted()).toHaveProperty('touchhold')
       })
@@ -311,7 +311,7 @@ describe('Draggable component', () => {
 
   describe('when the component is destroyed', () => {
     it('should remove the mousemove and mouseup methods', async () => {
-      const spy = jest.spyOn(window, 'removeEventListener')
+      const spy = vi.spyOn(window, 'removeEventListener')
 
       await wrapper.unmount()
 

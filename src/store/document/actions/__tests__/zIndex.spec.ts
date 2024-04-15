@@ -10,7 +10,7 @@ import { createDocumentStore } from '../..'
 setActivePinia(createPinia())
 
 describe('z-index actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('sendBackward', () => {
     const store = createDocumentStore('document')()

@@ -1,4 +1,11 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Status Bar Viewer > should match the snapshot 1`] = `
+"<div class="status-bar-viewer">
+  <div class="status-bar-viewer__left"></div>
+  <div class="status-bar-viewer__right"></div>
+</div>"
+`;
 
 exports[`Status Bar Viewer should match the snapshot 1`] = `
 "<div class="status-bar-viewer">

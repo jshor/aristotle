@@ -17,7 +17,7 @@ import Point from '@/types/interfaces/Point'
 setActivePinia(createPinia())
 
 describe('positioning actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('centerAll', () => {
     const store = createDocumentStore('document')()

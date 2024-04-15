@@ -1,3 +1,5 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Desktop Preferences Dialog > should match the snapshot 1`] = `"<dialog-container-stub dialogtype="2" title="Preferences"></dialog-container-stub>"`;
 
 exports[`Desktop Preferences Dialog should match the snapshot 1`] = `"<dialog-container-stub dialogtype="2" title="Preferences"></dialog-container-stub>"`;

@@ -16,7 +16,7 @@ import { createDocumentStore } from '../..'
 setActivePinia(createPinia())
 
 describe('selection actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('selectAll', () => {
     const store = createDocumentStore('document')()
@@ -215,7 +215,7 @@ describe('selection actions', () => {
       })
 
       it('should select the connection that lies within the selection boundary', () => {
-        jest
+        vi
           .spyOn(boundaries, 'hasIntersection')
           .mockReturnValue(true)
 
@@ -232,7 +232,7 @@ describe('selection actions', () => {
       })
 
       it('should select the connection that connects two selected items within the boundary', () => {
-        jest
+        vi
           .spyOn(boundaries, 'hasIntersection')
           .mockReturnValue(true)
 
@@ -465,7 +465,7 @@ describe('selection actions', () => {
 
     it('should not select anything if the group is already selected', () => {
       store.setGroupSelectionState('group1', true)
-      jest.resetAllMocks()
+      vi.resetAllMocks()
       store.setGroupSelectionState('group1', true)
 
       expect(store.setItemSelectionState).not.toHaveBeenCalled()
@@ -474,7 +474,7 @@ describe('selection actions', () => {
 
     it('should not deselect anything if the group is already not selected', () => {
       store.setGroupSelectionState('group1', false)
-      jest.resetAllMocks()
+      vi.resetAllMocks()
       store.setGroupSelectionState('group1', false)
 
       expect(store.setItemSelectionState).not.toHaveBeenCalled()
@@ -504,7 +504,7 @@ describe('selection actions', () => {
     describe('when the group is deselected', () => {
       beforeEach(() => {
         store.setGroupSelectionState('group1', true)
-        jest.resetAllMocks()
+        vi.resetAllMocks()
         store.setGroupSelectionState('group1', false)
       })
 
@@ -670,7 +670,7 @@ describe('selection actions', () => {
     })
 
     it('should not change the state if nothing is selected', () => {
-      jest.resetAllMocks()
+      vi.resetAllMocks()
 
       store.$reset()
       store.clearStatelessInfo()

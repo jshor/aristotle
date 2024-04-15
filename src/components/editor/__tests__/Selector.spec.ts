@@ -13,7 +13,7 @@ describe('Selector component', () => {
     })
   })
 
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   describe('when the mouse pans the canvas', () => {
     const x = 13

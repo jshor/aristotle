@@ -16,7 +16,7 @@ import Port from '@/types/interfaces/Port'
 setActivePinia(createPinia())
 
 describe('port actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('addPort()', () => {
     const store = createDocumentStore('document')()
@@ -200,7 +200,7 @@ describe('port actions', () => {
       })
 
       it('should not advance the simulation when in debugging mode', () => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
 
         store.isDebugging = true
         store.setPortValue({ id: port1.id, value })

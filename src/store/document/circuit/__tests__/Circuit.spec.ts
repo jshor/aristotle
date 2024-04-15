@@ -12,7 +12,7 @@ describe('Circuit', () => {
     circuit = new Circuit()
   })
 
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   describe('addNode()', () => {
     describe('when the node is an InputNode', () => {
@@ -29,7 +29,7 @@ describe('Circuit', () => {
       })
 
       it('should update the queue with the node', () => {
-        jest.spyOn(circuit, 'enqueue')
+        vi.spyOn(circuit, 'enqueue')
         circuit.addNode(node)
 
         expect(circuit.enqueue).toHaveBeenCalledTimes(1)
@@ -51,7 +51,7 @@ describe('Circuit', () => {
       })
 
       it('should not update the queue', () => {
-        jest.spyOn(circuit, 'enqueue')
+        vi.spyOn(circuit, 'enqueue')
         circuit.addNode(node)
 
         expect(circuit.enqueue).not.toHaveBeenCalled()
@@ -82,7 +82,7 @@ describe('Circuit', () => {
       })
 
       it('should call `removeNodeOutputs()` with the given node', () => {
-        jest.spyOn(circuit, 'removeNodeOutputs')
+        vi.spyOn(circuit, 'removeNodeOutputs')
         circuit.removeNode(node)
 
         expect(circuit.removeNodeOutputs).toHaveBeenCalledTimes(1)
@@ -90,7 +90,7 @@ describe('Circuit', () => {
       })
 
       it('should step the circuit', () => {
-        jest.spyOn(circuit, 'advance')
+        vi.spyOn(circuit, 'advance')
         circuit.removeNode(node)
 
         expect(circuit.advance).toHaveBeenCalledTimes(1)
@@ -112,7 +112,7 @@ describe('Circuit', () => {
       })
 
       it('should call `removeNodeOutputs()` with the given node', () => {
-        jest.spyOn(circuit, 'removeNodeOutputs')
+        vi.spyOn(circuit, 'removeNodeOutputs')
         circuit.removeNode(node)
 
         expect(circuit.removeNodeOutputs).toHaveBeenCalledTimes(1)
@@ -120,7 +120,7 @@ describe('Circuit', () => {
       })
 
       it('should not reset the circuit', () => {
-        jest.spyOn(circuit, 'reset')
+        vi.spyOn(circuit, 'reset')
         circuit.removeNode(node)
 
         expect(circuit.reset).not.toHaveBeenCalled()
@@ -144,9 +144,9 @@ describe('Circuit', () => {
       targetNode = new Nor('NOR_1')
       dummyNode = new Nor('NOR_2')
 
-      jest
+      vi
         .spyOn(circuit, 'advance')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       circuit.addNode(sourceNode)
       circuit.addNode(targetNode)
@@ -179,7 +179,7 @@ describe('Circuit', () => {
     })
 
     it('should update the queue with the source node', () => {
-      jest.spyOn(circuit, 'enqueue')
+      vi.spyOn(circuit, 'enqueue')
       circuit.addConnection(sourceNode, targetNode, targetNode.name)
 
       expect(circuit.enqueue).toHaveBeenCalledTimes(1)
@@ -201,20 +201,20 @@ describe('Circuit', () => {
       dummyNode = new Nor('NOR_2')
 
       /* stub each node's update methods */
-      targetNode.update = jest.fn()
-      sourceNode.update = jest.fn()
-      dummyNode.update = jest.fn()
+      targetNode.update = vi.fn()
+      sourceNode.update = vi.fn()
+      dummyNode.update = vi.fn()
 
       sourceNode.outputs.push(new Connection(dummyNode, dummyNode.name))
       sourceNode.outputs.push(new Connection(targetNode, targetNode.name))
 
-      jest
+      vi
         .spyOn(circuit, 'advance')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     it('should update the target node\'s value to hi-Z', () => {
-      jest.spyOn(targetNode, 'update')
+      vi.spyOn(targetNode, 'update')
       circuit.removeConnection(sourceNode, targetNode)
 
       expect(targetNode.update).toHaveBeenCalledTimes(1)
@@ -231,7 +231,7 @@ describe('Circuit', () => {
     })
 
     it('should update the queue with the target node', () => {
-      jest.spyOn(circuit, 'enqueue')
+      vi.spyOn(circuit, 'enqueue')
       circuit.removeConnection(sourceNode, targetNode)
 
       expect(circuit.enqueue).toHaveBeenCalledTimes(1)
@@ -241,9 +241,9 @@ describe('Circuit', () => {
 
   describe('removeNodeOutputs()', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(circuit, 'removeConnection')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     it('should call `removeConnection()` for each of the node\'s outputs', () => {
@@ -308,8 +308,8 @@ describe('Circuit', () => {
       const node1 = new Nor('NOR_1')
       const node2 = new Nor('NOR_2')
 
-      jest.spyOn(node1, 'reset')
-      jest.spyOn(node2, 'reset')
+      vi.spyOn(node1, 'reset')
+      vi.spyOn(node2, 'reset')
 
       circuit.nodes = [node1, node2]
       circuit.reset()
@@ -327,16 +327,16 @@ describe('Circuit', () => {
       node1 = new Nor('NOR_1')
       node2 = new Nor('NOR_2')
 
-      node1.propagate = jest.fn(() => ([]))
-      node2.propagate = jest.fn(() => ([]))
+      node1.propagate = vi.fn(() => ([]))
+      node2.propagate = vi.fn(() => ([]))
 
-      jest
+      vi
         .spyOn(circuit, 'enqueue')
-        .mockImplementation(jest.fn())
-        jest
+        .mockImplementation(vi.fn())
+        vi
           .spyOn(circuit, 'dequeue')
-          .mockImplementation(jest.fn())
-      jest.spyOn(circuit, 'advance')
+          .mockImplementation(vi.fn())
+      vi.spyOn(circuit, 'advance')
 
       circuit.queue = [node1, node2]
     })

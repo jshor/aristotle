@@ -24,7 +24,7 @@ describe('Dialog Container', () => {
   })
 
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
     store.$reset()
   })
 
@@ -89,7 +89,7 @@ describe('Dialog Container', () => {
         dialogType: ViewType.Preferences
       })
 
-      const onBeforeClose = jest.fn()
+      const onBeforeClose = vi.fn()
       await wrapper.setProps({
         title,
         dialogType,

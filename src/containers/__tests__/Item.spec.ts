@@ -53,7 +53,7 @@ describe('Item container', () => {
     })
   })
 
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   it('should match the snapshot', () => {
     expect(wrapper.html()).toMatchSnapshot()
@@ -75,7 +75,7 @@ describe('Item container', () => {
         ])
 
         await wrapper.vm.$nextTick()
-        jest.resetAllMocks()
+        vi.resetAllMocks()
       })
 
       it('should not change the state if the name is not configurable', async () => {
@@ -136,7 +136,7 @@ describe('Item container', () => {
         }
 
         await wrapper.vm.$nextTick()
-        jest.resetAllMocks()
+        vi.resetAllMocks()
 
         store.items.item1.properties.inputCount!.value = newValue
 
@@ -165,7 +165,7 @@ describe('Item container', () => {
         }
 
         await wrapper.vm.$nextTick()
-        jest.resetAllMocks()
+        vi.resetAllMocks()
 
         store.items.item1.properties.interval!.value = newValue
 
@@ -271,9 +271,9 @@ describe('Item container', () => {
   })
 
   it('should blur the element if it is focused', async () => {
-    const spy = jest.spyOn(wrapper.vm.$el, 'blur')
+    const spy = vi.spyOn(wrapper.vm.$el, 'blur')
 
-    jest
+    vi
       .spyOn(document, 'activeElement', 'get')
       .mockReturnValue(wrapper.vm.$el)
 

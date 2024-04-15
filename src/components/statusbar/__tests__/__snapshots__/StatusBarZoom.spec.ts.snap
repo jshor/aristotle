@@ -1,3 +1,5 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Oscilloscope Title Bar > should match the snapshot 1`] = `"<input type="range" class="status-bar-zoom" step="10" min="0" max="200">"`;
 
 exports[`Oscilloscope Title Bar should match the snapshot 1`] = `"<input type="range" class="status-bar-zoom" step="10" min="0" max="200">"`;

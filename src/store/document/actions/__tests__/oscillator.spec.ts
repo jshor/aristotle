@@ -9,7 +9,7 @@ import { createDocumentStore } from '../..'
 setActivePinia(createPinia())
 
 describe('oscillator actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('toggleOscilloscope()', () => {
     const store = createDocumentStore('document')()
@@ -76,9 +76,9 @@ describe('oscillator actions', () => {
         oscilloscopeHeight: 0
       })
 
-      jest
+      vi
         .spyOn(store.oscillator, 'clear')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       stubAll(store, ['unmonitorPort'])
     })
@@ -121,12 +121,12 @@ describe('oscillator actions', () => {
     })
 
     it('should do nothing if the user cancels the dialog', () => {
-      jest
+      vi
         .spyOn(window.api, 'showMessageBox')
         .mockReturnValue(1)
-      jest
+      vi
         .spyOn(store.oscillator, 'clear')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       stubAll(store, ['unmonitorPort'])
 
@@ -148,13 +148,13 @@ describe('oscillator actions', () => {
           isOscilloscopeOpen: true
         })
 
-        jest
+        vi
           .spyOn(window.api, 'showMessageBox')
           .mockReturnValue(0)
 
-        jest
+        vi
           .spyOn(store.oscillator, 'clear')
-          .mockImplementation(jest.fn())
+          .mockImplementation(vi.fn())
 
         stubAll(store, ['unmonitorPort'])
 

@@ -1,4 +1,44 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Wire Layout > renderLayout() > should render a bottom-left (a) to top-right wire (b) 1`] = `
+{
+  "height": 65,
+  "minX": -22.5,
+  "minY": -7.5,
+  "path": "M 30 0 C 15 0 -15 35 0 35",
+  "width": 75,
+}
+`;
+
+exports[`Wire Layout > renderLayout() > should render a bottom-left (b) to top-right wire (a) 1`] = `
+{
+  "height": 65,
+  "minX": -22.5,
+  "minY": -7.5,
+  "path": "M 30 0 C 15 0 -15 35 0 35",
+  "width": 75,
+}
+`;
+
+exports[`Wire Layout > renderLayout() > should render a top-left (a) to bottom-right wire (b) 1`] = `
+{
+  "height": 65,
+  "minX": -17.5,
+  "minY": -7.5,
+  "path": "M 0 35 C -10 35 0 0 10 0",
+  "width": 50,
+}
+`;
+
+exports[`Wire Layout > renderLayout() > should render a top-left (b) to bottom-right wire (a) 1`] = `
+{
+  "height": 65,
+  "minX": -17.5,
+  "minY": -7.5,
+  "path": "M 20 35 C 10 35 -10 0 0 0",
+  "width": 60,
+}
+`;
 
 exports[`Wire Layout renderLayout() should render a bottom-left (a) to top-right wire (b) 1`] = `
 {

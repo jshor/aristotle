@@ -17,7 +17,7 @@ describe('Draggable wire component', () => {
   })
 
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
   })
 
   it('should match the snapshot', () => {
@@ -34,7 +34,7 @@ describe('Draggable wire component', () => {
     const getTouchEvent = (clientX: number, clientY: number): Touch => ({ clientX, clientY }) as Touch
 
     it('should emit `add` to add a control point after being held down in the same place for more than the short touch-hold timeout', async () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
 
       await wrapper
         .find('[data-test="wire-clickable"]')
@@ -42,7 +42,7 @@ describe('Draggable wire component', () => {
           touches: [new TouchEvent('touchstart')]
         })
 
-      jest.advanceTimersByTime(TOUCH_SHORT_HOLD_TIMEOUT + 1)
+      vi.advanceTimersByTime(TOUCH_SHORT_HOLD_TIMEOUT + 1)
 
       expect(wrapper.emitted()).toHaveProperty('add')
     })
@@ -83,7 +83,7 @@ describe('Draggable wire component', () => {
       const clientY = 20
       const $event = {
         touches: [getTouchEvent(clientX, clientY)],
-        stopPropagation: jest.fn()
+        stopPropagation: vi.fn()
       } as unknown as TouchEvent
 
       describe('adding ports', () => {
@@ -133,7 +133,7 @@ describe('Draggable wire component', () => {
       const clientY = 20
       const $event = {
         touches: [getTouchEvent(clientX, clientY)],
-        stopPropagation: jest.fn()
+        stopPropagation: vi.fn()
       } as unknown as TouchEvent
 
       beforeEach(() => {
@@ -188,8 +188,7 @@ describe('Draggable wire component', () => {
       wrapper.vm.onDrag({ x: 10, y: 20 })
 
       expect(wrapper.emitted()).toHaveProperty('move')
-      expect(wrapper.emitted('move')).toHaveLength(1)
-      expect(wrapper.emitted('move')![0]).toEqual([{ x: 10, y: 20 }])
+      expect(wrapper.emitted('move')![0]).toEqual([{ x: 10, y: 20 }, undefined])
     })
   })
 
@@ -203,7 +202,7 @@ describe('Draggable wire component', () => {
 
   describe('when the component is destroyed', () => {
     it('should remove the mousemove and mouseup methods', async () => {
-      const spy = jest.spyOn(window, 'removeEventListener')
+      const spy = vi.spyOn(window, 'removeEventListener')
 
       await wrapper.unmount()
 

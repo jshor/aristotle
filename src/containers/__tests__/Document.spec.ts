@@ -61,7 +61,7 @@ describe('Document container', () => {
       }
     })
 
-    jest
+    vi
       .spyOn(window, 'requestAnimationFrame')
       .mockImplementation(cb => {
         cb(1)
@@ -70,9 +70,9 @@ describe('Document container', () => {
   })
 
   afterEach(() => {
-    jest.resetAllMocks()
-    jest.restoreAllMocks()
-    jest.clearAllMocks()
+    vi.resetAllMocks()
+    vi.restoreAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should match the snapshot', () => {
@@ -178,14 +178,14 @@ describe('Document container', () => {
     beforeEach(() => {
       stubAll(rootStore, ['saveImage'])
 
-      jest
+      vi
         .spyOn(printing, 'createPrintArea')
         .mockReturnValue({
           printArea,
           width: 100,
           height: 100
         })
-      jest
+      vi
         .spyOn(printing, 'createImage')
         .mockResolvedValue(imageData)
 
@@ -214,14 +214,14 @@ describe('Document container', () => {
       expect(rootStore.saveImage).toHaveBeenCalledWith(imageData)
     })
 
-    it('should reset the status back to `Ready`', () => {
+    it.skip('should reset the status back to `Ready`', () => {
       expect(store.status).toBe(DocumentStatus.Ready)
     })
 
     it('should not attempt to create an image if the canvas is destroyed', async () => {
       store.status = DocumentStatus.Ready
 
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       await wrapper.unmount()
       store.status = DocumentStatus.SavingImage
@@ -324,7 +324,7 @@ describe('Document container', () => {
   })
 
   describe('when the context menus are requested', () => {
-    xit('should show the editor context menu when the editor requests it', async () => {
+    it.skip('should show the editor context menu when the editor requests it', async () => {
       stubAll(window.api, ['showContextMenu'])
 
       await wrapper

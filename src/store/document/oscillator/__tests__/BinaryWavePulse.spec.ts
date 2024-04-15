@@ -9,13 +9,13 @@ describe('Binary Wave Service', () => {
     service = new BinaryWavePulse('test', 'test', 1, 0)
   })
 
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   describe('initialize()', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(service, 'addSegment')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       service.segments = []
       service.width = 0
@@ -38,13 +38,13 @@ describe('Binary Wave Service', () => {
 
   describe('clear()', () => {
     beforeEach(() => {
-      jest.spyOn(service, 'initialize')
+      vi.spyOn(service, 'initialize')
     })
 
     it('should clear out the segments and segment width', () => {
-      jest
+      vi
         .spyOn(service, 'initialize')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       service.clear()
 
@@ -69,9 +69,9 @@ describe('Binary Wave Service', () => {
 
   describe('update()', () => {
     it('should draw a pulse constant', () => {
-      jest
+      vi
         .spyOn(service, 'drawPulseConstant')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       service.update(1)
 

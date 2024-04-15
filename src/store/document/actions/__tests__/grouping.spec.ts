@@ -14,7 +14,7 @@ import Group from '@/types/interfaces/Group'
 setActivePinia(createPinia())
 
 describe('grouping/ungrouping actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('group', () => {
     const store = createDocumentStore('document')()

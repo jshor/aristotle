@@ -13,7 +13,7 @@ describe('Item Properties', () => {
   })
 
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
   })
 
   it('should match the snapshot', async () => {

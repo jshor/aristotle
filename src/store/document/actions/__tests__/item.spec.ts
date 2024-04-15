@@ -22,7 +22,7 @@ import portFactory from '@/factories/portFactory'
 setActivePinia(createPinia())
 
 describe('item actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('addItem', () => {
     const store = createDocumentStore('document')()
@@ -72,7 +72,7 @@ describe('item actions', () => {
         store.addItem({ item: icItem, ports: {} })
       })
 
-      xit('should add each port that is visible to the user to the state', () => {
+      it.skip('should add each port that is visible to the user to the state', () => {
         expect(store.ports).not.toHaveProperty('port1')
         expect(store.ports).toHaveProperty('port2')
         expect(store.ports.port2).toEqual(port2)

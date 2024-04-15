@@ -18,7 +18,7 @@ import ClockPulse from '../../oscillator/ClockPulse'
 setActivePinia(createPinia())
 
 describe('undo/redo actions', () => {
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   describe('undo', () => {
     const store = createDocumentStore('document')()
@@ -200,7 +200,7 @@ describe('undo/redo actions', () => {
         groups: { removedGroup }
       })
 
-      jest
+      vi
         .spyOn(window, 'requestAnimationFrame')
         .mockImplementation(cb => {
           cb(0)
@@ -269,7 +269,7 @@ describe('undo/redo actions', () => {
 
   describe('applySerializedState', () => {
     it('should call applyDeserializedState()', () => {
-      jest.restoreAllMocks()
+      vi.restoreAllMocks()
 
       const store = createDocumentStore('document')()
       const state = {

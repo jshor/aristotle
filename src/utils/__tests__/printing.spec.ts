@@ -1,7 +1,7 @@
 import domToImage from 'dom-to-image-more'
 import printing from '../printing'
 
-jest.mock('dom-to-image-more')
+vi.mock('dom-to-image-more')
 
 const sampleImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg=='
 
@@ -12,31 +12,31 @@ describe('Printing utility', () => {
   editor.appendChild(document.createElement('div'))
 
   beforeEach(() => {
-    jest
+    vi
       .spyOn(domToImage, 'toPng')
       .mockResolvedValue(sampleImg)
   })
 
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   describe('printWindow()', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(window, 'addEventListener')
         .mockImplementation((_, fn) => setTimeout(fn as Function))
-      jest
+      vi
         .spyOn(window, 'print')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
-      jest.useFakeTimers()
+      vi.useFakeTimers()
     })
 
-    afterEach(() => jest.useRealTimers())
+    afterEach(() => vi.useRealTimers())
 
     it('should print the window contents', async () => {
       const promise = printing.printWindow(window)
 
-      jest.advanceTimersByTime(10)
+      vi.advanceTimersByTime(10)
 
       await promise
 
@@ -46,7 +46,7 @@ describe('Printing utility', () => {
     it('should not invoke print if no window object is passed', async () => {
       const promise = printing.printWindow(null)
 
-      jest.advanceTimersByTime(10)
+      vi.advanceTimersByTime(10)
 
       await promise
 
@@ -55,11 +55,11 @@ describe('Printing utility', () => {
   })
 
   describe('printImage()', () => {
-    let printFrameSpy: jest.SpyInstance
+    let printFrameSpy: vi.SpyInstance
 
     beforeEach(() => {
-      printFrameSpy = jest.spyOn(printing, 'createPrintFrame')
-      jest
+      printFrameSpy = vi.spyOn(printing, 'createPrintFrame')
+      vi
         .spyOn(printing, 'printWindow')
         .mockResolvedValue()
     })

@@ -14,7 +14,7 @@ import boundaries from '../../geometry/boundaries'
 setActivePinia(createPinia())
 
 describe('connection actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('connect', () => {
     const store = createDocumentStore('document')()
@@ -36,9 +36,9 @@ describe('connection actions', () => {
         }
       })
 
-      jest
+      vi
         .spyOn(store.circuit, 'addConnection')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     it('should add the connection to the state if both the source and target are specified', () => {
@@ -105,9 +105,9 @@ describe('connection actions', () => {
         }
       })
 
-      jest
+      vi
         .spyOn(store.circuit, 'removeConnection')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     it('should not remove the connection if the source was not found', () => {
@@ -316,9 +316,9 @@ describe('connection actions', () => {
         }
       })
 
-      jest
+      vi
         .spyOn(window.api, 'beep')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       stubAll(store, [
         'setConnectionPreview',

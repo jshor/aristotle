@@ -33,10 +33,6 @@ describe('Item container', () => {
     target = createPort('target', 'item', PortType.Input, { name: 'Target Port' })
     connection = createConnection(connectionId, source.id, target.id)
 
-    // store.$patch({
-    //   connections: { connection },
-    //   ports: { source, target }
-    // })
     store.connections = { connection }
     store.ports = { source, target }
 
@@ -49,7 +45,7 @@ describe('Item container', () => {
   })
 
   afterEach(() => {
-    jest.resetAllMocks()
+    vi.resetAllMocks()
   })
 
   it('should match the snapshot', async () => {

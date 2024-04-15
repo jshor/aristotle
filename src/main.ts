@@ -5,7 +5,7 @@ import '@/styles/main.scss'
 
 if (!window.api) {
   // stub the ipc api for non-electron environments
-  // TODO: once the app is fully electron, move this to jest setup file
+  // TODO: once the app is fully electron, move this to vi setup file
   window.api = {
     showContextMenu () {},
     setApplicationMenu () {},

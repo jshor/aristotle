@@ -4,7 +4,7 @@ import { stubAll } from './__helpers__'
 
 setActivePinia(createPinia())
 
-jest.mock('@/constants', () => ({
+vi.mock('@/constants', () => ({
   PANNING_FRICTION: 1,
   PANNING_SPEED: 1,
   PANNING_EASING_FUNCTION: (x: number) => x
@@ -12,7 +12,7 @@ jest.mock('@/constants', () => ({
 
 describe('panning actions', () => {
   beforeEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   describe('panTo', () => {
@@ -44,7 +44,7 @@ describe('panning actions', () => {
 
       stubAll(store, ['setCanvasBoundingBox'])
 
-      jest
+      vi
         .spyOn(window, 'requestAnimationFrame')
         .mockImplementation(cb => {
           cb(0)

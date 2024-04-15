@@ -11,7 +11,7 @@ describe('Clock Service', () => {
     clock = new ClockPulse(name, interval, LogicValue.TRUE, LogicValue.FALSE)
   })
 
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   describe('deserialize', () => {
     it('should return a ClockPulse instance when given a ClockPulse instance', () => {
@@ -72,7 +72,7 @@ describe('Clock Service', () => {
     })
 
     it('should emit when a period first elapses', () => {
-      const spy = jest.fn()
+      const spy = vi.fn()
 
       clock.on('change', spy)
       clock.update(0)
@@ -82,7 +82,7 @@ describe('Clock Service', () => {
     })
 
     it('should not emit when the clock is stopped', () => {
-      const spy = jest.fn()
+      const spy = vi.fn()
 
       clock.stop()
       clock.on('change', spy)
@@ -92,7 +92,7 @@ describe('Clock Service', () => {
     })
 
     it('should emit a change event when the time elapsed has exceeded the interval period', () => {
-      const spy = jest.fn()
+      const spy = vi.fn()
 
       clock.on('change', spy)
       clock.update(5000)
@@ -103,7 +103,7 @@ describe('Clock Service', () => {
     })
 
     it('should emit an inverted signal', () => {
-      const spy = jest.fn()
+      const spy = vi.fn()
 
       clock.currentValue = LogicValue.FALSE
       clock.on('change', spy)

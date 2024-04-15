@@ -10,7 +10,7 @@ describe('Circuit Node', () => {
     node = new CircuitNode(name)
   })
 
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   it('should set the name to the one passed into the constructor', () => {
     expect(node.name).toEqual(name)
@@ -30,9 +30,9 @@ describe('Circuit Node', () => {
     })
 
     describe('invokeEvent()', () => {
-      const eventFn1 = jest.fn()
-      const eventFn2 = jest.fn()
-      const eventFn3 = jest.fn()
+      const eventFn1 = vi.fn()
+      const eventFn2 = vi.fn()
+      const eventFn3 = vi.fn()
       const newValue = LogicValue.TRUE
 
       beforeEach(() => {
@@ -91,12 +91,12 @@ describe('Circuit Node', () => {
     const output2 = new CircuitNode('test2')
 
     beforeEach(() => {
-      jest
+      vi
         .spyOn(output1, 'update')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(output2, 'update')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       node.outputs = [
         new Connection(output1, output1.name),
@@ -135,7 +135,7 @@ describe('Circuit Node', () => {
     })
 
     it('should set the new value to the evaluated one', () => {
-      node.eval = jest.fn(() => LogicValue.FALSE)
+      node.eval = vi.fn(() => LogicValue.FALSE)
       node.update(value, id)
 
       expect(node.newValue).toEqual(LogicValue.FALSE)
@@ -144,12 +144,12 @@ describe('Circuit Node', () => {
 
   describe('propagate()', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(node, 'invokeEvent')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(node, 'updateOutputs')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     describe('when the value has changed', () => {
@@ -168,7 +168,7 @@ describe('Circuit Node', () => {
         node.outputs = outputs
       })
 
-      xit('should set `isValueChanged` to `true`', () => {
+      it.skip('should set `isValueChanged` to `true`', () => {
         expect(node.isValueChanged).toEqual(false)
 
         node.propagate()
@@ -216,9 +216,9 @@ describe('Circuit Node', () => {
 
   describe('reset()', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(node, 'invokeEvent')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       node.value = LogicValue.TRUE
       node.newValue = LogicValue.TRUE
@@ -242,7 +242,7 @@ describe('Circuit Node', () => {
   describe('on()', () => {
     it('should register the given event listener', () => {
       const eventType = 'change'
-      const callback = jest.fn()
+      const callback = vi.fn()
 
       node.on(eventType, callback)
 

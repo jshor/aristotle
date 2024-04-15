@@ -10,18 +10,18 @@ describe('Oscillation Service', () => {
     oscillator = new Oscillator()
   })
 
-  afterEach(() => jest.resetAllMocks())
+  afterEach(() => vi.resetAllMocks())
 
   describe('start()', () => {
     const now = 5000
 
     beforeEach(() => {
-      jest
+      vi
         .spyOn(Date, 'now')
         .mockReturnValue(now)
-      jest
+      vi
         .spyOn(oscillator, 'tick')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     it('should not re-start when the oscillator is not currently paused', () => {
@@ -74,12 +74,12 @@ describe('Oscillation Service', () => {
       const clock1 = new ClockPulse('clock1', 100, LogicValue.TRUE, LogicValue.TRUE)
       const clock2 = new ClockPulse('clock2', 200, LogicValue.TRUE, LogicValue.TRUE)
 
-      jest
+      vi
         .spyOn(clock1, 'reset')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(clock2, 'reset')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       oscillator.clocks = { clock1, clock2 }
       oscillator.reset()
@@ -94,12 +94,12 @@ describe('Oscillation Service', () => {
       const wave1 = new BinaryWavePulse('wave1', 'wave1', LogicValue.TRUE, 0)
       const wave2 = new BinaryWavePulse('wave2', 'wave2', LogicValue.TRUE, 0)
 
-      jest
+      vi
         .spyOn(wave1, 'clear')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(wave2, 'clear')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       oscillator.binaryWaves = { wave1, wave2 }
       oscillator.clear()
@@ -140,19 +140,19 @@ describe('Oscillation Service', () => {
     const now = 5000
 
     beforeEach(() => {
-      jest
+      vi
         .spyOn(oscillator, 'update')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(oscillator, 'start')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(oscillator, 'stop')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(oscillator, 'broadcast')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(Date, 'now')
         .mockReturnValue(now)
     })
@@ -209,12 +209,12 @@ describe('Oscillation Service', () => {
     const wave2 = new BinaryWavePulse('wave2', 'wave2', LogicValue.TRUE, 0)
 
     it('should truncate segments for each binary wave when the max width has exceeded', () => {
-      jest
+      vi
         .spyOn(wave1, 'truncateSegments')
-        .mockImplementation(jest.fn())
-      jest
+        .mockImplementation(vi.fn())
+      vi
         .spyOn(wave2, 'truncateSegments')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       oscillator.refreshRate = 1000
       oscillator.binaryWaves = { wave1, wave2 }
@@ -232,8 +232,8 @@ describe('Oscillation Service', () => {
       const wave1 = new BinaryWavePulse('wave1', 'wave1', LogicValue.TRUE, 0)
       const wave2 = new BinaryWavePulse('wave2', 'wave2', LogicValue.TRUE, 0)
 
-      jest.spyOn(wave1, 'update')
-      jest.spyOn(wave2, 'update')
+      vi.spyOn(wave1, 'update')
+      vi.spyOn(wave2, 'update')
 
       oscillator.pulses = { wave1, wave2 }
       oscillator.update()

@@ -4,15 +4,15 @@ import { createDocumentStore } from '../..'
 setActivePinia(createPinia())
 
 describe('zooming actions', () => {
-  beforeEach(() => jest.restoreAllMocks())
+  beforeEach(() => vi.restoreAllMocks())
 
   describe('incrementZoom', () => {
     const store = createDocumentStore('document')()
 
     beforeEach(() => {
-      jest
+      vi
         .spyOn(store, 'setZoom')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
     })
 
     it('should decrement the zoom by one scale measure', () => {
@@ -34,9 +34,9 @@ describe('zooming actions', () => {
     const store = createDocumentStore('document')()
 
     beforeEach(() => {
-      jest
+      vi
         .spyOn(store, 'panTo')
-        .mockImplementation(jest.fn())
+        .mockImplementation(vi.fn())
 
       store.$reset()
       store.zoomLevel = 1

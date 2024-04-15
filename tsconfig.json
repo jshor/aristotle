@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
+    "module": "ES2015",
     "strict": true,
     "jsx": "preserve",
     "importHelpers": true,
@@ -14,8 +14,8 @@
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
-      "@types/jest",
-      "node"
+      "node",
+      "vitest/globals"
     ],
     "paths": {
       "@/*": [
@@ -34,10 +34,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx",
     "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "test/setup.ts"
   ],
   "exclude": [
     "node_modules"
