@@ -4,7 +4,6 @@
     :style="centroidStyle"
     :tabindex="0"
     :aria-label="title"
-    :title="title"
     data-test="centroid"
     @focus="onConnectionFocus"
     @blur="hasFocus = false"
@@ -19,13 +18,14 @@
     :ref="wire.ref"
     :source-value="source.value"
     :is-selected="isSelected"
-    :is-animated="false"
+    :is-animated="colors.animate.value"
     :style="{
       left: wire.wirePosition.x + 'px',
       top: wire.wirePosition.y + 'px'
     }"
     :title="title"
     :flash="flash"
+    :label="title"
     @add="p => onPortAdd(p, index)"
     @move="p => onPortDrag(p, index)"
     @added="dragEnd"
@@ -74,6 +74,8 @@ import renderLayout from '@/store/document/geometry/wire'
 import fromDocumentToEditorCoordinates from '@/utils/fromDocumentToEditorCoordinates'
 import ControlPoint from '@/types/interfaces/ControlPoint'
 import { DocumentStore } from '@/store/document'
+import { storeToRefs } from 'pinia'
+import { usePreferencesStore } from '@/store/preferences'
 
 export default defineComponent({
   name: 'Connection',
@@ -115,6 +117,7 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const store = props.store()
+    const { colors } = storeToRefs(usePreferencesStore())
     const connection = store.connections[props.id]
     const source = computed(() => store.ports[connection.source])
     const target = computed(() => store.ports[connection.target])
@@ -142,7 +145,7 @@ export default defineComponent({
       const source = store.ports[connection.source]
       const target = store.ports[connection.target]
 
-      return `Connection from ${source.name} to ${target.name}`
+      return `Connection from "${source.name}" to "${target.name}"`
     })
 
     /**
@@ -358,6 +361,7 @@ export default defineComponent({
     }
 
     return {
+      colors,
       title,
       isPreview,
       hasFocus,

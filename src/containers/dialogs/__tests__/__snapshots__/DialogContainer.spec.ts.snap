@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dialog Container should match the snapshot 1`] = `"<modal-stub modelvalue="false" title="Dialog Test"></modal-stub>"`;
+
+exports[`Toolbox Item should match the snapshot 1`] = `"<modal-stub modelvalue="false" title="Dialog Test"></modal-stub>"`;

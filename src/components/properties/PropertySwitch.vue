@@ -1,10 +1,12 @@
 <template>
   <label
     class="property-switch"
-      :class="{
-        'property-switch--on': model,
-        'property-switch--disabled': disabled
-      }"
+    :class="{
+      'property-switch--on': model,
+      'property-switch--disabled': disabled
+    }"
+    tabindex="0"
+    @keydown.space="$emit('update:modelValue', !model)"
   >
     <input
       v-model="model"
@@ -27,7 +29,7 @@
 import { defineComponent, ref, watch } from 'vue'
 
 export default defineComponent({
-  name: 'PropertyForm',
+  name: 'PropertySwitch',
   props: {
     modelValue: {
       type: Boolean,

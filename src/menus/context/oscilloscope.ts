@@ -1,25 +1,13 @@
-import { MenuItemConstructorOptions } from 'electron/main'
 import { DocumentStore } from '@/store/document'
+import { MenuFactory } from '@/types/interfaces/MenuFactory'
 
-export default function oscilloscope (useDocumentStore: DocumentStore, portId?: string): MenuItemConstructorOptions[] {
-  const store = useDocumentStore()
-  const menuItems: MenuItemConstructorOptions[] = []
+/**
+ * Creates the oscilloscope context menu.
+ */
+export const createOscilloscopeContextMenu: MenuFactory = (useDocumentStore?: DocumentStore, submenu = []) => {
+  const store = useDocumentStore!()
 
-  if (portId) {
-    menuItems.push({
-      label: 'Change color',
-      click: () => store.setRandomPortColor(portId)
-    })
-    menuItems.push({
-      label: 'Remove wave',
-      click: () => store.unmonitorPort(portId)
-    })
-    menuItems.push({
-      type: 'separator'
-    })
-  }
-
-  return menuItems.concat([
+  return submenu.concat([
     {
       label: 'Clear all waves',
       click: () => store.oscillator.clear()

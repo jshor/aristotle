@@ -1,9 +1,15 @@
 import { MenuItemConstructorOptions } from 'electron/main'
 import { DocumentStore } from '@/store/document'
-import grid from './grid'
+import { createGridSubmenu } from './grid'
+import { MenuFactory } from '@/types/interfaces/MenuFactory'
+import { useRootStore } from '@/store/root'
 
-export default function edit (useDocumentStore: DocumentStore): MenuItemConstructorOptions[] {
-  const store = useDocumentStore()
+/**
+ * Creates the document View submenu.
+ */
+export const createViewSubmenu: MenuFactory = (useDocumentStore?: DocumentStore) => {
+  const rootStore = useRootStore()
+  const store = useDocumentStore!()
   const zoomSubmenu: MenuItemConstructorOptions[] = []
   let hasFixedZoom = false
 
@@ -53,8 +59,15 @@ export default function edit (useDocumentStore: DocumentStore): MenuItemConstruc
       accelerator: 'CommandOrControl+;',
       click: store.panToCenter
     },
-    { type: 'separator' }
+    { type: 'separator' },
+    {
+      type: 'checkbox',
+      click: rootStore.toggleFullscreen,
+      checked: rootStore.isFullscreen,
+      accelerator: 'F11',
+      label: 'Fullscreen'
+    }
   ]
 
-  return menu.concat(grid(useDocumentStore))
+  return menu.concat(createGridSubmenu())
 }

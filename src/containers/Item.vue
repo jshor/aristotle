@@ -74,7 +74,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed, ComponentPublicInstance, watch, onMounted, nextTick } from 'vue'
 import CircuitComponent from '@/components/item/CircuitComponent.vue'
-import Properties from '@/components/item/Properties.vue'
+import Properties from '@/components/properties/Properties.vue'
 import PortItem from './PortItem.vue'
 import ItemType from '@/types/enums/ItemType'
 import ItemSubtype from '@/types/enums/ItemSubtype'
@@ -229,6 +229,7 @@ export default defineComponent({
      * Performs update operations on item property values.
      */
     async function onUpdateProperties (properties: ItemProperties) {
+      // TODO: need to save updated properties to undo/redo state
       const _item = store.items[props.id]
 
       await nextTick()
@@ -264,15 +265,17 @@ export default defineComponent({
 
       await nextTick()
 
-      element
-        .querySelectorAll('[data-port-id]')
-        .forEach((portElement: HTMLElement) => {
-          // ports may have shifted their positions
-          const portId = portElement.dataset.portId!
-          const { x, y } = portElement.getBoundingClientRect()
+      setTimeout(() => {
+        element
+          .querySelectorAll('[data-port-id]')
+          .forEach((portElement: HTMLElement) => {
+            // ports may have shifted their positions
+            const portId = portElement.dataset.portId!
+            const { x, y } = portElement.getBoundingClientRect()
 
-          store.setPortRelativePosition({ x, y }, portId)
-        })
+            store.setPortRelativePosition({ x, y }, portId)
+          })
+      })
     }
 
     return {

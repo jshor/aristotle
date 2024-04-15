@@ -7,8 +7,6 @@ import os from 'os'
 const defaultPath = path.resolve(app.getPath('desktop'))
 const cursorPosition = { x: 0, y: 0 }
 
-let isClosing = false
-
 window.addEventListener('contextmenu', (e) => {
   cursorPosition.x = e.x
   cursorPosition.y = e.y
@@ -32,7 +30,9 @@ export const api: typeof window.api = {
       .popup()
   },
   setApplicationMenu (menuItems: MenuItemConstructorOptions[]) {
-    Menu.setApplicationMenu(Menu.buildFromTemplate(menuItems))
+    if (menuItems.length) {
+      Menu.setApplicationMenu(Menu.buildFromTemplate(menuItems))
+    }
   },
   showOpenFileDialog (filters: FileFilter[]): string[] {
     return dialog.showOpenDialogSync({ defaultPath, filters }) || []
@@ -59,19 +59,22 @@ export const api: typeof window.api = {
       message
     })
   },
-  onBeforeClose (fn: () => Promise<boolean>) {
-    ipcRenderer.on('about-to-close', async () => {
-      if (isClosing) return
+  onBeforeClose (beforeCloseCallback: () => Promise<boolean>) {
+    function attachBeforeCloseEvent () {
+      ipcRenderer.once('about-to-close', async () => {
+        const canClose = await beforeCloseCallback()
 
-      isClosing = true
-      const canClose = await fn()
+        if (canClose !== false) {
+          ipcRenderer.send('quit')
+        } else {
+          setTimeout(() => {
+            attachBeforeCloseEvent()
+          })
+        }
+      })
+    }
 
-      if (canClose) {
-        ipcRenderer.send('quit')
-      }
-
-      isClosing = false
-    })
+    attachBeforeCloseEvent()
   },
   onOpenFile (fn: (filePath: string) => void) {
     ipcRenderer.on('open-file', (e, filePath) => {
@@ -79,7 +82,6 @@ export const api: typeof window.api = {
     })
   },
   quit () {
-    isClosing = true
     ipcRenderer.send('quit')
   },
   openFile (filePath: string) {

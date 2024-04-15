@@ -1,5 +1,6 @@
 import Oscillogram from '@/types/types/Oscillogram'
 import { DocumentStoreInstance } from '..'
+import { DocumentStatus } from '@/types/enums/DocumentStatus'
 
 export function loadDocument (this: DocumentStoreInstance, document: string) {
   const parsed = JSON.parse(document)
@@ -13,17 +14,13 @@ export function loadDocument (this: DocumentStoreInstance, document: string) {
   this.initialize()
 }
 
+export function setStatus (this: DocumentStoreInstance, status: DocumentStatus) {
+  this.status = status
+}
+
 export function initialize (this: DocumentStoreInstance) {
   this.resetCircuit()
   this.oscillator.onTick = (o: Oscillogram) => this.oscillogram = o
-}
-
-export function print (this: DocumentStoreInstance) {
-  this.isPrinting = true
-}
-
-export function createImage (this: DocumentStoreInstance) {
-  this.isCreatingImage = true
 }
 
 export function setHasLoaded (this: DocumentStoreInstance) {

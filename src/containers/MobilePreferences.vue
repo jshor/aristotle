@@ -68,7 +68,7 @@ import { storeToRefs } from 'pinia'
 import { defineComponent } from 'vue'
 import MobileButton from '@/components/mobile/MobileButton.vue'
 import MobileCollapsiblePanel from '@/components/mobile/MobileCollapsiblePanel.vue'
-import PropertyForm from '@/components/PropertyForm.vue'
+import PropertyForm from '@/components/properties/PropertyForm.vue'
 import { usePreferencesStore } from '@/store/preferences'
 
 export default defineComponent({

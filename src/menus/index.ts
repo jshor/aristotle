@@ -1,57 +1,21 @@
 import { MenuItemConstructorOptions } from 'electron/main'
 import { useRootStore } from '@/store/root'
-import edit from './submenus/edit'
-import file from './submenus/file'
-import view from './submenus/view'
+import { createDocumentMenu } from './views/document'
+import { createPreferencesMenu } from './views/preferences'
+import { ViewType } from '@/types/enums/ViewType'
 
-export default function createApplicationMenu (): MenuItemConstructorOptions[] {
+/**
+ * Returns the application menu based on the current view type.
+ */
+export function createApplicationMenu (): MenuItemConstructorOptions[] {
   const store = useRootStore()
 
-  if (store.isDialogOpen) {
-    // TODO: set only basic menus (file and help)
-    return [
-      {
-        label: 'File',
-        submenu: [{
-          label: 'Exit'
-        }]
-      }
-    ]
+  switch (store.viewType) {
+    case ViewType.Document:
+      return createDocumentMenu(store.activeDocument?.store)
+    case ViewType.Preferences:
+      return createPreferencesMenu()
+    default:
+      return []
   }
-
-  const menus: MenuItemConstructorOptions[] = [
-    {
-      label: 'File',
-      submenu: file()
-    }
-  ]
-
-  if (store.activeDocument) {
-    menus.push({
-      label: 'Edit',
-      submenu: edit(store.activeDocument.store)
-    })
-
-    menus.push({
-      label: 'View',
-      submenu: view(store.activeDocument.store).concat([
-        { type: 'separator' },
-        {
-          type: 'checkbox',
-          click: store.toggleFullscreen,
-          checked: store.isFullscreen,
-          accelerator: 'F11',
-          label: 'Fullscreen'
-        }
-      ])
-    })
-  }
-
-  menus.push({
-    label: 'Help',
-    role: 'help',
-    submenu: []
-  })
-
-  return menus
 }

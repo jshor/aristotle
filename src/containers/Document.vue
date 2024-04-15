@@ -63,24 +63,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, onMounted, onBeforeUnmount, ref, watchEffect, computed } from 'vue'
+import { defineComponent, PropType, onBeforeUnmount, ref, watch, computed, onMounted } from 'vue'
 import Connection from './Connection.vue'
 import Item from './Item.vue'
 import PortItem from './PortItem.vue'
 import Editor from '@/components/editor/Editor.vue'
 import Selector from '@/components/editor/Selector.vue'
 import Group from '@/components/Group.vue'
-import editorContextMenu from '@/menus/context/editor'
 import boundaries from '@/store/document/geometry/boundaries'
 import printing from '@/utils/printing'
 import { DocumentStore } from '@/store/document'
 import { useRootStore } from '@/store/root'
-import { storeToRefs } from 'pinia'
 import { usePreferencesStore } from '@/store/preferences'
 import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING, ITEM_BASE_Z_INDEX, PRINTER_FRIENDLY_COLORS } from '@/constants'
 import BoundingBox from '@/types/types/BoundingBox'
-import ControlPoint from '@/types/interfaces/ControlPoint'
 import Point from '@/types/interfaces/Point'
+import { DocumentStatus } from '@/types/enums/DocumentStatus'
+import { ViewType } from '@/types/enums/ViewType'
+import { createEditSubmenu } from '@/menus/submenus/edit'
 
 export default defineComponent({
   name: 'Document',
@@ -105,82 +105,101 @@ export default defineComponent({
     const editorRef = ref<typeof Editor>()
     const updates = ref(0)
     const flash = computed(() => store.isDebugging && store.isCircuitEvaluated)
-    const gridSize = computed(() => preferencesStore.grid.showGrid.value ? preferencesStore.grid.gridSize.value : 0)
-
-    let acceleration = 1
-    let requestAnimationFrameId = 0
-
-    watchEffect(() => {
-      if (store.isPrinting) printImage()
-      if (store.isCreatingImage) exportImage()
+    const gridSize = computed(() => {
+      return preferencesStore.grid.showGrid.value
+        ? preferencesStore.grid.gridSize.value
+        : 0
     })
 
-    onMounted(() => {
+    let acceleration = 1
+    let keydownAnimationFrameId = 0
+    let clipboardAnimationFrameId = 0
+
+    // add event listeners when the document is viewed, or remove them otherwise
+    watch(() => rootStore.viewType, viewType => {
+      if (viewType === ViewType.Document) {
+        onDocumentReady()
+      } else {
+        offDocumentReady()
+      }
+    }, { immediate: true })
+
+    watch(() => store.status, onDocumentStatus, { immediate: true })
+
+    onBeforeUnmount(offDocumentReady)
+
+    /**
+     * Handles the requested document status.
+     */
+    function onDocumentStatus (status: DocumentStatus) {
+      switch (status) {
+        case DocumentStatus.Printing:
+          return printImage()
+        case DocumentStatus.SavingImage:
+          return exportImage()
+      }
+    }
+
+    /**
+     * Adds clipboard and keyboard event listeners.
+     */
+    function onDocumentReady () {
+      document.addEventListener('cut', onCut)
+      document.addEventListener('copy', onCopy)
+      document.addEventListener('paste', onPaste)
       document.addEventListener('keydown', onKeyDown)
       document.addEventListener('keyup', onKeyUp)
       window.addEventListener('blur', onKeyUp)
-    })
+    }
 
-    onBeforeUnmount(() => {
+    /**
+     * Removes clipboard and keyboard event listeners.
+     */
+    function offDocumentReady () {
+      document.removeEventListener('cut', onCut)
+      document.removeEventListener('copy', onCopy)
+      document.removeEventListener('paste', onPaste)
       document.removeEventListener('keydown', onKeyDown)
       document.removeEventListener('keyup', onKeyUp)
       window.removeEventListener('blur', onKeyUp)
-    })
-
-    /**
-     * Invokes the given callback with the editor and its computed bounding box of all elements.
-     * This is used for rendering the document as an image that can be printed or exported to a file.
-     */
-    function initiatePrint (callback: (
-      editorElement: HTMLElement,
-      boundingBox: BoundingBox,
-      styles: Record<string, string>
-    ) => Promise<void>) {
-      const points = Object
-        .values(store.connections)
-        .reduce((points, { controlPoints }) => points.concat(
-          controlPoints.map(({ position }) => position)
-        ), [] as Point[])
-      const boundingBoxes = Object
-        .values(store.items)
-        .map(({ boundingBox }) => boundingBox)
-        .concat(boundaries.getConstellationBoundingBox(points))
-      const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
-
-      callback(editorRef.value!.grid, boundingBox, {
-        'zoom': `${(1 / store.zoom)}`,
-        '--media-display': 'none',
-        '--color-selection': 'transparent !important',
-        ...preferencesStore.colorStyles
-      })
     }
 
     /**
-     * Prints the document using a physical printer.
+     * Cuts the selection from this document.
      */
-    async function printImage () {
-      initiatePrint(async (editorElement, boundingBox, styles) => {
-        await printing.printImage(editorElement, boundingBox, {
-          ...styles,
-          ...PRINTER_FRIENDLY_COLORS
+    function onCut ($event: ClipboardEvent) {
+      return onClipboard('cut', $event)
+    }
+
+    /**
+     * Copies the document selection to the clipboard.
+     */
+    function onCopy ($event: ClipboardEvent) {
+      return onClipboard('copy', $event)
+    }
+
+    /**
+     * Pastes from the clipboard into the document.
+     */
+    function onPaste ($event: ClipboardEvent) {
+      return onClipboard('paste', $event)
+    }
+
+    /**
+     * Clipboard event handler.
+     */
+    function onClipboard (action: 'cut' | 'copy' | 'paste', $event: ClipboardEvent) {
+      if (!($event.target instanceof HTMLInputElement)) {
+        if (clipboardAnimationFrameId) return
+
+        clipboardAnimationFrameId = requestAnimationFrame(() => {
+          clipboardAnimationFrameId = 0
+          store[action]()
+          cancelAnimationFrame(clipboardAnimationFrameId)
         })
+      }
 
-        store.isPrinting = false
-      })
-    }
-
-    /**
-     * Exports the document as an image.
-     */
-    async function exportImage () {
-      initiatePrint(async (editorElement, boundingBox, styles) => {
-        const { printArea } = printing.createPrintArea(editorElement, boundingBox, IMAGE_PADDING, styles)
-        const image = await printing.createImage<Blob>(printArea, 'toBlob')
-
-        await rootStore.saveImage(image)
-
-        store.isCreatingImage = false
-      })
+      rootStore.checkPasteability()
     }
 
     /**
@@ -188,10 +207,10 @@ export default defineComponent({
      */
     function onKeyDown ($event: KeyboardEvent) {
       if ($event.target instanceof HTMLInputElement) return
-      if (requestAnimationFrameId) return
+      if (keydownAnimationFrameId) return
 
-      requestAnimationFrameId = requestAnimationFrame(() => {
-        requestAnimationFrameId = 0
+      keydownAnimationFrameId = requestAnimationFrame(() => {
+        keydownAnimationFrameId = 0
 
         switch ($event.key) {
           case 'Escape':
@@ -253,7 +272,7 @@ export default defineComponent({
      */
     function onContextMenu ($event: Event) {
       setTimeout(() => {
-        window.api.showContextMenu(editorContextMenu(props.store))
+        window.api.showContextMenu(createEditSubmenu(props.store))
       })
 
       $event.preventDefault()
@@ -268,6 +287,62 @@ export default defineComponent({
       if (!ctrlKey) {
         store.deselectAll()
       }
+    }
+
+    /**
+     * Prints the document using a physical printer.
+     */
+    async function printImage () {
+      initiatePrint(async (editorElement, boundingBox, styles) => {
+        await printing.printImage(editorElement, boundingBox, {
+          ...styles,
+          ...PRINTER_FRIENDLY_COLORS
+        })
+
+        store.status = DocumentStatus.Ready
+      })
+    }
+
+    /**
+     * Exports the document as an image.
+     */
+    async function exportImage () {
+      initiatePrint(async (editorElement, boundingBox, styles) => {
+        const { printArea } = printing.createPrintArea(editorElement, boundingBox, IMAGE_PADDING, styles)
+        const image = await printing.createImage<Blob>(printArea, 'toBlob')
+
+        await rootStore.saveImage(image)
+
+        store.status = DocumentStatus.Ready
+      })
+    }
+
+    /**
+     * Invokes the given callback with the editor and its computed bounding box of all elements.
+     * This is used for rendering the document as an image that can be printed or exported to a file.
+     */
+    function initiatePrint (callback: (
+      editorElement: HTMLElement,
+      boundingBox: BoundingBox,
+      styles: Record<string, string>
+    ) => Promise<void>) {
+      const points = Object
+        .values(store.connections)
+        .reduce((points, { controlPoints }) => points.concat(
+          controlPoints.map(({ position }) => position)
+        ), [] as Point[])
+      const boundingBoxes = Object
+        .values(store.items)
+        .map(({ boundingBox }) => boundingBox)
+        .concat(boundaries.getConstellationBoundingBox(points))
+      const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
+
+      callback(editorRef.value!.grid, boundingBox, {
+        'zoom': `${(1 / store.zoom)}`,
+        '--media-display': 'none',
+        '--color-selection': 'transparent !important',
+        ...preferencesStore.colorStyles
+      })
     }
 
     return {

@@ -11,6 +11,7 @@
           'property-form__label--disabled': data.disabled
         }"
         class="property-form__label"
+        data-test="label"
       >
         {{ data.label }}
       </label>
@@ -52,7 +53,7 @@
         v-model="data.value"
         :min="data.min"
         :max="data.max"
-        :type="data.type"
+        type="number"
         :id="`${id}_${propertyName}`"
         :disabled="data.disabled"
         class="property-form__input"
@@ -80,110 +81,99 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, ref, watch } from 'vue'
+<script lang="ts" setup>
+import { ref, watch } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import PropertySwitch from '@/components/properties/PropertySwitch.vue'
-import Icon from '@/components/Icon.vue'
 import isMobile from '@/utils/isMobile'
 import Property from '@/types/interfaces/Property'
 
 type PropertyList = Record<string, Property<string | boolean | number>>
 
-export default defineComponent({
-  name: 'PropertyForm',
-  components: {
-    Icon,
-    PropertySwitch
-  },
-  props: {
-    modelValue: {
-      type: Object as PropType<PropertyList>,
-      default: () => ({})
-    },
-    id: {
-      type: String,
-      default: ''
+const props = withDefaults(defineProps<{
+  /** Set of properties. */
+  modelValue: PropertyList
+  /** Custom ID for this property form. */
+  id: string
+}>(), {
+  modelValue: () => ({}),
+  id: ''
+})
+
+const emit = defineEmits<{
+  /** Model update. */
+  (e: 'update:modelValue', properties: PropertyList): void
+}>()
+
+const model = ref<PropertyList>(getModel(props.modelValue))
+
+watch(() => props.modelValue, value => {
+  model.value = getModel(value)
+}, { deep: true })
+
+function onSwitch (propertyName: keyof PropertyList) {
+  const property = model.value[propertyName]
+
+  property?.excludes?.forEach((p: keyof PropertyList) => {
+    if (property.value && model.value[p].type === 'boolean') {
+      model.value[p].value = false
     }
-  },
-  setup (props, { emit }) {
-    const getModel = (model: PropertyList) => {
-      const properties: PropertyList = {}
+  })
 
-      for (const key in model) {
-        const k = key as keyof PropertyList
-        const isVisible = isMobile
-          ? !model[k]?.desktopOnly
-          : !model[k]?.mobileOnly
+  onChange()
+}
 
-        if (isVisible) {
-          properties[k] = cloneDeep(model[k])
-        }
-      }
+function getModel (model: PropertyList) {
+  const properties: PropertyList = {}
 
-      return properties
-    }
-    const model = ref<PropertyList>(getModel(props.modelValue))
-    const errors = ref<string[]>([])
+  for (const key in model) {
+    const k = key as keyof PropertyList
+    const isVisible = isMobile
+      ? !model[k]!.desktopOnly
+      : !model[k]!.mobileOnly
 
-    watch(() => props.modelValue, value => {
-      model.value = getModel(value)
-    }, { deep: true })
-
-    function onSwitch (propertyName: keyof PropertyList) {
-      const property = model.value[propertyName]
-
-      property?.excludes?.forEach((p: keyof PropertyList) => {
-        if (property.value && model.value[p].type === 'boolean') {
-          model.value[p].value = false
-        }
-      })
-
-      onChange()
-    }
-
-    function onChange () {
-      validate()
-      emit('update:modelValue', model.value)
-    }
-
-    function validate () {
-      for (const key in model.value) {
-        const k = key as keyof PropertyList
-
-        if (!isValidValue(model.value[k])) {
-          model.value[k].value = props.modelValue[k].value
-        }
-      }
-    }
-
-    function isValidValue (property: Property<string | boolean | number>) {
-      if (property.type === 'boolean') return true
-      if (property.type === 'number') {
-        if (typeof property.value !== 'number') return false
-        if (property.max !== undefined && property.max < property.value) return false
-        if (property.min !== undefined && property.min > property.value) return false
-
-        return true
-      }
-
-      return !!property.value
-    }
-
-    return {
-      model,
-      errors,
-      close,
-      onSwitch,
-      onChange
+    if (isVisible) {
+      properties[k] = cloneDeep(model[k])
     }
   }
-})
+
+  return properties
+}
+
+function onChange () {
+  validate()
+  emit('update:modelValue', model.value)
+}
+
+function validate () {
+  for (const key in model.value) {
+    const k = key as keyof PropertyList
+
+    if (!isValidValue(model.value[k])) {
+      model.value[k].value = props.modelValue[k].value
+    }
+  }
+}
+
+function isValidValue (property: Property<string | boolean | number>) {
+  if (property.type === 'boolean') return true
+  if (property.type === 'number') {
+    const value = property.value as number
+
+    if (property.max !== undefined && property.max < value) return false
+    if (property.min !== undefined && property.min > value) return false
+
+    return true
+  }
+
+  return !!property.value
+}
 </script>
 
 <style lang="scss">
 .property-form {
   padding: 0.25em;
+  padding-top: 0;
   color: var(--color-primary);
 
   &__icon {
@@ -198,6 +188,7 @@ export default defineComponent({
   &__entry {
     display: grid;
     grid-template-columns: 50% 50% 100%;
+    margin-bottom: 0.5em;
   }
 
   &__label--disabled {

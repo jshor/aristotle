@@ -1,6 +1,5 @@
 import { mount, VueWrapper } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { ComponentPublicInstance } from 'vue'
 import Document from '../Document.vue'
 import { createDocumentStore, DocumentStore, DocumentStoreInstance } from '@/store/document'
 import { createItem, createConnection, createPort, stubAll } from '@/store/document/actions/__tests__/__helpers__'
@@ -8,13 +7,15 @@ import ItemType from '@/types/enums/ItemType'
 import PortType from '@/types/enums/PortType'
 import printing from '@/utils/printing'
 import { useRootStore } from '@/store/root'
-import editorContextMenu from '@/menus/context/editor'
+import { createEditSubmenu } from '@/menus/submenus/edit'
 import { ARROW_KEY_MOMENTUM_MULTIPLIER, IMAGE_PADDING, PRINTER_FRIENDLY_COLORS } from '@/constants'
 import Connection from '@/types/interfaces/Connection'
 import Port from '@/types/interfaces/Port'
 import Item from '@/types/interfaces/Item'
 import Point from '@/types/interfaces/Point'
 import { usePreferencesStore } from '@/store/preferences'
+import { DocumentStatus } from '@/types/enums/DocumentStatus'
+import { ViewType } from '@/types/enums/ViewType'
 
 setActivePinia(createPinia())
 
@@ -26,8 +27,10 @@ describe('Document container', () => {
   let port1: Port, port2: Port
   let connection1: Connection
 
+  const documentId = 'test-id'
+
   beforeEach(() => {
-    storeDefinition = createDocumentStore('test-id')
+    storeDefinition = createDocumentStore(documentId)
     store = storeDefinition()
 
     item1 = createItem('item1', ItemType.InputNode, { portIds: ['port1'] })
@@ -41,6 +44,16 @@ describe('Document container', () => {
     store.items = { item1, item2 }
     store.connections = { connection1 }
     store.hasLoaded = true
+
+    const rootStore = useRootStore()
+
+    rootStore.dialogType = ViewType.None
+    rootStore.activeDocumentId = documentId
+    rootStore.documents[documentId] = {
+      fileName: 'test-file.alfx',
+      displayName: 'Test Document',
+      store: storeDefinition
+    }
 
     wrapper = mount(Document, {
       props: {
@@ -81,7 +94,7 @@ describe('Document container', () => {
     beforeEach(() => {
       stubAll(printing, ['printImage'])
 
-      store.isPrinting = true
+      store.status = DocumentStatus.Printing
     })
 
     it('should invoke saveImage() on the root store', () => {
@@ -94,8 +107,66 @@ describe('Document container', () => {
       })
     })
 
-    it('should reset `isCreatingImage` back to `false`', () => {
-      expect(store.isPrinting).toBe(false)
+    it('should reset the status back to `Ready`', () => {
+      expect(store.status).toBe(DocumentStatus.Ready)
+    })
+  })
+
+  describe('clipboard functions', () => {
+    const rootStore = useRootStore()
+
+    beforeEach(() => {
+      stubAll(store, [
+        'cut',
+        'copy',
+        'paste'
+      ])
+      stubAll(rootStore, ['checkPasteability'])
+    })
+
+    it('should cut', () => {
+      document.dispatchEvent(new Event('cut'))
+
+      expect(store.cut).toHaveBeenCalled()
+    })
+
+    it('should copy', () => {
+      document.dispatchEvent(new Event('copy'))
+
+      expect(store.copy).toHaveBeenCalled()
+    })
+
+    it('should paste', () => {
+      document.dispatchEvent(new Event('paste'))
+
+      expect(store.paste).toHaveBeenCalled()
+      expect(rootStore.checkPasteability).toHaveBeenCalled()
+    })
+
+    it('should not paste when the pasted element is a textbox', () => {
+      const input = document.createElement('input')
+
+      input.type = 'text'
+      input.focus()
+
+      document.body.appendChild(input)
+      input.dispatchEvent(new Event('paste'))
+
+      expect(store.paste).not.toHaveBeenCalled()
+    })
+
+    it('should not invoke any clipboard functions when a dialog is open', async () => {
+      rootStore.dialogType = ViewType.Preferences
+
+      await wrapper.vm.$nextTick()
+
+      document.dispatchEvent(new Event('cut'))
+      document.dispatchEvent(new Event('copy'))
+      document.dispatchEvent(new Event('paste'))
+
+      expect(store.cut).not.toHaveBeenCalled()
+      expect(store.copy).not.toHaveBeenCalled()
+      expect(store.paste).not.toHaveBeenCalled()
     })
   })
 
@@ -118,7 +189,7 @@ describe('Document container', () => {
         .spyOn(printing, 'createImage')
         .mockResolvedValue(imageData)
 
-      store.isCreatingImage = true
+      store.status = DocumentStatus.SavingImage
     })
 
     it('should render the print area', () => {
@@ -143,17 +214,17 @@ describe('Document container', () => {
       expect(rootStore.saveImage).toHaveBeenCalledWith(imageData)
     })
 
-    it('should reset `isCreatingImage` back to `false`', () => {
-      expect(store.isCreatingImage).toBe(false)
+    it('should reset the status back to `Ready`', () => {
+      expect(store.status).toBe(DocumentStatus.Ready)
     })
 
     it('should not attempt to create an image if the canvas is destroyed', async () => {
-      store.isCreatingImage = false
+      store.status = DocumentStatus.Ready
 
       jest.clearAllMocks()
 
       await wrapper.unmount()
-      store.isCreatingImage = true
+      store.status = DocumentStatus.SavingImage
 
       expect(printing.createImage).not.toHaveBeenCalled()
     })
@@ -262,7 +333,7 @@ describe('Document container', () => {
         .$emit('contextmenu', new Event('contextmenu'))
 
       expect(window.api.showContextMenu).toHaveBeenCalledTimes(1)
-      expect(window.api.showContextMenu).toHaveBeenCalledWith(editorContextMenu(storeDefinition))
+      expect(window.api.showContextMenu).toHaveBeenCalledWith(createEditSubmenu(storeDefinition))
     })
   })
 

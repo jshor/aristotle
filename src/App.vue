@@ -10,21 +10,19 @@
       }"
     />
 
-    <main-view
-      v-if="activeDocumentId && activeDocument"
-      :is-blurred="isDialogOpen">
+    <main-view v-if="activeDocumentId && activeDocument">
       <template #top>
         <!-- mobile-only header -->
         <template v-if="isMobile">
           <mobile-header
             @select="isDocumentSelectOpen = true"
-            @open="isSettingsOpen = true"
+            @open="isMobilePulloutOpen = true"
             :document-name="activeDocument.displayName"
             :document-count="3"
           />
 
-          <mobile-pullout v-model="isSettingsOpen">
-            <mobile-pullout-heading @close="isSettingsOpen = false" />
+          <mobile-pullout v-model="isMobilePulloutOpen">
+            <mobile-pullout-heading @close="isMobilePulloutOpen = false" />
             <mobile-preferences />
           </mobile-pullout>
 
@@ -102,9 +100,7 @@
       no documents open {{ isDropping }}
     </div>
 
-    <builder-view
-      v-if="isBuilderOpen"
-    />
+    <desktop-preferences />
   </theme>
 </template>
 
@@ -112,8 +108,9 @@
 // TODO: the document/toolbox/toolbar stuff should be moved into a separate view called "Workspace.vue"
 import { faFile } from '@fortawesome/free-solid-svg-icons'
 import { storeToRefs } from 'pinia'
-import { defineComponent, onBeforeUnmount, onMounted, watchEffect, ref, computed } from 'vue'
+import { defineComponent, onBeforeUnmount, onMounted, watchEffect, ref } from 'vue'
 import BuilderView from '@/views/BuilderView.vue'
+import DesktopPreferences from './containers/dialogs/DesktopPreferences.vue'
 import Document from './containers/Document.vue'
 import MobilePreferences from './containers/MobilePreferences.vue'
 import Oscilloscope from './containers/Oscilloscope.vue'
@@ -133,13 +130,14 @@ import TabHost from './components/tab/TabHost.vue'
 import Theme from './components/layout/Theme.vue'
 import { useRootStore } from './store/root'
 import isMobile from '@/utils/isMobile'
-import createApplicationMenu from './menus'
+import { createApplicationMenu } from './menus'
 import { usePreferencesStore } from './store/preferences'
 
 export default defineComponent({
   name: 'App',
   components: {
     BuilderView,
+    DesktopPreferences,
     Document,
     Oscilloscope,
     MainView,
@@ -165,11 +163,9 @@ export default defineComponent({
       activeDocumentId,
       documents,
       hasOpenDocuments,
+      isMobilePulloutOpen,
       isFullscreen,
-      isDialogOpen,
-      isBuilderOpen,
       isToolboxOpen,
-      isSettingsOpen,
       isDocumentSelectOpen
     } = storeToRefs(store)
     const isDropping = ref(false)
@@ -187,7 +183,7 @@ export default defineComponent({
         : 'Aristotle'
     })
 
-    window.api.onBeforeClose(store.closeAll)
+    window.api.onBeforeClose(store.closeApplication)
     window.api.onOpenFile(store.openDocumentFromPath)
 
     onMounted(() => {
@@ -195,10 +191,7 @@ export default defineComponent({
       document.addEventListener('dragover', onDragOver)
       document.addEventListener('dragleave', onDragLeave)
       document.addEventListener('drop', onDrop)
-      document.addEventListener('cut', onClipboard('cut'))
-      document.addEventListener('copy', onClipboard('copy'))
-      document.addEventListener('paste', onClipboard('paste'))
-      window.addEventListener('focus', store.checkPastability)
+      window.addEventListener('focus', store.checkPasteability)
     })
 
     onBeforeUnmount(() => {
@@ -206,29 +199,8 @@ export default defineComponent({
       document.removeEventListener('dragover', onDragOver)
       document.removeEventListener('dragleave', onDragLeave)
       document.removeEventListener('drop', onDrop)
-      document.removeEventListener('cut', onClipboard('cut'))
-      document.removeEventListener('copy', onClipboard('copy'))
-      document.removeEventListener('paste', onClipboard('paste'))
-      window.removeEventListener('focus', store.checkPastability)
+      window.removeEventListener('focus', store.checkPasteability)
     })
-
-    let requestAnimationFrameId = 0
-
-    function onClipboard (action: 'cut' | 'copy' | 'paste') {
-      return function ($event: ClipboardEvent) {
-        if (!($event.target instanceof HTMLInputElement)) {
-          if (requestAnimationFrameId) return
-
-          requestAnimationFrameId = requestAnimationFrame(() => {
-            requestAnimationFrameId = 0
-            store.invokeClipboardAction(action)
-            cancelAnimationFrame(requestAnimationFrameId)
-          })
-        }
-
-        store.checkPastability()
-      }
-    }
 
     function onDragOver ($event: DragEvent) {
       $event.stopPropagation()
@@ -283,10 +255,8 @@ export default defineComponent({
       hasOpenDocuments,
       isDropping,
       isFullscreen,
-      isDialogOpen,
-      isBuilderOpen,
+      isMobilePulloutOpen,
       isToolboxOpen,
-      isSettingsOpen,
       isDocumentSelectOpen,
       onContextMenu,
       toggleFullscreen: store.toggleFullscreen,

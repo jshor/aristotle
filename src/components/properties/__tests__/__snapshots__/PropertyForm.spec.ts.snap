@@ -1,0 +1,170 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Properties Form should match the snapshot 1`] = `
+<div
+  class="property-form"
+>
+  
+  <div
+    class="property-form__entry"
+  >
+    <label
+      class="property-form__label"
+      data-test="label"
+      for="_name"
+    >
+      Name
+    </label>
+    <!-- drop-down select -->
+    
+    <!-- text boxes -->
+    <input
+      class="property-form__input"
+      id="_name"
+      type="text"
+    />
+    
+    <small
+      class="property-form__description"
+    >
+      A basic text input.
+    </small>
+  </div>
+  <div
+    class="property-form__entry"
+  >
+    <label
+      class="property-form__label"
+      data-test="label"
+      for="_count"
+    >
+      Count
+    </label>
+    <!-- drop-down select -->
+    
+    <!-- numeric input -->
+    <input
+      class="property-form__input"
+      id="_count"
+      max="50"
+      min="1"
+      type="number"
+    />
+    
+    <small
+      class="property-form__description"
+    >
+      A basic numeric input.
+    </small>
+  </div>
+  <div
+    class="property-form__entry"
+  >
+    <label
+      class="property-form__label"
+      data-test="label"
+      for="_switch1"
+    >
+      Switch 1
+    </label>
+    <!-- drop-down select -->
+    
+    <!-- toggle switch -->
+    <div
+      class="property-form__switch"
+    >
+      <label
+        class="property-switch"
+        modelmodifiers="[object Object]"
+        tabindex="0"
+      >
+        <input
+          class="property-switch__input"
+          id="_switch1"
+          type="checkbox"
+        />
+        <div
+          class="property-switch__trigger"
+        />
+      </label>
+    </div>
+    
+    <small
+      class="property-form__description"
+    >
+      A basic switch.
+    </small>
+  </div>
+  <div
+    class="property-form__entry"
+  >
+    <label
+      class="property-form__label"
+      data-test="label"
+      for="_switch2"
+    >
+      Switch 2
+    </label>
+    <!-- drop-down select -->
+    
+    <!-- toggle switch -->
+    <div
+      class="property-form__switch"
+    >
+      <label
+        class="property-switch property-switch--on"
+        modelmodifiers="[object Object]"
+        tabindex="0"
+      >
+        <input
+          class="property-switch__input"
+          id="_switch2"
+          type="checkbox"
+        />
+        <div
+          class="property-switch__trigger property-switch__trigger--on"
+        />
+      </label>
+    </div>
+    
+    <!--v-if-->
+  </div>
+  <div
+    class="property-form__entry"
+  >
+    <label
+      class="property-form__label"
+      data-test="label"
+      for="_options"
+    >
+      Select an option
+    </label>
+    <!-- drop-down select -->
+    <select
+      class="property-form__input"
+      id="_options"
+    >
+      
+      <option
+        value="option1"
+      >
+        Option 1
+      </option>
+      <option
+        value="option2"
+      >
+        Option 2
+      </option>
+      
+    </select>
+    <small
+      class="property-form__description"
+    >
+      An option applies.
+    </small>
+  </div>
+  
+</div>
+`;
+
+exports[`Properties Form should render when no properties are provided 1`] = `"<div class="property-form"></div>"`;

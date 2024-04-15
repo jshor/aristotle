@@ -4,7 +4,12 @@
       v-if="modelValue"
       class="modal"
     >
-      <div class="modal__inner">
+      <div
+        class="modal__inner"
+        tabindex="0"
+        ref="modalRef"
+        @keydown.esc.stop="$emit('update:modelValue', false)"
+      >
         <div class="modal__title">
           <div class="modal__title-text">
             {{ title }}
@@ -26,32 +31,34 @@
           <slot name="buttons" />
         </div>
       </div>
+
+      <div
+        tabindex="0"
+        data-test="focus-end"
+        @focus="modalRef?.focus()"
+      />
     </div>
   </transition>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { faClose } from '@fortawesome/free-solid-svg-icons'
-import { defineComponent, ref } from 'vue'
+import { nextTick, watch, ref } from 'vue'
 import Icon from '@/components/Icon.vue'
 
-export default defineComponent({
-  name: 'Modal',
-  components: { Icon },
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true
-    },
-    title: {
-      type: String,
-      default: ''
-    }
-  },
-  setup () {
-    const show = ref(false)
+const props = withDefaults(defineProps<{
+  modelValue: boolean
+  title: string
+}>(), {
+  title: ''
+})
+const modalRef = ref<HTMLElement>()
 
-    return { faClose, show }
+watch(() => props.modelValue, value => {
+  if (value) {
+    nextTick(() => {
+      modalRef.value?.focus()
+    })
   }
 })
 </script>
@@ -68,6 +75,9 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  transition: backdrop-filter 5s;
 
   &__inner {
     width: 100%;
@@ -75,7 +85,6 @@ export default defineComponent({
     max-width: 700px;
     background-color: var(--color-bg-primary);
     max-height: 600px;
-    padding: 1em;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -96,6 +105,8 @@ export default defineComponent({
 
   &__title {
     display: flex;
+    padding: 1em;
+    color: var(--color-primary);
   }
 
   &__title-text {
@@ -125,11 +136,23 @@ export default defineComponent({
   }
 
   &-enter-active {
-    animation: blur-in 0.5s;
+    &, .modal__inner {
+      transition: all var(--modal-transition-speed) ease-out;
+    }
   }
 
   &-leave-active {
-    animation: blur-in 0.5s reverse;
+    &, .modal__inner {
+      transition: all var(--modal-transition-speed) cubic-bezier(1, 0.5, 0.8, 1);
+    }
+  }
+
+  &-enter-from, &-leave-to {
+    .modal__inner {
+      transform: scale(0);
+    }
+
+    opacity: 0;
   }
 }
 

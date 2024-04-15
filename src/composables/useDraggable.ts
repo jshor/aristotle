@@ -159,7 +159,7 @@ export const useDraggable = (options: {
    * @param {TouchEvent} $event
    */
   function onTouchMove ($event: TouchEvent) {
-    if (isDragging && hasMovedSubstantially) {
+    if (isDragging) {
       $event.stopPropagation()
       $event.preventDefault()
     }

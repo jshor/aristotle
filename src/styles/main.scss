@@ -78,6 +78,9 @@ body {
 
   // sizes
   --integrated-circuit-wire-height: 35px;
+
+  // animation speed (must specifiy this in ms)
+  --modal-transition-speed: 300ms;
 }
 
 // background colors

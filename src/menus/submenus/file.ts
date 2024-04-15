@@ -1,7 +1,13 @@
 import { MenuItemConstructorOptions } from 'electron/main'
 import { useRootStore } from '@/store/root'
+import { DocumentStatus } from '@/types/enums/DocumentStatus'
+import { MenuFactory } from '@/types/interfaces/MenuFactory'
+import { ViewType } from '@/types/enums/ViewType'
 
-export default function file (): MenuItemConstructorOptions[] {
+/**
+ * Creates a document File menu.
+ */
+export const createFileSubmenu: MenuFactory = () => {
   const rootStore = useRootStore()
   const hasDocument = rootStore.activeDocumentId !== null
   const documentList = Object.keys(rootStore.documents)
@@ -47,7 +53,7 @@ export default function file (): MenuItemConstructorOptions[] {
       label: 'Print',
       enabled: hasDocument,
       accelerator: 'CommandOrControl+P',
-      click: () => store?.print()
+      click: store?.setStatus.bind(store, DocumentStatus.Printing)
     },
     { type: 'separator' },
     {
@@ -62,25 +68,15 @@ export default function file (): MenuItemConstructorOptions[] {
         {
           label: 'PNG Image',
           accelerator: 'CommandOrControl+Shift+I',
-          click: () => store?.createImage()
+          click: store?.setStatus.bind(store, DocumentStatus.SavingImage)
         }
       ]
     },
     { type: 'separator' },
     {
       label: 'Preferences',
-      submenu: [
-        {
-          label: 'Global Preferences',
-          accelerator: 'CommandOrControl+,',
-          click: () => console.log('global prefs')
-        },
-        {
-          label: 'Document Preferences',
-          accelerator: 'CommandOrControl+Shift+,',
-          click: () => console.log('doc prefs')
-        }
-      ]
+      accelerator: 'CommandOrControl+,',
+      click: () => (rootStore.dialogType = ViewType.Preferences)
     }
   ]
 

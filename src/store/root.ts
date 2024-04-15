@@ -14,6 +14,8 @@ import getFileName from '@/utils/getFileName'
 import idMapper from '@/utils/idMapper'
 import Oscillogram from '@/types/types/Oscillogram'
 import Item from '@/types/interfaces/Item'
+import { DocumentStatus } from '@/types/enums/DocumentStatus'
+import { ViewType } from '@/types/enums/ViewType'
 
 export type RootStore = {
   documents: {
@@ -28,12 +30,13 @@ export type RootStore = {
   activeDocumentId: string | null
   canExit: boolean
   canPaste: boolean
-  isSettingsOpen: boolean
   isDocumentSelectOpen: boolean
+  isMobilePulloutOpen: boolean
   isFullscreen: boolean
-  isBuilderOpen: boolean
+  dialogType: ViewType
   isToolboxOpen: boolean
   navigationAnimationFrameId: number
+  closeDialog?: () => Promise<boolean>
 }
 
 export const useRootStore = defineStore({
@@ -45,9 +48,9 @@ export const useRootStore = defineStore({
     canExit: false,
     canPaste: false,
     isFullscreen: false,
-    isBuilderOpen: false,
     isToolboxOpen: false,
-    isSettingsOpen: false,
+    isMobilePulloutOpen: false,
+    dialogType: ViewType.None,
     isDocumentSelectOpen: false,
     navigationAnimationFrameId: 0
   }),
@@ -64,8 +67,14 @@ export const useRootStore = defineStore({
 
       return null
     },
-    isDialogOpen (state) {
-      return state.isBuilderOpen
+    viewType (state) {
+      if (state.dialogType) {
+        return state.dialogType
+      }
+
+      return state.documents[state.activeDocumentId!]
+        ? ViewType.Document
+        : ViewType.None
     }
   },
   actions: {
@@ -74,32 +83,22 @@ export const useRootStore = defineStore({
       const document = this.activeDocument
 
       if (document) {
-        this.isBuilderOpen = true
+        await integratedCircuitStore.launchBuilder(document.store().$state)
 
-        try {
-          await integratedCircuitStore.launchBuilder(document.store().$state)
+        const store = document.store()
 
-          const store = document.store()
+        // const dialogResult = window.api.showMessageBox({
+        //   message: `Integrated circuit successfully created. Do you want to add it to the current document?`,
+        //   title: 'Confirm',
+        //   buttons: ['Yes', 'No']
+        // })
 
-          // const dialogResult = window.api.showMessageBox({
-          //   message: `Integrated circuit successfully created. Do you want to add it to the current document?`,
-          //   title: 'Confirm',
-          //   buttons: ['Yes', 'No']
-          // })
+        const idMappedIcItem = idMapper.mapIntegratedCircuitIds(integratedCircuitStore.model as Item)
 
-          const idMappedIcItem = idMapper.mapIntegratedCircuitIds(integratedCircuitStore.model as Item)
-
-          store.insertItemAtPosition({ item: idMappedIcItem })
-          store.setItemBoundingBox(idMappedIcItem.id)
-          store.setItemSelectionState(idMappedIcItem.id, true)
-
-        } catch (e) {
-          // window.api.showMessageBox({ message: 'That\'s okay.' })
-        }
-
-        this.isBuilderOpen = false
+        store.insertItemAtPosition({ item: idMappedIcItem })
+        store.setItemBoundingBox(idMappedIcItem.id)
+        store.setItemSelectionState(idMappedIcItem.id, true)
       }
-
     },
     openIntegratedCircuit (item: Item) {
       if (item.integratedCircuit) {
@@ -145,10 +144,15 @@ export const useRootStore = defineStore({
       }
       this.activateDocument(id)
     },
-    printActiveDocument () {
-      if (this.activeDocument) {
-        this.activeDocument.store().isPrinting = true
+
+    async closeApplication (): Promise<boolean> {
+      const dialogCloseResult = await this.closeDialog?.()
+
+      if (dialogCloseResult === false) {
+        return false
       }
+
+      return this.closeAllDocuments()
     },
 
     /**
@@ -156,7 +160,7 @@ export const useRootStore = defineStore({
      *
      * @returns true if all documents were closed successfully, false otherwise
      */
-    async closeAll (): Promise<boolean> {
+    async closeAllDocuments (): Promise<boolean> {
       const openDocuments = [this.activeDocumentId!].concat(Object.keys(this.documents))
 
       for (let i = 0; i < openDocuments.length; i++) {
@@ -195,11 +199,15 @@ export const useRootStore = defineStore({
       const document = this.documents[id]
       const store = document.store()
 
-      this.activateDocument(id)
-
       if (!store.isDirty) {
+        if (this.activeDocumentId === id) {
+          this.switchDocument(1)
+        }
+        delete this.documents[id]
         return true
       }
+
+      this.activateDocument(id)
 
       await store.load()
 
@@ -401,12 +409,14 @@ export const useRootStore = defineStore({
       this.isToolboxOpen = !this.isToolboxOpen
     },
 
-    invokeClipboardAction (action: 'cut' | 'copy' | 'paste') {
-      this.activeDocument?.store()[action]()
+    checkPasteability () {
+      this.canPaste = window.api.canPaste()
     },
 
-    checkPastability () {
-      this.canPaste = window.api.canPaste()
+    setAllDocumentStatuses (status: DocumentStatus) {
+      Object
+        .keys(this.documents)
+        .forEach(id => this.documents[id].store().setStatus(status))
     }
   }
 })

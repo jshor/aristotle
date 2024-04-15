@@ -13,6 +13,8 @@ remote.initialize()
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+let canClose = false
+
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{
   scheme: 'app',
@@ -69,9 +71,6 @@ function createMainWindow () {
  * Loads the main window, using a splash screen as an interstitial until it's ready.
  */
 async function boot (app: App, mainWindow: BrowserWindow) {
-  // flag of whether or not renderer is ready to exit
-  let canClose = false
-
   // create the splash screen
   const splashScreen = createWindow({
     width: 645,
@@ -107,14 +106,12 @@ async function boot (app: App, mainWindow: BrowserWindow) {
           splashScreen.destroy()
 
           mainWindow.on('close', ($event: Event) => {
+            if (canClose) return
+
             // when the main window is about to close, inform the renderer
             // this gives it time to prompt the user to save any unsaved files before exiting
-            if (!canClose) {
-              mainWindow.webContents.send('about-to-close')
-              $event.preventDefault()
-            } else {
-              app.quit()
-            }
+            mainWindow.webContents.send('about-to-close')
+            $event.preventDefault()
           })
 
           const filePath = process.argv.slice(-1)[0]
@@ -128,10 +125,8 @@ async function boot (app: App, mainWindow: BrowserWindow) {
     })
 
   ipcMain.on('quit', () => {
-    // the renderer has asked to exit
     canClose = true
-    // mainWindow.close()
-    app.quit()
+    quit()
   })
 }
 
@@ -140,14 +135,14 @@ app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
-    app.quit()
+    quit()
   }
 })
 
 const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
-  app.quit()
+  quit()
 } else {
   let mainWindow: BrowserWindow
 
@@ -189,10 +184,15 @@ if (isDevelopment) {
   if (process.platform === 'win32') {
     process.on('message', (data: string) => {
       if (data === 'graceful-exit') {
-        app.quit()
+        quit()
       }
     })
   } else {
-    process.on('SIGTERM', () => app.quit())
+    process.on('SIGTERM', () => quit())
   }
+}
+
+function quit () {
+  canClose = true
+  app.quit()
 }

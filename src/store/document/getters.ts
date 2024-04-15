@@ -1,3 +1,4 @@
+import { DocumentStatus } from "@/types/enums/DocumentStatus"
 import { DocumentState } from "./state"
 
 /**
@@ -17,4 +18,8 @@ export function canDelete (state: DocumentState) {
   return state.selectedItemIds.size > 0 ||
     state.selectedConnectionIds.size > 0 ||
     Object.keys(state.selectedControlPoints).length > 0
+}
+
+export function isEditable (state: DocumentState) {
+  return state.status === DocumentStatus.Ready
 }

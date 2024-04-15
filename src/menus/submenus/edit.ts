@@ -1,9 +1,13 @@
 import { MenuItemConstructorOptions } from 'electron/main'
 import { DocumentStore } from '@/store/document'
 import { useRootStore } from '@/store/root'
+import { MenuFactory } from '@/types/interfaces/MenuFactory'
 
-export default function edit (useDocumentStore: DocumentStore, submenus: MenuItemConstructorOptions[] = []): MenuItemConstructorOptions[] {
-  const store = useDocumentStore()
+/**
+ * Creates a document Edit menu.
+ */
+export const createEditSubmenu: MenuFactory = (useDocumentStore?: DocumentStore, submenus = []) => {
+  const store = useDocumentStore!()
   const rootStore = useRootStore()
 
   let menu: MenuItemConstructorOptions[] = [
@@ -94,10 +98,14 @@ export default function edit (useDocumentStore: DocumentStore, submenus: MenuIte
     menu.push({
       label: '&Group',
       submenu: [
-        { label: '&Group' },
+        {
+          label: '&Group',
+          click: store.group
+        },
         {
           label: '&Ungroup',
-          enabled: store.canUngroup
+          enabled: store.canUngroup,
+          click: store.ungroup
         }
       ]
     })
@@ -106,13 +114,6 @@ export default function edit (useDocumentStore: DocumentStore, submenus: MenuIte
   if (submenus.length > 0) {
     menu.push({ type: 'separator' })
     menu = menu.concat(submenus)
-  }
-
-  if (store.selectedItemIds.size === 1) {
-    menu.push({ type: 'separator' })
-    menu.push({
-      label: '&Item Properties'
-    })
   }
 
   if (store.activePortId) {

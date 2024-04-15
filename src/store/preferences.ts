@@ -1,9 +1,11 @@
 import Property from '@/types/interfaces/Property'
 import { defineStore } from 'pinia'
+import { useRootStore } from './root'
 
 export const usePreferencesStore = defineStore({
   id: 'preferences',
   state: () => ({
+    isOpen: false,
     colors: {
       onColor: {
         type: 'color',
@@ -20,9 +22,15 @@ export const usePreferencesStore = defineStore({
       unknownColor: {
         type: 'color',
         label: 'Unknown state',
-        value: 'darkred',
+        value: '#ff0000',
         description: 'High impedance (Hi-Z).'
-      } as Property<string>
+      } as Property<string>,
+      animate: {
+        type: 'boolean',
+        label: 'Animate signal direction',
+        value: true,
+        description: 'Show animated dashes in the direction of the signal\'s electrical flow.'
+      } as Property<boolean>
     },
     snapping: {
       snapToGrid: {

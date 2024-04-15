@@ -5,8 +5,11 @@ import CircuitNode from './circuit/CircuitNode'
 import Oscillator from './oscillator'
 import Oscillogram from '@/types/types/Oscillogram'
 import Point from '@/types/interfaces/Point'
+import { DocumentStatus } from '@/types/enums/DocumentStatus'
 
 export interface DocumentState extends SerializableState {
+  /** Current document status. */
+  status: DocumentStatus
   /** The boundaries encompassing the canvas. */
   viewport: DOMRect
   /** The boundaries of the canvas. This is usually larger han the viewport size. */
@@ -40,8 +43,6 @@ export interface DocumentState extends SerializableState {
   isDebugging: boolean
   /** Whether or not the document is dirty (i.e., has unsaved changes). */
   isDirty: boolean
-  /** Whether or not the document is busy processing something. Useful to debounce CPU-intensive actions. */
-  isBusy: boolean
   /** List of port IDs that are requested by the user to be monitored. */
   monitoredPortIds: Set<string>
   /** List of IDs of selected items. */
@@ -72,10 +73,6 @@ export interface DocumentState extends SerializableState {
     /** The current position of the target end of the experimenting wire. */
     targetPosition: Point
   } | null
-  /** Whether or not the computer is printing the document. */
-  isPrinting: boolean
-  /** Whether or not an image is being rendered from the document. */
-  isCreatingImage: boolean
   /** Whether or not to animate panning. */
   panningAnimationFrameId: number
   /** Mapping of port IDs to their respective virtual circuit nodes. */
@@ -93,6 +90,7 @@ export interface DocumentState extends SerializableState {
 }
 
 export const state = (): DocumentState => ({
+  status: DocumentStatus.Ready,
   undoStack: [],
   redoStack: [],
   oscillogram: {},
@@ -104,10 +102,7 @@ export const state = (): DocumentState => ({
   isCircuitEvaluated: false,
   isDebugging: false,
   isDirty: false,
-  isBusy: false,
   hasLoaded: false,
-  isPrinting: false,
-  isCreatingImage: false,
   panningAnimationFrameId: 0,
 
   nodes: {},

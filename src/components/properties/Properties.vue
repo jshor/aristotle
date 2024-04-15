@@ -23,11 +23,9 @@
         v-if="isOpen"
         class="properties__dialog"
         ref="dialogRef"
-        :aria-hidden="!isOpen"
         :style="dialogStyle"
         :tabindex="0"
         @keydown.esc="close"
-        @keydown="onKeyDown"
         @touchstart.stop
       >
         <div class="properties__heading" role="title">
@@ -35,7 +33,7 @@
           <icon
             :tabindex="0"
             :icon="faClose"
-            @click="close"
+            @click.stop="close"
             @keydown.space="close"
             role="button"
             class="properties__close"
@@ -49,6 +47,7 @@
 
         <div
           tabindex="0"
+          data-test="focus-end"
           @focus="dialogRef?.focus()"
         />
       </div>
@@ -65,149 +64,107 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, nextTick, PropType, ref, watch, onMounted } from 'vue'
+<script lang="ts" setup>
+import { computed, nextTick, ref, watch, onMounted } from 'vue'
 import { faClose, faGear as faWrench } from '@fortawesome/free-solid-svg-icons'
 import cloneDeep from 'lodash.clonedeep'
 import Icon from '@/components/Icon.vue'
-import PropertyForm from '@/components/PropertyForm.vue'
+import PropertyForm from '@/components/properties/PropertyForm.vue'
 import ItemProperties from '@/types/interfaces/ItemProperties'
 import Point from '@/types/interfaces/Point'
 import BoundingBox from '@/types/types/BoundingBox'
 
-export default defineComponent({
-  name: 'Properties',
-  components: {
-    Icon,
-    PropertyForm
-  },
-  props: {
-    modelValue: {
-      type: Object as PropType<ItemProperties>,
-      default: () => ({})
-    },
-    id: {
-      type: String,
-      default: ''
-    },
-    viewport: {
-      type: Object as PropType<DOMRect>,
-      required: true
-    },
-    boundingBox: {
-      type: Object as PropType<BoundingBox>,
-      required: true
-    },
-    zoom: {
-      type: Number,
-      required: true
-    }
-  },
-  emits: {
-    'update:modelValue': (properties: ItemProperties) => true,
-    'pan': (point: Point, animate: boolean) => true
-  },
-  setup (props, { emit }) {
-    const dialogRef = ref<HTMLElement>()
-    const propertiesRef = ref<HTMLElement>()
-    const isOpen = ref(false)
-    const position = ref<Point>({ x: 0, y: 0 })
-    const iconStyle = computed(() => ({
-      left: `${props.boundingBox.right + 16}px`,
-      top: `${props.boundingBox.top}px`
-    }))
-    const dialogStyle = computed(() => ({
-      ...iconStyle.value,
-      transform: `scale(${1 / props.zoom})`
-    }))
-    const model = computed({
-      get: () => cloneDeep(props.modelValue),
-      set: value => emit('update:modelValue', value)
-    })
-    const isMounted = ref(false)
-
-    onMounted(() => isMounted.value = true)
-
-    watch(() => props.boundingBox, updatePosition)
-
-    function close ($event: Event) {
-      propertiesRef.value?.focus()
-      $event.preventDefault()
-      $event.stopPropagation()
-      isOpen.value = false
-    }
-
-    function stopPropagation ($event: MouseEvent) {
-      $event.stopPropagation()
-    }
-
-    async function openProperties () {
-      isOpen.value = true
-
-      await nextTick()
-      await updatePosition()
-    }
-
-    async function updatePosition () {
-      position.value = {
-        x: props.boundingBox.right + 10,
-        y: props.boundingBox.top + 10
-      }
-
-      await nextTick()
-
-      if (!dialogRef.value) return
-
-      const { left, top, bottom, right } = dialogRef.value.getBoundingClientRect()
-      const deltaMaxX = Math.max(right - props.viewport.right, 0)
-      const deltaMaxY = Math.max(bottom - props.viewport.bottom, 0)
-      const deltaMinX = Math.min(left - props.viewport.left, 0)
-      const deltaMinY = Math.min(top - props.viewport.top, 0)
-
-      if (deltaMaxX > 0 || deltaMaxY > 0) {
-        emit('pan', {
-          x: -deltaMaxX,
-          y: -deltaMaxY
-        }, true)
-      }
-
-      if (deltaMinX < 0 || deltaMinY < 0) {
-        emit('pan', {
-          x: -deltaMinX,
-          y: -deltaMinY
-        }, true)
-      }
-
-      dialogRef.value.focus()
-    }
-
-    function onKeyDown ($event: KeyboardEvent) {
-      // $event.preventDefault()
-      // $event.stopImmediatePropagation()
-    }
-
-    return {
-      faClose,
-      faWrench,
-      model,
-      isOpen,
-      propertiesRef,
-      dialogRef,
-      iconStyle,
-      dialogStyle,
-      isMounted,
-      close,
-      openProperties,
-      stopPropagation,
-      onKeyDown,
-      touchedTest: ($event: TouchEvent) => {
-        $event.stopPropagation()
-
-        console.log('touched')
-      }
-    }
-  }
+const props = withDefaults(defineProps<{
+  /** Set of item properties. */
+  modelValue: ItemProperties
+  /** Item ID. */
+  id?: string
+  /** Viewport rect. */
+  viewport: DOMRect
+  /** Item bounding box. */
+  boundingBox: BoundingBox
+  /** Zoom level of the document. */
+  zoom: number
+}>(), {
+  modelValue: () => ({}),
+  id: ''
 })
+
+const emit = defineEmits<{
+  /** Model update. */
+  (e: 'update:modelValue', properties: ItemProperties): void
+  /** Panning request to the given point. */
+  (e: 'pan', point: Point, animate: boolean): void
+}>()
+
+const dialogRef = ref<HTMLElement>()
+const propertiesRef = ref<HTMLElement>()
+const isOpen = ref(false)
+const position = ref<Point>({ x: 0, y: 0 })
+const iconStyle = computed(() => ({
+  left: `${props.boundingBox.right + 16}px`,
+  top: `${props.boundingBox.top}px`
+}))
+const dialogStyle = computed(() => ({
+  ...iconStyle.value,
+  transform: `scale(${1 / props.zoom})`
+}))
+const model = computed({
+  get: () => cloneDeep(props.modelValue),
+  set: value => emit('update:modelValue', value)
+})
+const isMounted = ref(false)
+
+onMounted(() => isMounted.value = true)
+
+watch(() => props.boundingBox, updatePosition)
+
+function close ($event: Event) {
+  propertiesRef.value?.focus()
+  $event.preventDefault()
+  $event.stopPropagation()
+  isOpen.value = false
+}
+
+async function openProperties () {
+  isOpen.value = true
+
+  await nextTick()
+  await updatePosition()
+}
+
+async function updatePosition () {
+  position.value = {
+    x: props.boundingBox.right + 10,
+    y: props.boundingBox.top + 10
+  }
+
+  await nextTick()
+
+  if (!dialogRef.value) return
+
+  const { left, top, bottom, right } = dialogRef.value.getBoundingClientRect()
+  const deltaMaxX = Math.max(right - props.viewport.right, 0)
+  const deltaMaxY = Math.max(bottom - props.viewport.bottom, 0)
+  const deltaMinX = Math.min(left - props.viewport.left, 0)
+  const deltaMinY = Math.min(top - props.viewport.top, 0)
+
+  if (deltaMaxX > 0 || deltaMaxY > 0) {
+    emit('pan', {
+      x: -deltaMaxX,
+      y: -deltaMaxY
+    }, true)
+  }
+
+  if (deltaMinX < 0 || deltaMinY < 0) {
+    emit('pan', {
+      x: -deltaMinX,
+      y: -deltaMinY
+    }, true)
+  }
+
+  dialogRef.value.focus()
+}
 </script>
 
 <style lang="scss">

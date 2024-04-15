@@ -61,12 +61,13 @@ exports[`Document container should match the snapshot 1`] = `
       </div>
     </div><!-- Note: z-index of items will be offset by ITEM_BASE_Z_INDEX to ensure they overlap wires -->
     <!-- the tab-accessible centroid element -->
-    <div style="position: absolute; left: 0px; top: 0px;" tabindex="0" aria-label="Connection from  to " title="Connection from  to " data-test="centroid"></div><!-- each segment of the visible wire -->
-    <!-- TODO: set is-animated according to preferences --><svg class="wire" width="15" height="15" aria-roledescription="connection" style="left: -7.5px; top: -7.5px;" title="Connection from  to ">
+    <div style="position: absolute; left: 0px; top: 0px;" tabindex="0" aria-label="Connection from &quot;&quot; to &quot;&quot;" data-test="centroid"></div><!-- each segment of the visible wire -->
+    <!-- TODO: set is-animated according to preferences --><svg class="wire" width="15" height="15" aria-roledescription="connection" style="left: -7.5px; top: -7.5px;" title="Connection from &quot;&quot; to &quot;&quot;">
+      <title>Connection from "" to ""</title>
       <path class="wire__outline" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
       <path class="wire__display" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
-      <!--v-if-->
-      <path class="wire__clickable" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+      <path class="wire__animation" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
+      <path class="wire__clickable" data-test="wire-clickable" fill="none" transform="translate(7.5, 7.5)" d="M 0,0 L 0,0"></path>
     </svg><!-- the visual outline of the bounding box surrounding the connection -->
     <!--v-if-->
     <!-- the control points -->

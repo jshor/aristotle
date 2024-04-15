@@ -1,9 +1,7 @@
 <template>
   <status-bar-viewer>
     <template v-slot:left>
-      <span v-if="isPrinting">Printing...</span>
-      <span v-else-if="isCreatingImage">Rendering image...</span>
-      <span v-else>Ready</span>
+      {{ status }}
     </template>
     <template v-slot:right>
       <status-bar-button
@@ -53,6 +51,7 @@ import StatusBarViewer from '@/components/statusbar/StatusBarViewer.vue'
 import StatusBarZoom from '@/components/statusbar/StatusBarZoom.vue'
 import Icon from '@/components/Icon.vue'
 import { DocumentStore } from '@/store/document'
+import { DocumentStatus } from '@/types/enums/DocumentStatus'
 
 export default defineComponent({
   name: 'StatusBar',
@@ -74,14 +73,21 @@ export default defineComponent({
   },
   setup (props) {
     const store = props.store()
-    const isPrinting = computed(() => store.isPrinting)
-    const isCreatingImage = computed(() => store.isCreatingImage)
+    const status = computed(() => {
+      switch (store.status) {
+        case DocumentStatus.Printing:
+          return 'Printing...'
+        case DocumentStatus.SavingImage:
+          return 'Rendering image...'
+        default:
+          return 'Ready'
+      }
+    })
     const zoomPercent = computed(() => Math.round(store.zoomLevel * 100))
 
     return {
       store,
-      isPrinting,
-      isCreatingImage,
+      status,
       zoomPercent,
       faMinus,
       faPlus,
