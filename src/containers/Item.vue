@@ -28,7 +28,6 @@
       :bounding-box="item.boundingBox"
       :zoom="store.zoom"
       @pan="store.panDelta"
-      aria-label="Properties dialog"
       data-test="properties"
     />
     <circuit-component

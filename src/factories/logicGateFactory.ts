@@ -6,6 +6,7 @@ import portFactory from './portFactory'
 import Direction from '@/types/enums/Direction'
 import Port from '@/types/interfaces/Port'
 import PortType from '@/types/enums/PortType'
+import { t } from '@/utils/i18n'
 
 export default function logicGateFactory (type: ItemSubtype, inputCount = 2) {
   const elementId = uuid()
@@ -24,7 +25,7 @@ export default function logicGateFactory (type: ItemSubtype, inputCount = 2) {
   item.properties = {
     ...item.properties,
     inputCount: {
-      label: 'Input count',
+      label: t('propertyName.inputCount'),
       value: inputCount,
       type: 'number',
       min: inputCount

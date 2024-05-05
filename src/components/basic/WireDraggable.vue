@@ -71,7 +71,7 @@ const props = defineProps<{
     /** The wire Bezier curve geometry. */
   geometry: WireGeometry
     /** Whether or not to display marching ants to indicate electrical flow direction. */
-  isAnimated: boolean
+  isAnimated?: boolean
     /** The logical value of the source port. */
   sourceValue: LogicValue
   /** The user-friendly label. */
@@ -79,10 +79,9 @@ const props = defineProps<{
   /** Whether or not this connection is a preview (i.e., opaque in appearance). */
   isPreview?: boolean
   /** Whether or not this wire should display as selected (i.e., with a select shadow). */
-  isSelected: boolean
+  isSelected?: boolean
   /** Whether or not the item should show a flash once to the user. */
-  flash: boolean
-
+  flash?: boolean
 }>()
 
 const emit = defineEmits<{

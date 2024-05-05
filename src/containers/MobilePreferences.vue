@@ -87,7 +87,6 @@ export default defineComponent({
       simulation,
       experience
     } = storeToRefs(preferencesStore)
-    const { updateSettings } = preferencesStore
 
     return {
       faFile,
@@ -103,8 +102,7 @@ export default defineComponent({
       grid,
       snapping,
       simulation,
-      experience,
-      updateSettings
+      experience
     }
   }
 })

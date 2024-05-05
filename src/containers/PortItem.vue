@@ -8,6 +8,7 @@
         top: connectionExperiment.position.y + 'px'
       }"
       :source-value="port.value"
+      :label="$t('label.connection')"
     />
     <port-handle
       v-if="connectionExperiment"

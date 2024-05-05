@@ -3,13 +3,16 @@ import ItemType from '@/types/enums/ItemType'
 import Port from '@/types/interfaces/Port'
 import Item from '@/types/interfaces/Item'
 import Direction from '@/types/enums/Direction'
+import { t } from '@/utils/i18n'
 
 export default function itemFactory (id: string, type: ItemType, subtype: ItemSubtype, ports?: Record<Direction, Port[]>): Item {
+  const defaultNameKey = subtype === ItemSubtype.None
+    ? type
+    : subtype
+
   return {
     id,
-    defaultName: subtype === ItemSubtype.None
-      ? type
-      : subtype,
+    defaultName: t(`itemType.${defaultNameKey}`),
     name: '',
     type,
     subtype,
@@ -35,7 +38,7 @@ export default function itemFactory (id: string, type: ItemType, subtype: ItemSu
     properties: {
       name: {
         type: 'text',
-        label: 'Name',
+        label: t('propertyName.name'),
         value: ''
       }
     }

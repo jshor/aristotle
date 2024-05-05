@@ -8,6 +8,8 @@ import PortType from '@/types/enums/PortType'
 import ItemProperties from '@/types/interfaces/ItemProperties'
 import ItemFactory from '@/types/types/ItemFactory'
 import Port from '@/types/interfaces/Port'
+import LogicValue from '@/types/enums/LogicValue'
+import { t } from '@/utils/i18n'
 
 const inputFactory: ItemFactory = (type: ItemSubtype, properties: ItemProperties = {}) => {
   const elementId = uuid()
@@ -25,13 +27,13 @@ const inputFactory: ItemFactory = (type: ItemSubtype, properties: ItemProperties
     ...item.properties,
     ...properties,
     startValue: {
-      label: 'Start value',
-      value: -1,
+      label: t('propertyName.startValue'),
+      value: LogicValue.FALSE,
       type: 'number',
       options: {
-        'True': 1,
-        'Hi-Z': 0,
-        'False': -1
+        [t('propertyOption.true')]: LogicValue.TRUE,
+        [t('propertyOption.hiz')]: LogicValue.UNKNOWN,
+        [t('propertyOption.false')]: LogicValue.FALSE
       }
     },
   }

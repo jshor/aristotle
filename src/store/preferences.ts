@@ -122,15 +122,11 @@ export const usePreferencesStore = defineStore({
   },
 
   actions: {
-    async writeSettings () {
+    async savePreferences () {
       try {
         // TODO: determine settings path for each OS
         // await FileService.open('?')
       } catch (_) {}
-    },
-
-    async updateSettings (preferences: any) {
-      await this.writeSettings()
     }
   }
 })

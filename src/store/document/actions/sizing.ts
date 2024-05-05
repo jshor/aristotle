@@ -35,12 +35,16 @@ export function updateCanvasSize (this: DocumentStoreInstance, zoom = 1) {
     this.panToCenter()
   }
 
-  // zoom out to fit everything on the screen (within the editor viewport)
   // if everything fits, then zoom is defaulted to 100%
   setTimeout(() => {
-    this.setZoom({
-      zoom: defaultZoom || Math.min(this.viewport.width / width, this.viewport.height / height, 1)
-    })
+    // compute the zoom level to visually fit the items within the viewport
+    const zoomToFit = Math.min(this.viewport.width / width, this.viewport.height / height, 1)
+
+    // set the zoom level to the user's default preference or the zoom to fit level
+    // if there are no items to fit on the screen, this will default to 1.0 (100%)
+    const zoom = defaultZoom || (width + height > 0 ? zoomToFit : 1)
+
+    this.setZoom({ zoom })
   })
 }
 

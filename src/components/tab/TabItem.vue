@@ -16,6 +16,7 @@
     </div>
     <div
       class="tab-item__icon tab-item__icon--close"
+      :title="$t('button.close')"
       @click.stop="$emit('close')"
       @touchstart.stop="$emit('close')"
       @mousedown.stop

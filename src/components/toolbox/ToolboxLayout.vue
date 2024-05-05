@@ -10,15 +10,15 @@
       :hide-scrollbar="true"
     >
       <div
-        v-for="cat in categories"
+        v-for="category in categories"
         class="toolbox-layout__badge"
         :class="{
-          'toolbox-layout__badge--active': cat === selected
+          'toolbox-layout__badge--active': category === selected
         }"
-        :key="cat"
-        @click="select(cat)"
+        :key="category"
+        @click="select(category)"
       >
-        {{ cat }}
+        {{ $t(`toolbox.${category}`) }}
       </div>
     </scroll-fade>
     <scroll-fade class="toolbox-layout__items">

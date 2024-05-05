@@ -18,8 +18,8 @@
 
     <div
       class="oscilloscope-viewer__inner"
-    ref="viewer"
-    :style="{ height: `${height}px` }"
+      ref="viewer"
+      :style="{ height: `${height}px` }"
     >
       <slot />
     </div>

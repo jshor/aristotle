@@ -4,6 +4,7 @@ import { createHelpSubmenu } from '../submenus/help'
 import { createEditSubmenu } from '../submenus/edit'
 import { createFileSubmenu } from '../submenus/file'
 import { createViewSubmenu } from '../submenus/view'
+import { t } from '@/utils/i18n'
 
 /**
  * Creates the document application menu.
@@ -11,19 +12,19 @@ import { createViewSubmenu } from '../submenus/view'
 export const createDocumentMenu: MenuFactory = (useDocumentStore?: DocumentStore) => {
   return [
     {
-      label: 'File',
+      label: t('menu.file.parent'),
       submenu: createFileSubmenu(useDocumentStore)
     },
     {
-      label: 'Edit',
+      label: t('menu.edit.parent'),
       submenu: createEditSubmenu(useDocumentStore)
     },
     {
-      label: 'View',
+      label: t('menu.view.parent'),
       submenu: createViewSubmenu(useDocumentStore)
     },
     {
-      label: 'Help',
+      label: t('menu.help.parent'),
       role: 'help',
       submenu: createHelpSubmenu()
     }

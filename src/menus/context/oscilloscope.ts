@@ -1,5 +1,6 @@
 import { DocumentStore } from '@/store/document'
 import { MenuFactory } from '@/types/interfaces/MenuFactory'
+import { t } from '@/utils/i18n'
 
 /**
  * Creates the oscilloscope context menu.
@@ -9,18 +10,18 @@ export const createOscilloscopeContextMenu: MenuFactory = (useDocumentStore?: Do
 
   return submenu.concat([
     {
-      label: 'Clear all waves',
+      label: t('menu.oscilloscope.clearAllWaves'),
       click: () => store.oscillator.clear()
     },
     {
-      label: 'Remove all waves',
+      label: t('menu.oscilloscope.removeAllWaves'),
       click: () => store.destroyOscilloscope()
     },
     {
       type: 'separator'
     },
     {
-      label: 'Close oscilloscope',
+      label: t('menu.oscilloscope.close'),
       click: () => store.closeOscilloscope()
     }
   ])

@@ -5,7 +5,7 @@
     </template>
     <template v-slot:right>
       <status-bar-button
-        title="Zoom out"
+        :title="$t('button.zoomOut')"
         :disabled="store.zoomLevel <= 0.1"
         @click="store.incrementZoom(-1)"
       >
@@ -21,7 +21,7 @@
         @zoom="zoom => store.setZoom({ zoom })"
       />
       <status-bar-button
-        title="Zoom in"
+        :title="$t('button.zoomIn')"
         :disabled="store.zoomLevel >= 2.0"
         @click="store.incrementZoom(1)"
       >
@@ -34,7 +34,7 @@
         {{ zoomPercent }}%
       </status-bar-button>
       <status-bar-button
-        title="Toggle fullscreen"
+        :title="$t('button.fullscreen')"
         @click="$emit('fullscreen')"
       >
         <icon :icon="isFullscreen ? faCompress : faExpand" />
@@ -45,6 +45,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { faMinus, faPlus, faCompress, faExpand } from '@fortawesome/free-solid-svg-icons'
 import StatusBarButton from '@/components/statusbar/StatusBarButton.vue'
 import StatusBarViewer from '@/components/statusbar/StatusBarViewer.vue'
@@ -72,15 +73,16 @@ export default defineComponent({
     }
   },
   setup (props) {
+    const { t } = useI18n()
     const store = props.store()
     const status = computed(() => {
       switch (store.status) {
         case DocumentStatus.Printing:
-          return 'Printing...'
+          return t('label.printing')
         case DocumentStatus.SavingImage:
-          return 'Rendering image...'
+          return t('label.renderingImage')
         default:
-          return 'Ready'
+          return t('label.ready')
       }
     })
     const zoomPercent = computed(() => Math.round(store.zoomLevel * 100))

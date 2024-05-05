@@ -1,6 +1,7 @@
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from '@/App.vue'
+import { i18n } from '@/utils/i18n'
 import '@/styles/main.scss'
 
 if (!window.api) {
@@ -29,5 +30,6 @@ if (!window.api) {
 }
 
 createApp(App)
+  .use(i18n)
   .use(createPinia())
   .mount('#app')

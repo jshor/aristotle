@@ -1,7 +1,3 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Dialog Container > should match the snapshot 1`] = `"<modal-stub modelvalue="false" title="Dialog Test"></modal-stub>"`;
-
-exports[`Dialog Container should match the snapshot 1`] = `"<modal-stub modelvalue="false" title="Dialog Test"></modal-stub>"`;
-
-exports[`Toolbox Item should match the snapshot 1`] = `"<modal-stub modelvalue="false" title="Dialog Test"></modal-stub>"`;

@@ -1,17 +1,17 @@
 <template>
   <div class="oscilloscope-title-bar">
-    <div class="oscilloscope-title-bar__title">Oscilloscope</div>
+    <div class="oscilloscope-title-bar__title">{{ $t('title.oscilloscope') }}</div>
     <div class="oscilloscope-title-bar__actions">
       <button
         class="oscilloscope-title-bar__button"
-        title="Remove all observations"
+        :title="$t('button.removeOscilloscope')"
         @click="$emit('removeAll')"
       >
         <icon :icon="faBan" />
       </button>
       <button
         class="oscilloscope-title-bar__button"
-        title="Clear oscilloscope"
+        :title="$t('button.clearOscilloscope')"
         :disabled="!clearable"
         @click="$emit('clear')"
       >
@@ -19,7 +19,7 @@
       </button>
       <button
         class="oscilloscope-title-bar__button"
-        title="Close"
+        :title="$t('button.close')"
         @click="$emit('close')"
       >
         <icon :icon="faClose" />

@@ -51,3 +51,19 @@ export function setZoom (this: DocumentStoreInstance, { zoom, point }: { zoom: n
 
   this.zoomLevel = zoom
 }
+
+export function zoomToFit (this: DocumentStoreInstance) {
+  const boundingBoxes = Object
+    .values(this.items)
+    .map(item => item.boundingBox)
+
+  if (boundingBoxes.length === 0) return
+
+  const boundingBox = boundaries.getGroupBoundingBox(boundingBoxes)
+  const width = boundingBox.right - boundingBox.left
+  const height = boundingBox.bottom - boundingBox.top
+
+  this.setZoom({
+    zoom: Math.min(this.viewport.width / width, this.viewport.height / height, 1)
+  })
+}

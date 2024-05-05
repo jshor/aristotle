@@ -65,6 +65,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, PropType, Ref, ComponentPublicInstance, StyleValue } from 'vue'
+import { useI18n } from 'vue-i18n'
 import PortHandle from '@/components/port/PortHandle.vue'
 import Point from '@/types/interfaces/Point'
 import Draggable from '@/components/interactive/Draggable.vue'
@@ -116,6 +117,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
+    const { t } = useI18n()
     const store = props.store()
     const { colors } = storeToRefs(usePreferencesStore())
     const connection = store.connections[props.id]
@@ -145,7 +147,7 @@ export default defineComponent({
       const source = store.ports[connection.source]
       const target = store.ports[connection.target]
 
-      return `Connection from "${source.name}" to "${target.name}"`
+      return t('label.connectionFrom', [source.name, target.name])
     })
 
     /**

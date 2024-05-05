@@ -2,6 +2,7 @@ import { MenuItemConstructorOptions } from 'electron/main'
 import { DocumentStore } from '@/store/document'
 import { useRootStore } from '@/store/root'
 import { MenuFactory } from '@/types/interfaces/MenuFactory'
+import { t } from '@/utils/i18n'
 
 /**
  * Creates a document Edit menu.
@@ -12,7 +13,7 @@ export const createEditSubmenu: MenuFactory = (useDocumentStore?: DocumentStore,
 
   let menu: MenuItemConstructorOptions[] = [
     {
-      label: '&Undo',
+      label: t('menu.edit.undo'),
       enabled: store.canUndo,
       accelerator: 'CommandOrControl+Z',
       click: store.undo
@@ -31,32 +32,32 @@ export const createEditSubmenu: MenuFactory = (useDocumentStore?: DocumentStore,
       enabled: rootStore.canPaste
     },
     {
-      label: 'Delete',
+      label: t('menu.edit.delete'),
       accelerator: 'Delete',
       enabled: store.canDelete,
-      click: store.deleteSelection
+      click: () => store.deleteSelection()
     },
     { type: 'separator' },
     {
-      label: '&Select All',
+      label: t('menu.edit.selectAll'),
       accelerator: 'CommandOrControl+A',
       enabled: store.baseItems.length > 0,
-      click: store.selectAll
+      click: () => store.selectAll()
     }
   ]
 
   if (store.selectedItemIds.size > 0) {
     menu.push({ type: 'separator' })
     menu.push({
-      label: '&Rotate',
+      label: t('menu.edit.rotate.parent'),
       submenu: [
         {
-          label: 'Rotate 90° &CW',
+          label: t('menu.edit.rotate.clockwise'),
           accelerator: 'CmdOrCtrl+R',
           click: () => store.rotate(1)
         },
         {
-          label: 'Rotate 90° CC&W',
+          label: t('menu.edit.rotate.counterClockwise'),
           accelerator: 'CmdOrCtrl+Shift+R',
           click: () => store.rotate(-1)
         }
@@ -67,45 +68,50 @@ export const createEditSubmenu: MenuFactory = (useDocumentStore?: DocumentStore,
   if (store.hasSelection) {
     menu.push({ type: 'separator' })
     menu.push({
-      label: '&Bring to Front',
+      label: t('menu.edit.forward.parent'),
       submenu: [
         {
-          label: '&Bring to Front',
-          click: () => store.setZIndex(store.zIndex)
-        },
-        {
-          label: 'Bring &Forward',
+          label: t('menu.edit.forward.bringForward'),
+          accelerator: 'CmdOrCtrl+]',
           click: () => store.incrementZIndex(1)
-        }
-      ]
-    })
-    menu.push({
-      label: '&Send to Back',
-      submenu: [
+        },
         {
-          label: '&Send to Back',
+          label: t('menu.edit.forward.bringToFront'),
+          accelerator: 'CmdOrCtrl+Shift+]',
           click: () => store.setZIndex(store.zIndex)
-        },
-        {
-          label: 'Send &Backward',
-          click: () => store.incrementZIndex(-1)
         }
       ]
     })
-  }
-
-  if (store.canGroup) {
     menu.push({
-      label: '&Group',
+      label: t('menu.edit.backward.parent'),
       submenu: [
         {
-          label: '&Group',
-          click: store.group
+          label: t('menu.edit.backward.sendBackward'),
+          accelerator: 'CmdOrCtrl+[',
+          click: () => store.incrementZIndex(-1)
         },
         {
-          label: '&Ungroup',
+          label: t('menu.edit.backward.sendToBack'),
+          accelerator: 'CmdOrCtrl+Shift+[',
+          click: () => store.setZIndex(store.zIndex)
+        }
+      ]
+    })
+    menu.push({ type: 'separator' })
+    menu.push({
+      label: t('menu.edit.group.parent'),
+      submenu: [
+        {
+          label: t('menu.edit.group.group'),
+          accelerator: 'CmdOrCtrl+G',
+          enabled: store.canGroup,
+          click: () => store.group()
+        },
+        {
+          label: t('menu.edit.group.ungroup'),
+          accelerator: 'CmdOrCtrl+Shift+G',
           enabled: store.canUngroup,
-          click: store.ungroup
+          click: () => store.ungroup()
         }
       ]
     })
@@ -117,11 +123,17 @@ export const createEditSubmenu: MenuFactory = (useDocumentStore?: DocumentStore,
   }
 
   if (store.activePortId) {
+    const port = store.ports[store.activePortId]
+
     menu.push({ type: 'separator' })
     menu.push({
       type: 'checkbox',
-      label: 'Show in &Oscilloscope',
-      checked: true
+      label: t('menu.edit.showInOscilloscope'),
+      accelerator: 'CmdOrCtrl+.',
+      checked: port.isMonitored,
+      click: () => port.isMonitored
+        ? store.unmonitorPort(port.id)
+        : store.monitorPort(port.id)
     })
   }
 

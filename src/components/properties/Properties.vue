@@ -29,10 +29,11 @@
         @touchstart.stop
       >
         <div class="properties__heading" role="title">
-          Properties
+          {{ $t('title.properties') }}
           <icon
             :tabindex="0"
             :icon="faClose"
+            :title="$t('button.close')"
             @click.stop="close"
             @keydown.space="close"
             role="button"
@@ -58,6 +59,7 @@
         @touchend="openProperties"
         :style="iconStyle"
         :icon="faWrench"
+        :title="$t('button.openProperties')"
         class="properties__icon"
       />
     </teleport>

@@ -7,7 +7,5 @@ import { MenuFactory } from '@/types/interfaces/MenuFactory'
  * Creates the document editor context menu.
  */
 export const createEditorContextMenu: MenuFactory = (useDocumentStore?: DocumentStore) => {
-  return createEditSubmenu(useDocumentStore, createGridSubmenu(useDocumentStore).concat({
-    type: 'separator'
-  }))
+  return createEditSubmenu(useDocumentStore, createGridSubmenu(useDocumentStore))
 }

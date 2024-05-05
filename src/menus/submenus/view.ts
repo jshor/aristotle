@@ -3,6 +3,8 @@ import { DocumentStore } from '@/store/document'
 import { createGridSubmenu } from './grid'
 import { MenuFactory } from '@/types/interfaces/MenuFactory'
 import { useRootStore } from '@/store/root'
+import { t } from '@/utils/i18n'
+import { MAX_ZOOM, MIN_ZOOM } from '@/constants'
 
 /**
  * Creates the document View submenu.
@@ -32,40 +34,40 @@ export const createViewSubmenu: MenuFactory = (useDocumentStore?: DocumentStore)
     zoomSubmenu.unshift({
       type: 'checkbox',
       checked: true,
-      label: 'Custom'
+      label: t('menu.view.zoomCustom')
     })
   }
 
   const menu: MenuItemConstructorOptions[] = [
     {
-      label: '&Zoom In',
+      label: t('menu.view.zoomIn'),
       accelerator: 'CommandOrControl+=',
-      enabled: store.zoomLevel < 2, // TODO: const
+      enabled: store.zoomLevel < MIN_ZOOM,
       click: () => store.incrementZoom(1)
     },
     {
-      label: '&Zoom Out',
+      label: t('menu.view.zoomOut'),
       accelerator: 'CommandOrControl+-',
-      enabled: store.zoomLevel > 0.1, // TODO: const
+      enabled: store.zoomLevel > MAX_ZOOM,
       click: () => store.incrementZoom(-1)
     },
     {
-      label: '&Zoom...',
+      label: t('menu.view.zoomLevel'),
       submenu: zoomSubmenu
     },
     { type: 'separator' },
     {
-      label: '&Pan to Center',
+      label: t('menu.view.panToCenter'),
       accelerator: 'CommandOrControl+;',
-      click: store.panToCenter
+      click: () => store.panToCenter()
     },
     { type: 'separator' },
     {
       type: 'checkbox',
-      click: rootStore.toggleFullscreen,
+      click: () => rootStore.toggleFullscreen(),
       checked: rootStore.isFullscreen,
       accelerator: 'F11',
-      label: 'Fullscreen'
+      label: t('menu.view.fullscreen'),
     }
   ]
 

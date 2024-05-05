@@ -10,7 +10,8 @@
     "dev": "vite",
     "build": "vite build && electron-builder",
     "lint": "eslint src",
-    "test": "vitest run --coverage",
+    "test:ci": "vitest run --coverage",
+    "test": "vitest --coverage --ui",
     "docs:build": "vuepress build docs",
     "docs:serve": "vuepress dev docs",
     "release": "standard-version",
@@ -27,6 +28,7 @@
     "tiny-emitter": "^2.1.0",
     "uuid": "^9.0.0",
     "vue": "^3.3.4",
+    "vue-i18n": "^9.12.1",
     "vue3-smooth-dnd": "^0.0.2"
   },
   "devDependencies": {

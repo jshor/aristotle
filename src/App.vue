@@ -109,7 +109,6 @@
 import { faFile } from '@fortawesome/free-solid-svg-icons'
 import { storeToRefs } from 'pinia'
 import { defineComponent, onBeforeUnmount, onMounted, watchEffect, ref } from 'vue'
-import BuilderView from '@/views/BuilderView.vue'
 import DesktopPreferences from './containers/dialogs/DesktopPreferences.vue'
 import Document from './containers/Document.vue'
 import MobilePreferences from './containers/MobilePreferences.vue'
@@ -136,7 +135,6 @@ import { usePreferencesStore } from './store/preferences'
 export default defineComponent({
   name: 'App',
   components: {
-    BuilderView,
     DesktopPreferences,
     Document,
     Oscilloscope,
@@ -256,6 +254,7 @@ export default defineComponent({
       isDropping,
       isFullscreen,
       isMobilePulloutOpen,
+      isMobile,
       isToolboxOpen,
       isDocumentSelectOpen,
       onContextMenu,
@@ -264,15 +263,6 @@ export default defineComponent({
       closeDocument: store.closeDocument,
       switchDocument: store.switchDocument,
       openIntegratedCircuit: store.openIntegratedCircuit
-    }
-  },
-  data () {
-    return {
-      horizontal: false,
-      lastPosition: 0,
-      toolboxWidth: 20,
-      oscilloscopeHeight: 80,
-      isMobile
     }
   }
 })

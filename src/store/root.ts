@@ -135,7 +135,7 @@ export const useRootStore = defineStore({
       const store = createDocumentStore(id)
       const document = store()
 
-      document.resetCircuit()
+      document.initialize()
 
       this.documents[id] = {
         fileName: 'Untitled Circuit',
@@ -267,6 +267,13 @@ export const useRootStore = defineStore({
             type: 'error'
           })
       }
+    },
+
+    /**
+     * Saves all open documents.
+     */
+    saveAllDocuments () {
+      throw new Error('Not implemented.')
     },
 
     /**
