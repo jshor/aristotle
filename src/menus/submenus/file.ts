@@ -28,7 +28,7 @@ export const createFileSubmenu: MenuFactory = () => {
     {
       label: t('menu.file.openIntegratedCircuit'),
       accelerator: 'CommandOrControl+Shift+O',
-      click: () => rootStore.selectDocument() // TODO: filter by integrated circuit type
+      click: () => rootStore.selectDocument(true)
     },
     { type: 'separator' },
     {

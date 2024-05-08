@@ -5,6 +5,21 @@ export const i18n = createI18n({
   locale: 'en',
   messages: {
     'en': {
+      appName: 'Aristotle',
+      command: {
+        newDocument: 'New Circuit',
+        selectDocument: 'Load Circuit',
+        importDocument: 'Import Integrated Circuit',
+        exportImage: 'Export Image',
+        experience: 'Experience',
+        simulation: 'Simulation',
+        snapping: 'Snapping',
+        grid: 'Grid'
+      },
+      fileTypes: {
+        default: 'Aristotle Logic Circuit',
+        integratedCircuit: 'Aristotle Integrated Circuit',
+      },
       title: {
         oscilloscope: 'Oscilloscope',
         properties: 'Properties',
@@ -65,6 +80,7 @@ export const i18n = createI18n({
       },
       menu: {
         edit: {
+          parent: '&Edit',
           undo: '&Undo',
           delete: 'Delete',
           selectAll: '&Select All',
@@ -91,6 +107,7 @@ export const i18n = createI18n({
           showInOscilloscope: 'Show in &Oscilloscope',
         },
         file: {
+          parent: '&File',
           newCircuit: '&New Circuit',
           openCircuit: '&Open Circuit',
           openIntegratedCircuit: 'Open &Integrated Circuit',
@@ -119,6 +136,7 @@ export const i18n = createI18n({
           close: 'Close oscilloscope'
         },
         view: {
+          parent: '&View',
           zoomIn: '&Zoom In',
           zoomOut: '&Zoom Out',
           zoomLevel: '&Zoom...',
@@ -133,7 +151,7 @@ export const i18n = createI18n({
           snapToElements: 'Snap to &elements'
         },
         help: {
-          parent: 'Help'
+          parent: '&Help'
         }
       }
     }

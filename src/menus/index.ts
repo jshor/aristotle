@@ -3,6 +3,7 @@ import { useRootStore } from '@/store/root'
 import { createDocumentMenu } from './views/document'
 import { createPreferencesMenu } from './views/preferences'
 import { ViewType } from '@/types/enums/ViewType'
+import { createWelcomeMenu } from './views/welcome'
 
 /**
  * Returns the application menu based on the current view type.
@@ -16,6 +17,6 @@ export function createApplicationMenu (): MenuItemConstructorOptions[] {
     case ViewType.Preferences:
       return createPreferencesMenu()
     default:
-      return []
+      return createWelcomeMenu()
   }
 }

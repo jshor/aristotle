@@ -3,32 +3,28 @@
     class="modal-button"
     role="button"
     :class="{
-      'modal-button--inverted': inverted
+      'modal-button--inverted': inverted,
+      'modal-button--block': block
     }"
   >
     {{ text }}
   </button>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  name: 'ModalButton',
-  props: {
-    text: {
-      type: String,
-      required: true
-    },
-    disabled: {
-      type: Boolean,
-      default: false
-    },
-    inverted: {
-      type: Boolean,
-      default: false
-    }
-  }
+<script lang="ts" setup>
+withDefaults(defineProps<{
+  /** Button text to display. */
+  text: string
+  /** Whether or not the button is disabled. */
+  disabled?: boolean
+  /** Whether or not to display the button as transparent with an outline. */
+  inverted?: boolean
+  /** Whether or not to display a full-width button. */
+  block?: boolean
+}>(), {
+  disabled: false,
+  inverted: false,
+  block: false
 })
 </script>
 
@@ -44,6 +40,7 @@ export default defineComponent({
   font-family: var(--font-family);
   transition: background-color 0.25s;
   margin-left: 1em;
+  margin-top: 1em;
 
   &:hover {
     background-color: var(--color-bg-primary);
@@ -61,12 +58,20 @@ export default defineComponent({
     color: var(--color-primary);
 
     &:hover {
-      background-color: var(--color-bg-secondary);
+      background-color: var(--color-primary);
+      color: var(--color-bg-primary);
     }
 
     &:active {
-      background-color: var(--color-bg-tertiary);
+      background-color: var(--color-secondary);
+      color: var(--color-bg-primary);
     }
+  }
+
+  &--block {
+    display: block;
+    width: 100%;
+    margin-left: 0;
   }
 }
 

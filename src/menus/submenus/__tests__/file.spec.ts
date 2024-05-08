@@ -54,6 +54,7 @@ describe('File submenu', () => {
     expect(item.label).toBe(t('menu.file.openIntegratedCircuit'))
     expect(item.accelerator).toBe('CommandOrControl+Shift+O')
     expect(store.selectDocument).toHaveBeenCalledTimes(1)
+    expect(store.selectDocument).toHaveBeenCalledWith(true)
   })
 
   describe('saving documents', () => {

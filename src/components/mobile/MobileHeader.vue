@@ -9,14 +9,14 @@
     <div class="mobile-header__heading">
       <span
         class="mobile-header__document-name"
-        @click="$emit('select')"
+        @click="onSelect"
       >
-        {{ documentName }}
+        {{ documentName || $t('appName') }}
       </span>
       <span
         v-if="documentCount > 1"
         class="mobile-header__badge"
-        @click="$emit('select')"
+        @click="onSelect"
       >
         {{ documentCount }}
       </span>
@@ -24,36 +24,33 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
 import { faBars } from '@fortawesome/free-solid-svg-icons'
-import { faPlusSquare } from '@fortawesome/free-regular-svg-icons'
 import Icon from '../Icon.vue'
 
-export default defineComponent({
-  components: { Icon },
-  name: 'MobileHeader',
-  emits: {
-    select: () => true,
-    open: () => true
-  },
-  props: {
-    documentName: {
-      type: String,
-      required: true
-    },
-    documentCount: {
-      type: Number,
-      default: 1
-    }
-  },
-  setup () {
-    return {
-      faBars,
-      faPlusSquare
-    }
-  }
+const props = withDefaults(defineProps<{
+  documentName: string | null
+  documentCount: number
+}>(), {
+  documentName: null,
+  documentCount: 1
 })
+
+const emit = defineEmits<{
+  /** User request to select an open document. */
+  (e: 'select'): void
+  /** User request to open the mobile pullout. */
+  (e: 'open'): void
+}>()
+
+/**
+ * Emits the `select` event if there is more than one document.
+ */
+function onSelect () {
+  if (props.documentCount > 1) {
+    emit('select')
+  }
+}
 </script>
 
 <style lang="scss">
@@ -65,8 +62,8 @@ export default defineComponent({
   &__button {
     width: 1em;
     min-width: 1em;
-    font-size: 1.25em;
-    padding: 0.25em;
+    font-size: 1.5em;
+    padding: 0.5em;
     display: flex;
     align-items: center;
   }
@@ -88,14 +85,12 @@ export default defineComponent({
   }
 
   &__badge {
-    width: 2em;
     border-radius: 1.5em;
     background-color: var(--color-primary);
     color: var(--color-bg-primary);
-    font-size: 0.5em;
-    padding: 0.5em;
     font-weight: bold;
-    margin-left: 1em;
+    margin-left: 0.5em;
+    padding: 0 0.5em;
   }
 }
 </style>

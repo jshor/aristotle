@@ -16,6 +16,11 @@ import Oscillogram from '@/types/types/Oscillogram'
 import Item from '@/types/interfaces/Item'
 import { DocumentStatus } from '@/types/enums/DocumentStatus'
 import { ViewType } from '@/types/enums/ViewType'
+import {
+  DEFAULT_FILE_EXTENSION,
+  INTEGRATED_CIRCUIT_FILE_EXTENSION
+} from '@/constants'
+import { t } from '@/utils/i18n'
 
 export type RootStore = {
   documents: {
@@ -55,10 +60,8 @@ export const useRootStore = defineStore({
     navigationAnimationFrameId: 0
   }),
   getters: {
-    hasOpenDocuments (state) {
-      return Object
-        .keys(state.documents)
-        .length > 0
+    documentCount (state) {
+      return Object.keys(state.documents).length
     },
     activeDocument (state) {
       if (state.activeDocumentId) {
@@ -75,6 +78,22 @@ export const useRootStore = defineStore({
       return state.documents[state.activeDocumentId!]
         ? ViewType.Document
         : ViewType.None
+    },
+    title (state) {
+      const subtitle = (() => {
+        switch (state.dialogType) {
+          case ViewType.Preferences:
+            return t('menu.file.preferences')
+            default:
+            return state.activeDocumentId
+              ? state.documents[state.activeDocumentId]?.displayName
+              : undefined
+        }
+      })()
+
+      return subtitle
+        ? `${subtitle} - ${t('appName')}`
+        : t('appName')
     }
   },
   actions: {
@@ -318,17 +337,23 @@ export const useRootStore = defineStore({
 
       return true
     },
-    async selectDocument () {
-      const files = window.api.showOpenFileDialog([
+    async selectDocument (invertFilter = false) {
+      const filter = [
         {
-          name: 'Aristotle Logic Circuit (*.alfx)',
-          extensions: ['alfx']
+          name: `${t('fileTypes.default')} (*.${DEFAULT_FILE_EXTENSION})`,
+          extensions: [DEFAULT_FILE_EXTENSION]
         },
         {
-          name: 'Aristotle Integrated Circuit (*.aicx)',
-          extensions: ['aicx']
+          name: `${t('fileTypes.integratedCircuit')} (*.${INTEGRATED_CIRCUIT_FILE_EXTENSION})`,
+          extensions: [INTEGRATED_CIRCUIT_FILE_EXTENSION]
         }
-      ])
+      ]
+
+      if (invertFilter) {
+        filter.reverse()
+      }
+
+      const files = window.api.showOpenFileDialog(filter)
 
       for (let i = 0; i < files.length; i++) {
         await this.openDocumentFromPath(files[i])

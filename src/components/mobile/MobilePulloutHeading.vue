@@ -6,7 +6,7 @@
     />
     <div class="mobile-pullout-heading__brand">
       <div class="mobile-pullout-heading__title">
-        Aristotle
+        {{ $t('appName') }}
       </div>
       <div class="mobile-pullout-heading__subtitle">
          v{{ version }}

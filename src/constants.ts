@@ -31,6 +31,12 @@ export const TOUCH_SHORT_HOLD_TIMEOUT = 500
  */
 export const ITEM_BASE_Z_INDEX = 1000
 
+/** The file extension for regular circuits. */
+export const DEFAULT_FILE_EXTENSION = 'alfx'
+
+/** The file extension for integrated circuits. */
+export const INTEGRATED_CIRCUIT_FILE_EXTENSION = 'aicx'
+
 /** The easing function for each animation frame to ease out after panning. */
 export const PANNING_EASING_FUNCTION = (x: number) => 1 - Math.pow(1 - x, 3)
 
