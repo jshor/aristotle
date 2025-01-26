@@ -8,6 +8,7 @@
   "main": "dist-electron/main/main.js",
   "scripts": {
     "dev": "vite",
+    "dev:web": "vite --mode web",
     "build": "vite build && electron-builder",
     "lint": "eslint src",
     "test:ci": "vitest run --coverage",

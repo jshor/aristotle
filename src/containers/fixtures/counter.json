@@ -10352,10 +10352,10 @@
       },
       "e6b89983-8708-487f-992a-8d27b4363938": {
           "id": "e6b89983-8708-487f-992a-8d27b4363938",
-          "defaultName": "Clock",
-          "name": "Clock",
+          "defaultName": "Switch",
+          "name": "Switch",
           "type": "InputNode",
-          "subtype": "Clock",
+          "subtype": "Switch",
           "portIds": [
               "ea8c2967-daa3-47b9-8291-005cf9d59715"
           ],
@@ -10379,14 +10379,7 @@
               "name": {
                   "type": "text",
                   "label": "Name",
-                  "value": "Clock"
-              },
-              "interval": {
-                  "label": "Interval",
-                  "value": 1000,
-                  "type": "number",
-                  "min": 100,
-                  "step": 100
+                  "value": "Switch"
               },
               "startValue": {
                   "label": "Start value",
@@ -10398,22 +10391,6 @@
                       "False": -1
                   }
               }
-          },
-          "clock": {
-              "id": "8bb4ff4e-2a32-428a-8f12-9ef3fa3fa773",
-              "name": "ea8c2967-daa3-47b9-8291-005cf9d59715",
-              "currentValue": -1,
-              "defaultValue": -1,
-              "interval": 1000,
-              "lastUpdate": 704920,
-              "emitter": {
-                  "e": {
-                      "change": [
-                          {}
-                      ]
-                  }
-              },
-              "isStopped": false
           }
       },
       "16a2986b-9e8d-4792-bec2-ba1c2d7eb3c0": {
@@ -11400,7 +11377,7 @@
           "id": "ea8c2967-daa3-47b9-8291-005cf9d59715",
           "orientation": 2,
           "defaultName": "Output Port",
-          "name": "Clock Output Port",
+          "name": "Switch Output Port",
           "position": {
               "x": 16526.546223958332,
               "y": 7355.437282986111

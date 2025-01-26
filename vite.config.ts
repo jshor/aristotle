@@ -8,8 +8,30 @@ import renderer from 'vite-plugin-electron-renderer'
 import pkg from './package.json'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
   rmSync('dist-electron', { recursive: true, force: true })
+
+  const electronPlugins = [
+    electron(
+      ['main', 'preload'].map(name => ({
+        entry: `src/process/${name}.ts`, // TODO: rename 'process' folder to 'app'
+        onstart: options => options.startup(),
+        vite: {
+          build: {
+            sourcemap: name === 'main'
+              ? (command === 'serve')
+              : (command === 'serve' ? 'inline' : undefined),
+            minify: command === 'build',
+            outDir: `dist-electron/${name}`,
+            rollupOptions: {
+              external: Object.keys('dependencies' in pkg ? pkg.dependencies : {})
+            }
+          }
+        }
+      }))
+    ),
+    renderer()
+  ]
 
   return {
     build: {
@@ -25,27 +47,12 @@ export default defineConfig(({ command }) => {
         '@': path.resolve(path.resolve(__dirname), 'src')
       }
     },
+    server: mode === 'web' ? {
+      open: 'http://localhost:5173/index.html'
+    } : undefined,
     plugins: [
       vue(),
-      electron(
-        ['main', 'preload'].map(name => ({
-          entry: `src/process/${name}.ts`, // TODO: rename 'process' folder to 'app'
-          onstart: options => options.startup(),
-          vite: {
-            build: {
-              sourcemap: name === 'main'
-                ? (command === 'serve')
-                : (command === 'serve' ? 'inline' : undefined),
-              minify: command === 'build',
-              outDir: `dist-electron/${name}`,
-              rollupOptions: {
-                external: Object.keys('dependencies' in pkg ? pkg.dependencies : {})
-              }
-            }
-          }
-        }))
-      ),
-      renderer()
+      ...(mode === 'web' ? [] : electronPlugins)
     ],
     css: {
       preprocessorOptions: {

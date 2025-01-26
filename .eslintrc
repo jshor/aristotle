@@ -11,7 +11,9 @@
   "parserOptions": {
     "ecmaVersion": 2020
   },
-  "rules": {},
+  "rules": {
+    "max-len": 150
+  },
   "overrides": [
     {
       "files": [
