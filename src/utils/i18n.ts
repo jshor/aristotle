@@ -14,7 +14,8 @@ export const i18n = createI18n({
         experience: 'Experience',
         simulation: 'Simulation',
         snapping: 'Snapping',
-        grid: 'Grid'
+        grid: 'Grid',
+        colors: 'Colors'
       },
       fileTypes: {
         default: 'Aristotle Logic Circuit',

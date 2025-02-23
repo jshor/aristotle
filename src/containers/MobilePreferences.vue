@@ -13,7 +13,7 @@
       :label="$t('command.newDocument')"
       @click="closePullout() && newDocument()"
     />
-    <mobile-button
+    <!-- <mobile-button
       :icon="faCodeBranch"
       :label="$t('command.selectDocument')"
       @click="closePullout() && selectDocument()"
@@ -28,7 +28,7 @@
       :icon="faImage"
       :label="$t('command.exportImage')"
       @click="closePullout() && exportImage()"
-    />
+    /> -->
 
     <mobile-collapsible-panel
       :title="$t('command.colors')"

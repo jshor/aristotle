@@ -1,11 +1,11 @@
 // @ts-check
 import { defineStore } from 'pinia'
 import { v4 as uuid } from 'uuid'
-import basic from '../containers/fixtures/basic.json'
+// import basic from '../containers/fixtures/basic.json'
 // import flipFlop from '../containers/fixtures/flipflop.json'
 import flipFlop from '../containers/fixtures/counter.json'
 // import integratedCircuit from '../containers/fixtures/ic.json'
-import testIc from '../containers/fixtures/test.json'
+// import testIc from '../containers/fixtures/test.json'
 
 import { createDocumentStore, DocumentStore } from './document'
 import { useIntegratedCircuitStore } from './integratedCircuit'
@@ -51,7 +51,7 @@ export const useRootStore = defineStore({
     clipboard: null,
     activeDocumentId: null,
     canExit: false,
-    canPaste: false,
+    canPaste: true,
     isFullscreen: false,
     isToolboxOpen: false,
     isMobilePulloutOpen: false,
@@ -442,7 +442,7 @@ export const useRootStore = defineStore({
     },
 
     checkPasteability () {
-      this.canPaste = window.api.canPaste()
+      // this.canPaste = window.api.canPaste()
     },
 
     setAllDocumentStatuses (status: DocumentStatus) {

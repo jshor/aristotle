@@ -1,7 +1,6 @@
 <template>
   <main-view>
     <template #top>
-      <mobile-preferences v-if="isMobile" />
     </template>
 
     <template #middle>
@@ -16,12 +15,12 @@
             block
             inverted
           />
-          <modal-button
+          <!-- <modal-button
             @click="selectDocument()"
             :text="$t('command.selectDocument')"
             block
             inverted
-          />
+          /> -->
 
           <h2 class="welcome__heading">Samples</h2>
           <modal-button
@@ -69,6 +68,8 @@ function openSample () {
   justify-content: center;
   height: 100%;
   color: var(--color-primary);
+  padding: 1em;
+  box-sizing: border-box;
 
   &__content {
     width: 100%;
@@ -77,6 +78,7 @@ function openSample () {
 
   &__title {
     font-weight: 200;
+    text-align: center;
   }
 
   &__heading {

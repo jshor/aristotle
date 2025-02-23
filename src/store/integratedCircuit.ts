@@ -41,8 +41,6 @@ export const useIntegratedCircuitStore = defineStore('integratedCircuit', {
       const { item } = integratedCircuitFactory(circuit, 'My integrated circuit')
 
       this.model = item
-
-      console.log('RESUL:', JSON.stringify(this.model))
     },
 
     async loadLibrary () {

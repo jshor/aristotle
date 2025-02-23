@@ -4,6 +4,8 @@ import App from '@/App.vue'
 import { i18n } from '@/utils/i18n'
 import '@/styles/main.scss'
 
+let clipboardContents = ''
+
 if (!window.api) {
   // stub the ipc api for non-electron environments
   // TODO: once the app is fully electron, move this to vi setup file
@@ -19,13 +21,31 @@ if (!window.api) {
     onOpenFile () {},
     openFile () { return '' },
     saveFile () {},
-    setFullscreen () {},
+    setFullscreen (isFullscreen = false) {
+      try {
+        if (isFullscreen) {
+          document.exitFullscreen()
+        } else {
+          document.documentElement.requestFullscreen()
+        }
+      } catch (e) {
+        console.error('Failed to toggle fullscreen', e)
+      }
+    },
     getFilePaths () { return [] },
     getDefaultSavePath () { return ''},
-    setClipboardContents () {},
-    getClipboardContents () { return '' },
-    clearClipboard () {},
-    canPaste () { return false }
+    setClipboardContents (_clipboardContents: string) {
+      clipboardContents = _clipboardContents
+    },
+    getClipboardContents () {
+      return clipboardContents
+    },
+    clearClipboard () {
+      clipboardContents = ''
+    },
+    canPaste () {
+      return true
+    }
   }
 }
 
