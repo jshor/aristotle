@@ -4964,7 +4964,7 @@
               },
               "startValue": {
                   "label": "Start value",
-                  "value": -1,
+                  "value": 1,
                   "type": "number",
                   "options": {
                       "True": 1,
@@ -10161,7 +10161,7 @@
                       "elementId": "7618e2b4-8d6f-4149-bc9f-8f26e73e8e8a",
                       "value": -1,
                       "hue": 0,
-                      "isMonitored": false,
+                      "isMonitored": true,
                       "connectedPortIds": [
                           "8ce5f1af-64cd-46a1-9742-247791e63994"
                       ]
@@ -10180,7 +10180,7 @@
                       "elementId": "7618e2b4-8d6f-4149-bc9f-8f26e73e8e8a",
                       "value": -1,
                       "hue": 0,
-                      "isMonitored": false,
+                      "isMonitored": true,
                       "connectedPortIds": [
                           "7cacc21e-95e4-4763-9c00-6ad992bdb474"
                       ]
@@ -10199,7 +10199,7 @@
                       "elementId": "7618e2b4-8d6f-4149-bc9f-8f26e73e8e8a",
                       "value": -1,
                       "hue": 0,
-                      "isMonitored": false,
+                      "isMonitored": true,
                       "connectedPortIds": [
                           "41dcec94-17dd-43e5-9988-7f85df3c906e"
                       ]
@@ -10218,7 +10218,7 @@
                       "elementId": "7618e2b4-8d6f-4149-bc9f-8f26e73e8e8a",
                       "value": 1,
                       "hue": 0,
-                      "isMonitored": false,
+                      "isMonitored": true,
                       "connectedPortIds": [
                           "b86f0ca4-3b60-4fd9-bb97-ff02bc0e74df"
                       ]
@@ -10352,10 +10352,10 @@
       },
       "e6b89983-8708-487f-992a-8d27b4363938": {
           "id": "e6b89983-8708-487f-992a-8d27b4363938",
-          "defaultName": "Switch",
-          "name": "Switch",
+          "defaultName": "Clock",
+          "name": "Clock",
           "type": "InputNode",
-          "subtype": "Switch",
+          "subtype": "Clock",
           "portIds": [
               "ea8c2967-daa3-47b9-8291-005cf9d59715"
           ],
@@ -10379,7 +10379,14 @@
               "name": {
                   "type": "text",
                   "label": "Name",
-                  "value": "Switch"
+                  "value": "Clock"
+              },
+              "interval": {
+                  "label": "Interval",
+                  "value": 1000,
+                  "type": "number",
+                  "min": 100,
+                  "step": 100
               },
               "startValue": {
                   "label": "Start value",
@@ -10391,6 +10398,22 @@
                       "False": -1
                   }
               }
+          },
+          "clock": {
+              "id": "8bb4ff4e-2a32-428a-8f12-9ef3fa3fa773",
+              "name": "ea8c2967-daa3-47b9-8291-005cf9d59715",
+              "currentValue": -1,
+              "defaultValue": -1,
+              "interval": 1000,
+              "lastUpdate": 704920,
+              "emitter": {
+                  "e": {
+                      "change": [
+                          {}
+                      ]
+                  }
+              },
+              "isStopped": false
           }
       },
       "16a2986b-9e8d-4792-bec2-ba1c2d7eb3c0": {
@@ -11377,7 +11400,7 @@
           "id": "ea8c2967-daa3-47b9-8291-005cf9d59715",
           "orientation": 2,
           "defaultName": "Output Port",
-          "name": "Switch Output Port",
+          "name": "Clock Output Port",
           "position": {
               "x": 16526.546223958332,
               "y": 7355.437282986111
