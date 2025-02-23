@@ -29,7 +29,7 @@ jobs:
       tag: ${{ steps.git_tag.outputs.tag }}
       
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
@@ -70,7 +70,7 @@ jobs:
       #   run: yarn build
 
       # - name: Upload binary artifact
-      #   uses: actions/upload-artifact@v2
+      #   uses: actions/upload-artifact@v4
       #   with:
       #     name: binary-artifact
       #     path: |
@@ -82,7 +82,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set git credentials
         run: |
           git config --global user.email ${{ env.GIT_USER }}
@@ -107,7 +107,7 @@ jobs:
       #   run: git push --follow-tags origin master 
       
       - name: Upload docs bundle
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: docs
           path: build
@@ -116,7 +116,7 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
@@ -129,7 +129,7 @@ jobs:
         run: git pull origin master
           
       - name: Download binary artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: docs
           path: build
@@ -151,13 +151,13 @@ jobs:
   #   needs: [build, release]
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v2
+  #     - uses: actions/checkout@v4
       
   #     - name: Pull latest
   #       run: git pull origin master
 
   #     - name: Download binary artifacts
-  #       uses: actions/download-artifact@v2
+  #       uses: actions/download-artifact@v4
   #       with:
   #         name: binary-artifact
   #         path: dist_electron
