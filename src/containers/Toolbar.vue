@@ -8,7 +8,7 @@
       <scroll-fade class="toolbar__scrollable">
       <div class="toolbar__left">
         <!-- <toolbar-button :icon="faFolderOpen" text="Open" /> -->
-        <toolbar-button :icon="faFile" text="New" />
+        <toolbar-button @click="rootStore.newDocument" :icon="faFile" text="New" />
         <!-- <toolbar-button :icon="faSave" text="Save" /> -->
         <toolbar-separator />
         <toolbar-button @click="documentStore.undo" :disabled="!documentStore.canUndo" :icon="faReply" text="Undo" />
