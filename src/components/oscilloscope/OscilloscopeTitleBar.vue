@@ -5,6 +5,7 @@
       <button
         class="oscilloscope-title-bar__button"
         :title="$t('button.removeOscilloscope')"
+        :disabled="!clearable"
         @click="$emit('removeAll')"
       >
         <icon :icon="faBan" />

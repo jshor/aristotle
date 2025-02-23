@@ -10,9 +10,7 @@
       @remove-all="destroyOscilloscope"
       @contextmenu="onContextMenu"
     />
-    <div v-if="!hasWaves">
-      no waves to observe
-    </div>
+    <oscilloscope-message v-if="!hasWaves" />
     <oscilloscope-timeline
       v-else
       v-model="oscilloscopeWidth"
@@ -25,6 +23,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, PropType, ref } from 'vue'
+import OscilloscopeMessage from '@/components/oscilloscope/OscilloscopeMessage.vue'
 import OscilloscopeTimeline from '@/components/oscilloscope/OscilloscopeTimeline.vue'
 import OscilloscopeTitleBar from '@/components/oscilloscope/OscilloscopeTitleBar.vue'
 import OscilloscopeViewer from '@/components/oscilloscope/OscilloscopeViewer.vue'
@@ -35,6 +34,7 @@ import { createOscilloscopeContextMenu } from '@/menus/context/oscilloscope'
 export default defineComponent({
   name: 'Oscilloscope',
   components: {
+    OscilloscopeMessage,
     OscilloscopeTimeline,
     OscilloscopeTitleBar,
     OscilloscopeViewer

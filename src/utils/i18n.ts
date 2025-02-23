@@ -30,7 +30,7 @@ export const i18n = createI18n({
         connectionFrom: 'Connection from {0} to {1}',
         renderingImage: 'Rendering image...',
         printing: 'Printing...',
-        ready: 'Ready'
+        ready: 'Ready',
       },
       button: {
         openProperties: 'Open properties',
@@ -154,6 +154,9 @@ export const i18n = createI18n({
         help: {
           parent: '&Help'
         }
+      },
+      oscilloscope: {
+        defaultMessage: 'To observe the state of a port, double click or long-press on it.'
       }
     }
   }
