@@ -65,7 +65,11 @@ export default defineComponent({
           .pop()
           .split('/')
           .pop()
-        url.value = `https://github.com/${slug}/releases/download/${version.value}/Aristotle.Setup.${version.value}.exe`
+        url.value = [
+          `https://github.com/${slug}/releases/download/`,
+          version.value,
+          `/Aristotle.Setup.${version.value.replace(/^v/, '')}.exe`
+        ].join('')
       } catch (_) {
         return ''
       }
